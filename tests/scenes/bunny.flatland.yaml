@@ -1,0 +1,27 @@
+#
+#   This file is part of Flatland, a simple 2D ray tracer
+#
+#   Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
+#   Distributed under the 3-Clause BSD License software license, see the accompanying
+#   file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
+#
+
+scene:
+  - camera:
+      film:
+        width: 800
+        height: 600
+        filename: "out.svg"
+        transform:
+          - lookAt:
+              origin: 200, 500
+              target: 400, 300
+  - integrator:
+      type: path_specular_transmission
+      max_depth: 7
+  - shape:
+      type: "polygon"
+      transform:
+        scale: 3, 3
+        translate: 400, 300
+      filename: bunny_coords.ply

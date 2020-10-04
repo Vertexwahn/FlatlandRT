@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="700" baseProfile="full" version="1.1" viewBox="0 0 600 700">
+    <defs>
+    <marker id="arrow_head" markerHeight="8" markerWidth="8" orient="auto" refX="0.125" refY="3" viewBox="0 0 5 6">
+             <path fill="rgb(242, 101, 34)" d="M0,0 V6 L5,3 Z"/>
+    </marker>
+     </defs>
+    <rect width="100%" height="100%" fill="white"/>
+    <g transform="scale(1, 1)"><rect x="290" y="255" width="20" height="250" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)"></rect><rect x="310" y="255" width="20" height="250" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)"></rect><rect x="330" y="255" width="20" height="250" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)"></rect><rect x="350" y="255" width="20" height="250" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)"></rect><rect x="370" y="255" width="20" height="250" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)"></rect><rect x="390" y="255" width="20" height="250" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)"></rect><rect x="411" y="255" width="20" height="250" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)"></rect><line x1="431.007" y1="433.115" x2="488.692" y2="489.264" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="411.009" y1="423.425" x2="413.45" y2="424.608" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="410.007" y1="422.454" x2="411" y2="423.421" stroke="rgb(242, 101, 34)" stroke-width="3" />
+<line x1="390.009" y1="412.764" x2="392.45" y2="413.946" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="370.01" y1="407.099" x2="371.238" y2="407.446" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="350.01" y1="403.641" x2="350.785" y2="403.775" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="330.01" y1="401.5" x2="330.611" y2="401.564" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="310.01" y1="400.166" x2="310.543" y2="400.202" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="290.01" y1="399.334" x2="290.517" y2="399.355" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="0.000997785" y1="380" x2="270.543" y2="398.036" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+</g>
+      </svg>

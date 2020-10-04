@@ -1,0 +1,56 @@
+"""
+    This file is part of Flatland, a simple 2D ray tracer
+
+    Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
+    Distributed under the 3-Clause BSD License software license, see the accompanying
+    file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
+"""
+
+load("//bazel:compiler.bzl", "flatland_linker_opts")
+load("//bazel:compiler.bzl", "FLATLAND_DEFAULT_LINKOPTS")
+
+flatland_linker_opts()
+
+load("//tests/flatland:tests.bzl", "cc_test_flatland")
+
+cc_test_flatland(
+    name = "TestCamera",
+    srcs = [
+        "test_camera.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestColor",
+    srcs = [
+        "test_color.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestFilm",
+    srcs = [
+        "test_film.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestMaterial",
+    srcs = [
+        "test_material.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestMemory",
+    srcs = [
+        "test_memory.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestPropertySet",
+    srcs = [
+        "test_property_set.cpp",
+    ],
+)

@@ -1,0 +1,32 @@
+#
+#   This file is part of Flatland, a simple 2D ray tracer
+#
+#   Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
+#   Distributed under the 3-Clause BSD License software license, see the accompanying
+#   file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
+#
+
+build:vs2019 --cxxopt=/std:c++17
+build:vs2019 --enable_runfiles # https://github.com/bazelbuild/bazel/issues/8843
+build:vs2019 --define compiler=vs2019
+
+build:gcc --cxxopt=-std=c++17
+build:gcc --cxxopt=-Werror
+build:gcc --define compiler=gcc7_5_0
+
+build:llvm --cxxopt=-std=c++17
+build:llvm --cxxopt=-Werror
+build:llvm --define compiler=llvm
+
+build:asan --config=gcc
+build:asan --strip=never
+build:asan --copt -fsanitize=address
+build:asan --copt -O1
+build:asan --copt -fno-omit-frame-pointer
+build:asan --linkopt -fsanitize=address
+
+build:windows10_x64 --config=vs2019  # Default for Windows build is VS 2019
+build:ubuntu18_04_x64 --config=gcc  # Default for Ubuntu 18.04 is gcc
+build:ubuntu18_04_x64_gcc --config=gcc
+build:ubuntu18_04_x64_llvm --config=llvm
+build:ubuntu18_04_x64_asan --config=asan

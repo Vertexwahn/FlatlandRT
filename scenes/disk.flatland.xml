@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+        This file is part of Flatland, a simple 2D ray tracer
+
+        Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
+        Distributed under the 3-Clause BSD License software license, see the accompanying
+        file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause
+
+        The scene file format schema is the same as used in Mitsuba Renderer 2
+        (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
+-->
+<!-- https://github.com/mmp/pbrt-v3/blob/master/scenes/killeroo-simple.pbrt -->
+<scene>
+	<camera>
+		<film width="800" height="600" filename="disk.svg"></film>
+
+		<transform>
+			<lookAt origin="250, 500" target="450, 300" />
+		</transform>
+	</camera>
+
+	<integrator type="path_specular_transmission">
+		<integer name="max_depth" value="5"/>
+	</integrator>
+	
+	<shape type="disk">
+		<float name="radius" value="100" />
+
+		<transform>
+			<translate x="400" y="300" />
+		</transform>
+
+		<material>
+			<color name="stroke_color" value="0.0, 0.682, 0.937" />
+			<float name="stroke_width" value="3.0" />
+			<color name="fill_color" value="1.0, 1.0, 1.0" />
+			<float name="refraction_index" value="1.0" />
+			<string name="interface_interaction" value= "specular_transmission" />
+		</material>
+	</shape>
+</scene>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+        This file is part of Flatland, a simple 2D ray tracer
+
+        Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
+        Distributed under the 3-Clause BSD License software license, see the accompanying
+        file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause
+
+        The scene file format schema is the same as used in Mitsuba Renderer 2
+        (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
+-->
+<scene>
+	<shape type="mesh">
+		<integer name="int_property" value="42" />
+		<float name="float_property" value="1" />
+		<boolean name="bool_property" value="true"/>
+		<string name="string_property" value="This is a string"/>
+		<point name="point_property" value="3, 4"/>
+		<vector name="vector_property" value="1, 2"/>
+		<color name="color_property" value="0, 0.682, 0.937" />
+	</shape>
+</scene>

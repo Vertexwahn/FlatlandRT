@@ -1,0 +1,64 @@
+"""
+    This file is part of Flatland, a simple 2D ray tracer
+
+    Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
+    Distributed under the 3-Clause BSD License software license, see the accompanying
+    file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
+"""
+
+load("//bazel:compiler.bzl", "flatland_linker_opts")
+load("//bazel:compiler.bzl", "FLATLAND_DEFAULT_LINKOPTS")
+
+flatland_linker_opts()
+
+load("//tests/flatland:tests.bzl", "cc_test_flatland")
+
+cc_test_flatland(
+    name = "TestShape2f",
+    srcs = [
+        "test_shape.cpp",
+    ],
+    data = ["//scenes"],
+)
+
+cc_test_flatland(
+    name = "TestDisk2f",
+    srcs = [
+        "test_disk.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestShapeFactory",
+    srcs = [
+        "test_shape_factory.cpp",
+    ],
+    linkopts = FLATLAND_DEFAULT_LINKOPTS,
+)
+
+cc_test_flatland(
+    name = "TestRectangle2f",
+    srcs = [
+        "test_rectangle.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestPolygon2f",
+    srcs = [
+        "test_polygon.cpp",
+    ],
+)
+
+cc_test(
+    name = "TestRectangle2f_2nd",
+    timeout = "short",
+    srcs = [
+        "test_rectangle_via_catch2.cpp",
+    ],
+    defines = ["CATCH_CONFIG_MAIN"],
+    deps = [
+        "//srcs:Flatland",
+        "@catch2",
+    ],
+)

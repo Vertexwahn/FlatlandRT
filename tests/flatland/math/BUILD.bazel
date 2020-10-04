@@ -1,0 +1,79 @@
+"""
+    This file is part of Flatland, a simple 2D ray tracer
+
+    Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
+    Distributed under the 3-Clause BSD License software license, see the accompanying
+    file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
+"""
+
+load("//tests/flatland:tests.bzl", "cc_test_flatland")
+
+cc_test_flatland(
+    name = "TestGeometry",
+    srcs = [
+        "test_geometry.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestIntersection",
+    srcs = [
+        "test_intersection.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestMath",
+    srcs = [
+        "test_math.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestMatrix",
+    srcs = [
+        "test_matrix.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestNormal",
+    srcs = [
+        "test_normal.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestPoint",
+    srcs = [
+        "test_point.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestRay",
+    srcs = [
+        "test_ray.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestRefract",
+    srcs = [
+        "test_refract.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestTransform",
+    srcs = [
+        "test_transform.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestVector",
+    srcs = [
+        "test_vector.cpp",
+    ],
+)

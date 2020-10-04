@@ -1,0 +1,163 @@
+"""
+    This file is part of Flatland, a simple 2D ray tracer
+
+    Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
+    Distributed under the 3-Clause BSD License software license, see the accompanying
+    file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
+"""
+
+workspace(name = "Flatland")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+# Google Test
+http_archive(
+    name = "googletest",
+    sha256 = "1d547f2b83e16eed4f6e3d5504dab0be60886bcb19cc4c62ee174d3c2cca03a8",
+    strip_prefix = "googletest-7aca84427f224eeed3144123d5230d5871e93347",  # 2020-09-18T15:10:49Z
+    urls = ["https://github.com/google/googletest/archive/7aca84427f224eeed3144123d5230d5871e93347.zip"],
+)
+
+# Eigen
+http_archive(
+    name = "eigen",
+    build_file = "//third_party:eigen.BUILD",
+    sha256 = "d56fbad95abf993f8af608484729e3d87ef611dd85b3380a8bad1d5cbc373a57",
+    strip_prefix = "eigen-3.3.7",
+    url = "http://vertexwahn.de/artifacts/eigen-3.3.7.tar.gz",
+    # Does currently not work: https://github.com/bazelbuild/bazel/issues/11187
+    #url = "https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz",
+)
+
+# glog
+http_archive(
+    name = "com_github_gflags_gflags",
+    sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
+    strip_prefix = "gflags-2.2.2",
+    urls = [
+        "https://github.com/gflags/gflags/archive/v2.2.2.tar.gz",
+    ],
+)
+
+# glog
+# Latest release 0.4.0 does not work on Windows. Therefore, we use HEAD from master
+#http_archive(
+#    name = "glog",
+#    strip_prefix = "glog-0.4.0",
+#    urls = ["https://github.com/google/glog/archive/v0.4.0.zip"],
+#)
+
+git_repository(
+    name = "glog",
+    #branch = "master",
+    commit = "c8f8135a5720aee7de8328b42e4c43f8aa2e60aa",  # Fix build for Emscripten #546
+    remote = "https://github.com/google/glog",
+    shallow_since = "1601711556 +0200",
+)
+
+# Boost
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+git_repository(
+    name = "com_github_nelhage_rules_boost",
+    commit = "1e3a69bf2d5cd10c34b74f066054cd335d033d71",
+    remote = "https://github.com/nelhage/rules_boost",
+    shallow_since = "1591047380 -0700",
+)
+
+load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
+
+boost_deps()
+
+# Catch2
+http_archive(
+    name = "catch2",
+    sha256 = "4e6608d3fb0247e2aa988735bae2064381b0ec712f47beb766dd761838a546b6",
+    strip_prefix = "Catch2-2.13.0",
+    urls = ["https://github.com/catchorg/Catch2/archive/v2.13.0.tar.gz"],
+)
+
+# {fmt}
+http_archive(
+    name = "fmt",
+    build_file = "//third_party:fmt.BUILD",
+    sha256 = "decfdf9ad274070fa85f26407b816f5a4d82205ae86bac1990be658d0795ea4d",
+    strip_prefix = "fmt-7.0.3",
+    urls = ["https://github.com/fmtlib/fmt/releases/download/7.0.3/fmt-7.0.3.zip"],
+)
+
+# pugixml
+http_archive(
+    name = "pugixml",
+    build_file = "//third_party:pugixml.BUILD",
+    sha256 = "121d3b7ae8c667a1975de3581a7263b0a43509b878fc07a2e6d2946ce6f63823",
+    strip_prefix = "pugixml-1.10",
+    urls = ["http://github.com/zeux/pugixml/releases/download/v1.10/pugixml-1.10.zip"],
+)
+
+# tclap
+http_archive(
+    name = "tclap",
+    build_file = "//third_party:tclap.BUILD",
+    sha256 = "4c8529f2154a6c0e1cf518a1c2284ad33e4e1021e8e03f2773b573fe1c73910f",
+    strip_prefix = "tclap-1.2.2",
+    urls = ["https://github.com/mirror/tclap/archive/v1.2.2.tar.gz"],
+)
+
+# yaml-cpp-0.6.3
+# Latest release does not support Bazel. Therefore, we use HEAD from master
+#http_archive(
+#    name = "com_github_jbeder_yaml_cpp",
+#    #build_file = "//third_party:tclap.BUILD",
+#    sha256 = "77ea1b90b3718aa0c324207cb29418f5bced2354c2e483a9523d98c3460af1ed",
+#    strip_prefix = "yaml-cpp-yaml-cpp-0.6.3",
+#    urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.tar.gz"],
+#)
+
+git_repository(
+    name = "com_github_jbeder_yaml_cpp",
+    #branch = "master",
+    commit = "98acc5a8874faab28b82c28936f4b400b389f5d6",  # Emit the correct Alias on the key (#908) (#929)
+    remote = "https://github.com/jbeder/yaml-cpp",
+    shallow_since = "1595875744 -0500",
+)
+
+# LLVM Toolchain
+http_archive(
+    name = "com_grail_bazel_toolchain",
+    sha256 = "b7483184127494765d77129a0e82b1e7dcb20b6e04d5c54018d34e453a898bfb",
+    strip_prefix = "bazel-toolchain-master",
+    urls = ["https://github.com/grailbio/bazel-toolchain/archive/master.tar.gz"],
+)
+
+load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
+
+bazel_toolchain_dependencies()
+
+load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
+
+llvm_toolchain(
+    name = "llvm_toolchain",
+    llvm_version = "10.0.0",
+)
+
+load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()
+
+# rules_pkg
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rules_pkg",
+    sha256 = "352c090cc3d3f9a6b4e676cf42a6047c16824959b438895a76c2989c6d7c246a",
+    urls = [
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.5/rules_pkg-0.2.5.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.2.5/rules_pkg-0.2.5.tar.gz",
+    ],
+)
+
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
+rules_pkg_dependencies()

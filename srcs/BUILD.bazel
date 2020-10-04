@@ -1,0 +1,70 @@
+"""
+    This file is part of Flatland, a simple 2D ray tracer
+
+    Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
+    Distributed under the 3-Clause BSD License software license, see the accompanying
+    file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
+"""
+
+load("//bazel:compiler.bzl", "flatland_linker_opts")
+load("//bazel:compiler.bzl", "FLATLAND_DEFAULT_LINKOPTS")
+
+flatland_linker_opts()
+
+cc_library(
+    name = "Flatland",
+    srcs = [
+        "flatland/canvas/label.h",
+        "flatland/canvas/svg_canvas.h",
+        "flatland/core/camera.h",
+        "flatland/core/color.h",
+        "flatland/core/filesystem.h",
+        "flatland/core/film.cpp",
+        "flatland/core/film.h",
+        "flatland/core/logging.h",
+        "flatland/core/material.cpp",
+        "flatland/core/material.h",
+        "flatland/core/namespace.h",
+        "flatland/core/non_copyable.h",
+        "flatland/core/property_set.cpp",
+        "flatland/core/property_set.h",
+        "flatland/core/reference_counted.h",
+        "flatland/integrator/ambient_occlusion.h",
+        "flatland/integrator/integrator.h",
+        "flatland/integrator/path_mirror_reflection.h",
+        "flatland/integrator/path_specular_transmission.cpp",
+        "flatland/integrator/path_specular_transmission.h",
+        "flatland/math/geometry.h",
+        "flatland/math/geometry.inc",
+        "flatland/math/intersection.h",
+        "flatland/math/matrix.h",
+        "flatland/math/normal.h",
+        "flatland/math/point.h",
+        "flatland/math/ray.h",
+        "flatland/math/refraction.cpp",
+        "flatland/math/refraction.h",
+        "flatland/math/transform.h",
+        "flatland/math/util.h",
+        "flatland/math/vector.h",
+        "flatland/scene/load_scene.cpp",
+        "flatland/scene/load_scene.h",
+        "flatland/scene/scene.h",
+        "flatland/scene/scene_factory.cpp",
+        "flatland/scene/scene_factory.h",
+        "flatland/scene/shape/disk.h",
+        "flatland/scene/shape/polygon.h",
+        "flatland/scene/shape/rectangle.h",
+        "flatland/scene/shape/shape.cpp",
+        "flatland/scene/shape/shape.h",
+    ],
+    includes = ["."],
+    linkopts = FLATLAND_DEFAULT_LINKOPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        "@boost//:algorithm",
+        "@eigen",
+        "@fmt",
+        "@glog",
+        "@pugixml",
+    ],
+)
