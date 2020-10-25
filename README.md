@@ -9,7 +9,7 @@
 FlatlandRT is a 2D ray tracer visualization tool.
 See the [user manual](docs/user_manual.md) if you want to find out how to use it. 
 
-![out](scenes/bunny.svg)
+![out](docs/header.svg)
 
 More examples scene can be found [here](docs/example_scenes.md).
 
