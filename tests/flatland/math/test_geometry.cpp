@@ -82,3 +82,12 @@ TEST(createStanfordBunnyPointList, createStanfordBunnyPointList) {
     auto points = createStanfordBunnyPointList<float>();
     EXPECT_TRUE(isCounterClockwiseOrder(points));
 }
+
+TEST(read2DPlyFile, read2DPlyFile) {
+    auto points = read2DPlyFile<float>("scenes/bunny_coords.ply");
+
+    EXPECT_THAT(points.size(), testing::Ge(170));
+
+    EXPECT_NEAR(points[points.size()-1].x(), -40.5615654f, 0.0001f);
+    EXPECT_NEAR(points[points.size()-1].y(), 38.51184082f, 0.0001f);
+}

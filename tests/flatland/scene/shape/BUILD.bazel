@@ -6,11 +6,6 @@
     file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
 """
 
-load("//bazel:compiler.bzl", "flatland_linker_opts")
-load("//bazel:compiler.bzl", "FLATLAND_DEFAULT_LINKOPTS")
-
-flatland_linker_opts()
-
 load("//tests/flatland:tests.bzl", "cc_test_flatland")
 
 cc_test_flatland(
@@ -26,14 +21,6 @@ cc_test_flatland(
     srcs = [
         "test_disk.cpp",
     ],
-)
-
-cc_test_flatland(
-    name = "TestShapeFactory",
-    srcs = [
-        "test_shape_factory.cpp",
-    ],
-    linkopts = FLATLAND_DEFAULT_LINKOPTS,
 )
 
 cc_test_flatland(

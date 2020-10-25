@@ -23,14 +23,14 @@ You can use FlatlandRT by invoking the following Bazel command.
 
 ```bash
 # When running Windows 10:
-bazel run --config=windows10_x64 //:flatland D:\scenes\bunny.flatland.xml
+bazel run --config=windows10_x64 //srcs/flatland.cli:flatland C:\scenes\bunny.flatland.xml
 ```
 
 *Render scene with Linux*
 
 ```bash
 # When running Ubuntu 18.04
-bazel run --config=ubuntu18_04_x64 //:flatland -- ~/scenes/bunny.flatland.xml 
+bazel run --config=ubuntu20_04_x64 //srcs/flatland.cli:flatland -- ~/Flatland/scenes/bunny.flatland.xml
 ```
 
 ## Building
@@ -41,11 +41,11 @@ bazel run --config=ubuntu18_04_x64 //:flatland -- ~/scenes/bunny.flatland.xml
 
 ```bash
 # Run all tests
-bazel test --config=ubuntu18_04_x64 //...
+bazel test --config=ubuntu20_04_x64 //...
 # Build all targets
-bazel build --config=ubuntu18_04_x64 //... 
+bazel build --config=ubuntu20_04_x64 //... 
 # Test using LLVM
-bazel test --config=ubuntu18_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
+bazel test --config=ubuntu20_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
 ```
 
 #### CLion
@@ -65,7 +65,7 @@ additional_languages:
   python
 
 build_flags:
-  --config=ubuntu18_04_x64
+  --config=ubuntu20_04_x64
 ```
 
 CLion 2019.3.6 together with the  Bazel 2020.07.13.0.2 Plugin was tested successfully.
@@ -76,9 +76,9 @@ CLion 2019.3.6 together with the  Bazel 2020.07.13.0.2 Plugin was tested success
 Bazel supports different toolchains. Usually gcc is used when using Ubuntu 18. But you can also easily use LLVM to compile Flatland.
 
     # Build with LLVM
-    bazel build --config=ubuntu18_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
+    bazel build --config=ubuntu20_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
     # Test with LLVM
-    bazel test --config=ubuntu18_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
+    bazel test --config=ubuntu20_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
 
 ### Building with Windows
 
@@ -104,32 +104,7 @@ I made a short video where I describe how I use test driven development to imple
 
 ## License
 
-    Copyright (c) 2020, Julian Amann (dev@vertexwahn.de), All rights reserved.
-    
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are met:
-    
-    1. Redistributions of source code must retain the above copyright notice, this
-       list of conditions and the following disclaimer.
-    
-    2. Redistributions in binary form must reproduce the above copyright notice,
-       this list of conditions and the following disclaimer in the documentation
-       and/or other materials provided with the distribution.
-    
-    3. Neither the name of the copyright holder nor the names of its
-       contributors may be used to endorse or promote products derived from
-       this software without specific prior written permission.
-    
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+See (LICENSE.md)[LICENSE.md].
 
 ## Copyright notes
 

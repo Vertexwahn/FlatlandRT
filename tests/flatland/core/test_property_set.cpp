@@ -14,13 +14,13 @@ using namespace Flatland;
 
 TEST(PropertyDoesNotExistException, ErrorMessageTest) {
     PropertyDoesNotExistException ex("foobar");
-    EXPECT_THAT(std::string(ex.what()), ::testing::Eq("Property with name 'foobar' does not exist"));
+    EXPECT_THAT(std::string(ex.what()), testing::Eq("Property with name 'foobar' does not exist"));
 }
 
 TEST(PropertyDoesAlreadyExistException, TestErrorMessage) {
     PropertyDoesAlreadyExistException ex("foobar", 1);
     EXPECT_THAT(std::string(ex.what()),
-                ::testing::Eq("Property with name 'foobar' does already exist and its value is '1'"));
+                testing::Eq("Property with name 'foobar' does already exist and its value is '1'"));
 }
 
 TEST(PropertySet, TestBasicTypes) {
@@ -91,7 +91,7 @@ TEST(PropertySet, WhenPropertyDoesNotExist_ThenReturnFalse) {
 
 TEST(PropertySet, WhenPropertyDoesNotExist_Then_ReturnDefaultValue) {
     PropertySet ps;
-    EXPECT_THAT(ps.getProperty("notExistingProperty", 42), ::testing::Eq(42));
+    EXPECT_THAT(ps.getProperty("notExistingProperty", 42), testing::Eq(42));
 }
 
 TEST(PropertySet, CopyCtor) {
@@ -116,10 +116,3 @@ TEST(PropertySet, WhenGetIsCalledWithTheWrongType_ThenThrowException) {
 
     EXPECT_THROW(ps.getProperty<float>("a"), PropertyWithWrongValueTypeRequested);
 }
-
-// Todo: read this https://www.modernescpp.com/index.php/c-17-avoid-copying-with-std-string-view -> use std::string_view
-// https://www.grimm-jaud.de/index.php/blog/c-17-vermeide-kopieren-mit-std-string-view
-
-// Todo: implement operator[] int x = ps["muh"]; -> just implement that stuff that is used
-// Todo: what happens if some one intorduce sleep(2 days) will this be detected <- I gues so because of bazel!
-// Todo: What happens if someone adds bad code - i.e. if 42 return 43

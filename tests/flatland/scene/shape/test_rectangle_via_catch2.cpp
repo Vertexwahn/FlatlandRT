@@ -38,8 +38,11 @@ TEST_CASE("Rectangle2f", "[GivenAPreferedSizeForARectangle_WhenInitializing_Then
 
     REQUIRE(Vector2f{width/2.0f, height/2.0f} == Vector2f{75.0f, 50.0f});
 
-    Rectangle2f rect{translate(translation.x(), translation.y()), width, height};
-
+    PropertySet pset;
+    pset.addProperty("width", width);
+    pset.addProperty("height", height);
+    pset.addProperty("transform", translate(translation.x(), translation.y()));
+    Rectangle2f rect{pset};
 
     REQUIRE(translation.x() == 125.0f);
 

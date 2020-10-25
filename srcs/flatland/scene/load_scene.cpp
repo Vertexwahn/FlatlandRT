@@ -8,21 +8,21 @@
 
 #include "flatland/scene/load_scene.h"
 
-#include "flatland/core/camera.h"
-#include "flatland/core/filesystem.h"
+#include "flatland/camera/camera.h"
 #include "flatland/core/logging.h"
+#include "flatland/core/object_factory.h"
 #include "flatland/core/property_set.h"
+#include "flatland/core/sampler.h"
 #include "flatland/integrator/ambient_occlusion.h"
 #include "flatland/integrator/path_mirror_reflection.h"
 #include "flatland/integrator/path_specular_transmission.h"
-#include "flatland/scene/scene_factory.h"
 #include "flatland/scene/shape/disk.h"
 #include "flatland/scene/shape/polygon.h"
 #include "flatland/scene/shape/rectangle.h"
 
-#include <boost/algorithm/string.hpp>
 #include <pugixml.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <limits>
 #include <string>
@@ -75,6 +75,11 @@ Transform44f readTransform(const pugi::xml_node &xmlTransform) {
 
     for( auto node : xmlTransform) {
         std::string transformType = node.name();
+
+        if (transformType == "rotate_z") {
+            auto angle_in_degree = node.attribute("angle").as_float();
+            transform = rotateZ(degreeToRadian(angle_in_degree)) * transform;
+        }
 
         if (transformType == "translate") {
             auto x = node.attribute("x").as_float();
@@ -155,90 +160,37 @@ PropertySet readAllProperties(const pugi::xml_node &node) {
     return ps;
 }
 
-ReferenceCounted<Shape2f> createDisk(const PropertySet& ps, const fs::path& path) {
-    auto transform = ps.getProperty<Transform44f>("transform");
-    auto radius = ps.getProperty<float>("radius");
-    return makeReferenceCounted<Disk2f>(transform, radius);
-}
-
-ReferenceCounted<Shape2f> createRectangle(const PropertySet& ps, const fs::path& path) {
-    auto transform = ps.getProperty<Transform44f>("transform");
-    auto width = ps.getProperty<float>("width");
-    auto height = ps.getProperty<float>("height");
-    return makeReferenceCounted<Rectangle2f>(transform, width, height);
-}
-
-ReferenceCounted<PathSpecularTransmission> createIntegrator(const PropertySet& ps, const fs::path& path) {
-    return makeReferenceCounted<PathSpecularTransmission>(ps);
-}
-
-std::vector<Point2f> read2DPlyFile(const fs::path& filename) {
-    std::vector<Point2f> points;
-    std::ifstream plyFile(filename);
-    std::string line;
-    while (std::getline(plyFile, line)) {
-
-        std::vector<float> values;
-        std::vector<std::string> tokens;
-
-        // skip comment
-        if(boost::starts_with(line, "#"))
-            continue;
-
-        // skip empty line
-        if(line == std::string(""))
-            continue;
-
-        boost::split(tokens, line, boost::is_any_of(" "));
-
-        float x = std::stof(tokens[1]);
-        float y = std::stof(tokens[2]);
-
-        points.push_back(Point2f{x,y});
-    }
-    return points;
-}
-
-ReferenceCounted<Shape2f> createPolygon(const PropertySet& ps, const fs::path& path) {
-    auto transform = ps.getProperty<Transform44f>("transform");
-
-    std::string filename = ps.getProperty<std::string>("filename");
-
-    std::stringstream ss;
-    ss << path.parent_path().string() << "/" << filename;
-    fs::path outPath = ss.str();
-
-    std::vector<Point2f> points = read2DPlyFile(outPath);
-
-    return makeReferenceCounted<Polygon2f>(transform, &points[0], points.size());
-}
-
 ReferenceCounted<Scene2f> loadScene(std::string_view filename) {
-    fs::path p(filename);
+    std::filesystem::path p(filename);
+
+    ObjectFactory sf;
+    sf.registerClass<Disk2f>("disk");
+    sf.registerClass<Rectangle2f>("rectangle");
+    sf.registerClass<Polygon2f>("polygon");
+    sf.registerClass<PathSpecularTransmission>("path_specular_transmission");
+    sf.registerClass<PathMirrorReflection2f>("path_mirror_reflection");
+    sf.registerClass<AmbientOcclusion2f>("ambient_occlusion");
 
     bool bIntegratorTagFound = false;
-
-    SceneFactory sf;
-    sf.registerClass("disk", createDisk);
-    sf.registerClass("rectangle", createRectangle);
-    sf.registerClass("polygon", createPolygon);
 
     pugi::xml_document doc;
     auto result = doc.load_file(filename.data());
 
     if (!result)
-        return nullptr; // todo - what if there is an syntax error!?
+        return nullptr;
 
-    auto fl_scene = makeReferenceCounted<Scene2f>();
+    auto scene = makeReferenceCounted<Scene2f>();
 
-    for (pugi::xml_node scene: doc.root()) {
-        if (std::string(scene.name()) == "scene") {
-            for (pugi::xml_node sceneElements: scene) {
+    scene->setSampler(makeReferenceCounted<Sampler2f>());
+
+    for (pugi::xml_node scene_node: doc.root()) {
+        if (std::string(scene_node.name()) == "scene") {
+            for (pugi::xml_node sceneElements: scene_node) {
                 if (std::string(sceneElements.name()) == "camera") {
                     auto xmlFilm = sceneElements.child("film");
                     int width = xmlFilm.attribute("width").as_int();
                     int height = xmlFilm.attribute("height").as_int();
-                    std::string strFilename = xmlFilm.attribute("filename").as_string();
+                    auto strFilename = xmlFilm.attribute("filename").as_string();
 
                     auto camera = makeReferenceCounted<Camera2f>(width, height, strFilename);
 
@@ -248,7 +200,7 @@ ReferenceCounted<Scene2f> loadScene(std::string_view filename) {
                         camera->setTransform(transform);
                     }
 
-                    fl_scene->setCamera(camera);
+                    scene->setCamera(camera);
                 }
 
                 if (std::string(sceneElements.name()) == "integrator") {
@@ -256,18 +208,13 @@ ReferenceCounted<Scene2f> loadScene(std::string_view filename) {
 
                     auto ps = readAllProperties(sceneElements);
 
-                    if(type == "path_specular_transmission") {
-                        fl_scene->setIntegrator(makeReferenceCounted<PathSpecularTransmission>(ps));
+                    try {
+                        auto integrator = std::dynamic_pointer_cast<Integrator2f>(sf.createInstance(type, ps));
+                        integrator->setSampler(scene->getSampler().get());
+                        scene->setIntegrator(integrator);
                     }
-                    else if(type == "path_mirror_reflection") {
-                        fl_scene->setIntegrator(makeReferenceCounted<PathMirrorReflection2f>(ps));
-                    }
-                    else if(type == "ambient_occlusion") {
-                        fl_scene->setIntegrator(makeReferenceCounted<AmbientOcclusion2f>(ps));
-                    }
-                    else {
-                        LOG(WARNING) << "Unknown integrator. Using path specular transmission path integrator.";
-                        fl_scene->setIntegrator(makeReferenceCounted<PathSpecularTransmission>(ps));
+                    catch (...) {
+                        throw IntegratorMissing();
                     }
 
                     bIntegratorTagFound = true;
@@ -278,7 +225,7 @@ ReferenceCounted<Scene2f> loadScene(std::string_view filename) {
 
                     auto p = ps.getProperty<Point2f>("position");
                     auto t = ps.getProperty<std::string>("text");
-                    fl_scene->addAnnotation(Label2f{p, t});
+                    scene->addAnnotation(Label2f{p, t});
                 }
 
                 if (std::string(sceneElements.name()) == "shape") {
@@ -286,12 +233,16 @@ ReferenceCounted<Scene2f> loadScene(std::string_view filename) {
 
                     auto ps = readAllProperties(sceneElements);
 
+                    if(type == "polygon") {
+                        ps.addProperty("parent_path", p.parent_path().string());
+                    }
+
                     auto xmlTransform = sceneElements.child("transform");
                     if(xmlTransform) {
                         auto transform = readTransform(xmlTransform);
                         ps.addProperty("transform", transform);
                     }
-                    auto shape = sf.createShape(type, ps, p);
+                    auto shape = std::dynamic_pointer_cast<Shape2f>(sf.createInstance(type, ps));
 
                     auto xmlMaterial = sceneElements.child("material");
                     if(xmlMaterial) {
@@ -300,12 +251,12 @@ ReferenceCounted<Scene2f> loadScene(std::string_view filename) {
                         shape->setMaterial(material);
                     }
 
-                    fl_scene->addShape(shape);
+                    scene->addShape(shape);
                 }
             }
         }
         else {
-            throw LoadSceneException("scene xml tag missing");
+            throw LoadSceneException("scene_node xml tag missing");
         }
     }
 
@@ -313,7 +264,7 @@ ReferenceCounted<Scene2f> loadScene(std::string_view filename) {
         throw IntegratorMissing();
     }
 
-    return fl_scene;
+    return scene;
 }
 
 FLATLAND_END_NAMESPACE

@@ -15,6 +15,7 @@
 FLATLAND_BEGIN_NAMESPACE
 
 PathSpecularTransmission::PathSpecularTransmission(const PropertySet& ps) : Integrator2f(ps) {
+    max_depth = ps.getProperty("max_depth", 5);
 }
 
 PathSpecularTransmission::~PathSpecularTransmission() {

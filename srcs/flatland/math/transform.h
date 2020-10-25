@@ -145,9 +145,24 @@ Transform44Type<ScalarType> scale(const ScalarType x, const ScalarType y) {
 
 template <typename ScalarType>
 Transform44Type<ScalarType> rotateZ(const ScalarType radian) {
+
+    ScalarType s = sin(radian);
+    ScalarType c = cos(radian);
+
+    Matrix44<ScalarType> m;
+    m.row(0) = Eigen::Matrix<ScalarType, 4, 1>(c, -s, 0, 0);
+    m.row(1) = Eigen::Matrix<ScalarType, 4, 1>(s, c, 0, 0);
+    m.row(2) = Eigen::Matrix<ScalarType, 4, 1>(0, 0, 1, 0);
+    m.row(3) = Eigen::Matrix<ScalarType, 4, 1>(0, 0, 0, 1);
+
+    return Transform44Type<ScalarType>{m};
+
+
+/*
     Eigen::Transform<ScalarType,3,Eigen::Affine> transform(Eigen::AngleAxis<ScalarType>(radian,
-                              Eigen::Matrix<ScalarType, 3, 1>(ScalarType{0.0}, ScalarType{0.0}, ScalarType{1.0})));
+                              Eigen::Matrix<ScalarType, 3, 1>(ScalarType{0.0}, ScalarType{1.0}, ScalarType{0.0})));
     return Transform44Type<ScalarType>(transform.matrix());
+*/
 }
 
 template <typename ScalarType>

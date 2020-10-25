@@ -13,6 +13,9 @@
 #include "flatland/core/namespace.h"
 #include "flatland/math/point.h"
 
+#include <boost/algorithm/string.hpp>
+
+#include <fstream>
 #include <vector>
 
 FLATLAND_BEGIN_NAMESPACE
@@ -61,6 +64,34 @@ std::vector<Point2<ScalarType>> createSquare(const ScalarType size) {
             {-halfSize, halfSize}
     };
 
+    return points;
+}
+
+template <typename ScalarType>
+std::vector<Point2f> read2DPlyFile(const std::string& filename) {
+    std::vector<Point2f> points;
+    std::ifstream plyFile(filename);
+    std::string line;
+    while (std::getline(plyFile, line)) {
+
+        std::vector<float> values;
+        std::vector<std::string> tokens;
+
+        // skip comment
+        if(boost::starts_with(line, "#"))
+            continue;
+
+        // skip empty line
+        if(line == std::string(""))
+            continue;
+
+        boost::split(tokens, line, boost::is_any_of(" "));
+
+        float x = std::stof(tokens[1]);
+        float y = std::stof(tokens[2]);
+
+        points.push_back(Point2f{x,y});
+    }
     return points;
 }
 

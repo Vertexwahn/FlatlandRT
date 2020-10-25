@@ -6,7 +6,6 @@
     file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
 */
 
-#include "flatland/core/filesystem.h"
 #include "flatland/integrator/path_mirror_reflection.h"
 #include "flatland/integrator/ambient_occlusion.h"
 #include "flatland/scene/load_scene.h"
@@ -15,13 +14,14 @@
 
 #include <gmock/gmock.h>
 
+#include <filesystem>
+
 using namespace Flatland;
 
 // Test Scene details
 FLATLAND_BEGIN_NAMESPACE
     PropertySet readAllProperties(const pugi::xml_node &node);
     Transform44f readTransform(const pugi::xml_node &xmlTransform);
-    std::vector<Point2f> read2DPlyFile(const fs::path& filename);
 FLATLAND_END_NAMESPACE
 
 TEST(loadScene, GivenFileWithPathMirrorReflection_WhenLoadingScene_ThenExpectValidPathMirrorReflectionIntegrator) {
@@ -46,15 +46,6 @@ TEST(loadScene, GivenFileWithAmbientOcclusionIntegrator_WhenLoadingScene_ThenExp
     // Assert
     ReferenceCounted<AmbientOcclusion2f> ao = std::dynamic_pointer_cast<AmbientOcclusion2f>(integrator);
     EXPECT_TRUE(ao.get());
-}
-
-TEST(loadScene, read2DPlyFile) {
-    auto points = read2DPlyFile("scenes/bunny_coords.ply");
-
-    EXPECT_THAT(points.size(), ::testing::Ge(170));
-
-    EXPECT_NEAR(points[points.size()-1].x(), -40.5615654f, 0.0001f);
-    EXPECT_NEAR(points[points.size()-1].y(), 38.51184082f, 0.0001f);
 }
 
 TEST(loadScene, ReadProperties) {

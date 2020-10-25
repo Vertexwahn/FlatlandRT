@@ -7,7 +7,6 @@
 */
 
 #include "flatland/canvas/svg_canvas.h"
-#include "flatland/core/filesystem.h"
 #include "flatland/scene/load_scene.h"
 
 #include <tclap/CmdLine.h>
@@ -15,8 +14,7 @@
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 
-#include <iostream>
-#include <variant>
+#include <filesystem>
 
 using namespace Flatland;
 
@@ -48,13 +46,13 @@ int main(int argc, char **argv) {
 
         std::string_view filename = sceneFilename.getValue();
 
-        if(!fs::exists(filename)) {
+        if(!std::filesystem::exists(filename)) {
             LOG(ERROR) << "File " << filename << " does not exist";
             std::cout << "File " << filename << " does not exist" << std::endl;
             return 0; //ReturnStatus::SceneFileNotFound;
         }
 
-        LOG(INFO) << "Loading scene " << fs::path(filename) << ".";
+        LOG(INFO) << "Loading scene " << std::filesystem::path(filename) << ".";
 
         auto scene = loadScene(filename);
 
@@ -80,10 +78,10 @@ int main(int argc, char **argv) {
         }
 
         // determine out path
-        fs::path p(filename);
+        std::filesystem::path p(filename);
         std::stringstream ss;
         ss << p.parent_path().string() << "/" << scene->getCamera()->getFilm().getFilename();
-        fs::path outPath = ss.str();
+        std::filesystem::path outPath = ss.str();
 
         LOG(INFO) << "Store SVG to " << outPath << ".";
 

@@ -23,6 +23,11 @@ public:
     Disk2(const Transform44Type<ScalarType> &transform, const ScalarType radius) : Shape2<ScalarType>(transform), radius_(radius) {
     }
 
+    Disk2(const PropertySet& ps) : Shape2<ScalarType>(ps) {
+        auto radius = ps.getProperty<float>("radius");
+        radius_ = radius;
+    }
+
     bool intersect(const Ray2<ScalarType> &ray, MediumEvent2<ScalarType> &me) const override {
         Point2<ScalarType> intersectionPoint;
         Normal2<ScalarType> normal;

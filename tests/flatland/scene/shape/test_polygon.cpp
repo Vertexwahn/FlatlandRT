@@ -14,7 +14,7 @@
 
 using namespace Flatland;
 
-class Polygon2fTest : public ::testing::Test {
+class Polygon2fTest : public testing::Test {
 protected:
     virtual void SetUp()
     {
@@ -71,7 +71,7 @@ TEST(Polygon2f, GivenTranslatedPolygon_WhenConvertedToSvg_ThenExpectTranslationI
 
     std::string svgString = p.convertToSvg(800, 600);
 
-    EXPECT_THAT(svgString, ::testing::HasSubstr("100"));
+    EXPECT_THAT(svgString, testing::HasSubstr("100"));
 }
 
 TEST(Polygon2f, WhenConvertingToSvg_ThenExpectSvgPathTag) {
@@ -84,10 +84,10 @@ TEST(Polygon2f, WhenConvertingToSvg_ThenExpectSvgPathTag) {
 
     std::string svgString = p.convertToSvg(800, 600);
 
-    EXPECT_THAT(svgString, ::testing::HasSubstr("<path"));
-    EXPECT_THAT(svgString, ::testing::HasSubstr(" Z\""));
-    EXPECT_THAT(svgString, ::testing::HasSubstr(">"));
-    EXPECT_THAT(svgString, ::testing::HasSubstr("115.260"));
+    EXPECT_THAT(svgString, testing::HasSubstr("<path"));
+    EXPECT_THAT(svgString, testing::HasSubstr(" Z\""));
+    EXPECT_THAT(svgString, testing::HasSubstr(">"));
+    EXPECT_THAT(svgString, testing::HasSubstr("115.260"));
 }
 
 TEST(Polygon, AssumePlausibleNormal) {
@@ -133,8 +133,8 @@ TEST(Polygon2f, GivenARotateCube_WhenComputingIntersection_ThenAssumePlausibeNor
 
     // Assert
     EXPECT_TRUE(hit);
-    EXPECT_THAT(its.n.x(), ::testing::FloatEq(-sqrt(0.5f)));
-    EXPECT_THAT(its.n.y(), ::testing::FloatEq(sqrt(0.5f)));
+    EXPECT_THAT(its.n.x(), testing::FloatEq(-sqrt(0.5f)));
+    EXPECT_THAT(its.n.y(), testing::FloatEq(sqrt(0.5f)));
 }
 
 TEST(Polygon2f, GivenScaledPolygonCube_WhenRayIntersectsPolygon_AssumeProperDistance) {

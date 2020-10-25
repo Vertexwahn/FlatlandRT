@@ -14,53 +14,49 @@
 #include "flatland/math/intersection.h"
 #include "flatland/scene/shape/shape.h"
 
+#include <iomanip>
+
 FLATLAND_BEGIN_NAMESPACE
 
 template <typename ScalarType>
 class Rectangle2 : public Shape2<ScalarType> {
 public:
-    using PointType = Point2<ScalarType>;
-    using VectorType = Vector2<ScalarType>;
-    using NormalType = Normal2<ScalarType>;
+    using Point = Point2<ScalarType>;
+    using Vector = Vector2<ScalarType>;
+    using Normal = Normal2<ScalarType>;
+    using Frame = Frame2<ScalarType>;
+    using Scalar = ScalarType;
 
- 	Rectangle2(const Transform44Type<ScalarType>& transform, const ScalarType width, const ScalarType height) : Shape2<ScalarType>(transform) {
- 	    assert(width > ScalarType{0.0});
- 	    assert(height > ScalarType{0.0});
+    Rectangle2(const PropertySet& ps) : Shape2<ScalarType>(ps) {
+        width_ = ps.getProperty<Scalar>("width");
+        height_ = ps.getProperty<Scalar>("height");
 
-		width_ = width;
-		height_ = height;
-	}
+        assert(width_ > Scalar{0.0});
+        assert(height_ > Scalar{0.0});
 
-	ScalarType width() const {
+        Point minimum_{-width_/Scalar{2.0}, -height_/Scalar{2.0}};
+        Point maximum_{width_/Scalar{2.0}, height_/Scalar{2.0}};
+
+        Point points[4] = {minimum_,
+                           minimum_ + Vector{width(), Scalar{0.0}},
+                           maximum_,
+                           minimum_ + Vector{Scalar{0.0}, height()}
+        };
+
+        for(int i = 0; i < 4; ++i) {
+            points_[i] = Shape2<Scalar>::transform_ * points[i];
+        }
+    }
+
+	Scalar width() const {
 		return width_;
 	}
 
-	ScalarType height() const {
+	Scalar height() const {
 		return height_;
 	}
 
-	bool intersect(const Ray2<ScalarType>& ray, MediumEvent2<ScalarType>& its) const override {
-		/*
-		 * D               C
-		 * +---------------+
-		 * |               |
-		 * |               |
-		 * |               |
-		 * +---------------+
-		 * A               B
-		 */
-
-        PointType minimum_{-width_/ScalarType{2.0}, -height_/ScalarType{2.0}};
-        PointType maximum_{width_/ScalarType{2.0}, height_/ScalarType{2.0}};
-        minimum_ = Shape2<ScalarType>::transform_ * minimum_;
-        maximum_ = Shape2<ScalarType>::transform_ * maximum_;
-
-        PointType points[4] = {minimum_,
-                               minimum_ + VectorType(width(), ScalarType{0.0}),
-                               maximum_,
-                               minimum_ + VectorType(ScalarType{0.0}, height())
-        };
-
+	bool intersect(const Ray2<Scalar>& ray, MediumEvent2<Scalar>& its) const override {
 		bool hit = false;
 
 		// 0 -> 1
@@ -69,11 +65,11 @@ public:
 		// 3 -> 4
 		for (int i = 0; i < 4; ++i) {
             float t;
-            PointType intersectionPoint;
-            NormalType n;
+            Point intersectionPoint;
+            Normal n;
 
 			bool result =
-			  intersectRayLineSegment(ray.origin, ray.direction, points[i], points[(i + 1) % 4], intersectionPoint, t, n);
+			  intersectRayLineSegment(ray.origin, ray.direction, points_[i], points_[(i + 1) % 4], intersectionPoint, t, n);
 
 			if (result) {
 				if (!hit) {
@@ -81,11 +77,13 @@ public:
 					its.p = intersectionPoint;
 					its.t = t;
 					its.n = n;
+					its.frame = Frame{n, Vector{n.y(), -n.x()}};
 				} else {
 					if (t < its.t) {
 						its.p = intersectionPoint;
 						its.t = t;
                         its.n = n;
+                        its.frame = Frame{n, Vector{n.y(), -n.x()}};
 					}
 				}
 			}
@@ -96,10 +94,7 @@ public:
 
     std::string convertToSvg(const int svgCanvasWidth, const int svgCanvasHeight) const override {
         std::stringstream ss;
-        ss << "<rect x=\"" << getMinimum().x() << "\""
-           << " y=\"" << svgCanvasHeight - height() - getMinimum().y() << "\" "
-           << "width=\"" << width() << "\" "
-           << "height=\"" << height() << "\"";
+        ss << "<path ";
 
         ReferenceCounted<Material> material = Shape2<ScalarType>::getMaterial();
         if (material) {
@@ -107,28 +102,34 @@ public:
             ss << Shape2<ScalarType>::convertMaterialToSvgStyle(material.get());
         }
 
-        ss << ">";
+        ss << std::endl;
+        ss << " d=\"M ";
 
-        ss << "</rect>";
+        for (const auto &point : points_) {
+            auto pt = point;
+            ss << std::setprecision(10) << pt.x();
+            ss << " ";
+            ss << std::setprecision(10) << svgCanvasHeight + -1.0f * pt.y();
+            ss << " ";
+        }
 
+        ss << " Z\" />" << std::endl;
         return ss.str();
 	};
 
-	PointType getMinimum() const {
-        PointType minimum{-width_ / ScalarType{2.0}, -height_ / ScalarType{2.0}};
-        minimum = Shape2<ScalarType>::transform_ * minimum;
-		return minimum;
-	}
-
-    PointType getMaximum() const {
-        PointType maximum{width_ / ScalarType{2.0}, height_ / ScalarType{2.0}};
-        maximum = Shape2<ScalarType>::transform_ * maximum;
-		return maximum;
-	}
-
 private:
-    ScalarType width_;
-    ScalarType height_;
+    /*
+     * D               C
+     * +---------------+
+     * |               |
+     * |               |
+     * |               |
+     * +---------------+
+     * A               B
+     */
+    Point points_[4];
+    Scalar width_;
+    Scalar height_;
 };
 
 using Rectangle2f = Rectangle2<float>;

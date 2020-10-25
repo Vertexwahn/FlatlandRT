@@ -16,5 +16,5 @@ TEST(DegreeToRadian, When_90Degrees_Then_1DOT5708Radians) {
     auto valueInDegree = 90.0;
     auto valueInRadian = degreeToRadian(valueInDegree);
 
-    EXPECT_THAT(valueInRadian, ::testing::DoubleNear(1.5708, 0.0001));
+    EXPECT_THAT(valueInRadian, testing::DoubleNear(1.5708, 0.0001));
 }

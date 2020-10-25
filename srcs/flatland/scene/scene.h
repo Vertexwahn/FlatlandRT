@@ -10,8 +10,9 @@
 #ifndef Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
 #define Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
 
+#include "flatland/camera/camera.h"
 #include "flatland/canvas/label.h"
-#include "flatland/core/camera.h"
+#include "flatland/core/sampler.h"
 #include "flatland/integrator/integrator.h"
 
 FLATLAND_BEGIN_NAMESPACE
@@ -24,6 +25,7 @@ public:
     using MediumEvent = MediumEventType<Dimension, ScalarType>;
     using Camera = CameraType<Dimension, ScalarType>;
     using Integrator = IntegratorType<Dimension, ScalarType>;
+    using Sampler = SamplerType<ScalarType>;
     using Label = LabelType2<ScalarType>;
     using Scalar = ScalarType;
 
@@ -76,11 +78,19 @@ public:
         return annotations_.size();
     }
 
+    void setSampler(ReferenceCounted<Sampler> sampler) {
+        sampler_ = sampler;
+    }
+    ReferenceCounted<Sampler> getSampler() {
+        return sampler_;
+    }
+
 private:
     std::vector<Label> annotations_;
 	std::vector<ReferenceCounted<Shape>> shapes_;
 	ReferenceCounted<Camera> camera_ = nullptr;
     ReferenceCounted<Integrator> integrator_;
+    ReferenceCounted<Sampler> sampler_;
 };
 
 template <typename ScalarValue>

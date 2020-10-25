@@ -73,9 +73,9 @@ boost_deps()
 # Catch2
 http_archive(
     name = "catch2",
-    sha256 = "4e6608d3fb0247e2aa988735bae2064381b0ec712f47beb766dd761838a546b6",
-    strip_prefix = "Catch2-2.13.0",
-    urls = ["https://github.com/catchorg/Catch2/archive/v2.13.0.tar.gz"],
+    sha256 = "5e39d9199f4f174dc3c8896fb4cf0a2ce9b9c358ae759b87fade6d615ca2d27e",
+    strip_prefix = "Catch2-2.13.2",
+    urls = ["https://github.com/catchorg/Catch2/archive/v2.13.2.tar.gz"],
 )
 
 # {fmt}

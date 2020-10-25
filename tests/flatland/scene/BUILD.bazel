@@ -6,11 +6,6 @@
     file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
 """
 
-load("//bazel:compiler.bzl", "flatland_linker_opts")
-load("//bazel:compiler.bzl", "FLATLAND_DEFAULT_LINKOPTS")
-
-flatland_linker_opts()
-
 load("//tests/flatland:tests.bzl", "cc_test_flatland")
 
 cc_test(
@@ -23,7 +18,6 @@ cc_test(
         "//scenes",
         "//tests/scenes:TestSceneFiles",
     ],
-    linkopts = FLATLAND_DEFAULT_LINKOPTS,
     deps = [
         "//srcs:Flatland",
         "@googletest//:gtest_main",
@@ -41,7 +35,6 @@ cc_test(
         "//scenes",
         "//tests/scenes:TestSceneFiles",
     ],
-    linkopts = FLATLAND_DEFAULT_LINKOPTS,
     deps = [
         "//srcs:Flatland",
         "@googletest//:gtest_main",

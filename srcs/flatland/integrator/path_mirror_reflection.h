@@ -31,6 +31,7 @@ public:
     using Scalar = ScalarType;
 
     PathMirrorReflection2(const PropertySet &ps) : IntegratorType<2, ScalarType>(ps) {
+        max_depth = ps.getProperty("max_depth", 5);
     }
 
     virtual ~PathMirrorReflection2() {
@@ -40,7 +41,7 @@ public:
             const Scene2<ScalarType> *scene,
             Ray2<ScalarType> &ray,
             const int depth) const override {
-        if(depth > Base::max_depth)
+        if(depth > max_depth)
             return Color{Scalar{0.0}, Scalar{0.0}, Scalar{0.0}};
 
         MediumEvent2<ScalarType> me;
@@ -69,6 +70,9 @@ public:
 
         return Color{Scalar{0.0}, Scalar{0.0}, Scalar{0.0}};
     }
+
+private:
+    int max_depth = 0;
 };
 
 using PathMirrorReflection2f = PathMirrorReflection2<float>;

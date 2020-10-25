@@ -14,6 +14,8 @@
 #include "flatland/core/color.h"
 #include "flatland/core/logging.h"
 #include "flatland/core/namespace.h"
+#include "flatland/core/object.h"
+#include "flatland/core/sampler.h"
 #include "flatland/integrator/integrator.h"
 
 FLATLAND_BEGIN_NAMESPACE
@@ -27,14 +29,14 @@ using Scene2 = SceneType<2, ScalarValue>;
 using Scene2f = Scene2<float>;
 
 template <unsigned int Dimension, typename ScalarType>
-class IntegratorType {
+class IntegratorType : public Object {
 public:
     using Ray = RayType<Dimension, ScalarType>;
     using Scene = SceneType<Dimension, ScalarType>;
     using SvgCanvas = SvgCanvasType<ScalarType>;
+    using Sampler = SamplerType<ScalarType>;
 
     IntegratorType(const PropertySet& ps) {
-        max_depth = ps.getProperty("max_depth", 5);
     }
 
     virtual ~IntegratorType() {}
@@ -66,9 +68,13 @@ public:
             Ray &ray,
             const int depth) const = 0;
 
+    void setSampler(Sampler* sampler) {
+        sampler_ = sampler;
+    }
+
 protected:
     ReferenceCounted<SvgCanvas> canvas_ = nullptr;
-    int max_depth = 0;
+    Sampler* sampler_ = nullptr;
 };
 
 using Integrator2f = IntegratorType<2, float>;

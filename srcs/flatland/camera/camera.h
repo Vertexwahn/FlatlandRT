@@ -10,9 +10,9 @@
 #ifndef Flatland_Camera_14b27f8d_8dca_49d6_8087_3d67c31d29ec_h
 #define Flatland_Camera_14b27f8d_8dca_49d6_8087_3d67c31d29ec_h
 
-#include "flatland/core/film.h"
-#include "flatland/math/transform.h"
-#include "flatland/core/namespace.h"
+#include "srcs/flatland/camera/film.h"
+#include "srcs/flatland/math/transform.h"
+#include "srcs/flatland/core/namespace.h"
 
 #include <iostream>
 #include <string>

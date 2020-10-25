@@ -15,5 +15,4 @@ sh_test(
         "//scenes:reference_images",
         "//srcs/flatland.cli:flatland",
     ],
-    tags = ["manuall"],
 )

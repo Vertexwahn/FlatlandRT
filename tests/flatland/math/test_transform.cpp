@@ -289,8 +289,8 @@ TEST(Transform44f, WhenTransformIsScaling_ExpetedNotScaledVector) {
 
     n = transform * n;
 
-    EXPECT_THAT(n.x(), ::testing::FloatEq(0.1f));
-    EXPECT_THAT(n.y(), ::testing::FloatEq(0.0f));
+    EXPECT_THAT(n.x(), testing::FloatEq(0.1f));
+    EXPECT_THAT(n.y(), testing::FloatEq(0.0f));
 }
 
 TEST(Transform44f, WhenTransformIsRotatin_ExpetedRotatedNormalVector) {
@@ -302,6 +302,6 @@ TEST(Transform44f, WhenTransformIsRotatin_ExpetedRotatedNormalVector) {
     n = transform * n;
 
     // Assert
-    EXPECT_THAT(n.x(), ::testing::FloatEq(-sqrt(0.5f)));
-    EXPECT_THAT(n.y(), ::testing::FloatEq(sqrt(0.5f)));
+    EXPECT_THAT(n.x(), testing::FloatEq(-sqrt(0.5f)));
+    EXPECT_THAT(n.y(), testing::FloatEq(sqrt(0.5f)));
 }

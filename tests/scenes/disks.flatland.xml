@@ -19,7 +19,7 @@
 		</transform>
 	</camera>
 
-	<integrator type="path">
+	<integrator type="path_specular_transmission">
 		<integer name="max_depth" value="1"/>
 	</integrator>
 
@@ -54,6 +54,4 @@
 			<boolean name="specular_transmission" value="true" />
 		</material>
 	</shape>
-
-
 </scene>

@@ -18,15 +18,14 @@
         </transform>
     </camera>
 
-    <integrator type="ambient_occlusion">
-        <integer name="max_depth" value="7"/>
-    </integrator>
+    <integrator type="ambient_occlusion" />
 
     <shape type="rectangle">
         <float name="width" value="400" />
         <float name="height" value="50" />
 
         <transform>
+            <rotate_z angle="45" />
             <translate x="300" y="300" />
         </transform>
 
@@ -36,5 +35,4 @@
             <color name="fill_color" value="1, 1, 1" />
         </material>
     </shape>
-
 </scene>

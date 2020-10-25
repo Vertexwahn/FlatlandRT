@@ -13,6 +13,9 @@ cc_test_flatland(
     srcs = [
         "test_geometry.cpp",
     ],
+    data = [
+        "//scenes",
+    ],
 )
 
 cc_test_flatland(
@@ -75,5 +78,12 @@ cc_test_flatland(
     name = "TestVector",
     srcs = [
         "test_vector.cpp",
+    ],
+)
+
+cc_test_flatland(
+    name = "TestWarping",
+    srcs = [
+        "test_warping.cpp",
     ],
 )

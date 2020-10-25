@@ -12,19 +12,25 @@
 
 using namespace Flatland;
 
+// Further ideas for tests:
+// What happens if width= -5 -> Exception?
+// What happens when infinite rectangle is defined?
+// Does a infinite ray hit an infinite rectangle? yes at infinity...? or?
+// NaN?
+
 TEST(Rectangle2f, WhenInitializingRectangle_ThenExpectCorrectWidhtAndHeight) {
-    constexpr  float width = 2.0f;
+    constexpr float width = 2.0f;
     constexpr float height = 4.0f;
-    Rectangle2f rectangle{identity<float>(), width, height};
+
+    PropertySet ps;
+    ps.addProperty("width", width);
+    ps.addProperty("height", height);
+    ps.addProperty("transform", identity<float>());
+
+    Rectangle2f rectangle{ps};
     EXPECT_THAT(rectangle.width(), width);
     EXPECT_THAT(rectangle.height(), height);
 }
-
-// todo what happens if width= -5 -> Exception
-// what heppens when infinit rectangle is defined?
-// does a infinit ray hit an inifite rectangle? yes at infinity...? or?
-// NaN?
-// shape
 
 TEST(Rectangle2f, GivenAPreferedSizeForARectangle_WhenInitializing_ThenExpectedCorrectParameters) {
     // Arrange
@@ -33,14 +39,19 @@ TEST(Rectangle2f, GivenAPreferedSizeForARectangle_WhenInitializing_ThenExpectedC
     auto width = maximum.x() - minimum.x();
     auto height = maximum.y() - minimum.y();
 
+    PropertySet ps;
+    ps.addProperty("width", width);
+    ps.addProperty("height", height);
+    ps.addProperty("transform", identity<float>());
+
     // Act
-    Rectangle2f rect{identity<float>(), width, height};
+    Rectangle2f rect{ps};
 
     // Assert
     EXPECT_THAT(rect.width(), 50.0f);
     EXPECT_THAT(rect.height(), 100.0f);
-    EXPECT_THAT(rect.getMinimum(), minimum);
-    EXPECT_THAT(rect.getMaximum(), maximum);
+    //EXPECT_THAT(rect.getCornerA(), minimum);
+    //EXPECT_THAT(rect.getCornerC(), maximum);
 
     Matrix44f expectedMatrix;
     expectedMatrix << 1.0f, 0.0f, 0.0f, 0.0f,
@@ -57,13 +68,19 @@ TEST(Rectangle2f, GivenATranslatedRectangle_WhenInitializing_ThenExpectTransform
     auto width = maximum.x() - minimum.x();
     auto height = maximum.y() - minimum.y();
     Point2f translation = minimum + Vector2f{width/2.0f, height/2.0f}; // todo: auto does not work here - why?
-    Rectangle2f rect{translate(translation.x(), translation.y()), width, height};
+
+    PropertySet ps;
+    ps.addProperty("width", width);
+    ps.addProperty("height", height);
+    ps.addProperty("transform", translate(translation.x(), translation.y()));
+
+    Rectangle2f rect{ps};
 
     EXPECT_THAT(translation.x(), 125.0f);
     EXPECT_THAT(rect.width(), 150.0f);
     EXPECT_THAT(rect.height(), 100.0f);
-    EXPECT_THAT(rect.getMinimum(), minimum);
-    EXPECT_THAT(rect.getMaximum(), maximum);
+    //EXPECT_THAT(rect.getCornerA(), minimum);
+    //EXPECT_THAT(rect.getCornerC(), maximum);
 
     Matrix44f expectedMatrix;
     expectedMatrix << 1.0f, 0.0f, 0.0f, translation.x(),
@@ -76,7 +93,13 @@ TEST(Rectangle2f, GivenATranslatedRectangle_WhenInitializing_ThenExpectTransform
 
 TEST(Rectangle2f, WhenRayHitsRectangle_ExpectIntersection) {
     Vector2f position{250.0f, 250.0f};
-    Rectangle2f rect{translate(position), 100.f, 100.0f};
+
+    PropertySet ps;
+    ps.addProperty("width", 100.0f);
+    ps.addProperty("height", 100.0f);
+    ps.addProperty("transform", translate(position));
+
+    Rectangle2f rect{ps};
 
     Point2f rayOrigin{0.0f, 250.0f};
     Vector2f rayDirection{1.0f, 0.0f}; // shoot away - expected is no hit
@@ -94,12 +117,53 @@ TEST(Rectangle2f, WhenRayHitsRectangle_ExpectIntersection) {
 
 TEST(Rectangl2f, GivenATranslatedRectangle_WhenConvertToSvg_ThenExpectSvgTags) {
     Vector2f position{250.0f, 250.0f};
-    Rectangle2f rect{translate(position), 100.f, 100.0f};
 
-    EXPECT_THAT(rect.convertToSvg(500, 500), ::testing::HasSubstr("<rect"));
-    EXPECT_THAT(rect.convertToSvg(500, 500), ::testing::HasSubstr("</rect>"));
-    // regex
-    // http://www.regexe.de/hilfe.jsp
-    // https://howtodoinjava.com/java/regex/start-end-of-string/
-    EXPECT_THAT(rect.convertToSvg(500, 500), ::testing::MatchesRegex("^<rect.*>.*</rect>"));
+    PropertySet ps;
+    ps.addProperty("width", 100.0f);
+    ps.addProperty("height", 100.0f);
+    ps.addProperty("transform", translate(position));
+
+    Rectangle2f rect{ps};
+
+    EXPECT_THAT(rect.convertToSvg(500, 500), testing::HasSubstr("<path"));
 }
+
+TEST(Rectangle2f, GivenRectangleWithARotationTransform_WhenComputingACorner_ThenExpectRotatedCornerPoint) {
+    constexpr float width = 400.0f;
+    constexpr float height = 200.0f;
+    auto transform = rotateZ(degreeToRadian(90.0f));
+
+    PropertySet ps;
+    ps.addProperty("width", width);
+    ps.addProperty("height", height);
+    ps.addProperty("transform", transform);
+
+    Rectangle2f rectangle{ps};
+
+    // Assert
+    //auto px = -height/2.0f;
+    //auto py = width/2.0f;
+
+    std::string svgContent = rectangle.convertToSvg(800, 600);
+
+    EXPECT_THAT(svgContent, testing::HasSubstr("100.0"));
+
+    //Point2f a = rectangle.getCorner(3);
+    //EXPECT_THAT(a.x(), testing::FloatEq(-height/2.0f));
+    //EXPECT_THAT(a.y(), testing::FloatEq(width/2.0f));
+}
+
+/*
+TEST(Rectangle2f, GivenRectangleWithARotationTransform_WhenComputingACorner_ThenExpectRotatedCornerPoint2) {
+    constexpr float width = 400.0f;
+    constexpr float height = 200.0f;
+    auto transform = rotateZ(degreeToRadian(45.0f));
+
+    Rectangle2f rectangle{transform, width, height};
+
+    Point2f a = rectangle.getCornerC();
+
+    EXPECT_THAT(a.x(), testing::FloatEq(70.7107f));
+    EXPECT_THAT(a.y(), testing::FloatEq(212.132f));
+}
+*/

@@ -77,12 +77,12 @@ TEST(Ray2f, GivenARay_WhenPrintedToStdOutput_ExpectRayAsStringRepresentation) {
     ss << r;
     std::string output = ss.str();
 
-    EXPECT_THAT(output, ::testing::HasSubstr("Ray2f["));
-    EXPECT_THAT(output, ::testing::HasSubstr("origin ="));
-    EXPECT_THAT(output, ::testing::HasSubstr("direction ="));
-    EXPECT_THAT(output, ::testing::HasSubstr("min_t = 1"));
-    EXPECT_THAT(output, ::testing::HasSubstr("max_t = 10"));
-    EXPECT_THAT(output, ::testing::HasSubstr("]"));
+    EXPECT_THAT(output, testing::HasSubstr("Ray2f["));
+    EXPECT_THAT(output, testing::HasSubstr("origin ="));
+    EXPECT_THAT(output, testing::HasSubstr("direction ="));
+    EXPECT_THAT(output, testing::HasSubstr("min_t = 1"));
+    EXPECT_THAT(output, testing::HasSubstr("max_t = 10"));
+    EXPECT_THAT(output, testing::HasSubstr("]"));
 }
 
 TEST(Ray2d, GivenARay2d_WhenPrintedToStdOutput_ExpectRayTypeRay2d) {
@@ -94,12 +94,12 @@ TEST(Ray2d, GivenARay2d_WhenPrintedToStdOutput_ExpectRayTypeRay2d) {
     ss << r;
     std::string output = ss.str();
 
-    EXPECT_THAT(output, ::testing::HasSubstr("Ray2d["));
-    EXPECT_THAT(output, ::testing::HasSubstr("origin ="));
-    EXPECT_THAT(output, ::testing::HasSubstr("direction ="));
-    EXPECT_THAT(output, ::testing::HasSubstr("min_t = 1"));
-    EXPECT_THAT(output, ::testing::HasSubstr("max_t = 10"));
-    EXPECT_THAT(output, ::testing::HasSubstr("]"));
+    EXPECT_THAT(output, testing::HasSubstr("Ray2d["));
+    EXPECT_THAT(output, testing::HasSubstr("origin ="));
+    EXPECT_THAT(output, testing::HasSubstr("direction ="));
+    EXPECT_THAT(output, testing::HasSubstr("min_t = 1"));
+    EXPECT_THAT(output, testing::HasSubstr("max_t = 10"));
+    EXPECT_THAT(output, testing::HasSubstr("]"));
 }
 
 TEST(Ray3f, GivenARay3f_WhenPrintedToStdOutput_ExpectRayTypeRay3f) {
@@ -111,12 +111,12 @@ TEST(Ray3f, GivenARay3f_WhenPrintedToStdOutput_ExpectRayTypeRay3f) {
     ss << r;
     std::string output = ss.str();
 
-    EXPECT_THAT(output, ::testing::HasSubstr("Ray3f["));
-    EXPECT_THAT(output, ::testing::HasSubstr("origin ="));
-    EXPECT_THAT(output, ::testing::HasSubstr("direction ="));
-    EXPECT_THAT(output, ::testing::HasSubstr("min_t = 1"));
-    EXPECT_THAT(output, ::testing::HasSubstr("max_t = 10"));
-    EXPECT_THAT(output, ::testing::HasSubstr("]"));
+    EXPECT_THAT(output, testing::HasSubstr("Ray3f["));
+    EXPECT_THAT(output, testing::HasSubstr("origin ="));
+    EXPECT_THAT(output, testing::HasSubstr("direction ="));
+    EXPECT_THAT(output, testing::HasSubstr("min_t = 1"));
+    EXPECT_THAT(output, testing::HasSubstr("max_t = 10"));
+    EXPECT_THAT(output, testing::HasSubstr("]"));
 }
 
 TEST(internal_convertTypToString, GivenIntegralType_WhenConverTypeToString_ThenShortStringRepersentationExpected) {

@@ -6,7 +6,7 @@
     file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
 */
 
-#include "flatland/core/film.h"
+#include "flatland/camera/film.h"
 
 #include <gmock/gmock.h>
 

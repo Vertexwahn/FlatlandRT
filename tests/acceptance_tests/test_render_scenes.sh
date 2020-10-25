@@ -33,7 +33,9 @@ check_scene_output()
     fi
 }
 
+check_scene_output "scenes/ao.flatland.xml" "scenes/ao.svg" "scenes/ao_ref.svg"
 check_scene_output "scenes/bunny.flatland.xml" "scenes/bunny.svg" "scenes/bunny_ref.svg"
+check_scene_output "scenes/disk.flatland.xml" "scenes/disk.svg" "scenes/disk_ref.svg"
 check_scene_output "scenes/mirror.flatland.xml" "scenes/mirror.svg" "scenes/mirror_ref.svg"
 check_scene_output "scenes/mirrors.flatland.xml" "scenes/mirrors.svg" "scenes/mirrors_ref.svg"
 check_scene_output "scenes/rectangles.flatland.xml" "scenes/rectangles.svg" "scenes/rectangles_ref.svg"

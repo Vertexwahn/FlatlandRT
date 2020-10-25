@@ -192,8 +192,8 @@ TEST(Disk2f, GivenADiskAndARay_WhenRayIntersectsSphere_ThenValidNormal) {
     EXPECT_THAT(its[2].n.y(), 1.0f);
     EXPECT_THAT(its[3].n.x(), 0.0f);
     EXPECT_THAT(its[3].n.y(), -1.0f);
-    EXPECT_THAT(its[4].n.x(), ::testing::FloatNear(-std::sqrt(0.5f), 0.001f));
-    EXPECT_THAT(its[4].n.y(), ::testing::FloatNear(-std::sqrt(0.5f), 0.001f));
-    EXPECT_THAT(its[5].n.x(), ::testing::FloatNear(-std::sqrt(0.5f), 0.001f));
-    EXPECT_THAT(its[5].n.y(), ::testing::FloatNear(std::sqrt(0.5f), 0.001f));
+    EXPECT_THAT(its[4].n.x(), testing::FloatNear(-std::sqrt(0.5f), 0.001f));
+    EXPECT_THAT(its[4].n.y(), testing::FloatNear(-std::sqrt(0.5f), 0.001f));
+    EXPECT_THAT(its[5].n.x(), testing::FloatNear(-std::sqrt(0.5f), 0.001f));
+    EXPECT_THAT(its[5].n.y(), testing::FloatNear(std::sqrt(0.5f), 0.001f));
 }

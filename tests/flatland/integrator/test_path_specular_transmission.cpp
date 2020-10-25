@@ -26,7 +26,7 @@ TEST(PathSpecularTransmission, Path_render) {
 
     EXPECT_TRUE(integrator);
 
-    EXPECT_THAT(sc->toString(), ::testing::HasSubstr("stroke-width:3"));
+    EXPECT_THAT(sc->toString(), testing::HasSubstr("stroke-width:3"));
 }
 
 TEST(PathSpecularTransmission, GivenSceneWhereCameraRayIntersectsDisk_WhenMaxDepthIs2_ThenTraceOnly2Rays) {

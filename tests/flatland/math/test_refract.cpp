@@ -39,14 +39,14 @@ TEST(RefractionVacuumToGlass, When_IncidentVectorIs45Degrees_Then_RefratedVector
 	EXPECT_TRUE(refractedDirection.x() > 0.0f);
 	EXPECT_TRUE(refractedDirection.y() < 0.0f);
 
-	EXPECT_THAT(refractedDirection.norm(), ::testing::FloatEq(1.0f));
+	EXPECT_THAT(refractedDirection.norm(), testing::FloatEq(1.0f));
 
 	float theta = degreeToRadian(26.23);
 	Eigen::Rotation2Df rotationTransform(theta);
 	Vector2f rotatedVector = rotationTransform.toRotationMatrix() * Vector2f(0.0, -1.0);
 
-	EXPECT_THAT(refractedDirection.x(), ::testing::FloatNear(rotatedVector.x(), 0.0001f));
-	EXPECT_THAT(refractedDirection.y(), ::testing::FloatNear(rotatedVector.y(), 0.0001f));
+	EXPECT_THAT(refractedDirection.x(), testing::FloatNear(rotatedVector.x(), 0.0001f));
+	EXPECT_THAT(refractedDirection.y(), testing::FloatNear(rotatedVector.y(), 0.0001f));
 }
 
 TEST(RefractionVacuumToGlass, When_IncidentVectorIs0Degrees_Then_RefratedVectorIs0Degrees) {
@@ -66,14 +66,14 @@ TEST(RefractionVacuumToGlass, When_IncidentVectorIs0Degrees_Then_RefratedVectorI
     // Assert
     EXPECT_TRUE(validRefraction);
 
-    EXPECT_THAT(refractedDirection.norm(), ::testing::FloatEq(1.0f));
+    EXPECT_THAT(refractedDirection.norm(), testing::FloatEq(1.0f));
 
     float theta = degreeToRadian(0.0f);
     Eigen::Rotation2Df rotationTransform(theta);
     Vector2f rotatedVector = rotationTransform.toRotationMatrix() * Vector2f(0.0, -1.0);
 
-    EXPECT_THAT(refractedDirection.x(), ::testing::FloatNear(rotatedVector.x(), 0.0001f));
-    EXPECT_THAT(refractedDirection.y(), ::testing::FloatNear(rotatedVector.y(), 0.0001f));
+    EXPECT_THAT(refractedDirection.x(), testing::FloatNear(rotatedVector.x(), 0.0001f));
+    EXPECT_THAT(refractedDirection.y(), testing::FloatNear(rotatedVector.y(), 0.0001f));
 }
 
 TEST(RefractionGlassToVaccum, When_IncidentVectorIsCriticalAnglePlus5Degrees_Then_RefratedVectorIsInvalid) {
@@ -117,7 +117,7 @@ TEST(RefractionRayHitsSphere, When_RayHitsSphereStraight_Then_ExpectStraightRefr
 	// Assert
 	ASSERT_TRUE(result);
 
-	EXPECT_THAT(refractedDirection.dot(Vector2f(1.0f, 0.0f)), ::testing::FloatEq(1.0f));
+	EXPECT_THAT(refractedDirection.dot(Vector2f(1.0f, 0.0f)), testing::FloatEq(1.0f));
 }
 
 TEST(RefractionRayHitsSphere, When_RayHitsSphereStraightFromInside_Then_ExpectStraightRefraction) {
@@ -137,10 +137,10 @@ TEST(RefractionRayHitsSphere, When_RayHitsSphereStraightFromInside_Then_ExpectSt
 	// Assert
 	ASSERT_TRUE(result);
 
-	EXPECT_THAT(its.p.x(), ::testing::FloatEq(150.0f));
-	EXPECT_THAT(its.p.y(), ::testing::FloatEq(100.0f));
+	EXPECT_THAT(its.p.x(), testing::FloatEq(150.0f));
+	EXPECT_THAT(its.p.y(), testing::FloatEq(100.0f));
 
-	EXPECT_THAT(refractedDirection.dot(Vector2f(1.0f, 0.0f)), ::testing::FloatEq(1.0f));
+	EXPECT_THAT(refractedDirection.dot(Vector2f(1.0f, 0.0f)), testing::FloatEq(1.0f));
 }
 
 TEST(RefractionRayHitsAndExitsSphere, When_RayFromTopAt45Degrees_HitsSphere) {
@@ -156,8 +156,8 @@ TEST(RefractionRayHitsAndExitsSphere, When_RayFromTopAt45Degrees_HitsSphere) {
 
 	// 100
 	// 150
-	EXPECT_THAT(its.p.x(), ::testing::FloatNear(100.0f, 0.001f));
-	EXPECT_THAT(its.p.y(), ::testing::FloatNear(150.0f, 0.001f));
+	EXPECT_THAT(its.p.x(), testing::FloatNear(100.0f, 0.001f));
+	EXPECT_THAT(its.p.y(), testing::FloatNear(150.0f, 0.001f));
 	std::cout << "pointA " << its.p << std::endl;
 
 	r.max_t = its.t;
@@ -175,8 +175,8 @@ TEST(RefractionRayHitsAndExitsSphere, When_RayFromTopAt45Degrees_HitsSphere) {
 
 	// 139.644
 	// 69.5312
-	EXPECT_THAT(its.p.x(), ::testing::FloatNear(139.644f, 0.001f));
-	EXPECT_THAT(its.p.y(), ::testing::FloatNear(69.5312f, 0.001f));
+	EXPECT_THAT(its.p.x(), testing::FloatNear(139.644f, 0.001f));
+	EXPECT_THAT(its.p.y(), testing::FloatNear(69.5312f, 0.001f));
 	std::cout << "pointB " << its.p << std::endl;
 
 	refractedRay.max_t = its.t;

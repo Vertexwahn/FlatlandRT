@@ -6,29 +6,28 @@
     file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
 """
 
-load("//bazel:compiler.bzl", "flatland_linker_opts")
-load("//bazel:compiler.bzl", "FLATLAND_DEFAULT_LINKOPTS")
-
-flatland_linker_opts()
-
 cc_library(
     name = "Flatland",
     srcs = [
+        "flatland/camera/camera.h",
+        "flatland/camera/film.cpp",
+        "flatland/camera/film.h",
         "flatland/canvas/label.h",
         "flatland/canvas/svg_canvas.h",
-        "flatland/core/camera.h",
         "flatland/core/color.h",
-        "flatland/core/filesystem.h",
-        "flatland/core/film.cpp",
-        "flatland/core/film.h",
         "flatland/core/logging.h",
         "flatland/core/material.cpp",
         "flatland/core/material.h",
         "flatland/core/namespace.h",
         "flatland/core/non_copyable.h",
+        "flatland/core/object.cpp",
+        "flatland/core/object.h",
+        "flatland/core/object_factory.cpp",
+        "flatland/core/object_factory.h",
         "flatland/core/property_set.cpp",
         "flatland/core/property_set.h",
         "flatland/core/reference_counted.h",
+        "flatland/core/sampler.h",
         "flatland/integrator/ambient_occlusion.h",
         "flatland/integrator/integrator.h",
         "flatland/integrator/path_mirror_reflection.h",
@@ -46,11 +45,10 @@ cc_library(
         "flatland/math/transform.h",
         "flatland/math/util.h",
         "flatland/math/vector.h",
+        "flatland/math/warping.h",
         "flatland/scene/load_scene.cpp",
         "flatland/scene/load_scene.h",
         "flatland/scene/scene.h",
-        "flatland/scene/scene_factory.cpp",
-        "flatland/scene/scene_factory.h",
         "flatland/scene/shape/disk.h",
         "flatland/scene/shape/polygon.h",
         "flatland/scene/shape/rectangle.h",
@@ -58,13 +56,13 @@ cc_library(
         "flatland/scene/shape/shape.h",
     ],
     includes = ["."],
-    linkopts = FLATLAND_DEFAULT_LINKOPTS,
     visibility = ["//visibility:public"],
     deps = [
         "@boost//:algorithm",
         "@eigen",
         "@fmt",
         "@glog",
+        "@pcg",
         "@pugixml",
     ],
 )

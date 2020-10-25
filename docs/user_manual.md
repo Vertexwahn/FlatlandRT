@@ -14,19 +14,20 @@ Given this scene file:
 <?xml version="1.0" encoding="UTF-8"?>
 <scene>
     <camera>
-        <film width="800" height="600" filename="out.svg"></film>
+        <film width="800" height="600" filename="bunny.svg"></film>
 
         <transform>
             <lookAt origin="200, 500" target="400, 300" />
         </transform>
     </camera>
 
-    <integrator type="path">
-        <integer name="max_depth" value="1"/>
+    <integrator type="path_specular_transmission">
+        <integer name="max_depth" value="7"/>
     </integrator>
 
     <shape type="polygon">
         <transform>
+            <!-- <rotate_z angle="30" /> -->
             <scale x="3" y="3" />
             <translate x="400" y="300" />
         </transform>
@@ -37,6 +38,7 @@ Given this scene file:
             <color name="stroke_color" value="0.0, 0.682, 0.937" />
             <float name="stroke_width" value="3.0" />
             <color name="fill_color" value="1.0, 1.0, 1.0" />
+            <string name="interface_interaction" value= "specular_transmission" />
         </material>
     </shape>
 </scene>

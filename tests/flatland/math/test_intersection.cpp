@@ -57,10 +57,10 @@ TEST(Intersection, IntersectRayCircle) {
 	        t,
 	        normal);
 
-	EXPECT_THAT(t, ::testing::FloatEq(50.0f));
+	EXPECT_THAT(t, testing::FloatEq(50.0f));
 
-	EXPECT_THAT(intersectionPoint.x(), ::testing::FloatEq(50.0f));
-	EXPECT_THAT(intersectionPoint.y(), ::testing::FloatEq(100.0f));
+	EXPECT_THAT(intersectionPoint.x(), testing::FloatEq(50.0f));
+	EXPECT_THAT(intersectionPoint.y(), testing::FloatEq(100.0f));
 
 	EXPECT_TRUE(bHit);
 }
@@ -78,11 +78,11 @@ TEST(Intersection, RayLineSegmentIntersection) {
 	bool result = intersectRayLineSegment(rayOrigin, rayDirection, lineSegmentStart, lineSegmentEnd, intersectionPoint, t, n);
 
 	EXPECT_TRUE(result);
-    EXPECT_THAT(intersectionPoint.x(), ::testing::FloatEq(100.0f));
-    EXPECT_THAT(intersectionPoint.y(), ::testing::FloatEq(0.0f));
+    EXPECT_THAT(intersectionPoint.x(), testing::FloatEq(100.0f));
+    EXPECT_THAT(intersectionPoint.y(), testing::FloatEq(0.0f));
 
-    EXPECT_THAT(n.x(), ::testing::FloatEq(1.0f));
-    EXPECT_THAT(n.y(), ::testing::FloatEq(0.0f));
+    EXPECT_THAT(n.x(), testing::FloatEq(1.0f));
+    EXPECT_THAT(n.y(), testing::FloatEq(0.0f));
 }
 
 TEST(Intersection, RayLineSegmentIntersection2) {
@@ -99,8 +99,8 @@ TEST(Intersection, RayLineSegmentIntersection2) {
 
     EXPECT_TRUE(result);
 
-    EXPECT_THAT(n.x(), ::testing::FloatEq(sqrt(0.5f)));
-    EXPECT_THAT(n.y(), ::testing::FloatEq(-sqrt(0.5f)));
+    EXPECT_THAT(n.x(), testing::FloatEq(sqrt(0.5f)));
+    EXPECT_THAT(n.y(), testing::FloatEq(-sqrt(0.5f)));
 }
 
 TEST(Intersection2f, Ray2CircleIntersection) {
@@ -113,5 +113,5 @@ TEST(Intersection2f, Ray2CircleIntersection) {
     bool hit = c.intersect(r, its);
 
     ASSERT_TRUE(hit);
-    EXPECT_THAT(its.t, ::testing::FloatEq(50.0f));
+    EXPECT_THAT(its.t, testing::FloatEq(50.0f));
 }

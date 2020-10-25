@@ -28,9 +28,11 @@ filegroup(
 filegroup(
     name = "reference_images",
     srcs = [
+        "ao_ref.svg",
         "bunny_ref.svg",
+        "disk_ref.svg",
         "mirror_ref.svg",
         "mirrors_ref.svg",
-        "rectangles_ref.svg"
+        "rectangles_ref.svg",
     ],
 )

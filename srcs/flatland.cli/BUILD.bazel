@@ -6,22 +6,15 @@
     file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
 """
 
-load("//bazel:compiler.bzl", "flatland_linker_opts")
-load("//bazel:compiler.bzl", "FLATLAND_DEFAULT_LINKOPTS")
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-
-flatland_linker_opts()
 
 cc_binary(
     name = "flatland",
     srcs = ["main.cpp"],
     data = ["//scenes"],
-    linkopts = FLATLAND_DEFAULT_LINKOPTS,
     visibility = ["//visibility:public"],
     deps = [
         "//srcs:Flatland",
-        "@eigen",
-        "@glog",
         "@tclap",
     ],
 )

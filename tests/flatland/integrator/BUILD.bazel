@@ -9,9 +9,9 @@
 load("//tests/flatland:tests.bzl", "cc_test_flatland")
 
 cc_test_flatland(
-    name = "TestPathSpecularTransmission",
+    name = "TestAmbientOcclusion",
     srcs = [
-        "test_path_specular_transmission.cpp",
+        "test_ambient_occlusion.cpp",
     ],
     data = ["//scenes"],
 )
@@ -25,9 +25,9 @@ cc_test_flatland(
 )
 
 cc_test_flatland(
-    name = "TestAmbientOcclusion",
+    name = "TestPathSpecularTransmission",
     srcs = [
-        "test_ambient_occlusion.cpp",
+        "test_path_specular_transmission.cpp",
     ],
     data = ["//scenes"],
 )

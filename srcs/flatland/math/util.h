@@ -15,7 +15,21 @@
 #include <cassert>
 #include <cmath>
 
+#if !defined(M_PI)
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 FLATLAND_BEGIN_NAMESPACE
+
+template<class T> inline constexpr T pi_v = M_PI;
+
+inline constexpr float pif = pi_v<float>;
+inline constexpr double pi_over_2f = pi_v<float> / 2.0f;
+inline constexpr double pi_over_4f = pi_v<float> / 4.0f;
+
+inline constexpr double pi = pi_v<double>;
+inline constexpr double pi_over_2 = pi_v<double> / 2.0;
+inline constexpr double pi_over_4 = pi_v<double> / 4.0;
 
 template <typename ScalarType>
 ScalarType degreeToRadian(const ScalarType value) {

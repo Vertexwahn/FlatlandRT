@@ -29,8 +29,8 @@ TEST(Scene, GivenAScene_WhenAddingAAnnotations_ThenValidAnnotion) {
 
     // Assert
     EXPECT_THAT(scene.getAnnotationCount(), 1u);
-    EXPECT_THAT(scene.getAnnotations()[0].position.x(), ::testing::FloatEq(x));
-    EXPECT_THAT(scene.getAnnotations()[0].position.y(), ::testing::FloatEq(y));
+    EXPECT_THAT(scene.getAnnotations()[0].position.x(), testing::FloatEq(x));
+    EXPECT_THAT(scene.getAnnotations()[0].position.y(), testing::FloatEq(y));
     EXPECT_THAT(scene.getAnnotations()[0].text, text);
 }
 

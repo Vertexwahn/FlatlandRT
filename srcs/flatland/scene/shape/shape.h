@@ -10,31 +10,66 @@
 #ifndef Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
 #define Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
 
-#include "flatland/math/util.h"
 #include "flatland/core/material.h"
-#include "flatland/core/non_copyable.h"
-#include "flatland/core/reference_counted.h"
-#include "flatland/math/transform.h"
-#include "flatland/core/namespace.h"
-
+#include "flatland/core/object.h"
 
 FLATLAND_BEGIN_NAMESPACE
 
 template <unsigned int Dimension, typename ScalarType>
 struct Intersection {
-	PointType<Dimension, ScalarType> p;   // intersection point
-	ScalarType t;                     // distance to intersection point
-	NormalType<Dimension, ScalarType> n;  // normal at intersection point
+    using Point = PointType<Dimension, ScalarType>;
+    using Scalar = ScalarType;
+    using Normal = NormalType<Dimension, ScalarType>;
+
+    Point p;   // intersection point
+	Scalar t;  // distance to intersection point
+	Normal n;  // normal at intersection point
 };
 
 template <typename ScalarType>
 using Intersection2 = Intersection<2, ScalarType>;
+template <typename ScalarType>
+using Intersection3 = Intersection<3, ScalarType>;
 
 using Intersection2f = Intersection2<float>;
+using Intersection3f = Intersection3<float>;
+using Intersection2d = Intersection2<double>;
+using Intersection3d = Intersection3<double>;
+
+template <unsigned int Dimension, typename ScalarType>
+struct FrameType {
+    using Vector = VectorType<Dimension, ScalarType>;
+    using Normal = NormalType<Dimension, ScalarType>;
+
+    Vector tangent;
+    Vector normal;
+
+    FrameType() {}
+
+    explicit FrameType(const Normal& n, const Vector& t)  : normal(n), tangent(t) {
+    }
+
+    Vector toWorld(const Vector& v) const {
+        return v.x() * tangent + v.y() * normal;
+    }
+};
+
+template <typename ScalarType>
+using Frame2 = FrameType<2, ScalarType>;
+template <typename ScalarType>
+using Frame3 = FrameType<3, ScalarType>;
+
+using Frame2f = Frame2<float>;
+using Frame2d = Frame2<double>;
+using Frame3f = Frame3<float>;
+using Frame3d = Frame3<double>;
 
 template <unsigned int Dimension, typename ScalarType>
 struct MediumEventType : public Intersection<Dimension, ScalarType> {
+    using Frame = FrameType<Dimension, ScalarType>;
+
     Material *material = nullptr;
+    Frame frame;
 };
 
 template <typename ScalarValue>
@@ -48,12 +83,15 @@ using MediumEvent3f = MediumEvent3<float>;
 using MediumEvent3d = MediumEvent3<double>;
 
 template <unsigned int Dimension, typename ScalarType>
-class ShapeType : NonCopyable {
+class ShapeType : public Object {
 public:
     ShapeType() : transform_(identity<ScalarType>()) {}
 	ShapeType(const Transform44f& transform)  : transform_(transform) {
-
     };
+    ShapeType(const PropertySet& ps) : transform_(ps.getProperty<Transform44f>("transform")) {
+
+    }
+
 	virtual ~ShapeType() {};
 
 	virtual bool intersect(const RayType<Dimension, ScalarType> &ray, MediumEventType<Dimension, ScalarType> &me) const = 0;
@@ -88,6 +126,7 @@ public:
 
         return ss.str();
     }
+
 protected:
     Transform44Type<ScalarType> transform_;
 	ReferenceCounted<Material> material_{nullptr};

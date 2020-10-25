@@ -32,6 +32,15 @@ public:
             throw std::runtime_error("Points not counter clock wise");
     }
 
+    Polygon2(const PropertySet& ps) : Shape2<ScalarType>(ps) {
+        std::string filename = ps.getProperty<std::string>("filename");
+
+        std::stringstream ss;
+        ss << ps.getProperty<std::string>("parent_path")  << "/" << filename;
+
+        points_ = read2DPlyFile<float>(ss.str());
+	}
+
 	bool intersect(const Ray2<ScalarType> &ray_, MediumEvent2<ScalarType> &me) const override {
         // transform ray into object space
         auto toObjectSpace = Shape2<ScalarType>::transform_.inverse();

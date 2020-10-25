@@ -22,6 +22,9 @@ public:
     virtual ~PathSpecularTransmission();
 
     Color3f trace(const Scene2f *scene, Ray2f &ray, const int depth) const override;
+
+private:
+    int max_depth = 0;
 };
 
 FLATLAND_END_NAMESPACE
