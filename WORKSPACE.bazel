@@ -94,6 +94,24 @@ http_archive(
     urls = ["http://github.com/zeux/pugixml/releases/download/v1.10/pugixml-1.10.zip"],
 )
 
+# PCG, A Family of Better Random Number Generators
+# Does not work with Visual Studio 2019
+#http_archive(
+#    name = "pcg",
+#    build_file = "//third_party:pcg.BUILD",
+#    sha256 = "25bb22f076e8c346fa28c2267ae3564b12122f1f4ab2d2a08ad8909dcd6319fd",
+#    strip_prefix = "pcg-cpp-0.98.1",
+#    urls = ["https://github.com/imneme/pcg-cpp/archive/v0.98.1.tar.gz"],
+#)
+
+http_archive(
+    name = "pcg",
+    build_file = "//third_party:pcg.BUILD",
+    sha256 = "26562c6de2d5f17fe5911a42eca5cbf46901b7e697aab4224d4a4e25410c758d",
+    strip_prefix = "pcg-cpp-5b5cac8d61339e810c5dbb4692d868a1d7ca1b2d",
+    urls = ["https://github.com/imneme/pcg-cpp/archive/5b5cac8d61339e810c5dbb4692d868a1d7ca1b2d.zip"],
+)
+
 # tclap
 http_archive(
     name = "tclap",
