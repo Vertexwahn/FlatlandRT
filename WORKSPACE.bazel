@@ -14,9 +14,9 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 # Google Test
 http_archive(
     name = "googletest",
-    sha256 = "1d547f2b83e16eed4f6e3d5504dab0be60886bcb19cc4c62ee174d3c2cca03a8",
-    strip_prefix = "googletest-7aca84427f224eeed3144123d5230d5871e93347",  # 2020-09-18T15:10:49Z
-    urls = ["https://github.com/google/googletest/archive/7aca84427f224eeed3144123d5230d5871e93347.zip"],
+    sha256 = "a2e48f1c92e68ba5d84afc42ea163e017d1b612f818ef4002f4bf4d88d6aca09",
+    strip_prefix = "googletest-620659ed92829a88ee34134c782bf5b5aa5a0a0c",  # 2020-10-16T05:30:37Z
+    urls = ["https://github.com/google/googletest/archive/620659ed92829a88ee34134c782bf5b5aa5a0a0c.zip"],
 )
 
 # Eigen
@@ -25,9 +25,7 @@ http_archive(
     build_file = "//third_party:eigen.BUILD",
     sha256 = "d56fbad95abf993f8af608484729e3d87ef611dd85b3380a8bad1d5cbc373a57",
     strip_prefix = "eigen-3.3.7",
-    url = "http://vertexwahn.de/artifacts/eigen-3.3.7.tar.gz",
-    # Does currently not work: https://github.com/bazelbuild/bazel/issues/11187
-    #url = "https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz",
+    url = "https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz",
 )
 
 # glog
@@ -126,9 +124,9 @@ git_repository(
 # LLVM Toolchain
 http_archive(
     name = "com_grail_bazel_toolchain",
-    sha256 = "b7483184127494765d77129a0e82b1e7dcb20b6e04d5c54018d34e453a898bfb",
-    strip_prefix = "bazel-toolchain-master",
-    urls = ["https://github.com/grailbio/bazel-toolchain/archive/master.tar.gz"],
+    sha256 = "bc779302ca428a1f60cbfa8adb36e1a9876ae6fbcb059eb42f0c27d9898893ef",
+    strip_prefix = "bazel-toolchain-9b0bae6a79392920698b9778e334ce2354b425a5",
+    urls = ["https://github.com/grailbio/bazel-toolchain/archive/9b0bae6a79392920698b9778e334ce2354b425a5.tar.gz"],
 )
 
 load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
@@ -147,14 +145,12 @@ load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
 llvm_register_toolchains()
 
 # rules_pkg
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
 http_archive(
     name = "rules_pkg",
-    sha256 = "352c090cc3d3f9a6b4e676cf42a6047c16824959b438895a76c2989c6d7c246a",
+    sha256 = "aeca78988341a2ee1ba097641056d168320ecc51372ef7ff8e64b139516a4937",
     urls = [
-        "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.5/rules_pkg-0.2.5.tar.gz",
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.2.5/rules_pkg-0.2.5.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.6-1/rules_pkg-0.2.6.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
     ],
 )
 
