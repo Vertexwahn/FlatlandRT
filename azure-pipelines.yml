@@ -58,7 +58,7 @@ jobs:
         condition: and(succeeded(), eq(variables['systemName'], 'linux'))
 
       - script: |
-          bazel $(bazel_startup) test --config=ubuntu20_04_x64 -- //... -//tests/third_party:TestBoost
+          bazel $(bazel_startup) test --config=ubuntu20_04_x64 -- //...
         displayName: 'Bazel test GCC'
         condition: and(succeeded(), eq(variables['systemName'], 'linux'))
 
@@ -69,7 +69,7 @@ jobs:
         condition: and(succeeded(), eq(variables['systemName'], 'linux'))
 
       - script: |
-          bazel $(bazel_startup) test --config=ubuntu20_04_x64_llvm -- //... -//tests/third_party:TestBoost
+          bazel $(bazel_startup) test --config=ubuntu20_04_x64_llvm -- //...
         displayName: 'Bazel test LLVM'
         condition: and(succeeded(), eq(variables['systemName'], 'linux'))
 
@@ -79,6 +79,6 @@ jobs:
         condition: and(succeeded(), eq(variables['systemName'], 'windows'))
 
       - script: |
-          bazel $(bazel_startup) test --config=windows10_x64 -- //... -//tests/third_party:TestBoost -//tests/acceptance_tests:acceptance_test
+          bazel $(bazel_startup) test --config=windows10_x64 -- //... -//tests/acceptance_tests:acceptance_test
         displayName: 'bazel test'
         condition: and(succeeded(), eq(variables['systemName'], 'windows'))
