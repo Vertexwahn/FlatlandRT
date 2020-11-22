@@ -37,7 +37,7 @@ bazel run --config=ubuntu20_04_x64 //srcs/flatland.cli:flatland -- ~/Flatland/sc
 
 ### Building with Linux
 
-#### Command line (zsh)
+#### Command line (bash/zsh)
 
 ```bash
 # Run all tests
@@ -50,7 +50,9 @@ bazel test --config=ubuntu20_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolc
 
 #### CLion
 
-You can use the following `.bazelprject` file:
+There is a Bazel Plugin for CLion. It can be downloaded from [here](https://plugins.jetbrains.com/author/4bb31785-ad06-4671-8e26-266aadc184bd).
+
+You can use the following `.bazelproject` file:
 
 ```yaml
 directories:
@@ -68,12 +70,11 @@ build_flags:
   --config=ubuntu20_04_x64
 ```
 
-CLion 2019.3.6 together with the  Bazel 2020.07.13.0.2 Plugin was tested successfully.
+#### Ubuntu 20 and LLVM
 
-
-#### Ubuntu 18 and LLVM
-
-Bazel supports different toolchains. Usually gcc is used when using Ubuntu 18. But you can also easily use LLVM to compile Flatland.
+Bazel supports different toolchains. 
+Usually gcc is used a C++ default compiler when using Ubuntu 20.
+But you can also easily use LLVM to compile Flatland.
 
     # Build with LLVM
     bazel build --config=ubuntu20_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
@@ -95,7 +96,8 @@ Use [Lavender](https://github.com/tmandry/lavender) to generate a solution and p
 python3 D:\dev\lavender\generate.py --config=windows10_x64  //...
 ```
 
-Lavender is far from being perfect. It might be necessary to do some modifications to the generated solution and project files.
+Lavender is far from being perfect. 
+It might be necessary to do some modifications to the generated solution and project files.
 
 ## Coding process
 
@@ -120,6 +122,7 @@ The corresponding licenses can be found in the Licenses folder distributed with 
 * Seurat (https://github.com/googlevr/seurat) (third party Bazel dependency for Eigen, i.e. eigen.BUILD) ([License](licenses/seurat/LICENSE))
 * envoy (https://github.com/glasnostic/envoy) (third party Bazel dependency for tclap, i.e. tclap.BUILD)  ([License](licenses/envoy/LICENSE))
 * pbrt, Version 3 (https://github.com/mmp/pbrt-v3) (Refract, Faceforward functions) ([License](licenses/pbrt-v3/LICENSE.txt))
+* pbrt, Version 4 (https://github.com/mmp/pbrt-v4) (concentric sampling of unit disk) ([License](licenses/pbrt-v4/LICENSE.txt))
 
 ### Build related
 
@@ -127,17 +130,18 @@ The corresponding licenses can be found in the Licenses folder distributed with 
 
 ### Third party dependencies
 
+* {fmt} (https://github.com/fmtlib/fmt) (third party dependency) ([License](licenses/fmt/LICENSE.rst))
 * Boost (https://www.boost.org/) (third party dependency) ([License](licenses/boost/LICENSE))
-* Google Test (https://github.com/google/googletest) (third party dependency) ([License](licenses/googletest/LICENSE))
-* TCLAP - Templatized Command Line Argument Parser (https://github.com/mirror/tclap) ([License](licenses/tclap/COPYING))
 * catch2 (https://github.com/catchorg/Catch2) (third party dependency) ([License](licenses/catch2/LICENSE.txt))
 * gflags (https://github.com/gflags/gflags/) (third party dependency) ([License](licenses/gflags/COPYING.txt))
 * glog (https://github.com/google/glog) (third party dependency) ([License](licenses/glog/COPYING))
+* Google Test (https://github.com/google/googletest) (third party dependency) ([License](licenses/googletest/LICENSE))
+* hypothesis (https://github.com/wjakob/hypothesis) (third party dependency) ([License](licenses/hypothesis/LICENSE))
+* pcg-cpp (https://github.com/imneme/pcg-cpp/)  (third party dependency) ([License](licenses/pcg-cpp/LICENSE-MIT.txt))
 * pugixml (https://pugixml.org/, https://github.com/zeux/pugixml) (third party dependency) ([License](licenses/pugixml/LICENSE.md))
+* TCLAP - Templatized Command Line Argument Parser (https://github.com/mirror/tclap) ([License](licenses/tclap/COPYING))
 * yaml-cpp (https://github.com/jbeder/yaml-cpp) (third party dependency) ([License](licenses/yaml-cpp/LICENSE))
-* {fmt} (https://github.com/fmtlib/fmt) (third party dependency) ([License](licenses/fmt/LICENSE.rst))
 
 ### Artwork
 
 The Stanford Bunny was derived from the Stanford Bunny provided here: http://graphics.stanford.edu/data/3Dscanrep/#bunny)
-

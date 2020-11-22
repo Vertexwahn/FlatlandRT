@@ -6,7 +6,7 @@
     file LICENSE.md or https://opensource.org/licenses/BSD-3-Clause.
 """
 
-workspace(name = "Flatland")
+workspace(name = "FlatlandRT")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
@@ -80,9 +80,18 @@ http_archive(
 http_archive(
     name = "fmt",
     build_file = "//third_party:fmt.BUILD",
-    sha256 = "decfdf9ad274070fa85f26407b816f5a4d82205ae86bac1990be658d0795ea4d",
-    strip_prefix = "fmt-7.0.3",
-    urls = ["https://github.com/fmtlib/fmt/releases/download/7.0.3/fmt-7.0.3.zip"],
+    sha256 = "308af4e36ee3ab527b51014a2a5d862682c84f5d16f7a597aea34c84853cbcb0",
+    strip_prefix = "fmt-7.1.0",
+    urls = ["https://github.com/fmtlib/fmt/releases/download/7.1.0/fmt-7.1.0.zip"],
+)
+
+# hypothesis
+http_archive(
+    name = "hypothesis",
+    build_file = "//third_party:hypothesis.BUILD",
+    sha256 = "257a8448bfc28e04497169caeaea986d8cfeb6c3c116abaedc003c30b23fd645",
+    strip_prefix = "hypothesis-e165503f7d796d844d5d6ab69b5c7f839cf0ede8",
+    urls = ["https://github.com/wjakob/hypothesis/archive/e165503f7d796d844d5d6ab69b5c7f839cf0ede8.zip"],
 )
 
 # pugixml
@@ -165,10 +174,10 @@ llvm_register_toolchains()
 # rules_pkg
 http_archive(
     name = "rules_pkg",
-    sha256 = "aeca78988341a2ee1ba097641056d168320ecc51372ef7ff8e64b139516a4937",
+    sha256 = "6b5969a7acd7b60c02f816773b06fcf32fbe8ba0c7919ccdc2df4f8fb923804a",
     urls = [
-        "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.6-1/rules_pkg-0.2.6.tar.gz",
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.2.6/rules_pkg-0.2.6.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.3.0/rules_pkg-0.3.0.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.3.0/rules_pkg-0.3.0.tar.gz",
     ],
 )
 

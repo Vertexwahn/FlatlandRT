@@ -22,18 +22,15 @@ FLATLAND_BEGIN_NAMESPACE
 template <typename ScalarType>
 class SamplerType {
 public:
-    SamplerType() {
-        rng.seed(pcg_extras::seed_seq_from<std::random_device>());
-    }
-
-    SamplerType(unsigned  int seed) {
-        rng.seed(seed);
+    SamplerType(bool non_determistic_seed = true) {
+        if(non_determistic_seed)
+            rng.seed(pcg_extras::seed_seq_from<std::random_device>());
     }
 
     virtual ~SamplerType() {
     }
 
-    float next1d() {
+    ScalarType next1d() {
         return uniform_distribution(rng);
     }
 

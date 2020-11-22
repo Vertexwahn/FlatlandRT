@@ -102,7 +102,12 @@ TEST(RefractionGlassToVaccum, When_IncidentVectorIsCriticalAnglePlus5Degrees_The
 TEST(RefractionRayHitsSphere, When_RayHitsSphereStraight_Then_ExpectStraightRefraction) {
 	// Arrange
 	const Ray2f r(Point2f(0.0f, 100.0f), Vector2f(1.0f, 0.0f), 0.0f, 100.0f);
-	const Disk2f c(translate(Vector2f{100.0f, 100.0f}), 50.0f);
+
+	PropertySet ps;
+	ps.addProperty("radius", 50.0f);
+	ps.addProperty("transform", translate(Vector2f{100.0f, 100.0f}));
+
+	const Disk2f c{ps};
 
 	MediumEvent2f its;
 	c.intersect(r, its);
@@ -123,7 +128,11 @@ TEST(RefractionRayHitsSphere, When_RayHitsSphereStraight_Then_ExpectStraightRefr
 TEST(RefractionRayHitsSphere, When_RayHitsSphereStraightFromInside_Then_ExpectStraightRefraction) {
 	// Arrange
 	Ray2f r(Point2f(100.0f, 100.0f), Vector2f(1.0f, 0.0f), 0.0f, 100.0f);
-	Disk2f disk(translate(Vector2f{100.0f, 100.0f}), 50.0f);
+
+    PropertySet ps;
+    ps.addProperty("radius", 50.0f);
+    ps.addProperty("transform", translate(Vector2f{100.0f, 100.0f}));
+    Disk2f disk{ps};
 
 	MediumEvent2f its;
 	disk.intersect(r, its);
@@ -147,7 +156,11 @@ TEST(RefractionRayHitsAndExitsSphere, When_RayFromTopAt45Degrees_HitsSphere) {
 	SvgCanvas2f sc{800, 600};
 
 	Ray2f r{Point2f{50.0f, 200.0f}, Vector2f{1.0f, -1.0f}.normalized(), 0.0f, 500.0f};
-	Disk2f c{translate(Vector2f{100.0f, 100.0f}), 50.0f};
+
+	PropertySet ps;
+	ps.addProperty("radius", 50.0f);
+	ps.addProperty("transform", translate(Vector2f{100.0f, 100.0f}));
+	Disk2f c{ps};
 
 	sc.add(&c);
 

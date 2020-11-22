@@ -14,7 +14,7 @@ cc_binary(
     data = ["//scenes"],
     visibility = ["//visibility:public"],
     deps = [
-        "//srcs:Flatland",
+        "//srcs:flatland",
         "@tclap",
     ],
 )

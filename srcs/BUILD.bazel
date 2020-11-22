@@ -7,7 +7,7 @@
 """
 
 cc_library(
-    name = "Flatland",
+    name = "flatland",
     srcs = [
         "flatland/camera/camera.h",
         "flatland/camera/film.cpp",

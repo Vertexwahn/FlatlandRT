@@ -52,7 +52,11 @@ TEST(Scene, GivenSceneWithMultipleShapes_WhenRayHitsAllShapes_ThenClosesHit) {
 TEST(Scence, GivenRayThatHitsASceneWithDisk_ThenIntersectedDisk) {
     // Arrange
     auto transform = translate(Vector2f{100.0f, 100.0f});
-    auto disk = makeReferenceCounted<Disk2f>(transform, 25.0f);
+
+    PropertySet ps;
+    ps.addProperty("radius", 25.0f);
+    ps.addProperty("transform", transform);
+    auto disk = makeReferenceCounted<Disk2f>(ps);
 
     auto scene = makeReferenceCounted<Scene2f>();
     scene->addShape(disk);
@@ -83,7 +87,10 @@ TEST(Scene, WhenLoadingASceneWithARectangle_ThenSceneContainsARectangle) {
 
 TEST(Scene, TestShapeGetter) {
     Scene2f scene;
-    scene.addShape(makeReferenceCounted<Disk2f>(identity<float>(), 10.0f));
+    PropertySet ps;
+    ps.addProperty("radius", 10.0f);
+    ps.addProperty("transform", identity<float>());
+    scene.addShape(makeReferenceCounted<Disk2f>(ps));
 
     EXPECT_THAT(scene.getShapes().size(), 1u);
 }

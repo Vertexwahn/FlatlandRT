@@ -84,7 +84,12 @@ TEST(SvgCanvas, GivenASvgCanvasWithARectangle_WhenConvertingToString_ThenSvgRect
 TEST(SvgCanvas, GivenASvgCanvasWithADisk2f_WhenConvertingToString_ThenSvgCircleOutput) {
     // Arrange
 	SvgCanvas2f sc{800, 600};
-	Disk2f c{translate<float>(Point2f{100.0f,100.0f}), 3.0f};
+
+    PropertySet ps;
+    ps.addProperty("radius", 3.0f);
+    ps.addProperty("transform", translate(Vector2f{100.0f, 100.0f}));
+
+	Disk2f c{ps};
 	sc.add(&c);
 
 	// Act
@@ -131,7 +136,11 @@ TEST(SvgCanvas, When_DiskWithRedMaterial_Then_ExpectCicleWithRedFillAndBoderColo
 	blueMaterial->setStrokeWidth(3.0f);
 	blueMaterial->setFillColor(Color3f(1.0f, 1.0f, 1.0f));
 
-    Disk2f c(translate(Vector2f{200.0f, 200.0f}), 50.0f);
+    PropertySet ps;
+    ps.addProperty("radius", 50.0f);
+    ps.addProperty("transform", translate(Vector2f{200.0f, 200.0f}));
+
+    Disk2f c{ps};
     c.setMaterial(blueMaterial);
     sc.add(&c);
 

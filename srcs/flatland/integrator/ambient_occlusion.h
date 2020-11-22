@@ -46,13 +46,7 @@ public:
 
         ray.max_t = me.t;
         Base::canvas_->add(ray);
-        /*
-        //me.frame
-        //me.frame.toWorld();
-        */
-
-
-
+    
         for(int i = 0; i < sampleCount_; ++i) {
             auto a = static_cast<Scalar>(i+1);
             auto b = static_cast<Scalar>(sampleCount_ + 1);

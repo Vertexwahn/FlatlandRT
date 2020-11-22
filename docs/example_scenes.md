@@ -39,3 +39,11 @@
 ### ao.flatland.xml
 
 ![out](../scenes/ao_ref.svg)
+
+### bunny.ao.flatland.xml
+
+![out](../scenes/bunny.ao_ref.svg)
+
+### disk.ao.flatland.xml
+
+![out](../scenes/disk.ao_ref.svg)

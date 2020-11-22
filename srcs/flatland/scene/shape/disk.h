@@ -20,21 +20,24 @@ FLATLAND_BEGIN_NAMESPACE
 template <typename ScalarType>
 class Disk2 : public Shape2<ScalarType> {
 public:
-    Disk2(const Transform44Type<ScalarType> &transform, const ScalarType radius) : Shape2<ScalarType>(transform), radius_(radius) {
-    }
+    using Point = Point2<ScalarType>;
+    using Vector = Vector2<ScalarType>;
+    using Normal = Normal2<ScalarType>;
+    using Frame = Frame2<ScalarType>;
+    using Scalar = ScalarType;
 
-    Disk2(const PropertySet& ps) : Shape2<ScalarType>(ps) {
+    Disk2(const PropertySet& ps) : Shape2<Scalar>(ps) {
         auto radius = ps.getProperty<float>("radius");
         radius_ = radius;
     }
 
-    bool intersect(const Ray2<ScalarType> &ray, MediumEvent2<ScalarType> &me) const override {
-        Point2<ScalarType> intersectionPoint;
-        Normal2<ScalarType> normal;
+    bool intersect(const Ray2<Scalar> &ray, MediumEvent2<Scalar> &me) const override {
+        Point intersectionPoint;
+        Normal normal;
         float distance;
 
-        Point2<ScalarType> center{ScalarType{0.0},ScalarType{0.0}};
-        center = Shape2<ScalarType>::transform_ * center;
+        Point center{Scalar{0.0},Scalar{0.0}};
+        center = Shape2<Scalar>::transform_ * center;
         bool bHit = intersectRayCircle(ray.origin,
                                        ray.direction,
                                        center,
@@ -47,6 +50,7 @@ public:
         me.p = intersectionPoint;
         me.n = normal;
         me.material = Shape2<ScalarType>::material_.get();
+        me.frame = Frame{normal, Vector{normal.y(), -normal.x()}};
 
         return bHit;
     }
@@ -54,17 +58,17 @@ public:
     std::string convertToSvg(const int svgCanvasWidth, const int svgCanvasHeight) const override {
         std::stringstream ss;
 
-        Point2<ScalarType> center{ScalarType{0.0}, ScalarType{0.0}};
-        center = Shape2<ScalarType>::getTransform() * center;
+        Point center{Scalar{0.0}, Scalar{0.0}};
+        center = Shape2<Scalar>::getTransform() * center;
 
         ss << "<circle cx=\"" << center.x() << "\" cy=\"" << svgCanvasHeight - center.y() << "\" r=\""
            << getRadius()
            << "\"";
 
-        ReferenceCounted<Material> material = Shape2<ScalarType>::getMaterial();
+        ReferenceCounted<Material> material = Shape2<Scalar>::getMaterial();
         if (material) {
             ss << " ";
-            ss << Shape2<ScalarType>::convertMaterialToSvgStyle(material.get());
+            ss << Shape2<Scalar>::convertMaterialToSvgStyle(material.get());
         }
 
         ss << ">";
@@ -73,15 +77,16 @@ public:
         return ss.str();
     }
 
-    ScalarType getRadius() const {
+    Scalar getRadius() const {
         return radius_;
     }
 
 private:
-    ScalarType radius_;
+    Scalar radius_;
 };
 
 using Disk2f = Disk2<float>;
+using Disk2d = Disk2<double>;
 
 FLATLAND_END_NAMESPACE
 

@@ -31,9 +31,9 @@ cc_library(
             "Eigen/SparseLU",
         ],
     ),
-    includes=["."],
     defines = [
         "EIGEN_MPL_ONLY",
         "EIGEN_NO_DEBUG",
     ],
+    includes = ["."],
 )

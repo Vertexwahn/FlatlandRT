@@ -24,7 +24,13 @@ FLATLAND_BEGIN_NAMESPACE
 template <typename ScalarType>
 class Polygon2 : public Shape2<ScalarType> {
 public:
-	Polygon2(const Transform44Type<ScalarType>& transform, const Point2<ScalarType> *points, const size_t pointCount)  : Shape2<ScalarType>(
+    using Point = Point2<ScalarType>;
+    using Vector = Vector2<ScalarType>;
+    using Normal = Normal2<ScalarType>;
+    using Frame = Frame2<ScalarType>;
+    using Scalar = ScalarType;
+
+	Polygon2(const Transform44Type<ScalarType>& transform, const Point *points, const size_t pointCount)  : Shape2<ScalarType>(
             transform) {
         std::copy(&points[0], &points[pointCount], std::back_inserter(points_));
 
@@ -32,7 +38,7 @@ public:
             throw std::runtime_error("Points not counter clock wise");
     }
 
-    Polygon2(const PropertySet& ps) : Shape2<ScalarType>(ps) {
+    Polygon2(const PropertySet& ps) : Shape2<Scalar>(ps) {
         std::string filename = ps.getProperty<std::string>("filename");
 
         std::stringstream ss;
@@ -70,11 +76,13 @@ public:
                     me.p = intersectionPoint;
                     me.t = t;
                     me.n = n;
+                    me.frame = Frame{n, Vector{n.y(), -n.x()}};
                 } else {
                     if (t < me.t) {
                         me.p = intersectionPoint;
                         me.t = t;
                         me.n = n;
+                        me.frame = Frame{n, Vector{n.y(), -n.x()}};
                     }
                 }
             }
@@ -85,6 +93,8 @@ public:
             me.n = Shape2<ScalarType>::transform_ * me.n;
             me.n.normalize();
             me.material = Shape2<ScalarType>::material_.get();
+            me.frame.normal = Shape2<ScalarType>::transform_ * me.frame.normal;
+            me.frame.tangent = Shape2<ScalarType>::transform_ * me.frame.tangent;
         }
 
         return hit;

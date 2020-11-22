@@ -38,6 +38,14 @@ Point2<ScalarType> warpUniformSquareToConcentricDisk(const Point2<ScalarType> &s
 }
 
 template <typename ScalarType>
+ScalarType warpUniformSquareToConcentricDiskPdf(const Point2<ScalarType> &p) {
+    if (p.x() * p.x() + p.y() * p.y() <= 1)
+        return ScalarType{1} / ScalarType{M_PI};
+    else
+        return ScalarType{0};
+}
+
+template <typename ScalarType>
 Vector2<ScalarType> rotatedUnitVector(const ScalarType radian) {
     ScalarType x = cos(radian);
     ScalarType y = sin(radian);

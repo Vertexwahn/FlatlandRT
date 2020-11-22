@@ -12,7 +12,8 @@ def cc_test_flatland(name, srcs, additional_deps = [], **kwargs):
         timeout = "short",
         srcs = srcs,
         deps = [
-            "//srcs:Flatland",
+            "//srcs:flatland",
+            "@hypothesis//:hypothesis",
             "@googletest//:gtest_main",
         ],
         **kwargs

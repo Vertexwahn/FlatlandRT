@@ -20,33 +20,17 @@ TEST(Disk2f, GivenDiskCenterAndRadius_WhenInitializing_ThenInitializedDisk) {
     auto diskCenter = Vector2f{100.0f, 100.0f};
     auto transform = translate(diskCenter);
 
+    PropertySet ps;
+    ps.addProperty("radius", diskRadius);
+    ps.addProperty("transform", transform);
+
     // Act
-    Disk2f disk{transform, diskRadius};
+    Disk2f disk{ps};
 
     // Assert
     EXPECT_THAT(disk.getTransform().getMatrix()(0,3), diskCenter.x());
     EXPECT_THAT(disk.getTransform().getMatrix()(1,3), diskCenter.y());
     EXPECT_THAT(disk.getRadius(), diskRadius);
-}
-
-TEST(Disk2f, GivenDiskAndRay_WhenRayIntesectsDisk_ThenIntersectionIsValid) {
-    // Arrange
-    auto diskCenter = Vector2f(100.0f, 100.0f);
-    auto diskRadius = 25.0f;
-    auto transform = translate(diskCenter);
-
-    Disk2f disk{transform, diskRadius};
-
-    Point2f rayOrigin{0.0f, 100.0f};
-    Vector2f rayDirection{1.0f, 0.0f};
-    Ray2f ray{rayOrigin, rayDirection, 0.0f, 10000.0f};
-
-    // Act
-    MediumEvent2f its;
-    auto hit = disk.intersect(ray, its);
-
-    // Assert
-    EXPECT_TRUE(hit);
 }
 
 // Trivial hit
@@ -56,7 +40,11 @@ TEST(Disk2f, GivenADiskAndRay_WhenRayIntesectsDisk_ThenIntersectionOnDisk) {
     auto diskRadius = 25.0f;
     auto transform = translate(diskCenter);
 
-    Disk2f disk{transform, diskRadius};
+    PropertySet ps;
+    ps.addProperty("radius", diskRadius);
+    ps.addProperty("transform", transform);
+
+    Disk2f disk{ps};
 
     Point2f rayOrigin{0.0f, 100.0f};
     Vector2f rayDirection{1.0f, 0.0f};
@@ -68,6 +56,11 @@ TEST(Disk2f, GivenADiskAndRay_WhenRayIntesectsDisk_ThenIntersectionOnDisk) {
 
     // Assert
     EXPECT_TRUE(hit);
+
+    EXPECT_THAT(its.frame.normal.x(), testing::FloatEq(-1.0f));
+    EXPECT_THAT(its.frame.normal.y(), testing::FloatEq(0.0f));
+    EXPECT_THAT(its.frame.tangent.x(), testing::FloatEq(0.0f));
+    EXPECT_THAT(its.frame.tangent.y(), testing::FloatEq(1.0f));
 }
 
 // Trivial miss
@@ -77,7 +70,11 @@ TEST(Disk2f, GivenADiskAndRay_WhenRayMissesDisk_ThenNoIntersectionOnDisk) {
     auto diskRadius = 25.0f;
     auto transform = translate(diskCenter);
 
-    Disk2f disk{transform, diskRadius};
+    PropertySet ps;
+    ps.addProperty("radius", diskRadius);
+    ps.addProperty("transform", transform);
+
+    Disk2f disk{ps};
 
     Point2f rayOrigin{0.0f, 0.0f};
     Vector2f rayDirection{1.0f, 0.0f};
@@ -101,8 +98,16 @@ TEST(Disk2f, GivenTwoDisksAndRay_WhenRayIntesectsBothDisks_ThenIntersectionOnBot
     auto transform1 = translate(diskCenter1);
     auto transform2 = translate(diskCenter2);
 
-    Disk2f disk1{transform1, diskRadius};
-    Disk2f disk2{transform2, diskRadius};
+    PropertySet ps1;
+    ps1.addProperty("radius", diskRadius);
+    ps1.addProperty("transform", transform1);
+
+    PropertySet ps2;
+    ps2.addProperty("radius", diskRadius);
+    ps2.addProperty("transform", transform2);
+
+    Disk2f disk1{ps1};
+    Disk2f disk2{ps2};
 
     Point2f rayOrigin{0.0f, 100.0f};
     Vector2f rayDirection{1.0f, 0.0f};
@@ -124,7 +129,12 @@ TEST(Disk2f, GivenADiskAndRay_WhenRayStartsInsideDisk_ThenInnerIntersection) {
     Point2f diskCenter{100.0f, 100.0f};
     Ray2f ray{diskCenter, Vector2f{1.0f, 0.0f}, 0.0f, 100.0f};
     auto transform = translate<float>(diskCenter);
-    Disk2f disk{transform, 50.0f};
+
+    PropertySet ps;
+    ps.addProperty("radius", 50.0f);
+    ps.addProperty("transform", transform);
+
+    Disk2f disk{ps};
 
     // Act
     MediumEvent2f its;
@@ -139,7 +149,12 @@ TEST(Disk2f, GivenADiskAndRay_WhenRayRefracts_ThenInnerIntersection) {
     // Arrange
     Ray2f ray{Point2f{0.0f, 100.0f}, Vector2f{1.0f, 0.0f}, 0.0f, 100.0f};
     auto transform = translate<float>(Point2f{100.0f, 100.0f});
-    Disk2f disk{transform, 50.0f};
+
+    PropertySet ps;
+    ps.addProperty("radius", 50.0f);
+    ps.addProperty("transform", transform);
+
+    Disk2f disk{ps};
 
     // Act
     MediumEvent2f its;
@@ -175,7 +190,12 @@ TEST(Disk2f, GivenADiskAndARay_WhenRayIntersectsSphere_ThenValidNormal) {
     };
     constexpr int rayCount = sizeof(rays)/ sizeof(Ray2f);
     auto transform = identity<float>();
-    Disk2f disk{transform, 1.0f};
+
+    PropertySet ps;
+    ps.addProperty("radius", 1.0f);
+    ps.addProperty("transform", transform);
+
+    Disk2f disk{ps};
 
     // Act
     MediumEvent2f its[rayCount];

@@ -45,7 +45,7 @@ cc_test(
     ],
     defines = ["CATCH_CONFIG_MAIN"],
     deps = [
-        "//srcs:Flatland",
+        "//srcs:flatland",
         "@catch2",
     ],
 )

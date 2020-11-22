@@ -29,8 +29,8 @@ protected:
     ReferenceCounted<Polygon2f> polygon = nullptr;
 };
 
-TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayIntesectsPolygon_ThenIntersectionOnPolygon)
-{
+TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayIntesectsPolygon_ThenIntersectionOnPolygon) {
+    // Arrange
     Point2f rayOrigin{0.0f, 100.0f};
     Vector2f rayDirection{1.0f, 0.0f};
     Ray2f ray{rayOrigin, rayDirection, 0.0f, 10000.0f};
@@ -41,10 +41,14 @@ TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayIntesectsPolygon_ThenIntersecti
 
     // Assert
     EXPECT_TRUE(hit);
+
+    EXPECT_THAT(me.frame.normal.x(), testing::FloatEq(-1.0f));
+    EXPECT_THAT(me.frame.normal.y(), testing::FloatEq(0.0f));
+    EXPECT_THAT(me.frame.tangent.x(), testing::FloatEq(0.0f));
+    EXPECT_THAT(me.frame.tangent.y(), testing::FloatEq(1.0f));
 }
 
-TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayMissesPolygon_ThenNoIntersectionOnPolygon)
-{
+TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayMissesPolygon_ThenNoIntersectionOnPolygon) {
     Point2f rayOrigin{0.0f, 0.0f};
     Vector2f rayDirection{1.0f, 0.0f};
     Ray2f ray{rayOrigin, rayDirection, 0.0f, 10000.0f};

@@ -14,8 +14,10 @@ filegroup(
     name = "scenes",
     srcs = [
         "ao.flatland.xml",
+        "bunny.ao.flatland.xml",
         "bunny.flatland.xml",
         "bunny_coords.ply",
+        "disk.ao.flatland.xml",
         "disk.flatland.xml",
         "gradient_refractive_index.flatland.xml",
         "mirror.flatland.xml",
@@ -29,7 +31,9 @@ filegroup(
     name = "reference_images",
     srcs = [
         "ao_ref.svg",
+        "bunny.ao_ref.svg",
         "bunny_ref.svg",
+        "disk.ao_ref.svg",
         "disk_ref.svg",
         "mirror_ref.svg",
         "mirrors_ref.svg",

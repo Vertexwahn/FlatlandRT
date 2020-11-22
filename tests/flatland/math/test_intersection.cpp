@@ -107,7 +107,12 @@ TEST(Intersection2f, Ray2CircleIntersection) {
     float length = 100.0f;
 
     Ray2f r(Point2f(0.0f, 100.0f), Vector2f(1.0f, 0.0f), 0.0f, length);
-    Disk2f c(translate(Vector2f{100.0f, 100.0f}), 50.0f);
+
+    PropertySet ps;
+    ps.addProperty("radius", 50.0f);
+    ps.addProperty("transform", translate(Vector2f{100.0f, 100.0f}));
+
+    Disk2f c{ps};
 
     MediumEvent2f its;
     bool hit = c.intersect(r, its);

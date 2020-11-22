@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="600" baseProfile="full" version="1.1" viewBox="0 0 800 600">
+    <defs>
+    <marker id="arrow_head" markerHeight="8" markerWidth="8" orient="auto" refX="0.125" refY="3" viewBox="0 0 5 6">
+             <path fill="rgb(242, 101, 34)" d="M0,0 V6 L5,3 Z"/>
+    </marker>
+     </defs>
+    <rect width="100%" height="100%" fill="white"/>
+    <g transform="scale(1, 1)"><circle cx="400" cy="300" r="100" style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)"></circle>
+<line x1="50.001" y1="300" x2="280.5" y2="300" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.997" y1="299.99" x2="277.318" y2="222.751" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.995" y1="299.992" x2="256.473" y2="232.271" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.992" y1="299.993" x2="239.155" y2="247.277" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.991" y1="299.996" x2="226.766" y2="266.555" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.99" y1="299.999" x2="220.309" y2="288.542" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.99" y1="300.001" x2="220.309" y2="311.458" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.991" y1="300.004" x2="226.766" y2="333.445" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.992" y1="300.007" x2="239.155" y2="352.723" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.995" y1="300.008" x2="256.473" y2="367.729" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+<line x1="299.997" y1="300.01" x2="277.318" y2="377.249" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+</g>
+      </svg>
