@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+
+    The scene file format schema is the same as used in Mitsuba Renderer 2
+    (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
+-->
+<!-- https://github.com/mmp/pbrt-v3/blob/master/scenes/killeroo-simple.pbrt -->
+<scene>
+	<sensor>
+		<film>
+			<integer name="width" value="800" />
+			<integer name="height" value="600" />
+			<string name="filename" value="disk.ao.svg" />
+		</film>
+
+		<transform>
+			<lookat origin="50, 300" target="600, 300" />
+		</transform>
+	</sensor>
+
+	<integrator type="ambient_occlusion" />
+	
+	<shape type="disk">
+		<float name="radius" value="100" />
+
+		<transform>
+			<translate x="400" y="300" />
+		</transform>
+
+		<material>
+			<color name="stroke_color" value="0.0, 0.682, 0.937" />
+			<float name="stroke_width" value="3.0" />
+			<color name="fill_color" value="1.0, 1.0, 1.0" />
+			<float name="refraction_index" value="1.0" />
+			<string name="interface_interaction" value= "specular_transmission" />
+		</material>
+	</shape>
+</scene>

@@ -1,36 +1,61 @@
-[![deepcode](https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6IlZlcnRleHdhaG4iLCJyZXBvMSI6IkZsYXRsYW5kUlQiLCJpbmNsdWRlTGludCI6ZmFsc2UsImF1dGhvcklkIjoyMTM3NywiaWF0IjoxNjAwMjgxMDc4fQ.tB-4Y4PqbWI76ly-bpNjlxDXGQG1oyPjtjq2w3m6gtA)](https://www.deepcode.ai/app/gh/Vertexwahn/FlatlandRT/_/dashboard?utm_content=gh%2FVertexwahn%2FFlatlandRT) [![Build Status](https://vertexwahn.visualstudio.com/FlatlandRT/_apis/build/status/Vertexwahn.FlatlandRT?branchName=master)](https://vertexwahn.visualstudio.com/FlatlandRT/_build/latest?definitionId=6&branchName=master)
+<!--
+SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+SPDX-License-Identifier: Apache-2.0
+-->
+
+[![Build Status](https://vertexwahn.visualstudio.com/FlatlandRT/_apis/build/status/Vertexwahn.FlatlandRT?branchName=master)](https://vertexwahn.visualstudio.com/FlatlandRT/_build/latest?definitionId=6&branchName=master)
 
 # FlatlandRT
-
-[TOC]
 
 ## Description
 
 FlatlandRT is a 2D ray tracer visualization tool.
-See the [user manual](docs/user_manual.md) if you want to find out how to use it. 
+The following pictures were created using Flatland:
 
-![out](docs/header.svg)
+From left to right: Refraction, ambient occulsion and reflection:
 
-More examples scene can be found [here](docs/example_scenes.md).
+![Refraction, ambient occulusion and reflection](docs/images/header.svg)
+
+Quadtree intersection of 2d triangle meshes:
+
+![Quadtree](docs/images/quadtree.svg)
+
+More examples scenes can be found [here](devertexwahn/flatland/docs/example_scenes.md).
+See the [user manual](devertexwahn/flatland/docs/user_manual.md) if you want to find out how to use it. 
 
 ## Quick start
 
-Flatland uses [Bazel](https://bazel.build/) as build system.
+This project uses [Bazel](https://bazel.build/) as a build system. The current used version is defined in [.bazelversion](devertexwahn/.bazelversion).
 
-You can use FlatlandRT by invoking the following Bazel command.
+You can use Flatland by invoking the following Bazel command.
 
-*Render scene with Windows*
+*Render a scene with Windows 10/11 x64 with Visual Studio 2019/2022:*
 
 ```bash
-# When running Windows 10:
-bazel run --config=windows10_x64 //srcs/flatland.cli:flatland C:\scenes\bunny.flatland.xml
+git clone https://github.com/Vertexwahn/FlatlandRT
+cd FlatlandRT
+cd devertexwahn # switch to the location where the WORKSPACE file is located
+bazel --output_base=C:/bazel_output_base  run --config=vs2022 //flatland/cli:flatland.cli C:\scenes\bunny.flatland.xml
 ```
 
-*Render scene with Linux*
+For more hints on how to use Bazel on Windows have a look at the [Bazel on Windows](https://docs.google.com/document/d/17YIqUdffxpwcKP-0whHM6TFELN8VohTpjiiEIbbRfts/edit?usp=sharing) document.
+
+*Render a scene with Linux (e.g. Ubunutu 20.04):*
 
 ```bash
-# When running Ubuntu 18.04
-bazel run --config=ubuntu20_04_x64 //srcs/flatland.cli:flatland -- ~/Flatland/scenes/bunny.flatland.xml
+git clone https://github.com/Vertexwahn/FlatlandRT
+cd FlatlandRT
+cd devertexwahn # switch to the location where the WORKSPACE file is located
+bazel run --config=gcc9 //flatland/cli:flatland.cli -- $(pwd)/flatland/scenes/bunny/bunny.flatland.xml
+```
+
+*Render a scene with macOS:*
+
+```bash
+git clone https://github.com/Vertexwahn/FlatlandRT
+cd FlatlandRT
+cd devertexwahn # switch to the location where the WORKSPACE file is located
+bazel run --config=macos //flatland/cli:flatland.cli -- $(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
 ## Building
@@ -40,12 +65,14 @@ bazel run --config=ubuntu20_04_x64 //srcs/flatland.cli:flatland -- ~/Flatland/sc
 #### Command line (bash/zsh)
 
 ```bash
-# Run all tests
-bazel test --config=ubuntu20_04_x64 //...
-# Build all targets
-bazel build --config=ubuntu20_04_x64 //... 
-# Test using LLVM
-bazel test --config=ubuntu20_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
+# Run all tests using GCC 9.3
+bazel test --config=gcc9 //...
+# Build all targets uing GCC 9.3
+bazel build --config=gcc9 //... 
+# Run all tests using Clang 13
+bazel test --config=clang13 //...
+# Build all targets uing Clang 13
+bazel build --config=clang13 //... 
 ```
 
 #### CLion
@@ -59,7 +86,7 @@ directories:
   .
 
 test_sources:
-  tests
+  flatland/tests
 
 derive_targets_from_directories: true
 
@@ -67,62 +94,77 @@ additional_languages:
   python
 
 build_flags:
-  --config=ubuntu20_04_x64
+  --config=gcc9
 ```
 
-#### Ubuntu 20 and LLVM
+#### Code coverage
 
-Bazel supports different toolchains. 
-Usually gcc is used a C++ default compiler when using Ubuntu 20.
-But you can also easily use LLVM to compile Flatland.
+Make sure that lcov is installed.
 
-    # Build with LLVM
-    bazel build --config=ubuntu20_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
-    # Test with LLVM
-    bazel test --config=ubuntu20_04_x64_llvm --crosstool_top=@llvm_toolchain//:toolchain //...
+    sudo apt install lcov
+
+Go to the directory that contains the `WORKSPACE` file and execute:
+
+```bash
+./coverage.sh buchgr_remote_cache
+xdg-open coverage_report/index.html
+```
+
+#### Address Sanitizer
+
+There is a build config called `asan` that can be used for detection memory errors.
+
+    bazel run --config=asan --compilation_mode=opt //flatland/cli:flatland.cli --  $(pwd)/flatland/scenes/sphere.flatland.xml
+
+#### Clang Tidy
+
+    bazel build --config=clang-tidy //flatland/core/...
 
 ### Building with Windows
 
 #### Command line (Powershell)
 
-    # Build with Visual Studio 2019 C++ Compiler
-    bazel build --config=windows10_x64 //...
+    # Build with Visual Studio C++ Compiler
+    bazel build --config=vs2022 //...
 
-#### Using Visual Studio 2019
+#### Using Visual Studio
 
 Use [Lavender](https://github.com/tmandry/lavender) to generate a solution and project files for Visual Studio.
 
 ```bash
-python3 D:\dev\lavender\generate.py --config=windows10_x64  //...
+python3 G:\dev\lavender\generate.py --config=vs2022  //...
 ```
 
 Lavender is far from being perfect. 
 It might be necessary to do some modifications to the generated solution and project files.
 
-## Coding process
+## Development process
 
 I made a short video where I describe how I use test driven development to implement this project: 
 [![Let's Code: Using Test-driven Development to implement a ray tracer](https://img.youtube.com/vi/vFBXNr952nU/0.jpg)](https://www.youtube.com/watch?v=vFBXNr952nU)
 
 ## License
 
-See (LICENSE.md)[LICENSE.md].
+The source code of FlatlandRT itself is under the Apache License 2.0 (see [LICENSE](LICENSE)).
+The license of its third-party dependencies or some third-party code fragments can and is under different license terms. See copyright notes in the next section.
 
 ## Copyright notes
 
-FlatlandRT makes use of several software libraries. 
-Besides this, 
-some source code was directly copied from other open-source software libraries or programs. 
-This is always clearly stated as a comment in the source code of Flatland. 
-The corresponding licenses can be found in the Licenses folder distributed with this source code:
+FlatlandRT makes use of several software libraries.
+Some tools and libraries were copied to this repository (see `third_party` folder).
+The corresponding licenses can be found in the `third_party` folder of this repository.
+Besides this,
+some source code was directly copied from other open-source software libraries or programs.
+This is always clearly stated as a comment in the source code of FlatlandRT.
+If you find any copyright or license violations or issues please let me know.
 
 ### Copied source code/ideas
 
-* Mitsuba Renderer 2 (https://github.com/mitsuba-renderer/mitsuba2) (scene file format) ([License](licenses/mitsuba2/LICENSE))
-* Seurat (https://github.com/googlevr/seurat) (third party Bazel dependency for Eigen, i.e. eigen.BUILD) ([License](licenses/seurat/LICENSE))
-* envoy (https://github.com/glasnostic/envoy) (third party Bazel dependency for tclap, i.e. tclap.BUILD)  ([License](licenses/envoy/LICENSE))
-* pbrt, Version 3 (https://github.com/mmp/pbrt-v3) (Refract, Faceforward functions) ([License](licenses/pbrt-v3/LICENSE.txt))
-* pbrt, Version 4 (https://github.com/mmp/pbrt-v4) (concentric sampling of unit disk) ([License](licenses/pbrt-v4/LICENSE.txt))
+* Mitsuba Renderer 2 (https://github.com/mitsuba-renderer/mitsuba2) (scene file format) ([License](devertexwahn/flatland/LICENSES/mitsuba2/LICENSE))
+* envoy (https://github.com/glasnostic/envoy) (third party Bazel dependency for tclap, i.e. tclap.BUILD)  ([License](devertexwahn/flatland/LICENSES/envoy/LICENSE))
+* pbrt, Version 3 (https://github.com/mmp/pbrt-v3) (Refract, face_forward functions) ([License](devertexwahn/flatland/LICENSES/pbrt-v3/LICENSE.txt))
+* pbrt, Version 4 (https://github.com/mmp/pbrt-v4) (concentric sampling of unit disk) ([License](devertexwahn/flatland/LICENSES/pbrt-v4/LICENSE.txt))
+* bazel_clang_tidy (https://github.com/erenon/bazel_clang_tidy) (almost everything) ([License](devertexwahn/flatland/LICENSES/bazel_clang_tidy/LICENSE))
 
 ### Build related
 
@@ -130,18 +172,32 @@ The corresponding licenses can be found in the Licenses folder distributed with 
 
 ### Third party dependencies
 
-* {fmt} (https://github.com/fmtlib/fmt) (third party dependency) ([License](licenses/fmt/LICENSE.rst))
-* Boost (https://www.boost.org/) (third party dependency) ([License](licenses/boost/LICENSE))
-* catch2 (https://github.com/catchorg/Catch2) (third party dependency) ([License](licenses/catch2/LICENSE.txt))
-* gflags (https://github.com/gflags/gflags/) (third party dependency) ([License](licenses/gflags/COPYING.txt))
-* glog (https://github.com/google/glog) (third party dependency) ([License](licenses/glog/COPYING))
-* Google Test (https://github.com/google/googletest) (third party dependency) ([License](licenses/googletest/LICENSE))
-* hypothesis (https://github.com/wjakob/hypothesis) (third party dependency) ([License](licenses/hypothesis/LICENSE))
-* pcg-cpp (https://github.com/imneme/pcg-cpp/)  (third party dependency) ([License](licenses/pcg-cpp/LICENSE-MIT.txt))
-* pugixml (https://pugixml.org/, https://github.com/zeux/pugixml) (third party dependency) ([License](licenses/pugixml/LICENSE.md))
-* TCLAP - Templatized Command Line Argument Parser (https://github.com/mirror/tclap) ([License](licenses/tclap/COPYING))
-* yaml-cpp (https://github.com/jbeder/yaml-cpp) (third party dependency) ([License](licenses/yaml-cpp/LICENSE))
+* Boost (https://www.boost.org/) (third party dependency) ([License](devertexwahn/flatland/LICENSES/boost/LICENSE))
+* Catch2 (https://github.com/catchorg/Catch2) (see `third_party` folder)
+* Eigen 3.4.0 (see `third_party` folder)
+* Google Test (https://github.com/google/googletest) (see `third_party` folder)
+* Imath 3.1.4 (see `third_party` folder)
+* LLVM toolchain for Bazel (see `third_party` folder)
+* OpenEXR (see `third_party` folder)
+* TCLAP - Templatized Command Line Argument Parser (https://github.com/mirror/tclap)  (see `third_party` folder)
+* gflags (https://github.com/gflags/gflags/) (see `third_party` folder)
+* glog (https://github.com/google/glog) (see `third_party` folder)
+* hypothesis (https://github.com/wjakob/hypothesis) (see `third_party` folder)
+* libpng-1.6.37 (https://github.com/wjakob/hypothesis) (see `third_party` folder)
+* pcg-cpp (https://github.com/imneme/pcg-cpp/)  (see `third_party` folder)
+* pugixml (https://pugixml.org/, https://github.com/zeux/pugixml) (third party dependency) (see `third_party` folder)
+* rules_boost (see `third_party` folder)
+* rules_pkg (see `third_party` folder)
+* yaml-cpp (https://github.com/jbeder/yaml-cpp) (third party dependency) ([License](devertexwahn/flatland/LICENSES/yaml-cpp/LICENSE))
+* zlib 1.2.11 (https://zlib.net/) ([License](devertexwahn/flatland/LICENSES/third_party/zlib-1.2.11/README))
+* {fmt} (https://github.com/fmtlib/fmt) (see `third_party` folder)
 
 ### Artwork
 
-The Stanford Bunny was derived from the Stanford Bunny provided here: http://graphics.stanford.edu/data/3Dscanrep/#bunny)
+The Stanford Bunny was derived from the Stanford Bunny provided from the Stanford 3D Scanning Repository (see [here](http://graphics.stanford.edu/data/3Dscanrep/#bunny)).
+
+The data for the Donut, Armadillo and Stanford Bunny for the 2D triangle data was derived from https://github.com/mmacklin/sandbox. 
+
+### Credits
+
+A big thank goes to all the providers, developers and maintainers of the aforementioned artifacts.

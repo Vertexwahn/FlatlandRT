@@ -1,0 +1,23 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "film",
+    hdrs = ["film.h"],
+    deps = ["//flatland/core:namespace"],
+)
+
+cc_library(
+    name = "sensor",
+    hdrs = ["sensor.h"],
+    deps = [
+        "//flatland/core:namespace",
+        "//flatland/core:object",
+        "//flatland/math:transform",
+        "//flatland/rendering:property_set",
+    ],
+)

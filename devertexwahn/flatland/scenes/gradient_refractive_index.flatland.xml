@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+
+    The scene file format schema is the same as used in Mitsuba Renderer 2
+    (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
+-->
+<scene>
+    <sensor>
+        <film>
+            <integer name="width" value="600" />
+            <integer name="height" value="700" />
+            <string name="filename" value="gradient_refractive_index.svg" />
+        </film>
+
+        <transform>
+            <lookat origin="0, 320" target="300, 300" />
+        </transform>
+    </sensor>
+
+    <integrator type="path_specular_transmission">
+        <integer name="max_depth" value="20"/>
+    </integrator>
+
+    <shape type="rectangle">
+        <float name="width" value="20" />
+        <float name="height" value="250" />
+
+        <transform>
+            <translate x="300" y="320" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <shape type="rectangle">
+        <float name="width" value="20" />
+        <float name="height" value="250" />
+
+        <transform>
+            <translate x="320" y="320" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <shape type="rectangle">
+        <float name="width" value="20" />
+        <float name="height" value="250" />
+
+        <transform>
+            <translate x="340" y="320" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <shape type="rectangle">
+        <float name="width" value="20" />
+        <float name="height" value="250" />
+
+        <transform>
+            <translate x="360" y="320" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <shape type="rectangle">
+        <float name="width" value="20" />
+        <float name="height" value="250" />
+
+        <transform>
+            <translate x="380" y="320" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <shape type="rectangle">
+        <float name="width" value="20" />
+        <float name="height" value="250" />
+
+        <transform>
+            <translate x="400" y="320" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <shape type="rectangle">
+        <float name="width" value="20" />
+        <float name="height" value="250" />
+
+        <transform>
+            <translate x="421" y="320" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+</scene>

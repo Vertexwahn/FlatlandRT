@@ -1,0 +1,8 @@
+#
+#   SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+
+# Local buchgr remote cache
+build:buchgr_remote_cache --remote_cache=http://localhost:9090

@@ -1,0 +1,46 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "load_scene",
+    srcs = ["load_scene.cpp"],
+    hdrs = ["load_scene.h"],
+    deps = [
+        ":load_scene_exception",
+        "//flatland/core:object_factory",
+        "//flatland/rendering/integrator:ambient_occlusion",
+        "//flatland/rendering/integrator:path_mirror_reflection",
+        "//flatland/rendering/integrator:path_specular_transmission",
+        "//flatland/rendering/intersector:brute_force_intersector",
+        "//flatland/rendering/intersector:quadtree_intersector",
+        "//flatland/rendering/scene/shape:disk",
+        "//flatland/rendering/scene/shape:rectangle",
+        "//flatland/rendering/scene/shape:triangle_mesh",
+        "//flatland/rendering/scene",
+        "@pugixml",
+    ],
+)
+
+cc_library(
+    name = "load_scene_exception",
+    srcs = ["load_scene_exception.cpp"],
+    hdrs = ["load_scene_exception.h"],
+    deps = ["//flatland/core:namespace"],
+)
+
+cc_library(
+    name = "scene",
+    hdrs = ["scene.h"],
+    deps = [
+        "//flatland/rendering:sampler",
+        "//flatland/rendering/canvas:label",
+        "//flatland/rendering/integrator",
+        "//flatland/rendering/intersector",
+        "//flatland/rendering/scene/shape",
+        "//flatland/rendering/sensor",
+    ],
+)

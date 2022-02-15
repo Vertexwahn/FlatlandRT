@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+
+    The scene file format schema is the same as used in Mitsuba Renderer 2
+    (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
+-->
+<scene>
+    <sensor>
+        <film>
+            <integer name="width" value="800" />
+            <integer name="height" value="600" />
+            <string name="filename" value="bunny.svg" />
+        </film>
+
+        <transform>
+            <lookat origin="200, 500" target="400, 300" />
+        </transform>
+    </sensor>
+
+    <integrator type="path_specular_transmission">
+        <integer name="max_depth" value="7"/>
+    </integrator>
+
+    <shape type="polygon">
+        <transform>
+            <!-- <rotate z="30" /> -->
+            <scale x="3" y="3" />
+            <translate x="400" y="300" />
+        </transform>
+
+        <string name="filename" value="bunny_coords.ply"/>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3.0" />
+            <color name="fill_color" value="1.0, 1.0, 1.0" />
+            <string name="interface_interaction" value= "specular_transmission" />
+        </material>
+    </shape>
+</scene>

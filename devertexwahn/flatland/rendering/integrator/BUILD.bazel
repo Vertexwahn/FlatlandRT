@@ -1,0 +1,92 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "ambient_occlusion",
+    hdrs = ["ambient_occlusion.h"],
+    deps = [
+        "//flatland/core:namespace",
+        "//flatland/math:warping",
+        "//flatland/rendering/integrator",
+    ],
+)
+
+cc_test(
+    name = "ambient_occlusion_test",
+    srcs = [
+        "ambient_occlusion_test.cpp",
+    ],
+    data = ["//flatland/scenes"],
+    deps = [
+        "//flatland/rendering",
+        "//flatland/rendering/integrator:ambient_occlusion",
+        "//flatland/rendering/scene:load_scene",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "integrator",
+    srcs = ["integrator.h"],
+    deps = [
+        "//flatland/core:logging",
+        "//flatland/core:object",
+        "//flatland/imaging:color",
+        "//flatland/rendering:sampler",
+        "//flatland/rendering/canvas:svg_canvas",
+    ],
+)
+
+cc_library(
+    name = "path_mirror_reflection",
+    hdrs = ["path_mirror_reflection.h"],
+    deps = [
+        "//flatland/math:refract",
+        "//flatland/rendering/integrator",
+    ],
+)
+
+cc_test(
+    name = "path_mirror_reflection_test",
+    srcs = [
+        "path_mirror_reflection_test.cpp",
+    ],
+    data = ["//flatland/scenes"],
+    deps = [
+        ":path_mirror_reflection",
+        "//flatland/rendering",
+        "//flatland/rendering/scene:load_scene",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "path_specular_transmission",
+    srcs = ["path_specular_transmission.cpp"],
+    hdrs = ["path_specular_transmission.h"],
+    deps = [
+        "//flatland/math:refract",
+        "//flatland/rendering/scene",
+    ],
+)
+
+cc_test(
+    name = "path_specular_transmission_test",
+    srcs = [
+        "path_specular_transmission_test.cpp",
+    ],
+    data = [
+        "//flatland/scenes",
+        "//flatland/scenes/bunny:scenes",
+    ],
+    deps = [
+        ":path_specular_transmission",
+        "//flatland/rendering",
+        "//flatland/rendering/scene:load_scene",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

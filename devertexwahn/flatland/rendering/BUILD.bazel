@@ -1,0 +1,104 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "material",
+    srcs = ["material.cpp"],
+    hdrs = ["material.h"],
+    deps = [
+        ":property_set",
+        "//flatland/core:namespace",
+        "//flatland/core:reference_counted",
+        "//flatland/imaging:color",
+    ],
+)
+
+cc_test(
+    name = "material_test",
+    srcs = [
+        "material_test.cpp",
+    ],
+    deps = [
+        ":material",
+        "@com_google_googletest//:gtest_main",
+        "@hypothesis",
+    ],
+)
+
+cc_library(
+    name = "property_set",
+    hdrs = [
+        "property_set.h",
+        "property_set_formatter.h",
+    ],
+    deps = [
+        "//flatland/core:object",
+        "//flatland/core:property_set",
+        "//flatland/core:reference_counted",
+        "//flatland/imaging:color",
+        "//flatland/math:point",
+        "//flatland/math:transform",
+    ],
+)
+
+cc_test(
+    name = "property_set_test",
+    srcs = [
+        "property_set_test.cpp",
+    ],
+    deps = [
+        ":property_set",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "property_set_formatter_test",
+    srcs = [
+        "property_set_formatter_test.cpp",
+    ],
+    deps = [
+        ":property_set",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "rendering",
+    srcs = [
+        "rendering.cpp",
+        "rendering.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flatland/rendering:property_set",
+        "//flatland/rendering/scene:load_scene",
+    ],
+)
+
+cc_library(
+    name = "sampler",
+    hdrs = ["sampler.h"],
+    deps = [
+        "//flatland/core:object",
+        "//flatland/math:point",
+        "//flatland/rendering:property_set",
+        "@pcg",
+    ],
+)
+
+cc_test(
+    name = "sampler_test",
+    srcs = [
+        "sampler_test.cpp",
+    ],
+    deps = [
+        ":sampler",
+        "@com_google_googletest//:gtest_main",
+        "@hypothesis",
+    ],
+)

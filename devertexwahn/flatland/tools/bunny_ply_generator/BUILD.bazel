@@ -1,0 +1,13 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+cc_binary(
+    name = "bunny_ply_generator",
+    srcs = ["main.cpp"],
+    deps = [
+        "//flatland/math:geometry",
+        "//flatland/rendering/canvas:svg_canvas",
+    ],
+)

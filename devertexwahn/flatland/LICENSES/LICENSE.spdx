@@ -1,0 +1,6 @@
+SPDXVersion: SPDX-2.1
+DataLicense: CC0-1.0
+PackageName: flatland
+PackageOriginator: Julian Amann <dev@vertexwahn.de>
+PackageHomePage: https://www.vertexwahn.de/
+PackageLicenseDeclared: Apache-2.0

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+
+    The scene file format schema is the same as used in Mitsuba Renderer 2
+    (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
+-->
+<scene>
+    <sensor>
+        <film>
+            <integer name="width" value="600" />
+            <integer name="height" value="700" />
+            <string name="filename" value="rectangles.svg" />
+        </film>
+
+        <transform>
+            <lookat origin="100, 600" target="300, 325" />
+        </transform>
+    </sensor>
+
+    <integrator type="path_specular_transmission">
+        <integer name="max_depth" value="7"/>
+    </integrator>
+
+    <shape type="rectangle">
+        <float name="width" value="400" />
+        <float name="height" value="50" />
+
+        <transform>
+            <translate x="300" y="200" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <shape type="rectangle">
+        <float name="width" value="400" />
+        <float name="height" value="50" />
+
+        <transform>
+            <translate x="300" y="300" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <shape type="rectangle">
+        <float name="width" value="400" />
+        <float name="height" value="50" />
+
+        <transform>
+            <translate x="300" y="400" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+</scene>

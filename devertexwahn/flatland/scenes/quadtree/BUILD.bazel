@@ -1,0 +1,21 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "scenes",
+    srcs = [
+        "armadillo.obj2d",
+        "bunny.obj2d",
+        "donut.obj2d",
+        "single_triangle.obj2d",
+        "test1.obj2d",
+        "test2.obj2d",
+        "test3.obj2d",
+    ],
+)

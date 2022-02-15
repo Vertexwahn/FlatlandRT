@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This file is part of the Okapi project
+
+    Copyright 2021 Julian Amann
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    SPDX-License-Identifier: Apache-2.0
+
+    The scene file format schema is the same as used in Mitsuba Renderer 2
+    (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
+-->
+<scene>
+    <sensor>
+        <film>
+            <integer name="width" value="600" />
+            <integer name="height" value="700" />
+            <string name="filename" value="rectangle.svg" />
+        </film>
+
+        <transform>
+            <lookat origin="100, 600" target="300, 325" />
+        </transform>
+    </sensor>
+
+    <shape type="rectangle">
+        <float name="width" value="400" />
+        <float name="height" value="250" />
+
+        <transform>
+            <translate x="300" y="325" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <label>
+        <point name="position" value="100.5, 600" />
+        <string name="text" value="Incident vector" />
+    </label>
+
+    <label>
+        <point name="position" value="297.484, 270.582" />
+        <string name="text" value="Refracted vector" />
+    </label>
+</scene>

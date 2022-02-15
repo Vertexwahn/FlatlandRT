@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+
+    The scene file format schema is the same as used in Mitsuba Renderer 2
+    (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
+-->
+<scene>
+    <sensor>
+        <film>
+            <integer name="width" value="600" />
+            <integer name="height" value="700" />
+            <string name="filename" value="rectangle.svg" />
+        </film>
+
+        <transform>
+            <lookat origin="100, 600" target="300, 325" />
+        </transform>
+    </sensor>
+
+    <integrator type="path_specular_transmission">
+        <integer name="max_depth" value="3"/>
+    </integrator>
+
+    <shape type="rectangle">
+        <float name="width" value="400" />
+        <float name="height" value="250" />
+
+        <transform>
+            <translate x="300" y="325" />
+        </transform>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <float name="stroke_width" value="3" />
+            <color name="fill_color" value="1, 1, 1" />
+        </material>
+    </shape>
+
+    <label>
+        <point name="position" value="100.5, 600" />
+        <string name="text" value="Incident vector" />
+    </label>
+
+    <label>
+        <point name="position" value="297.484, 270.582" />
+        <string name="text" value="Refracted vector" />
+    </label>
+</scene>

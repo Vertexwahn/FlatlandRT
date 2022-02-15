@@ -1,0 +1,17 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "scenes",
+    srcs = [
+        "small_terrain.obj2d",
+        "terrain.flatland.xml",
+        "terrain.obj2d",
+    ],
+)

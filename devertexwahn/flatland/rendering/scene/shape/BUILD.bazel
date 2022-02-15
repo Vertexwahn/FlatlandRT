@@ -1,0 +1,129 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "disk",
+    srcs = ["disk.h"],
+    deps = [
+        "//flatland/math:intersection",
+        "//flatland/rendering:property_set",
+        "//flatland/rendering/scene/shape",
+    ],
+)
+
+cc_test(
+    name = "disk_test",
+    srcs = [
+        "disk_test.cpp",
+    ],
+    deps = [
+        ":disk",
+        "//flatland/math:refract",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "polygon",
+    hdrs = ["polygon.h"],
+    deps = [
+        "//flatland/math:geometry",
+        "//flatland/math:intersection",
+        "//flatland/rendering/scene/shape",
+    ],
+)
+
+cc_test(
+    name = "polygon_test",
+    srcs = [
+        "polygon_test.cpp",
+    ],
+    deps = [
+        ":polygon",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "rectangle",
+    hdrs = ["rectangle.h"],
+    deps = [
+        "//flatland/math:geometry",
+        "//flatland/math:intersection",
+        "//flatland/rendering/scene/shape",
+    ],
+)
+
+cc_test(
+    name = "rectangle_test",
+    srcs = [
+        "rectangle_test.cpp",
+    ],
+    deps = [
+        ":rectangle",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "rectangle_test_via_catch2",
+    timeout = "short",
+    srcs = [
+        "rectangle_test_via_catch2.cpp",
+    ],
+    defines = ["CATCH_CONFIG_MAIN"],
+    deps = [
+        ":rectangle",
+        "@catch2//:catch2_main",
+    ],
+)
+
+cc_library(
+    name = "shape",
+    srcs = ["shape.cpp"],
+    hdrs = ["shape.h"],
+    deps = [
+        "//flatland/core:object",
+        "//flatland/math:axis_aligned_bounding_box",
+        "//flatland/math:frame",
+        "//flatland/rendering:material",
+    ],
+)
+
+cc_test(
+    name = "shape_test",
+    srcs = [
+        "shape_test.cpp",
+    ],
+    deps = [
+        "//flatland/rendering/scene/shape",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "triangle_mesh",
+    hdrs = ["triangle_mesh.h"],
+    deps = [
+        "//flatland/math:axis_aligned_bounding_box",
+        "//flatland/math:geometry",
+        "//flatland/math:intersection",
+        "//flatland/rendering/scene/shape",
+    ],
+)
+
+cc_test(
+    name = "triangle_mesh_test",
+    srcs = [
+        "triangle_mesh_test.cpp",
+    ],
+    data = ["//flatland/scenes/terrain:scenes"],
+    deps = [
+        ":triangle_mesh",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

@@ -1,0 +1,91 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "io",
+    srcs = ["io.cpp"],
+    hdrs = ["io.h"],
+    deps = [
+        ":io_openexr",
+        ":io_png",
+        ":io_ppm",
+        "@boost//:algorithm",
+    ],
+)
+
+cc_test(
+    name = "io_test",
+    srcs = [
+        "io_test.cpp",
+    ],
+    deps = [
+        ":io",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "io_openexr",
+    srcs = ["io_openexr.cpp"],
+    hdrs = ["io_openexr.h"],
+    deps = [
+        "//flatland/core:reference_counted",
+        "//flatland/imaging:image",
+        "@openexr//:OpenEXR",
+    ],
+)
+
+cc_test(
+    name = "io_openexr_test",
+    srcs = [
+        "io_openexr_test.cpp",
+    ],
+    deps = [
+        ":io_openexr",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "io_png",
+    srcs = ["io_png.cpp"],
+    hdrs = ["io_png.h"],
+    deps = [
+        "//flatland/core:logging",
+        "//flatland/core:reference_counted",
+        "//flatland/imaging:image",
+        "@libpng",
+    ],
+)
+
+cc_test(
+    name = "io_png_test",
+    srcs = ["io_png_test.cpp"],
+    deps = [
+        ":io_png",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "io_ppm",
+    srcs = ["io_ppm.cpp"],
+    hdrs = ["io_ppm.h"],
+    deps = [
+        "//flatland/core:reference_counted",
+        "//flatland/imaging:image",
+    ],
+)
+
+cc_test(
+    name = "io_ppm_test",
+    srcs = ["io_ppm_test.cpp"],
+    deps = [
+        ":io_ppm",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

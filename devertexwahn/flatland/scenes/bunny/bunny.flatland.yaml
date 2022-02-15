@@ -1,0 +1,24 @@
+#
+#    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+#    SPDX-License-Identifier: Apache-2.0
+#
+
+scene:
+  - sensor:
+      film:
+        width: 800
+        height: 600
+        filename: "out.svg"
+        transform:
+          - lookat:
+              origin: 200, 500
+              target: 400, 300
+  - integrator:
+      type: path_specular_transmission
+      max_depth: 7
+  - shape:
+      type: "polygon"
+      transform:
+        scale: 3, 3
+        translate: 400, 300
+      filename: bunny_coords.ply
