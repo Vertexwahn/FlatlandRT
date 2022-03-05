@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Okapi_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
-#define Okapi_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
+#ifndef Flatland_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
+#define Flatland_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
 
 #include "flatland/math/intersection.h"
 #include "flatland/rendering/property_set.h"
@@ -13,7 +13,7 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-template <typename ScalarType>
+template<typename ScalarType>
 class Disk2 : public Shape2<ScalarType> {
 public:
     using Point = Point2<ScalarType>;
@@ -21,9 +21,9 @@ public:
     using Normal = Normal2<ScalarType>;
     using Frame = Frame2<ScalarType>;
     using Scalar = ScalarType;
-	using Ray = Ray2<Scalar>;
+    using Ray = Ray2<Scalar>;
 
-    Disk2(const PropertySet& ps) : Shape2<Scalar>(ps) {
+    Disk2(const PropertySet &ps) : Shape2<Scalar>(ps) {
         auto radius = ps.get_property<float>("radius");
         radius_ = radius;
     }
@@ -38,7 +38,7 @@ public:
         Normal normal;
         Scalar distance = Scalar{0.0};
 
-        Point center{Scalar{0.0},Scalar{0.0}};
+        Point center{Scalar{0.0}, Scalar{0.0}};
         center = Shape2<Scalar>::transform_ * center;
         bool bHit = intersect_ray_n_sphere(ray.origin,
                                            ray.direction,
@@ -48,7 +48,7 @@ public:
                                            distance,
                                            normal);
 
-        if(!bHit)
+        if (!bHit)
             return false;
 
         me.t = distance;
@@ -94,4 +94,4 @@ using Disk2d = Disk2<double>;
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Okapi_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
+#endif // end define Flatland_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h

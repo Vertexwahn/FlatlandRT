@@ -32,14 +32,14 @@ void print_boost_version() {
               << std::endl;
 }
 
-void plot_quadtree(QuadtreeNode* node, SvgCanvas2f* canvas) {
-    if(node == nullptr) {
+void plot_quadtree(QuadtreeNode *node, SvgCanvas2f *canvas) {
+    if (node == nullptr) {
         return;
     }
 
     canvas->add(node->bounds);
 
-    for(auto n : node->nodes) {
+    for (auto n: node->nodes) {
         plot_quadtree(n, canvas);
     }
 }
@@ -51,9 +51,9 @@ int main(int argc, char **argv) {
         google::InitGoogleLogging(argv[0]);
         gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-        TCLAP::CmdLine cmd("Flatland command line interface", ' ', "1.1");
+        TCLAP::CmdLine cmd("Flatland command line interface", ' ', "1.2.0");
 
-        TCLAP::UnlabeledValueArg<std::string>  scene_filename(
+        TCLAP::UnlabeledValueArg <std::string> scene_filename(
                 "filename",
                 "Flatland scene filename",
                 true,
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 
         std::string_view filename = scene_filename.getValue();
 
-        if(!std::filesystem::exists(filename)) {
+        if (!std::filesystem::exists(filename)) {
             LOG(ERROR) << "File " << filename << " does not exist";
             return ExitStatus::SceneFileNotFound;
         }
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
 
         auto sensor = scene->sensor();
 
-        if(sensor == nullptr) {
+        if (sensor == nullptr) {
             LOG(ERROR) << "Sensor is missing in scene description";
             return ExitStatus::SensorMissing;
         }
@@ -94,12 +94,12 @@ int main(int argc, char **argv) {
         integrator->set_canvas(canvas);
         render(integrator.get(), canvas, scene.get());
 
-        for(const auto& label : scene->annotations()) {
+        for (const auto &label: scene->annotations()) {
             canvas->add(label);
         }
 
         auto intersector = scene->intersector();
-        if(intersector->to_string() == "QuadtreeIntersector") {
+        if (intersector->to_string() == "QuadtreeIntersector") {
             ReferenceCounted<QuadtreeIntersector2f> qti = std::dynamic_pointer_cast<QuadtreeIntersector2f>(intersector);
 
             plot_quadtree(qti->root_node(), canvas.get());
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
     catch (LoadSceneException &ex) {
         LOG(ERROR) << ex.what();
     }
-    catch (std::exception & ex) {
+    catch (std::exception &ex) {
         LOG(ERROR) << ex.what();
     }
 

@@ -14,22 +14,24 @@ using namespace flatland;
 TEST(AmbientOcclusion2, TestBackgroundColor) {
     // Arrange
     Scene2f scene;
-    class NullIntersector : public IntersectorType<2, float>  {
+    class NullIntersector : public IntersectorType<2, float> {
     public:
         NullIntersector() = default;
+
         virtual void build_acceleration_structure(std::vector<ReferenceCounted<Shape>> shapes) override {};
+
         virtual bool intersect(const Ray &ray, MediumEvent &me) const override { return false; };
     };
     auto intersector = make_reference_counted<NullIntersector>();
     scene.set_intersector(intersector);
 
-    Ray2f ray{{0.f,0.f},{1.f, 0.f}, 0.f, 100.f};
+    Ray2f ray{{0.f, 0.f}, {1.f, 0.f}, 0.f, 100.f};
 
     PropertySet ps_sampler;
     IndependentSampler sampler{ps_sampler};
 
     PropertySet ps;
-    ps.add_property("background_color", Color3f{1.f, .5f, .1f} );
+    ps.add_property("background_color", Color3f{1.f, .5f, .1f});
 
     // Act
     AmbientOcclusion2f aoi{ps};

@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Okapi_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
-#define Okapi_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
+#ifndef Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
+#define Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
 
 #include "flatland/core/object.h"
 #include "flatland/math/axis_aligned_bounding_box.h"
@@ -143,4 +143,4 @@ using Shape3d = Shape3<double>;
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Okapi_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
+#endif // end define Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h

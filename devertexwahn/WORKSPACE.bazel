@@ -17,12 +17,16 @@ load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
 boost_deps()
 
 
+#-------------------------------------------------------------------------------------
 # OpenEXR
+#-------------------------------------------------------------------------------------
 load("@openexr//:bazel/third_party/openexr_deps.bzl", "openexr_deps")
 
 openexr_deps()
 
+#-------------------------------------------------------------------------------------
 # LLVM Toolchain
+#-------------------------------------------------------------------------------------
 
 load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 

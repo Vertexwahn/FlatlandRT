@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Okapi_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
-#define Okapi_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
+#ifndef Flatland_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
+#define Flatland_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
 
 #include "flatland/core/namespace.h"
 #include "flatland/math/intersection.h"
@@ -130,4 +130,4 @@ using Rectangle2d = Rectangle2<double>;
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Okapi_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
+#endif // end define Flatland_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h

@@ -15,7 +15,9 @@
 FLATLAND_BEGIN_NAMESPACE
 
 Image3f load_image_openexr(std::string_view filename);
+
 void store_open_exr(const std::string_view &filename, const Image3f &image);
+
 void store_open_exr(const std::string_view &filename, ReferenceCounted<Image3f> image);
 
 FLATLAND_END_NAMESPACE

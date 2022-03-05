@@ -15,8 +15,8 @@ TEST(Image, storeLoadOpenEXR) {
     // Arrange
     Image4b image{100, 100};
 
-    for(int y = 0; y < image.height(); ++y) {
-        for(int x = 0; x < image.width(); ++x) {
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = 0; x < image.width(); ++x) {
             image.set_pixel(x, y, Color4b{255, 128, 0, 255});
         }
     }
@@ -28,15 +28,15 @@ TEST(Image, storeLoadOpenEXR) {
     std::ifstream ppm_file{"test.ppm"};
     std::string line;
 
-    std::getline (ppm_file, line);
+    std::getline(ppm_file, line);
     EXPECT_THAT(line, "P3");
 
-    std::getline (ppm_file, line);
+    std::getline(ppm_file, line);
     EXPECT_THAT(line, "100 100");
 
-    std::getline (ppm_file, line);
+    std::getline(ppm_file, line);
     EXPECT_THAT(line, "255");
 
-    std::getline (ppm_file, line);
+    std::getline(ppm_file, line);
     EXPECT_THAT(line, testing::HasSubstr("255 128 0"));
 }

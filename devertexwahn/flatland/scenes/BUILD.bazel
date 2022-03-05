@@ -35,6 +35,8 @@ filegroup(
         "reference_images/disk_ref.svg",
         "reference_images/mirror_ref.svg",
         "reference_images/mirrors_ref.svg",
+        "reference_images/quadtree_corner_case_ref.svg",
+        "reference_images/quadtree_ref.svg",
         "reference_images/rectangles_ref.svg",
     ],
 )

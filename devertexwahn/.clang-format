@@ -1,0 +1,61 @@
+#
+#   SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+BasedOnStyle: LLVM                                          # LLVM, Google, Chromium, Mozilla, WebKit
+AccessModifierOffset: -4
+AlignEscapedNewlinesLeft: true
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: false                     # None(false), Inline, All(true)
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterDefinitionReturnType: false
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
+BinPackParameters: false
+BreakBeforeBinaryOperators: NonAssignment                   # None, NonAssignment, All
+BreakBeforeBraces: Attach                                   # Attach, Linux, Stroustrup, Allman, GNU
+BreakBeforeTernaryOperators: false
+BreakConstructorInitializersBeforeComma: true
+ColumnLimit: 120
+# CommentPragmas
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 2
+Cpp11BracedListStyle: true
+DerivePointerAlignment: true
+DisableFormat: false
+ExperimentalAutoDetectBinPacking: true
+# ForEachMacros
+IndentCaseLabels: false
+IndentWidth: 4
+IndentWrappedFunctionNames: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+Language: Cpp                                               # None, Cpp, JavaScript, Proto
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None                                  # None, Inner, All
+# ObjCSpaceAfterProperty
+# ObjCSpaceBeforeProtocolList
+#// PenaltyBreakBeforeFirstCallParameter
+#// PenaltyBreakComment
+#// PenaltyBreakFirstLessLess
+#// PenaltyBreakString
+#// PenaltyExcessCharacter
+#// PenaltyReturnTypeOnItsOwnLine: 
+PointerAlignment: Right                                     # Left, Right, Middle
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements                        # Never, ControlStatements, Always
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+Standard: c++17                                             # Cpp03, Cpp11, Auto
+TabWidth: 4
+UseTab: Never                                      # Never(false), ForIndentation, Always(true)

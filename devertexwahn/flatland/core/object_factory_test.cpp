@@ -19,7 +19,7 @@ TEST(ObjectFactoryClassAlreadyRegisteredException, what) {
 
 class MockIntegrator : public IntegratorType<2, float> {
 public:
-    MockIntegrator(const PropertySet& ps) : IntegratorType<2, float>(ps) {
+    MockIntegrator(const PropertySet &ps) : IntegratorType<2, float>(ps) {
 
     }
 
@@ -28,7 +28,7 @@ public:
             Sampler *sampler,
             Ray &ray,
             const int depth) const override {
-        return  Color3f{1.f, 0.f, 0.f};
+        return Color3f{1.f, 0.f, 0.f};
     }
 };
 
@@ -79,6 +79,6 @@ TEST(ShapeFactory, WhenSameClassIsRegisteredTwice_ThenThrowException) {
 TEST(ShapeFactory, WhenTryingToCreateAnInstanceOfANotRegistedClass_ThenThrowException) {
     ObjectFactory<PropertySet> sf;
     PropertySet ps;
-    //std::filesystem::path path;
+
     EXPECT_THROW(sf.create_instance("Disk", ps), ObjectFactoryClassDoesNotExist);
 }

@@ -4,10 +4,9 @@
  */
 
 #pragma once
-#ifndef Okapi_Integrator_74e1969c_9ae1_4c6c_b5f2_3b0545a65bd4_h
-#define Okapi_Integrator_74e1969c_9ae1_4c6c_b5f2_3b0545a65bd4_h
+#ifndef Flatland_Integrator_74e1969c_9ae1_4c6c_b5f2_3b0545a65bd4_h
+#define Flatland_Integrator_74e1969c_9ae1_4c6c_b5f2_3b0545a65bd4_h
 
-//#include "flatland/core/logging.h"
 #include "flatland/core/object.h"
 #include "flatland/imaging/color.h"
 #include "flatland/rendering/canvas/svg_canvas.h"
@@ -77,4 +76,4 @@ using Integrator3d = IntegratorType<3, double>;
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Okapi_Integrator_74e1969c_9ae1_4c6c_b5f2_3b0545a65bd4_h
+#endif // end define Flatland_Integrator_74e1969c_9ae1_4c6c_b5f2_3b0545a65bd4_h

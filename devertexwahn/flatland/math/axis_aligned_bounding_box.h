@@ -12,7 +12,7 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-template <unsigned int Dimension, typename ScalarType>
+template<unsigned int Dimension, typename ScalarType>
 struct AxisAlignedBoundingBoxType {
     using Scalar = ScalarType;
     using Point = PointType<Dimension, ScalarType>;
@@ -38,7 +38,7 @@ struct AxisAlignedBoundingBoxType {
 
     Vector size() const {
         Vector size;
-        for(unsigned int i = 0; i < Dimension; ++i) {
+        for (unsigned int i = 0; i < Dimension; ++i) {
             size[i] = max_[i] - min_[i];
             assert(size[i] >= 0);
         }
@@ -59,7 +59,7 @@ struct AxisAlignedBoundingBoxType {
     }
 
     // Copied from PBRTv4
-    bool intersect(Point o, Vector d, Scalar tMax, Scalar* hitt) {
+    bool intersect(Point o, Vector d, Scalar tMax, Scalar *hitt) {
         Scalar t0 = 0, t1 = tMax;
         for (size_t i = 0; i < Dimension; ++i) {
             // Update interval for _i_th bounding box slab
@@ -84,10 +84,10 @@ struct AxisAlignedBoundingBoxType {
 
     bool contains(Point p) {
         for (size_t i = 0; i < Dimension; ++i) {
-            if(p[i] < min_[i]) {
+            if (p[i] < min_[i]) {
                 return false;
             }
-            if(p[i] >= max_[i]) {
+            if (p[i] >= max_[i]) {
                 return false;
             }
         }
@@ -95,13 +95,13 @@ struct AxisAlignedBoundingBoxType {
         return true;
     }
 
-    PointType<Dimension, ScalarType> min_;
-    PointType<Dimension, ScalarType> max_;
+    PointType <Dimension, ScalarType> min_;
+    PointType <Dimension, ScalarType> max_;
 };
 
-template <typename ScalarType>
+template<typename ScalarType>
 using AxisAlignedBoundingBox2 = AxisAlignedBoundingBoxType<2, ScalarType>;
-template <typename ScalarType>
+template<typename ScalarType>
 using AxisAlignedBoundingBox3 = AxisAlignedBoundingBoxType<3, ScalarType>;
 
 using AxisAlignedBoundingBox2i = AxisAlignedBoundingBox2<int>;
@@ -113,7 +113,7 @@ using AxisAlignedBoundingBox3f = AxisAlignedBoundingBox3<float>;
 using AxisAlignedBoundingBox3d = AxisAlignedBoundingBox3<double>;
 
 // following function was copied from PBRTv4 and slightly modified
-template <typename T>
+template<typename T>
 inline bool overlaps(const AxisAlignedBoundingBox2<T> &ba, const AxisAlignedBoundingBox2<T> &bb) {
     assert(ba.valid());
     assert(bb.valid());
@@ -122,7 +122,7 @@ inline bool overlaps(const AxisAlignedBoundingBox2<T> &ba, const AxisAlignedBoun
     return (x && y);
 }
 
-template <typename T>
+template<typename T>
 inline bool overlaps(const AxisAlignedBoundingBox3<T> &ba, const AxisAlignedBoundingBox3<T> &bb) {
     assert(ba.valid());
     assert(bb.valid());
@@ -133,8 +133,9 @@ inline bool overlaps(const AxisAlignedBoundingBox3<T> &ba, const AxisAlignedBoun
 }
 
 // following function was copied from PBRTv4 and slightly modified
-template <typename T>
-inline AxisAlignedBoundingBox2<T> union_aabb(const AxisAlignedBoundingBox2<T> &b1, const AxisAlignedBoundingBox2<T> &b2) {
+template<typename T>
+inline AxisAlignedBoundingBox2<T>
+union_aabb(const AxisAlignedBoundingBox2<T> &b1, const AxisAlignedBoundingBox2<T> &b2) {
     assert(b1.valid());
     assert(b2.valid());
     AxisAlignedBoundingBox2<T> ret;
@@ -145,8 +146,9 @@ inline AxisAlignedBoundingBox2<T> union_aabb(const AxisAlignedBoundingBox2<T> &b
     return ret;
 }
 
-template <typename T>
-inline AxisAlignedBoundingBox3<T> union_aabb(const AxisAlignedBoundingBox3<T> &b1, const AxisAlignedBoundingBox3<T> &b2) {
+template<typename T>
+inline AxisAlignedBoundingBox3<T>
+union_aabb(const AxisAlignedBoundingBox3<T> &b1, const AxisAlignedBoundingBox3<T> &b2) {
     assert(b1.valid());
     assert(b2.valid());
     AxisAlignedBoundingBox3<T> ret;
@@ -159,14 +161,15 @@ inline AxisAlignedBoundingBox3<T> union_aabb(const AxisAlignedBoundingBox3<T> &b
     return ret;
 }
 
-template <unsigned int Dimension, typename ScalarType>
-inline bool operator==(const AxisAlignedBoundingBoxType<Dimension, ScalarType>& lhs, const AxisAlignedBoundingBoxType<Dimension, ScalarType>& rhs) {
+template<unsigned int Dimension, typename ScalarType>
+inline bool operator==(const AxisAlignedBoundingBoxType<Dimension, ScalarType> &lhs,
+                       const AxisAlignedBoundingBoxType<Dimension, ScalarType> &rhs) {
     return lhs.min_ == rhs.min_ && lhs.max_ == rhs.max_;
 }
 
-template <unsigned int Dimension, typename ScalarType>
-std::ostream& operator<<(std::ostream& stream, const AxisAlignedBoundingBoxType<Dimension, ScalarType>& aabb) {
-    stream << "AABB {" << aabb.min_ << ", " <<  aabb.max_ << "}";
+template<unsigned int Dimension, typename ScalarType>
+std::ostream &operator<<(std::ostream &stream, const AxisAlignedBoundingBoxType<Dimension, ScalarType> &aabb) {
+    stream << "AABB {" << aabb.min_ << ", " << aabb.max_ << "}";
     return stream;
 }
 

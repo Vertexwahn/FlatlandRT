@@ -39,7 +39,7 @@ TEST(Rectangle2f, GivenATranslatedRectangle_WhenInitializing_ThenExpectTransform
     Point2f maximum{200.f, 300.f};
     auto width = maximum.x() - minimum.x();
     auto height = maximum.y() - minimum.y();
-    Point2f translation = minimum + Vector2f{width/2.f, height/2.f}; // todo: auto does not work here - why?
+    Point2f translation = minimum + Vector2f{width / 2.f, height / 2.f}; // todo: auto does not work here - why?
 
     PropertySet ps;
     ps.add_property("width", width);

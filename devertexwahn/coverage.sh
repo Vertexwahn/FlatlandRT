@@ -17,7 +17,7 @@ fi
 additional_bazel_config=$1 
 
 # Bazel 5
-bazel coverage --config=gcc9 --config=${additional_bazel_config} --instrumentation_filter="[:]" --instrument_test_targets=true --combined_report=lcov --java_runtime_version=remotejdk_11  //...
+bazel coverage --config=gcc9 --config=${additional_bazel_config} --instrumentation_filter="[:]" --instrument_test_targets=true --combined_report=lcov --java_runtime_version=remotejdk_11 -- //...
 
 output_path=$(bazel info output_path)
 

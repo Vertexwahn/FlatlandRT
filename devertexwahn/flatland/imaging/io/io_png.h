@@ -15,8 +15,10 @@
 FLATLAND_BEGIN_NAMESPACE
 
 ReferenceCounted<Image3f> load_image_png(std::string_view filename);
-bool store_png(const char *filename, const Image4b& image);
-bool store_png(const char *filename, const Image3f& image);
+
+bool store_png(const char *filename, const Image4b &image);
+
+bool store_png(const char *filename, const Image3f &image);
 
 FLATLAND_END_NAMESPACE
 

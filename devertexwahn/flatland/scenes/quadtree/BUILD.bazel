@@ -13,9 +13,12 @@ filegroup(
         "armadillo.obj2d",
         "bunny.obj2d",
         "donut.obj2d",
+        "quadtree_corner_case_scene.flatland.xml",
+        "quadtree_scene.flatland.xml",
         "single_triangle.obj2d",
         "test1.obj2d",
         "test2.obj2d",
         "test3.obj2d",
+        "test4.obj2d",
     ],
 )

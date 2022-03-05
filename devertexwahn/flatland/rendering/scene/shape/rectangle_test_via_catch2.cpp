@@ -10,7 +10,8 @@ using namespace flatland;
 
 #include "catch2/catch_test_macros.hpp"
 
-TEST_CASE("Rectangle2f", "[GivenApreferredSizeForARectangle_WhenInitializing_ThenExpectedTransformHeightWidthMinAndMax]") {
+TEST_CASE("Rectangle2f",
+          "[GivenApreferredSizeForARectangle_WhenInitializing_ThenExpectedTransformHeightWidthMinAndMax]") {
     Point2f p{100.f, 100.f};
     Vector2f t{50.f, 50.f};
     Point2f ps = p + t;
@@ -27,12 +28,12 @@ TEST_CASE("Rectangle2f", "[GivenApreferredSizeForARectangle_WhenInitializing_The
     REQUIRE(height == 100.f);
 
     //auto translation = minimum + Vector2f{width/2.f, height/2.f};
-    Point2f translation = minimum + Vector2f{width/2.f, height/2.f};
+    Point2f translation = minimum + Vector2f{width / 2.f, height / 2.f};
 
     //const std::type_info& r1 = typeid(translation);
     //std::cout << '\n' << "std::cout<<myint has type : " << r1.name() << '\n';
 
-    REQUIRE(Vector2f{width/2.f, height/2.f} == Vector2f{75.f, 50.f});
+    REQUIRE(Vector2f{width / 2.f, height / 2.f} == Vector2f{75.f, 50.f});
 
     PropertySet pset;
     pset.add_property("width", width);

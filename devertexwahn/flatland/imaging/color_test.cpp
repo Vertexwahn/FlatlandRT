@@ -64,8 +64,8 @@ TEST(Color3f, assignment) {
 
 TEST(Color3f, ostream) {
     Color3f c{1.f, 2.f, 3.f};
-	std::stringstream ss;
-	ss << c;
+    std::stringstream ss;
+    ss << c;
 
     EXPECT_THAT(ss.str(), testing::HasSubstr("1\n2\n3"));
 }

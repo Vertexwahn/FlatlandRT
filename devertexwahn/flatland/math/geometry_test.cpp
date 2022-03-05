@@ -12,8 +12,8 @@ using namespace flatland;
 TEST(Point2f, GivenPointsInCounterClockwiseOrder_WhenIsClockwiseOrder_ThenClockwiseOrderIsFalse) {
     std::vector<Point2f> points = {
             {-50.f, -50.f},
-            {50.f, -50.f},
-            {50.f, 50.f},
+            {50.f,  -50.f},
+            {50.f,  50.f},
             {-50.f, 50.f}
     };
 
@@ -33,8 +33,8 @@ TEST(Point2f, GivenPointsInClockwiseOrder_WhenIsClockwiseOrder_ThenClockwiseOrde
 TEST(Point2f, GivenPointsInCounterClockwiseOrder_WhenIsCounterClockwiseOrder_ThenCounterClockwiseOrderIsTrue) {
     std::vector<Point2f> points = {
             {-50.f, -50.f},
-            {50.f, -50.f},
-            {50.f, 50.f},
+            {50.f,  -50.f},
+            {50.f,  50.f},
             {-50.f, 50.f}
     };
 
@@ -70,13 +70,13 @@ TEST(create_square, WhenCreatingSquarePoints_ThenExpectCounterClockwiseOrder) {
     auto points = create_square(100.f);
     EXPECT_TRUE(is_counter_clockwise_order(points));
     EXPECT_THAT(points[0], Point2f(-50.f, -50.f));
-    EXPECT_THAT(points[1], Point2f( 50.f, -50.f));
-    EXPECT_THAT(points[2], Point2f( 50.f,  50.f));
-    EXPECT_THAT(points[3], Point2f(-50.f,  50.f));
+    EXPECT_THAT(points[1], Point2f(50.f, -50.f));
+    EXPECT_THAT(points[2], Point2f(50.f, 50.f));
+    EXPECT_THAT(points[3], Point2f(-50.f, 50.f));
 }
 
 TEST(create_stanford_bunny_point_list, create_stanford_bunny_point_list) {
-    auto points = create_stanford_bunny_point_list<float>();
+    auto points = create_stanford_bunny_point_list < float > ();
     EXPECT_TRUE(is_counter_clockwise_order(points));
 }
 
@@ -85,8 +85,8 @@ TEST(load_2D_ply, WhenRedingBunnyFile_ExpectValidCoordinates) {
 
     EXPECT_THAT(points.size(), testing::Ge(170));
 
-    EXPECT_NEAR(points[points.size()-1].x(), -40.5615654f, 0.0001f);
-    EXPECT_NEAR(points[points.size()-1].y(), 38.51184082f, 0.0001f);
+    EXPECT_NEAR(points[points.size() - 1].x(), -40.5615654f, 0.0001f);
+    EXPECT_NEAR(points[points.size() - 1].y(), 38.51184082f, 0.0001f);
 }
 
 TEST(load_2D_ply, WhenFileDoesNotExiten_ThenThrowException) {
@@ -114,6 +114,6 @@ TEST(load_obj2d, WhenRedingTerrainFile_ExpectValidCoordinatesAndIndices) {
     EXPECT_THAT(positions.size(), testing::Ge(300));
     EXPECT_THAT(indices.size(), testing::Ge(1));
 
-    EXPECT_NEAR(positions[positions.size()-1].x(), 450.f, 500.f);
-    EXPECT_THAT(indices[indices.size()-1], 396);
+    EXPECT_NEAR(positions[positions.size() - 1].x(), 450.f, 500.f);
+    EXPECT_THAT(indices[indices.size() - 1], 396);
 }

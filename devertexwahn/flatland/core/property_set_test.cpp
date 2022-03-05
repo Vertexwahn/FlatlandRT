@@ -21,12 +21,13 @@ TEST(PropertyDoesAlreadyExistException, TestErrorMessage) {
 }
 
 TEST(PropertySet, TestBasicTypes) {
-    using VariantType = std::variant<int,
-                                     float,
-                                     double,
-                                     char,
-                                     std::string,
-                                     bool>;
+    using VariantType = std::variant<
+            int,
+            float,
+            double,
+            char,
+            std::string,
+            bool>;
 
     using PropertySet = PropertySetType<VariantType>;
 

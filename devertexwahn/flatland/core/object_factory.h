@@ -42,23 +42,24 @@ template<class PropertySetType>
 class ObjectFactory {
 public:
     ObjectFactory() = default;
+
     virtual ~ObjectFactory() = default;
 
-    ReferenceCounted<Object> create_instance(std::string_view name, const PropertySetType& ps) const {
-        if(creation_function_.find(std::string(name)) == creation_function_.end()) {
+    ReferenceCounted<Object> create_instance(std::string_view name, const PropertySetType &ps) const {
+        if (creation_function_.find(std::string(name)) == creation_function_.end()) {
             throw ObjectFactoryClassDoesNotExist(name);
         }
 
         return creation_function_.at(std::string(name))(ps);
     }
 
-    template <typename ObjectType>
-    void register_class(const std::string& className) {
-        if(creation_function_.find(className) != creation_function_.end()) {
+    template<typename ObjectType>
+    void register_class(const std::string &className) {
+        if (creation_function_.find(className) != creation_function_.end()) {
             throw ObjectFactoryClassAlreadyRegisteredException(className);
         }
 
-        std::function<ReferenceCounted<Object>(PropertySetType)> createObject = [](const PropertySetType& ps){
+        std::function<ReferenceCounted<Object>(PropertySetType)> createObject = [](const PropertySetType &ps) {
             return make_reference_counted<ObjectType>(ps);
         };
 

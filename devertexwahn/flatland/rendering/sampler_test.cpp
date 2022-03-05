@@ -6,6 +6,7 @@
 #include "flatland/rendering/sampler.h"
 
 #include "hypothesis.h"
+
 #include "gmock/gmock.h"
 
 #include <array>
@@ -13,13 +14,13 @@
 using namespace flatland;
 
 TEST(IndependentSampler, GivenSampler_WhenGettingAUniformRandomNumber_ExpectCertainAverageValue) {
-	PropertySet ps;
+    PropertySet ps;
     ps.add_property("deterministic_seed", true);
     IndependentSampler sampler{ps};
 
     float avg = 0.f;
     constexpr int rounds = 100000;
-    for(int i = 0; i < rounds; ++i) {
+    for (int i = 0; i < rounds; ++i) {
         auto random_number = sampler.next_1d();
         avg += random_number;
     }
@@ -37,9 +38,9 @@ TEST(IndependentSampler, GivenSampler_WhenGettingAUniformRandomNumber_ExpectNotA
 
     constexpr int rounds = 100000;
     float lastRandomNumber = sampler.next_1d();
-    for(int i = 0; i < rounds-1; ++i) {
+    for (int i = 0; i < rounds - 1; ++i) {
         auto random_number = sampler.next_1d();
-        if(lastRandomNumber != random_number) {
+        if (lastRandomNumber != random_number) {
             notAlwaysEqual = true;
         }
     }
@@ -54,7 +55,7 @@ TEST(IndependentSampler, GivenSampler_WhenGettingAUniformPoint_ExpectCertainAver
 
     Point2f avg{0.f, 0.f};
     constexpr int rounds = 100000;
-    for(int i = 0; i < rounds; ++i) {
+    for (int i = 0; i < rounds; ++i) {
         auto random_number = sampler.next_2d();
         avg.x() += random_number.x();
         avg.y() += random_number.y();
@@ -69,7 +70,7 @@ TEST(IndependentSampler, GivenSample_WhenDrawingSamples_ExpectUniformDistributio
     PropertySet ps;
     ps.add_property("deterministic_seed", true);
     IndependentSampler sampler{ps};
-    
+
     const int bucket_count = 100;
     double observed_frequencies[bucket_count] = {0};
     const int sample_count = 100000;
@@ -82,9 +83,10 @@ TEST(IndependentSampler, GivenSample_WhenDrawingSamples_ExpectUniformDistributio
 
     std::vector<double> expected_frequencies;
     expected_frequencies.resize(bucket_count);
-    std::fill(std::begin(expected_frequencies), std::end(expected_frequencies), sample_count/bucket_count);
-        
-    std::pair<bool, std::string> result = hypothesis::chi2_test(bucket_count, observed_frequencies, &expected_frequencies[0], sample_count, 5, 0.05);
+    std::fill(std::begin(expected_frequencies), std::end(expected_frequencies), sample_count / bucket_count);
+
+    std::pair<bool, std::string> result = hypothesis::chi2_test(bucket_count, observed_frequencies,
+                                                                &expected_frequencies[0], sample_count, 5, 0.05);
 
     EXPECT_THAT(result.second, testing::HasSubstr("Chi^2 statistic = 120.37 (d.o.f. = 99)"));
     EXPECT_THAT(result.second, testing::HasSubstr("Accepted the null hypothesis"));
@@ -101,7 +103,7 @@ TEST(IndependentSampler, WhenRequestingDeterministicBehaviour_ExpectDeterminstic
     std::array<float, rounds> random_array1{0};
     std::array<float, rounds> random_array2{0};
 
-    for(int i = 0; i < rounds; ++i) {
+    for (int i = 0; i < rounds; ++i) {
         random_array1[i] = sampler1.next_1d();
         random_array2[i] = sampler2.next_1d();
     }
@@ -119,7 +121,7 @@ TEST(IndependentSampler, WhenRequestingNonDeterministicBehaviour_ExpectNonDeterm
     std::array<float, rounds> random_array1{0};
     std::array<float, rounds> random_array2{0};
 
-    for(int i = 0; i < rounds; ++i) {
+    for (int i = 0; i < rounds; ++i) {
         random_array1[i] = sampler1.next_1d();
         random_array2[i] = sampler2.next_1d();
     }
@@ -128,8 +130,8 @@ TEST(IndependentSampler, WhenRequestingNonDeterministicBehaviour_ExpectNonDeterm
 }
 
 TEST(PixelCenterSampler, GivenPixelCenterSample_WhenRequestingSample_ThenExpectAlwaysCenterPosition) {
-	PixelCenterSampler pcs{{}};
+    PixelCenterSampler pcs{{}};
 
-	EXPECT_THAT(pcs.next_1d(), .5f);
-	EXPECT_THAT(pcs.next_2d(), Point2f(.5f, .5f));
+    EXPECT_THAT(pcs.next_1d(), .5f);
+    EXPECT_THAT(pcs.next_2d(), Point2f(.5f, .5f));
 }

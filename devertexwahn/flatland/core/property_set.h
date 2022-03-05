@@ -35,10 +35,11 @@ public:
 
 class PropertyDoesAlreadyExistException : public PropertyException {
 public:
-    template <typename ValueType>
+    template<typename ValueType>
     explicit PropertyDoesAlreadyExistException(std::string_view property_name, const ValueType &value) {
         error_message_ =
-                fmt::format("Property with name '{}' does already exist and its value is '{}'", property_name, value);
+                fmt::format("Property with name '{}' does already exist and its value is '{}'", property_name,
+                            value);
     }
 };
 
@@ -47,14 +48,15 @@ class PropertyWithWrongValueTypeRequested : public PropertyException {
 public:
     explicit PropertyWithWrongValueTypeRequested(std::string_view property_name) {
         error_message_ =
-                fmt::format("Existing Property with name '{}' was requested but wrong type was specified", property_name);
+                fmt::format("Existing Property with name '{}' was requested but wrong type was specified",
+                            property_name);
     }
 };
 
 // The following template function was copied from an answer provided on Stack Overflow.
 // See here: https://stackoverflow.com/questions/46091671/c-template-recursive-to-check-type-in-stdtuple
 // The original author (Vittorio Romeo) was asked and gave his approval.
-template <typename VariantType, typename T, std::size_t index = 0>
+template<typename VariantType, typename T, std::size_t index = 0>
 constexpr std::size_t variant_index() {
     if constexpr (index == std::variant_size_v<VariantType>) {
         return index;
@@ -74,12 +76,12 @@ public:
     PropertySetType() = default;
 
     PropertySetType(const std::initializer_list<MapElementType> &list) {
-        for (const auto &element : list) {
+        for (const auto &element: list) {
             property_name_to_value_.emplace(element);
         }
     }
 
-    template <typename ValueType>
+    template<typename ValueType>
     void add_property(const std::string &name, const ValueType &value) {
         if (has_property(name)) {
             throw PropertyDoesAlreadyExistException(name, value);
@@ -88,7 +90,7 @@ public:
         }
     }
 
-    template <typename ValueType>
+    template<typename ValueType>
     const ValueType &get_property(const std::string &name) const {
         if (has_property(name)) {
             const VariantType &vt = property_name_to_value_.at(name);
@@ -104,7 +106,7 @@ public:
     }
 
     // A default value can be provided in the case a property does not exist
-    template <typename ValueType>
+    template<typename ValueType>
     const ValueType &get_property(const std::string &name, const ValueType &default_value) const {
         if (has_property(name)) {
             return get_property<ValueType>(name);

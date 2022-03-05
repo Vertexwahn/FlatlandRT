@@ -20,7 +20,7 @@ TEST(Normal2f, Normal3f_ctor) {
     Normal3f n{0.f, 1.f, 0.f};
 
     EXPECT_THAT(n.x(), 0.f);
-    EXPECT_THAT(n.y(),1.f);
+    EXPECT_THAT(n.y(), 1.f);
     EXPECT_THAT(n.z(), 0.f);
 }
 /*

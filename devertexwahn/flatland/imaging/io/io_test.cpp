@@ -17,7 +17,7 @@ TEST(Image, WriteAndReadFile) {
     // Write file
     {
         std::ofstream file;
-        file.open (filename);
+        file.open(filename);
         file << "Writing this to a file.";
         file.close();
     }
@@ -38,8 +38,8 @@ TEST(Image, GivenTestImage3f_WhenStoreImageAsPng_ExpectCorectColorValues) {
     // Arrange
     Image3f image{100, 100};
 
-    for(int y = 0; y < image.height(); ++y) {
-        for(int x = 0; x < image.width(); ++x) {
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = 0; x < image.width(); ++x) {
             image.set_pixel(x, y, Color3f{1.f, 0.f, 0.f});
         }
     }
@@ -53,11 +53,11 @@ TEST(Image, GivenTestImage3f_WhenStoreImageAsPng_ExpectCorectColorValues) {
     EXPECT_THAT(image.width(), ref_image.width());
     EXPECT_THAT(image.height(), ref_image.height());
 
-    for(int y = 0; y < image.height(); ++y) {
-        for(int x = 0; x < image.width(); ++x) {
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = 0; x < image.width(); ++x) {
             Color3f c = image.get_pixel(x, y);
             Color3f ref_c = ref_image.get_pixel(x, y);
-            EXPECT_THAT(ref_c, (Color3f{1.f,0.f,0.f}));
+            EXPECT_THAT(ref_c, (Color3f{1.f, 0.f, 0.f}));
             EXPECT_THAT(ref_c, c);
         }
     }

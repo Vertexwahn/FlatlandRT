@@ -11,7 +11,7 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-void render(Integrator2f* integrator, ReferenceCounted<SvgCanvas2f> canvas_, const Scene2f* scene);
+void render(Integrator2f *integrator, ReferenceCounted<SvgCanvas2f> canvas_, const Scene2f *scene);
 
 FLATLAND_END_NAMESPACE
 

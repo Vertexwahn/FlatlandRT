@@ -9,13 +9,13 @@
 <scene>
     <sensor>
         <film>
-            <integer name="width" value="600" />
-            <integer name="height" value="700" />
-            <string name="filename" value="mirror.svg" />
+            <integer name="width" value="600"/>
+            <integer name="height" value="700"/>
+            <string name="filename" value="mirror.svg"/>
         </film>
 
         <transform>
-            <lookat origin="100, 525" target="300, 325" />
+            <lookat origin="100, 525" target="300, 325"/>
         </transform>
     </sensor>
 
@@ -24,17 +24,17 @@
     </integrator>
 
     <shape type="rectangle">
-        <float name="width" value="400" />
-        <float name="height" value="50" />
+        <float name="width" value="400"/>
+        <float name="height" value="50"/>
 
         <transform>
-            <translate x="300" y="300" />
+            <translate x="300" y="300"/>
         </transform>
 
         <material>
-            <color name="stroke_color" value="0.0, 0.682, 0.937" />
-            <float name="stroke_width" value="3" />
-            <color name="fill_color" value="1, 1, 1" />
+            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <float name="stroke_width" value="3"/>
+            <color name="fill_color" value="1, 1, 1"/>
         </material>
     </shape>
 

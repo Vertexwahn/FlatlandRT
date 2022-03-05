@@ -199,10 +199,10 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
 
     for (pugi::xml_node scene_node : doc.root()) {
         if (std::string(scene_node.name()) == "scene") {
-            for (pugi::xml_node sceneElements : scene_node) {
-                if (std::string(sceneElements.name()) == "sensor") {
+            for (pugi::xml_node scene_elements : scene_node) {
+                if (std::string(scene_elements.name()) == "sensor") {
                     // Construct film
-                    auto xml_film = sceneElements.child("film");
+                    auto xml_film = scene_elements.child("film");
 
                     PropertySet film_ps = read_all_properties(xml_film);
                     //auto filter = read_filter<float>(xml_film, object_factory);
@@ -211,11 +211,11 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     auto film = make_reference_counted<Film_>(film_ps);
 
                     // Construct sensor
-                    PropertySet sensor_ps = read_all_properties(sceneElements);
+                    PropertySet sensor_ps = read_all_properties(scene_elements);
                     sensor_ps.add_property("film", film);
                     auto sensor = make_reference_counted<SensorType<2, float>>(sensor_ps);
 
-                    auto xml_transform = sceneElements.child("transform");
+                    auto xml_transform = scene_elements.child("transform");
                     if (xml_transform) {
                         auto transform = read_transform<2>(xml_transform);
                         sensor->set_transform(transform);
@@ -223,7 +223,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
 
                     scene->set_sensor(sensor);
 
-                    auto xml_sampler = sceneElements.child("sampler");
+                    auto xml_sampler = scene_elements.child("sampler");
                     if(xml_sampler) {
                         std::string type = xml_sampler.attribute("type").as_string();
 
@@ -234,10 +234,10 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     }
                 }
 
-                if (std::string(sceneElements.name()) == "integrator") {
-                    std::string type = sceneElements.attribute("type").as_string();
+                if (std::string(scene_elements.name()) == "integrator") {
+                    std::string type = scene_elements.attribute("type").as_string();
 
-                    auto ps = read_all_properties(sceneElements);
+                    auto ps = read_all_properties(scene_elements);
 
                     try {
                         auto integrator = std::dynamic_pointer_cast<IntegratorType<2, float>>(
@@ -250,18 +250,18 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     integrator_tag_found = true;
                 }
 
-                if (std::string(sceneElements.name()) == "label") {
-                    auto ps = read_all_properties(sceneElements);
+                if (std::string(scene_elements.name()) == "label") {
+                    auto ps = read_all_properties(scene_elements);
 
                     auto label_position = ps.get_property<Point2f>("position");
                     auto label_text = ps.get_property<std::string>("text");
                     scene->add_annotation(Label2f{label_position, label_text});
                 }
 
-                if (std::string(sceneElements.name()) == "shape") {
-                    std::string type = sceneElements.attribute("type").as_string();
+                if (std::string(scene_elements.name()) == "shape") {
+                    std::string type = scene_elements.attribute("type").as_string();
 
-                    auto ps = read_all_properties(sceneElements);
+                    auto ps = read_all_properties(scene_elements);
 
                     if (type == "polygon" || type == "obj" || type == "triangle_mesh") {
                         ps.add_property("parent_path", p.parent_path().string());
@@ -269,7 +269,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
 
                     auto transform = identity<float>();
 
-                    auto xmlTransform = sceneElements.child("transform");
+                    auto xmlTransform = scene_elements.child("transform");
                     if (xmlTransform) {
                         transform = read_transform<2>(xmlTransform);
                     }
@@ -279,7 +279,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     auto shape = std::dynamic_pointer_cast<ShapeType<2, float>>(
                             object_factory.create_instance(type, ps));
 
-                    auto xmlMaterial = sceneElements.child("material");
+                    auto xmlMaterial = scene_elements.child("material");
                     if (xmlMaterial) {
                         auto material_ps = read_all_properties(xmlMaterial);
                         auto material = create_material(material_ps);
@@ -289,11 +289,13 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     scene->add_shape(shape);
                 }
 
-                if (std::string(sceneElements.name()) == "intersector") {
-                    std::string type = sceneElements.attribute("type").as_string();
+                if (std::string(scene_elements.name()) == "intersector") {
+                    std::string type = scene_elements.attribute("type").as_string();
+
+                    auto ps = read_all_properties(scene_elements);
 
                     auto intersector = std::dynamic_pointer_cast<IntersectorType<2, float>>(
-                            object_factory.create_instance(type, PropertySet{}));
+                            object_factory.create_instance(type, ps));
                     scene->set_intersector(intersector);
                 }
             }

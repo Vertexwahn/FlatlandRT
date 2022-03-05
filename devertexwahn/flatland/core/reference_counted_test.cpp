@@ -14,6 +14,7 @@ public:
     Dummy() {
         count++;
     }
+
     ~Dummy() {
         count--;
     }
@@ -37,7 +38,7 @@ TEST(Memory, Memory_RefCount) {
 
     EXPECT_TRUE(Dummy::count == 1);
 
-    foo = nullptr; 
+    foo = nullptr;
     bar = nullptr;
 
     EXPECT_TRUE(Dummy::count == 0);

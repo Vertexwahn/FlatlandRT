@@ -12,5 +12,6 @@ sh_test(
         "//flatland/scenes",
         "//flatland/scenes:reference_images",
         "//flatland/scenes/bunny:scenes",
+        "//flatland/scenes/quadtree:scenes",
     ],
 )

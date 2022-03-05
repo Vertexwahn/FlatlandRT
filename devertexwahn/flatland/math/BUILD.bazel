@@ -7,7 +7,6 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "axis_aligned_bounding_box",
-    srcs = ["axis_aligned_bounding_box.cpp"],
     hdrs = ["axis_aligned_bounding_box.h"],
     deps = [
         ":point",

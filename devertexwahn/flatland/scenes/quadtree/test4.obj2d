@@ -1,0 +1,12 @@
+#
+#   SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+v 100 0 0
+v 200 0 0
+v 200 100
+v 300 0
+
+f 0 1 2
+f 2 1 3

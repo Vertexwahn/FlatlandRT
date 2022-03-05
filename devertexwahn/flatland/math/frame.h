@@ -13,8 +13,8 @@
 FLATLAND_BEGIN_NAMESPACE
 
 // https://graphics.pixar.com/library/OrthonormalB/paper.pdf
-template <typename Scalar>
-void revised_onb(const NormalType<3, Scalar>& n, VectorType<3, Scalar>& b1, VectorType<3, Scalar>& b2) {
+template<typename Scalar>
+void revised_onb(const NormalType<3, Scalar> &n, VectorType<3, Scalar> &b1, VectorType<3, Scalar> &b2) {
     using Vector = VectorType<3, Scalar>;
 
     if (n.z() < 0.) {
@@ -30,7 +30,7 @@ void revised_onb(const NormalType<3, Scalar>& n, VectorType<3, Scalar>& b1, Vect
     }
 }
 
-template <unsigned int Dimension, typename ScalarType>
+template<unsigned int Dimension, typename ScalarType>
 struct FrameType {
     using Vector = VectorType<Dimension, ScalarType>;
     using Normal = NormalType<Dimension, ScalarType>;
@@ -41,15 +41,15 @@ struct FrameType {
     FrameType() {
     }
 
-    explicit FrameType(const Normal& n, const Vector& t) : normal(n), tangent(t) {
+    explicit FrameType(const Normal &n, const Vector &t) : normal(n), tangent(t) {
     }
 
-    Vector to_world(const Vector& v) const {
+    Vector to_world(const Vector &v) const {
         return v.x() * tangent + v.y() * normal;
     }
 };
 
-template <typename ScalarType>
+template<typename ScalarType>
 struct FrameType<3, ScalarType> {
     using Vector = VectorType<3, ScalarType>;
     using Normal = NormalType<3, ScalarType>;
@@ -61,21 +61,21 @@ struct FrameType<3, ScalarType> {
     FrameType() {
     }
 
-    FrameType(const Normal3f& n) : n(n) {
+    FrameType(const Normal3f &n) : n(n) {
         revised_onb(n, s, t);
     }
 
-    explicit FrameType(const Vector& x, const Vector& y, const Normal& n) : s(x), t(y), n(n) {
+    explicit FrameType(const Vector &x, const Vector &y, const Normal &n) : s(x), t(y), n(n) {
     }
 
-    Vector to_world(const Vector& v) const {
+    Vector to_world(const Vector &v) const {
         return v.x() * s + v.y() * t + v.z() * Vector(n);
     }
 };
 
-template <typename ScalarType>
+template<typename ScalarType>
 using Frame2 = FrameType<2, ScalarType>;
-template <typename ScalarType>
+template<typename ScalarType>
 using Frame3 = FrameType<3, ScalarType>;
 
 using Frame2f = Frame2<float>;

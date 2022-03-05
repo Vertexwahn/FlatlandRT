@@ -11,21 +11,20 @@ Material::Material() {
 
 }
 
-Material::Material(const PropertySet& ps) {
+Material::Material(const PropertySet &ps) {
     refraction_index_ = ps.get_property<float>("refraction_index", 0.f);
 
     //bool mirrorReflection_ = false; -> enum class eInterfaceInteraction {specularTransmission, mirrorReflection}
     // <string name="interface_interaction" value= "specular_transmission">
 
-    std::string interfaceInteraction = ps.get_property<std::string>("interface_interaction", "specular_transmission");
+    std::string interfaceInteraction = ps.get_property<std::string>("interface_interaction",
+                                                                    "specular_transmission");
 
-    if(interfaceInteraction == "specular_transmission") {
+    if (interfaceInteraction == "specular_transmission") {
         interface_interaction_ = eInterfaceInteraction::specularTransmission;
-    }
-    else if(interfaceInteraction == "mirror_reflection") {
+    } else if (interfaceInteraction == "mirror_reflection") {
         interface_interaction_ = eInterfaceInteraction::mirrorReflection;
-    }
-    else {
+    } else {
         interface_interaction_ = eInterfaceInteraction::specularTransmission;
     }
 }
@@ -47,7 +46,7 @@ Color3f SvgMaterial::stroke_color() const {
 }
 
 Color3f SvgMaterial::fill_color() const {
-    return  fill_color_;
+    return fill_color_;
 }
 
 float SvgMaterial::stroke_width() const {
@@ -58,7 +57,7 @@ float Material::refraction_index() const {
     return refraction_index_;
 }
 
-eInterfaceInteraction  Material::interface_interaction_type() const {
+eInterfaceInteraction Material::interface_interaction_type() const {
     return interface_interaction_;
 }
 

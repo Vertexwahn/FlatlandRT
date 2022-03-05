@@ -15,26 +15,26 @@
 using namespace flatland;
 
 TEST(SvgCanvas, GivenASvgCanvas_WhenConvertingToString_ThenUTF8EncodingHeader) {
-	// Arrange
-    SvgCanvas2f sc{800, 600};
-
-	// Act
-    auto output = sc.to_string();
-
-    // Assert
-    auto utf8Encoding = R"(<?xml version="1.0" encoding="UTF-8"?>)";
-	EXPECT_THAT(output, testing::HasSubstr(utf8Encoding));
-}
-
-TEST(SvgCanvas, GivenASvgCanvas_WhenConvertingToString_ThenSvgTags) {
     // Arrange
-	SvgCanvas2f sc{800, 600};
+    SvgCanvas2f sc{800, 600};
 
     // Act
     auto output = sc.to_string();
 
-	EXPECT_THAT(output, testing::HasSubstr("<svg"));
-	EXPECT_THAT(output, testing::HasSubstr("</svg>"));
+    // Assert
+    auto utf8Encoding = R"(<?xml version="1.0" encoding="UTF-8"?>)";
+    EXPECT_THAT(output, testing::HasSubstr(utf8Encoding));
+}
+
+TEST(SvgCanvas, GivenASvgCanvas_WhenConvertingToString_ThenSvgTags) {
+    // Arrange
+    SvgCanvas2f sc{800, 600};
+
+    // Act
+    auto output = sc.to_string();
+
+    EXPECT_THAT(output, testing::HasSubstr("<svg"));
+    EXPECT_THAT(output, testing::HasSubstr("</svg>"));
 }
 
 TEST(SvgCanvas, GivenASvgCanvasWithLabel_WhenConvertingToString_ThenSvgTextTag) {
@@ -81,20 +81,20 @@ TEST(SvgCanvas, GivenASvgCanvasWithARectangle_WhenConvertingToString_ThenSvgRect
 
 TEST(SvgCanvas, GivenASvgCanvasWithADisk2f_WhenConvertingToString_ThenSvgCircleOutput) {
     // Arrange
-	SvgCanvas2f sc{800, 600};
+    SvgCanvas2f sc{800, 600};
 
     PropertySet ps;
     ps.add_property("radius", 3.f);
     ps.add_property("transform", translate(Vector2f{100.f, 100.f}));
 
-	Disk2f c{ps};
-	sc.add(&c);
+    Disk2f c{ps};
+    sc.add(&c);
 
-	// Act
-	auto output = sc.to_string();
+    // Act
+    auto output = sc.to_string();
 
-	// Assert
-	EXPECT_THAT(sc.to_string(), testing::HasSubstr("circle"));
+    // Assert
+    EXPECT_THAT(sc.to_string(), testing::HasSubstr("circle"));
 }
 
 TEST(SvgCanvas, GivenRectangle_WhenAssigningMaterial_ExpectSpecificFillAndBoderColor) {
@@ -221,7 +221,7 @@ TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor2) {
 
     SvgCanvas2f sc{scene->sensor()->film()->size()};
 
-    for(auto shape : scene->shapes()) {
+    for (auto shape: scene->shapes()) {
         sc.add(shape.get());
     }
 
@@ -243,7 +243,7 @@ TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor2) {
     incidentVector.normalize();
 
     bool result = refract(incidentVector, its.geo_frame.normal, 1.f / 1.6f, refracted_direction);
-	EXPECT_TRUE(result);
+    EXPECT_TRUE(result);
 
     Ray2f refracted_ray(its.p + refracted_direction * 0.01f, refracted_direction, 0.f, 200.f);
 
@@ -259,7 +259,7 @@ TEST(SvgCanvas, GivenARectangle_WhenSceneFileMaterialDefineStrokeWidth3_ThenExpe
 
     SvgCanvas2f sc{scene->sensor()->film()->size()};
 
-    for (auto shape : scene->shapes()) {
+    for (auto shape: scene->shapes()) {
         sc.add(shape.get());
     }
 
@@ -271,7 +271,7 @@ TEST(SvgCanvas, GivenAPolygon_WhenSceneFileMaterialDefineStrokeWidth3_ThenExpect
 
     SvgCanvas2f sc{scene->sensor()->film()->size()};
 
-    for (auto shape : scene->shapes()) {
+    for (auto shape: scene->shapes()) {
         sc.add(shape.get());
     }
 
@@ -283,7 +283,7 @@ TEST(SvgCanvas, GivenADisk_WhenSceneFileMaterialDefineStrokeWidth3_ThenExpectSvg
 
     SvgCanvas2f sc{scene->sensor()->film()->size()};
 
-    for (auto shape : scene->shapes()) {
+    for (auto shape: scene->shapes()) {
         sc.add(shape.get());
     }
 
@@ -296,7 +296,7 @@ TEST(SvgCanvas, GivenCanvasWithShapes_WhenCountingShapes_ThenExpectMoreThan1Shap
 
     SvgCanvas2f sc{scene->sensor()->film()->size()};
 
-    for (auto shape : scene->shapes()) {
+    for (auto shape: scene->shapes()) {
         sc.add(shape.get());
     }
 
@@ -310,7 +310,8 @@ TEST(SvgCanvas, GivenCanvasWithShapes_WhenCountingShapes_ThenExpectMoreThan1Shap
 TEST(SvgCanvas, bounds) {
     // Arrange
     SvgCanvas2f sc{800, 600};
-    AxisAlignedBoundingBox2f aabb{{100.f, 100.f}, {200.f, 200.0f}};
+    AxisAlignedBoundingBox2f aabb{{100.f, 100.f},
+                                  {200.f, 200.0f}};
 
     // Act
     sc.add(aabb);

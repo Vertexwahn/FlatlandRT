@@ -10,13 +10,13 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-void render(Integrator2f* integrator, ReferenceCounted<SvgCanvas2f> canvas_, const Scene2f* scene) {
+void render(Integrator2f *integrator, ReferenceCounted<SvgCanvas2f> canvas_, const Scene2f *scene) {
     assert(scene);
     assert(canvas_);
 
     LOG(INFO) << "Begin rendering.";
 
-    for (auto shape : scene->shapes()) {
+    for (auto shape: scene->shapes()) {
         canvas_->add(shape.get());
     }
 

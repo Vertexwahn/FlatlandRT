@@ -12,8 +12,10 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-bool are_equal(const Image3f& a, const Image3f& b);
-double mean_squared_error(const Image3f& a, const Image3f& b);
+bool are_equal(const Image3f &a, const Image3f &b);
+
+double mean_squared_error(const Image3f &a, const Image3f &b);
+
 double mean_squared_error(ReferenceCounted<Image3f> a, ReferenceCounted<Image3f> b);
 
 FLATLAND_END_NAMESPACE

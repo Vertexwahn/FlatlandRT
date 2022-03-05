@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Flatland_Core_Film_c9bc3122_a798_4307_b471_0bdf9838b4e3_h
-#define Flatland_Core_Film_c9bc3122_a798_4307_b471_0bdf9838b4e3_h
+#ifndef Flatland_Rendering_Film_c9bc3122_a798_4307_b471_0bdf9838b4e3_h
+#define Flatland_Rendering_Film_c9bc3122_a798_4307_b471_0bdf9838b4e3_h
 
 #include "flatland/core/namespace.h"
 
@@ -20,3 +20,5 @@ public:
 };
 
 FLATLAND_END_NAMESPACE
+
+#endif // Flatland_Rendering_Film_c9bc3122_a798_4307_b471_0bdf9838b4e3_h

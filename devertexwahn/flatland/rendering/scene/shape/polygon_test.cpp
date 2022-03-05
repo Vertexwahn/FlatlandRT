@@ -13,8 +13,7 @@ using namespace flatland;
 
 class Polygon2fTest : public testing::Test {
 protected:
-    virtual void SetUp()
-    {
+    virtual void SetUp() {
         std::vector<Point2f> points = create_square(100.f);
 
         auto transform = translate(Vector2f{100.f, 100.f});
@@ -76,7 +75,7 @@ TEST(Polygon2f, GivenTranslatedPolygon_WhenConvertedToSvg_ThenExpectTranslationI
 }
 
 TEST(Polygon2f, WhenConvertingToSvg_ThenExpectSvgPathTag) {
-    auto points = create_stanford_bunny_point_list<float>();
+    auto points = create_stanford_bunny_point_list < float > ();
 
     Transform44f transform = translate(Vector2f(100.f, 100.f));
 
@@ -92,9 +91,9 @@ TEST(Polygon2f, WhenConvertingToSvg_ThenExpectSvgPathTag) {
 }
 
 TEST(Polygon2f, AssumePlausibleNormal) {
-    std::vector<Point2f> points = create_stanford_bunny_point_list<float>();
+    std::vector<Point2f> points = create_stanford_bunny_point_list < float > ();
 
-    auto transform = translate(Vector2f{400.f-50.f, 300.f-50.f});
+    auto transform = translate(Vector2f{400.f - 50.f, 300.f - 50.f});
     auto point_count = points.size();
     auto polygon = make_reference_counted<Polygon2f>(transform, &points[0], point_count);
 
@@ -173,9 +172,9 @@ TEST(Polygon2f, IfWindingOrderOfProvidedPointsIsIncorrect_ThenThrowException) {
 TEST(Polygon2f, GivenInvalidPoints_WhenConstructionPolygon_ThenRuntimeException) {
     // Arrange
     std::vector<Point2f> points = {
-        {0.f, 0.f},
-        {1.f, 0.f},
-        {std::numeric_limits<float>::infinity(), 1.f}
+            {0.f,                                    0.f},
+            {1.f,                                    0.f},
+            {std::numeric_limits<float>::infinity(), 1.f}
     };
 
     auto transform = identity<float>();

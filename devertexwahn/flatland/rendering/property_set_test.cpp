@@ -40,7 +40,8 @@ TEST(PropertySet, ObjectProperty) {
     PropertySet ps;
     ps.add_property("obj", make_reference_counted<Object>());
 
-    EXPECT_THAT(ps.get_property<ReferenceCounted<Object>>("obj")->to_string(), "A object. Implement to_string method to improve description.");
+    EXPECT_THAT(ps.get_property<ReferenceCounted<Object>>("obj")->to_string(),
+                "A object. Implement to_string method to improve description.");
 }
 
 TEST(PropertySet, MultipleObjects) {
@@ -49,7 +50,10 @@ TEST(PropertySet, MultipleObjects) {
     ps.add_property("obj2", make_reference_counted<Object>());
     ps.add_property("obj3", make_reference_counted<Object>());
 
-    EXPECT_THAT(ps.get_property<ReferenceCounted<Object>>("obj1")->to_string(), "A object. Implement to_string method to improve description.");
-    EXPECT_THAT(ps.get_property<ReferenceCounted<Object>>("obj2")->to_string(), "A object. Implement to_string method to improve description.");
-    EXPECT_THAT(ps.get_property<ReferenceCounted<Object>>("obj3")->to_string(), "A object. Implement to_string method to improve description.");
+    EXPECT_THAT(ps.get_property<ReferenceCounted<Object>>("obj1")->to_string(),
+                "A object. Implement to_string method to improve description.");
+    EXPECT_THAT(ps.get_property<ReferenceCounted<Object>>("obj2")->to_string(),
+                "A object. Implement to_string method to improve description.");
+    EXPECT_THAT(ps.get_property<ReferenceCounted<Object>>("obj3")->to_string(),
+                "A object. Implement to_string method to improve description.");
 }

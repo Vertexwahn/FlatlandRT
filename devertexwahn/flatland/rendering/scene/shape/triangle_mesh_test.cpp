@@ -12,8 +12,8 @@ using namespace flatland;
 TEST(TriangleMesh2, GivenPointWithInfiniteValue_WhenConstructionTriangleMesh_ThenExpectException) {
     // Arrange
     std::vector<Point2f> points = {
-            {0.f, 0.f},
-            {1.f, 0.f},
+            {0.f,                                    0.f},
+            {1.f,                                    0.f},
             {std::numeric_limits<float>::infinity(), 1.f}
     };
 
@@ -28,7 +28,7 @@ TEST(TriangleMesh2, GivenPointWithInfiniteValue_WhenConstructionTriangleMesh_The
     EXPECT_THROW((TriangleMesh2f{ps, points, indices}), std::runtime_error);
 
     // Assert
-    auto try_to_construct_with_invalid_points = [&](){
+    auto try_to_construct_with_invalid_points = [&]() {
         TriangleMesh2f{ps, points, indices};
     };
 

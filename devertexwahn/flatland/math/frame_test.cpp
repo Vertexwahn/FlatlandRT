@@ -10,16 +10,16 @@
 using namespace flatland;
 
 TEST(Frame, ComputerOrthonormalBasis) {
-	// Arrange
+    // Arrange
     Normal3f n{0.f, 0.f, 1.f};
-	Vector3f b1, b2;
+    Vector3f b1, b2;
 
-	// Act
+    // Act
     revised_onb(n, b1, b2);
 
-	// Assert
+    // Assert
     auto computed_n = b1.cross(b2);
-	Normal3f expected_n{0.f, 0.f, 1.f};
+    Normal3f expected_n{0.f, 0.f, 1.f};
     EXPECT_THAT(computed_n.x(), testing::FloatNear(expected_n.x(), .00001f));
     EXPECT_THAT(computed_n.y(), testing::FloatNear(expected_n.y(), .00001f));
     EXPECT_THAT(computed_n.z(), testing::FloatNear(expected_n.z(), .00001f));
@@ -27,7 +27,9 @@ TEST(Frame, ComputerOrthonormalBasis) {
 
 TEST(Frame, GivenFrameIdenticalWithWorld_WhenTransformToWorld_ExpectSameCoordinates) {
     // Arrange
-    Frame3f frame{{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}};
+    Frame3f frame{{1.f, 0.f, 0.f},
+                  {0.f, 1.f, 0.f},
+                  {0.f, 0.f, 1.f}};
     Vector3f v{1.f, 2.f, 3.f};
 
     // Act

@@ -9,13 +9,13 @@
 <scene>
     <sensor>
         <film>
-            <integer name="width" value="900" />
-            <integer name="height" value="700" />
-            <string name="filename" value="terrain.svg" />
+            <integer name="width" value="900"/>
+            <integer name="height" value="700"/>
+            <string name="filename" value="quadtree.svg"/>
         </film>
 
         <transform>
-            <lookat origin="100, 600" target="300, 325" />
+            <lookat origin="100, 600" target="300, 325"/>
         </transform>
     </sensor>
 
@@ -25,51 +25,48 @@
 
     <shape type="triangle_mesh">
         <transform>
-			<scale x="220" y="220" />
-            <translate x="200" y="100" />
+            <scale x="220" y="220"/>
+            <translate x="200" y="100"/>
         </transform>
 
         <string name="filename" value="donut.obj2d"/>
 
         <material>
-            <color name="stroke_color" value="0.0, 0.682, 0.937" />
-            <float name="stroke_width" value="3" />
-            <color name="fill_color" value="1, 1, 1" />
+            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <float name="stroke_width" value="3"/>
+            <color name="fill_color" value="1, 1, 1"/>
         </material>
     </shape>
 
+    <shape type="triangle_mesh">
+        <transform>
+            <scale x="220" y="220"/>
+            <translate x="500" y="100"/>
+        </transform>
 
-        <shape type="triangle_mesh">
-            <transform>
-                <scale x="220" y="220" />
-                <translate x="500" y="100" />
-            </transform>
+        <string name="filename" value="bunny.obj2d"/>
 
-            <string name="filename" value="bunny.obj2d"/>
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <float name="stroke_width" value="3"/>
+            <color name="fill_color" value="1, 1, 1"/>
+        </material>
+    </shape>
 
-            <material>
-                <color name="stroke_color" value="0.0, 0.682, 0.937" />
-                <float name="stroke_width" value="3" />
-                <color name="fill_color" value="1, 1, 1" />
-            </material>
-        </shape>
+    <shape type="triangle_mesh">
+        <transform>
+            <scale x="220" y="220"/>
+            <translate x="500" y="400"/>
+        </transform>
 
+        <string name="filename" value="armadillo.obj2d"/>
 
-        <shape type="triangle_mesh">
-            <transform>
-                <scale x="220" y="220" />
-                <translate x="500" y="400" />
-            </transform>
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <float name="stroke_width" value="3"/>
+            <color name="fill_color" value="1, 1, 1"/>
+        </material>
+    </shape>
 
-            <string name="filename" value="armadillo.obj2d"/>
-
-            <material>
-                <color name="stroke_color" value="0.0, 0.682, 0.937" />
-                <float name="stroke_width" value="3" />
-                <color name="fill_color" value="1, 1, 1" />
-            </material>
-        </shape>
-
-    <intersector type="quadtree" />
-
+    <intersector type="quadtree"/>
 </scene>

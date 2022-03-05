@@ -54,11 +54,10 @@ ReferenceCounted<Image3f> load_image_png(std::string_view filename) {
 
     png_init_io(png_ptr, fp);
 
-    /* If we have already
-        * read some of the signature */
     png_set_sig_bytes(png_ptr, sig_read);
 
-    png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, png_voidp_NULL);
+    png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND,
+                 png_voidp_NULL);
 
     int width = png_get_image_width(png_ptr, info_ptr);
     int height = png_get_image_height(png_ptr, info_ptr);
@@ -67,23 +66,18 @@ ReferenceCounted<Image3f> load_image_png(std::string_view filename) {
 
     int color_count = 1;
 
-    switch (color_type)
-    {
+    switch (color_type) {
         case PNG_COLOR_TYPE_RGBA:
-            //hasAlpha = true;
             color_count = 4;
             break;
         case PNG_COLOR_TYPE_RGB:
-            //hasAlpha = false;
             color_count = 3;
             break;
         case PNG_COLOR_TYPE_GRAY:
-            //isGray_ = true;
             color_count = 1;
             break;
         default:
             std::runtime_error("Color type not supported");
-            //std::cout << "Color type " << colorType << " not supported" << std::endl;
             png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
             fclose(fp);
             return nullptr;
@@ -97,22 +91,13 @@ ReferenceCounted<Image3f> load_image_png(std::string_view filename) {
     ReferenceCounted<Image3f> image = make_reference_counted<Image3f>(width, height);
 
     size_t row_bytes = png_get_rowbytes(png_ptr, info_ptr);
-    //*outData = (unsigned char*) malloc(row_bytes * outHeight);
 
     png_bytepp row_pointers = png_get_rows(png_ptr, info_ptr);
 
     for (int y = 0; y < height; y++) {
-        // note that png is ordered top to
-        // bottom, but OpenGL expect it bottom to top
-        // so the order or swapped
-        //memcpy(*outData+(row_bytes * (outHeight-1-i)), row_pointers[i], row_bytes);
-
-        //memcpy(&data[row_bytes * i], row_pointers[i], row_bytes);
-
-
         memcpy(&data[(row_bytes * (y))], row_pointers[y], row_bytes);
 
-        for(int x = 0; x < width; x++) {
+        for (int x = 0; x < width; x++) {
             float red = data[(height * color_count) * y + (x * color_count) + 0] / 255.0f;
             float green = data[(height * color_count) * y + (x * color_count) + 1] / 255.0f;
             float blue = data[(height * color_count) * y + (x * color_count) + 2] / 255.0f;
@@ -125,12 +110,12 @@ ReferenceCounted<Image3f> load_image_png(std::string_view filename) {
     return image;
 }
 
-bool store_png(const char *filename, const Image4b& image) {
+bool store_png(const char *filename, const Image4b &image) {
     int width = image.width();
     int height = image.height();
 
     FILE *fp = fopen(filename, "wb");
-    if(fp == nullptr) {
+    if (fp == nullptr) {
         LOG(INFO) << "Store PNG: Could not open file " << filename;
         return false;
     }
@@ -147,7 +132,7 @@ bool store_png(const char *filename, const Image4b& image) {
         LOG(ERROR) << "Store PNG: Could not allocate info struct (" << filename << ")";
     }
 
-    if(setjmp(png_jmpbuf(png_ptr))) {
+    if (setjmp(png_jmpbuf(png_ptr))) {
         LOG(ERROR) << "Store PNG: Set jumpbuf failed (" << filename << ")";
     }
 
@@ -159,15 +144,15 @@ bool store_png(const char *filename, const Image4b& image) {
 
     png_write_info(png_ptr, info_ptr);
 
-    row = (png_bytep) malloc(sizeof(png_byte)*width*4); //I think the problems start here
+    row = (png_bytep) malloc(sizeof(png_byte) * width * 4); //I think the problems start here
 
-    for(int y=0; y < height; ++y) {
-        for(int x=0; x < width; ++x) {
-            Color4b c = image.get_pixel(x,y).clamp(0, 255);
-            row[x*4+0] = c.red();
-            row[x*4+1] = c.green();
-            row[x*4+2] = c.blue();
-            row[x*4+3] = 255;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            Color4b c = image.get_pixel(x, y).clamp(0, 255);
+            row[x * 4 + 0] = c.red();
+            row[x * 4 + 1] = c.green();
+            row[x * 4 + 2] = c.blue();
+            row[x * 4 + 3] = 255;
         }
         png_write_row(png_ptr, row); //I think this causes the segmentation fault
     }
@@ -176,18 +161,18 @@ bool store_png(const char *filename, const Image4b& image) {
 
     if (info_ptr != nullptr) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
     if (row != nullptr) free(row);
-    if (png_ptr != nullptr) png_destroy_write_struct(&png_ptr, (png_infopp)nullptr);
+    if (png_ptr != nullptr) png_destroy_write_struct(&png_ptr, (png_infopp) nullptr);
     if (fp != nullptr) fclose(fp);
 
     return true;
 }
 
-bool store_png(const char *filename, const Image3f& image) {
+bool store_png(const char *filename, const Image3f &image) {
     int width = image.width();
     int height = image.height();
 
     FILE *fp = fopen(filename, "wb");
-    if(fp == nullptr) {
+    if (fp == nullptr) {
         LOG(INFO) << "Store PNG: Could not open file " << filename;
         return false;
     }
@@ -204,7 +189,7 @@ bool store_png(const char *filename, const Image3f& image) {
         LOG(ERROR) << "Store PNG: Could not allocate info struct (" << filename << ")";
     }
 
-    if(setjmp(png_jmpbuf(png_ptr))) {
+    if (setjmp(png_jmpbuf(png_ptr))) {
         LOG(ERROR) << "Store PNG: Set jumpbuf failed (" << filename << ")";
     }
 
@@ -216,13 +201,13 @@ bool store_png(const char *filename, const Image3f& image) {
 
     png_write_info(png_ptr, info_ptr);
 
-    row = (png_bytep) malloc(sizeof(png_byte)*width*3); //I think the problems start here
+    row = (png_bytep) malloc(sizeof(png_byte) * width * 3); //I think the problems start here
 
-    for(int y=0; y < height; ++y) {
-        for(int x=0; x < width; ++x) {
-            row[x*3] = std::clamp(image.get_pixel(x, y).red() * 255, 0.f, 255.f);
-            row[x*3+1] = std::clamp(image.get_pixel(x, y).green() * 255, 0.f, 255.f);
-            row[x*3+2] = std::clamp(image.get_pixel(x, y).blue() * 255, 0.f, 255.f);
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            row[x * 3] = std::clamp(image.get_pixel(x, y).red() * 255, 0.f, 255.f);
+            row[x * 3 + 1] = std::clamp(image.get_pixel(x, y).green() * 255, 0.f, 255.f);
+            row[x * 3 + 2] = std::clamp(image.get_pixel(x, y).blue() * 255, 0.f, 255.f);
         }
         png_write_row(png_ptr, row); //I think this causes the segmentation fault
     }
@@ -231,7 +216,7 @@ bool store_png(const char *filename, const Image3f& image) {
 
     if (info_ptr != nullptr) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
     if (row != nullptr) free(row);
-    if (png_ptr != nullptr) png_destroy_write_struct(&png_ptr, (png_infopp)nullptr);
+    if (png_ptr != nullptr) png_destroy_write_struct(&png_ptr, (png_infopp) nullptr);
     if (fp != nullptr) fclose(fp);
 
     return true;

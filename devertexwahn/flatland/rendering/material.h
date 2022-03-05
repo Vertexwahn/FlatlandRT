@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Okapi_Rendering_Material_11d72dcc_a416_4530_b706_b1e69711c5c5_h
-#define Okapi_Rendering_Material_11d72dcc_a416_4530_b706_b1e69711c5c5_h
+#ifndef Flatland_Rendering_Material_11d72dcc_a416_4530_b706_b1e69711c5c5_h
+#define Flatland_Rendering_Material_11d72dcc_a416_4530_b706_b1e69711c5c5_h
 
 #include "flatland/core/namespace.h"
 #include "flatland/rendering/property_set.h"
@@ -65,4 +65,4 @@ ReferenceCounted<SvgMaterial> create_material(const PropertySet& ps);
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Okapi_Rendering_Material_11d72dcc_a416_4530_b706_b1e69711c5c5_h
+#endif // end define Flatland_Rendering_Material_11d72dcc_a416_4530_b706_b1e69711c5c5_h

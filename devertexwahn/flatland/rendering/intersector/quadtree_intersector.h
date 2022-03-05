@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Flatland_Core_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
-#define Flatland_Core_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
+#ifndef Flatland_Rendering_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
+#define Flatland_Rendering_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
 
 #include "flatland/math/axis_aligned_bounding_box.h"
 #include "flatland/math/util.h"
@@ -23,7 +23,7 @@ struct SubShapeIdentifier {
     SubShapeId sub_shape_index;
 };
 
-template <unsigned int Dimension, typename ScalarType>
+template<unsigned int Dimension, typename ScalarType>
 class IShapesSubBoundsProvider {
 public:
     using AxisAlignedBoundingBox = AxisAlignedBoundingBoxType<Dimension, ScalarType>;
@@ -35,7 +35,8 @@ public:
     virtual AxisAlignedBoundingBox bounds() const = 0; // Minimal AABB of all shapes
 
     [[nodiscard]]
-    virtual AxisAlignedBoundingBox bounds(const SubShapeIdentifier& id) const = 0; // Minimal AABB of a specific sub shape
+    virtual AxisAlignedBoundingBox
+    bounds(const SubShapeIdentifier &id) const = 0; // Minimal AABB of a specific sub shape
 };
 
 using IShapesSubBoundsProvider2f = IShapesSubBoundsProvider<2, float>;
@@ -52,10 +53,10 @@ public:
     std::vector<SubShapeIdentifier> sub_shape_ids() const override {
         std::vector<SubShapeIdentifier> sub_shape_ids;
 
-        for(ShapeId shape_index = 0; shape_index < shapes_.size(); ++shape_index) {
+        for (ShapeId shape_index = 0; shape_index < shapes_.size(); ++shape_index) {
             ReferenceCounted<TriangleMesh2f> tm = std::dynamic_pointer_cast<TriangleMesh2f>(shapes_[shape_index]);
 
-            for(SubShapeId sub_shape_index = 0; sub_shape_index < tm->index_count() / 3; ++sub_shape_index) {
+            for (SubShapeId sub_shape_index = 0; sub_shape_index < tm->index_count() / 3; ++sub_shape_index) {
                 SubShapeIdentifier identifier{shape_index, sub_shape_index};
                 sub_shape_ids.push_back(identifier);
             }
@@ -67,11 +68,12 @@ public:
     [[nodiscard]]
     virtual AxisAlignedBoundingBox2f bounds() const override {
         if (shapes_.size() == 0u) {
-            return AxisAlignedBoundingBox2f {{0.f, 0.f}, {0.f, 0.f}};
+            return AxisAlignedBoundingBox2f{{0.f, 0.f},
+                                            {0.f, 0.f}};
         }
 
         AxisAlignedBoundingBox2f bb = shapes_[0]->bounds();
-        for(size_t i = 1; i < shapes_.size(); ++i) {
+        for (size_t i = 1; i < shapes_.size(); ++i) {
             bb = union_aabb(bb, shapes_[i]->bounds());
         }
 
@@ -79,10 +81,11 @@ public:
     }
 
     [[nodiscard]]
-    AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier& id) const override {
-        ReferenceCounted<TriangleMesh2f> tm = std::dynamic_pointer_cast<TriangleMesh2f>(shapes_[id.parent_shape_index]);
+    AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier &id) const override {
+        ReferenceCounted<TriangleMesh2f> tm = std::dynamic_pointer_cast<TriangleMesh2f>(
+                shapes_[id.parent_shape_index]);
 
-        auto triangle_index  = id.sub_shape_index;
+        auto triangle_index = id.sub_shape_index;
 
         size_t index0 = tm->indices()[triangle_index * 3u + 0u];
         size_t index1 = tm->indices()[triangle_index * 3u + 1u];
@@ -100,7 +103,8 @@ public:
         auto current_max_x = max(v0.x(), v1.x(), v2.x());
         auto current_max_y = max(v0.y(), v1.y(), v2.y());
 
-        return AxisAlignedBoundingBox2f{{current_min_x, current_min_y}, {current_max_x, current_max_y}};
+        return AxisAlignedBoundingBox2f{{current_min_x, current_min_y},
+                                        {current_max_x, current_max_y}};
     }
 
 private:
@@ -111,12 +115,14 @@ struct QuadtreeNode {
     std::vector<SubShapeIdentifier> sub_shape_ids;
     AxisAlignedBoundingBox2f bounds;
 
-    std::array<QuadtreeNode*, 4> nodes = {nullptr, nullptr, nullptr, nullptr}; // only nullptr for leave nodes
+    std::array<QuadtreeNode *, 4> nodes = {nullptr, nullptr, nullptr, nullptr}; // only nullptr for leave nodes
 
     [[nodiscard]]
     bool is_parent() const {
-        assert((sub_shape_ids.empty() == false && nodes[0] == nullptr && nodes[1] == nullptr && nodes[2] == nullptr && nodes[3] == nullptr) ^
-               (sub_shape_ids.empty() == true && (nodes[0] != nullptr || nodes[1] != nullptr || nodes[2] != nullptr || nodes[3] != nullptr)));
+        assert((sub_shape_ids.empty() == false && nodes[0] == nullptr && nodes[1] == nullptr &&
+                nodes[2] == nullptr && nodes[3] == nullptr) ^
+               (sub_shape_ids.empty() == true &&
+                (nodes[0] != nullptr || nodes[1] != nullptr || nodes[2] != nullptr || nodes[3] != nullptr)));
         return sub_shape_ids.empty();
     }
 
@@ -126,25 +132,48 @@ struct QuadtreeNode {
     }
 };
 
-std::vector<AxisAlignedBoundingBox2f> split_bound(const AxisAlignedBoundingBox2f& bound);
+std::vector<AxisAlignedBoundingBox2f> split_bound(const AxisAlignedBoundingBox2f &bound);
+
+enum class QuadtreeBuildStrategy {
+    StopSplitIfOneChildHasAsManySubShapesAsParent,
+    StopAtMaxDepth,
+    StopSplitIfAtLeastTwoChildsHaveAsManySubShapesAsParent
+};
 
 struct QuadtreeBuildDescription {
     const IShapesSubBoundsProvider2f *tip;
     const AxisAlignedBoundingBox2f &bound;
-    const std::vector<SubShapeIdentifier>& sub_shapes_ids;
+    const std::vector<SubShapeIdentifier> &sub_shapes_ids;
     size_t maximum_desired_leave_size;
+    int depth;
+    QuadtreeBuildStrategy strategy;
 };
 
-QuadtreeNode *build_quadtree(const QuadtreeBuildDescription& qtbd);
+QuadtreeNode *build_quadtree(const QuadtreeBuildDescription &qtbd);
 
 class QuadtreeIntersector : public IntersectorType<2, float> {
 public:
-    explicit QuadtreeIntersector(const PropertySet& ps) {}
+    explicit QuadtreeIntersector(const PropertySet &ps) {
+        auto str_strategy = ps.get_property<std::string>("strategy", "StopSplitIfOneChildHasAsManySubShapesAsParent");
+
+        if(str_strategy == "StopSplitIfOneChildHasAsManySubShapesAsParent") {
+            strategy_ = QuadtreeBuildStrategy::StopSplitIfOneChildHasAsManySubShapesAsParent;
+        }
+        else if(str_strategy == "StopSplitIfAtLeastTwoChildsHaveAsManySubShapesAsParent") {
+            strategy_ = QuadtreeBuildStrategy::StopSplitIfAtLeastTwoChildsHaveAsManySubShapesAsParent;
+        }
+        else if(str_strategy == "StopAtMaxDepth") {
+            strategy_ = QuadtreeBuildStrategy::StopAtMaxDepth;
+        }
+        else {
+            throw std::runtime_error("Unknown quad tree build strategy");
+        }
+    }
 
     virtual ~QuadtreeIntersector() = default;
 
-    // better name: squarify? cubeanize
-    static AxisAlignedBoundingBox2f square_box(const AxisAlignedBoundingBox2f& bounds) {
+    // better name: squarify? cubeanize?
+    static AxisAlignedBoundingBox2f square_box(const AxisAlignedBoundingBox2f &bounds) {
         float size = std::max(bounds.width(), bounds.height());
         AxisAlignedBoundingBox2f squared_box;
         squared_box.min_ = bounds.min_;
@@ -163,30 +192,33 @@ public:
         auto sub_shape_ids = shape_bounds_provider->sub_shape_ids();
 
         QuadtreeBuildDescription qtbd{
-            shape_bounds_provider.get(),
-            square_box(shape_bounds_provider->bounds()),
-            sub_shape_ids,
-            MAXIMUM_DESIRED_LEAVE_SIZE
+                shape_bounds_provider.get(),
+                square_box(shape_bounds_provider->bounds()),
+                sub_shape_ids,
+                MAXIMUM_DESIRED_LEAVE_SIZE,
+                0,
+                strategy_,
         };
 
         root_ = build_quadtree(qtbd);
     }
 
-    bool intersect(QuadtreeNode* node, const Ray &ray, MediumEvent &me) const {
+    bool intersect(QuadtreeNode *node, const Ray &ray, MediumEvent &me) const {
         if (node == nullptr) {
             return false;
         }
 
-        if(node->is_leave()) {
-            if(node->bounds.intersect(ray.origin, ray.direction, ray.max_t, nullptr)) {
+        if (node->is_leave()) {
+            if (node->bounds.intersect(ray.origin, ray.direction, ray.max_t, nullptr)) {
                 //me.t = std::numeric_limits<float>::infinity();
 
                 // visit each sub shape and find the closest intersection
                 for (size_t i = 0; i < node->sub_shape_ids.size(); ++i) {
                     auto shape_index = node->sub_shape_ids[i].parent_shape_index;
-                    ReferenceCounted<TriangleMesh2f> mesh = std::dynamic_pointer_cast<TriangleMesh2f>(shapes_[shape_index]);
-                    const auto& V = mesh->positions();
-                    const auto& position_indices = mesh->indices();
+                    ReferenceCounted<TriangleMesh2f> mesh = std::dynamic_pointer_cast<TriangleMesh2f>(
+                            shapes_[shape_index]);
+                    const auto &V = mesh->positions();
+                    const auto &position_indices = mesh->indices();
 
                     uint32_t f = node->sub_shape_ids[i].sub_shape_index;
 
@@ -195,20 +227,19 @@ public:
                     Point2f p2 = V[position_indices[f * 3 + 2]];
 
                     // make use of polygon class to compute the intersection
-                    std::array<Point2f,3> points_ = {p0, p1, p2};
+                    std::array<Point2f, 3> points_ = {p0, p1, p2};
                     Polygon2f poly{mesh->transform(), &points_[0], 3};
 
                     MediumEvent shape_me;
                     bool shape_hit = poly.intersect(ray, shape_me);
 
-                    if(shape_hit && shape_me.t < me.t) {
+                    if (shape_hit && shape_me.t < me.t) {
                         me = shape_me;
                     }
                 }
 
                 return me.t != std::numeric_limits<float>::infinity();
-            }
-            else {
+            } else {
                 return false;
             }
         }
@@ -216,9 +247,9 @@ public:
         // node is parent
         assert(node->is_parent());
         bool child_hit = false;
-        if(node->bounds.intersect(ray.origin, ray.direction, ray.max_t, nullptr)) {
-            for(int i = 0; i < 4; ++i) {
-                if(intersect(node->nodes[i], ray, me)) {
+        if (node->bounds.intersect(ray.origin, ray.direction, ray.max_t, nullptr)) {
+            for (int i = 0; i < 4; ++i) {
+                if (intersect(node->nodes[i], ray, me)) {
                     child_hit = true;
                 }
             }
@@ -238,17 +269,19 @@ public:
     }
 
     [[nodiscard]]
-    QuadtreeNode* root_node() {
+    QuadtreeNode *root_node() {
         return root_;
     }
 
 private:
     std::vector<ReferenceCounted<Shape>> shapes_;
-    QuadtreeNode* root_ = nullptr;
+    QuadtreeNode *root_ = nullptr;
+
+    QuadtreeBuildStrategy strategy_ = QuadtreeBuildStrategy::StopSplitIfOneChildHasAsManySubShapesAsParent;
 };
 
 using QuadtreeIntersector2f = QuadtreeIntersector;
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Flatland_Core_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
+#endif // end define Flatland_Rendering_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h

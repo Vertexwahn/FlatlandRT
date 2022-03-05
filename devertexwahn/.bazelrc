@@ -46,7 +46,13 @@ build:vs2019 --host_copt=-DWIN32_LEAN_AND_MEAN
 build:vs2019 --host_copt=-DNOGDI
 
 # Visual Studio 2022
-build:vs2022 --config=vs2019
+build:vs2022 --cxxopt=/std:c++17
+build:vs2022 --enable_runfiles # https://github.com/bazelbuild/bazel/issues/8843
+build:vs2022 --define compiler=vs2022
+build:vs2022 --copt=-DWIN32_LEAN_AND_MEAN
+build:vs2022 --copt=-DNOGDI
+build:vs2022 --host_copt=-DWIN32_LEAN_AND_MEAN
+build:vs2022 --host_copt=-DNOGDI
 
 # Address Sanitizer
 build:asan --config=gcc9

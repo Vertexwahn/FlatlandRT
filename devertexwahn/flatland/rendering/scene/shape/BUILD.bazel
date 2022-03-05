@@ -84,7 +84,6 @@ cc_test(
 
 cc_library(
     name = "shape",
-    srcs = ["shape.cpp"],
     hdrs = ["shape.h"],
     deps = [
         "//flatland/core:object",

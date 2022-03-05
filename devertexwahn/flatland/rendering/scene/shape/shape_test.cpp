@@ -11,7 +11,7 @@ using namespace flatland;
 
 class DummyShape : public Shape2f {
 public:
-    DummyShape(const Transform44f& transform) : Shape2f(transform) {
+    DummyShape(const Transform44f &transform) : Shape2f(transform) {
     }
 
     [[nodiscard]]
@@ -19,11 +19,12 @@ public:
         throw std::runtime_error("Not implemented yet");
     }
 
-    virtual bool intersect(const Ray2f &ray, MediumEvent2f &its) const override { return  false; }
+    virtual bool intersect(const Ray2f &ray, MediumEvent2f &its) const override { return false; }
 
-    virtual std::string convert_to_svg(const int svgCanvasWidth, const int svgCanvasHeight) const override {return "";};
+    virtual std::string
+    convert_to_svg(const int svgCanvasWidth, const int svgCanvasHeight) const override { return ""; };
 
-    Transform44f& getTransform() {
+    Transform44f &getTransform() {
         return transform_;
     }
 };

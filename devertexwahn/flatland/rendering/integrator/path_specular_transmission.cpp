@@ -11,7 +11,7 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-PathSpecularTransmission::PathSpecularTransmission(const PropertySet& ps) : Integrator2f(ps) {
+PathSpecularTransmission::PathSpecularTransmission(const PropertySet &ps) : Integrator2f(ps) {
     max_depth = ps.get_property("max_depth", 5);
 }
 
@@ -20,16 +20,16 @@ PathSpecularTransmission::~PathSpecularTransmission() {
 
 Color3f PathSpecularTransmission::trace(
         const Scene2f *scene,
-        Sampler* sampler,
+        Sampler *sampler,
         Ray2f &ray,
         const int depth) const {
-    if(depth > max_depth)
+    if (depth > max_depth)
         return Color3f{0.f, 0.f, 0.f}; //ColorConstants3f::Black;
 
     MediumEvent2f me;
     bool hit = scene->intersect(ray, me);
 
-    if(hit) {
+    if (hit) {
         ray.max_t = me.t;
 
         // compute refraction
@@ -48,16 +48,15 @@ Color3f PathSpecularTransmission::trace(
 
         std::cout << "Valid refraction: " << valid << std::endl;
         assert(valid);
-        if(!valid)
+        if (!valid)
             return Color3f{0.f, 0.f, 0.f};
 
         refracted_direction.normalize();
 
         Ray2f refractedRay(me.p + refracted_direction * 0.01f, refracted_direction, 0.f, 20000.f);
 
-        trace(scene, sampler, refractedRay, depth+1);
-    }
-    else {
+        trace(scene, sampler, refractedRay, depth + 1);
+    } else {
         ray.max_t = 100.f;
     }
 

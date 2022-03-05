@@ -3,6 +3,7 @@ SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+[![Support Ukraine](https://img.shields.io/badge/Support-Ukraine-FFD500?style=flat&labelColor=005BBB)](https://opensource.fb.com/support-ukraine)
 [![Build Status](https://vertexwahn.visualstudio.com/FlatlandRT/_apis/build/status/Vertexwahn.FlatlandRT?branchName=master)](https://vertexwahn.visualstudio.com/FlatlandRT/_build/latest?definitionId=6&branchName=master)
 
 # FlatlandRT
@@ -18,7 +19,7 @@ From left to right: Refraction, ambient occulsion and reflection:
 
 Quadtree intersection of 2d triangle meshes:
 
-![Quadtree](docs/images/quadtree.svg)
+![Quadtree](docs/images/quadtree_StopSplitIfAtLeastTwoChildsHaveAsManySubShapesAsParent.svg)
 
 More examples scenes can be found [here](devertexwahn/flatland/docs/example_scenes.md).
 See the [user manual](devertexwahn/flatland/docs/user_manual.md) if you want to find out how to use it. 
@@ -142,6 +143,18 @@ It might be necessary to do some modifications to the generated solution and pro
 
 I made a short video where I describe how I use test driven development to implement this project: 
 [![Let's Code: Using Test-driven Development to implement a ray tracer](https://img.youtube.com/vi/vFBXNr952nU/0.jpg)](https://www.youtube.com/watch?v=vFBXNr952nU)
+
+## Ray tracing 101
+
+I have written several blog posts about ray tracing:
+
+- [Ray tracing 101: Refraction of light](https://vertexwahn.de/2020/12/19/refraction/)
+- [Ray tracing 101: Matrices and coordinate systems](https://vertexwahn.de/2020/12/20/coordinatesystemsandmatrices/)
+- [Ray tracing 101: How does a look at transform work?](https://vertexwahn.de/2020/12/21/lookat/)
+- [Ray tracing 101: Perspective projection](https://vertexwahn.de/2020/12/27/perspectiveprojection/)
+- [Ray tracing 101: Shooting Rays](https://vertexwahn.de/2021/01/03/shootingrays/)
+- [Ray Tracing 101: Image sampling and reconstruction](https://vertexwahn.de/2021/02/28/imagereconstruction/)
+- [Ray Tracing 101: Ray Triangle Intersection](https://vertexwahn.de/2021/05/29/raytriangleintersection/)
 
 ## License
 

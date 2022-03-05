@@ -11,16 +11,16 @@ using namespace flatland;
 
 TEST(Ray2f, GivenDirectionOriginMaxMinT_WhenRayIsInitialized_ThenInitzalizedRayValues) {
     Point2f origin(0.f, 0.f);
-	Vector2f direction(1.f, 0.f);
+    Vector2f direction(1.f, 0.f);
 
-	Ray2f r(origin, direction, 1.f, 10.f);
+    Ray2f r(origin, direction, 1.f, 10.f);
 
     EXPECT_THAT(r.origin.x(), 0.f);
     EXPECT_THAT(r.origin.y(), 0.f);
     EXPECT_THAT(r.direction.x(), 1.f);
     EXPECT_THAT(r.direction.y(), 0.f);
     EXPECT_THAT(r.min_t, 1.f);
-	EXPECT_THAT(r.max_t, 10.f);
+    EXPECT_THAT(r.max_t, 10.f);
 }
 
 TEST(Ray2f, GivenNormalizedRay_WhenCheckingIfRayIsNormalized_ThenNormalizedIsTrue) {

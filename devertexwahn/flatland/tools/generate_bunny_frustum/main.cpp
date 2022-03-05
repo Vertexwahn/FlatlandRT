@@ -4,7 +4,7 @@
  */
 
 #include "flatland/rendering/canvas/svg_canvas.h"
-//#include "flatland/imaging/io/io.h"
+
 #include "flatland/math/geometry.h"
 #include "flatland/math/transform.h"
 #include "flatland/math/util.h"
@@ -16,7 +16,7 @@
 using namespace flatland;
 
 int main() {
-    SvgCanvas2f sc{Vector2i{1400,900}};
+    SvgCanvas2f sc{Vector2i{1400, 900}};
 
     float near_clip_plane_distance = 100.f;
     float far_clip_plane_distance = 500.f;
@@ -31,16 +31,16 @@ int main() {
     Point4f near_top(0.f, y_near_top, near_clip_plane_distance, 1.f);
     Point4f near_bottom(0.f, -y_near_top, near_clip_plane_distance, 1.f);
 
-    std::vector<Point2f> points {
-        {0,0},
-        {far_bottom.z(), far_bottom.y()},
-        {far_top.z(), far_top.y()},
+    std::vector<Point2f> points{
+            {0,              0},
+            {far_bottom.z(), far_bottom.y()},
+            {far_top.z(),    far_top.y()},
     };
 
-    std::vector<Point2f> points2 {
-            {0,0},
+    std::vector<Point2f> points2{
+            {0,               0},
             {near_bottom.z(), near_bottom.y()},
-            {near_top.z(), near_top.y()},
+            {near_top.z(),    near_top.y()},
     };
 
     auto transform = translate(Vector2f{50.f, 400.f});
@@ -72,13 +72,11 @@ int main() {
     Point4f t_near_top = per * near_top;
     Point4f t_near_bottom = per * near_bottom;
 
-
-
-    std::vector<Point2f> points4 {
-        {t_near_bottom.z(), t_near_bottom.y()},
-        {t_far_bottom.z(), t_far_bottom.y()},
-        {t_far_top.z(), t_far_top.y()},
-        {t_near_top.z(), t_near_top.y()},
+    std::vector<Point2f> points4{
+            {t_near_bottom.z(), t_near_bottom.y()},
+            {t_far_bottom.z(),  t_far_bottom.y()},
+            {t_far_top.z(),     t_far_top.y()},
+            {t_near_top.z(),    t_near_top.y()},
     };
 
     auto transformedFrustum = make_reference_counted<Polygon2f>(transform2, &points4[0], points4.size());
@@ -91,14 +89,14 @@ int main() {
     Point3f w_t_near_top = t_near_top.xyz() / t_near_top.w();
     Point3f w_t_near_bottom = t_near_bottom.xyz() / t_near_bottom.w();
 
-    std::vector<Point2f> points5 {
-        {w_t_near_bottom.z(), w_t_near_bottom.y()},
-        {w_t_far_bottom.z(), w_t_far_bottom.y()},
-        {w_t_far_top.z(), w_t_far_top.y()},
-        {w_t_near_top.z(), w_t_near_top.y()},
+    std::vector<Point2f> points5{
+            {w_t_near_bottom.z(), w_t_near_bottom.y()},
+            {w_t_far_bottom.z(),  w_t_far_bottom.y()},
+            {w_t_far_top.z(),     w_t_far_top.y()},
+            {w_t_near_top.z(),    w_t_near_top.y()},
     };
 
-    for(auto point : points5) {
+    for (auto point: points5) {
         std::cout << "aftor homo" << std::endl;
         std::cout << point << std::endl;
     }
@@ -114,7 +112,7 @@ int main() {
     sc.add(transformedFrustumAfterHomo.get());
 
     auto bunny_points2 = load_2D_ply<float>("scenes/bunny_coords.ply");
-    for(auto& point : bunny_points2) {
+    for (auto &point: bunny_points2) {
         Point4f p4 = per * Point4f(0, point.y(), point.x(), 1.f);
 
         point = p4.zy();

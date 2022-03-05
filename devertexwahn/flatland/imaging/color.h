@@ -21,48 +21,52 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     using Scalar = ScalarType;
 
     ColorType() : Base() {}
+
     ColorType(const ScalarType red, const ScalarType green, const ScalarType blue) : Base(red, green, blue) {}
-    ColorType(const ScalarType red, const ScalarType green, const ScalarType blue, const ScalarType alpha) : Base(red, green, blue, alpha) {}
+
+    ColorType(const ScalarType red, const ScalarType green, const ScalarType blue, const ScalarType alpha) : Base(
+            red, green, blue, alpha) {}
+
     explicit ColorType(const ScalarType value) {
         *this = Base::Constant(value);
     }
 
-    template <typename Derived>
-    ColorType(const Eigen::MatrixBase<Derived>& src) : Base(src) {
+    template<typename Derived>
+    ColorType(const Eigen::MatrixBase<Derived> &src) : Base(src) {
     }
 
-    Scalar& red() {
+    Scalar &red() {
         static_assert(Dimension > 0);
         return Base::x();
     }
 
-    Scalar& green() {
+    Scalar &green() {
         static_assert(Dimension > 1);
         return Base::y();
     }
 
-    Scalar& blue() {
+    Scalar &blue() {
         static_assert(Dimension > 2);
         return Base::z();
     }
 
-    const Scalar& red() const {
+    const Scalar &red() const {
         static_assert(Dimension > 0);
         return Base::x();
     }
 
-    const Scalar& green() const {
+    const Scalar &green() const {
         static_assert(Dimension > 1);
         return Base::y();
     }
 
-    const Scalar& blue() const {
+    const Scalar &blue() const {
         static_assert(Dimension > 2);
         return Base::z();
     }
 
-    ColorType& clamp(const ScalarType min = ScalarType{0}, const ScalarType max = ScalarType{1}) {
-        for(long int i = 0; i < Base::size(); ++i) {
+    ColorType &clamp(const ScalarType min = ScalarType{0}, const ScalarType max = ScalarType{1}) {
+        for (long int i = 0; i < Base::size(); ++i) {
             (*this)[i] = std::clamp((*this)[i], min, max);
         }
 
@@ -72,19 +76,19 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     using Base::operator=;
 };
 
-template <typename ScalarType>
+template<typename ScalarType>
 struct ColorConstants3 {
     using Scalar = ScalarType;
-    static constexpr ColorType<3, ScalarType> Black{Scalar{0.0},Scalar{0.0},Scalar{0.0}};
-    static constexpr ColorType<3, ScalarType> White{Scalar{1.0},Scalar{1.0},Scalar{1.0}};
+    static constexpr ColorType<3, ScalarType> Black{Scalar{0.0}, Scalar{0.0}, Scalar{0.0}};
+    static constexpr ColorType<3, ScalarType> White{Scalar{1.0}, Scalar{1.0}, Scalar{1.0}};
 };
 
 using ColorConstants3f = ColorConstants3<float>;
 using ColorConstants3d = ColorConstants3<double>;
 
-template <typename ScalarType>
+template<typename ScalarType>
 using Color3 = ColorType<3, ScalarType>;
-template <typename ScalarType>
+template<typename ScalarType>
 using Color4 = ColorType<4, ScalarType>;
 
 using Color3f = Color3<float>;

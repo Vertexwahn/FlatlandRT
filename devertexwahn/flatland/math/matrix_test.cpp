@@ -40,9 +40,9 @@ TEST(Matrix44f, Matrix44f_multiplication) {
 
     Matrix44f expected_result;
     expected_result << 3.f, 0.f, 0.f, 400.f,
-                      0.f, 3.f, 0.f, 300.f,
-                      0.f, 0.f, 3.f, 0.f,
-                      0.f, 0.f, 0.f, 1.f;
+                       0.f, 3.f, 0.f, 300.f,
+                       0.f, 0.f, 3.f, 0.f,
+                       0.f, 0.f, 0.f, 1.f;
 
     EXPECT_THAT(result, expected_result);
 }

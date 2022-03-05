@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Flatland_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
-#define Flatland_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
+#ifndef Flatland_Rendering_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
+#define Flatland_Rendering_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
 
 #include "flatland/math/axis_aligned_bounding_box.h"
 #include "flatland/math/ray.h"
@@ -197,4 +197,4 @@ using SvgCanvas2d = SvgCanvasType<double>;
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Flatland_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
+#endif // end define Flatland_Rendering_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h

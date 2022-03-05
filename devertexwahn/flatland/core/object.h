@@ -17,6 +17,7 @@ FLATLAND_BEGIN_NAMESPACE
 class Object : NonCopyable {
 public:
     Object() = default;
+
     virtual ~Object() = default;
 
     [[nodiscard]]

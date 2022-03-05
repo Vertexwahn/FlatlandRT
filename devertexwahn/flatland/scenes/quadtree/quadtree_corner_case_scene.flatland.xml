@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+
+    The scene file format schema is the same as used in Mitsuba Renderer 2
+    (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
+-->
+<scene>
+    <sensor>
+        <film>
+            <integer name="width" value="1300"/>
+            <integer name="height" value="1200"/>
+            <string name="filename" value="quadtree_corner_case.svg"/>
+        </film>
+
+        <transform>
+            <lookat origin="100, 600" target="300, 325"/>
+        </transform>
+    </sensor>
+
+    <integrator type="path_specular_transmission">
+        <integer name="max_depth" value="3"/>
+    </integrator>
+
+    <shape type="triangle_mesh">
+        <transform>
+            <scale x="4" y="4"/>
+            <translate x="0" y="205"/>
+        </transform>
+
+        <string name="filename" value="test4.obj2d"/>
+
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <float name="stroke_width" value="3"/>
+            <color name="fill_color" value="1, 1, 1"/>
+        </material>
+    </shape>
+
+    <intersector type="quadtree">
+        <string name="strategy" value="StopAtMaxDepth"/>
+    </intersector>
+</scene>

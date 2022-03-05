@@ -5,12 +5,12 @@
 
 #include "flatland/rendering/intersector/quadtree_intersector.h"
 
-#include "flatland/math/util.h"
 #include "flatland/core/logging.h"
+#include "flatland/math/util.h"
 
 FLATLAND_BEGIN_NAMESPACE
 
-std::vector<AxisAlignedBoundingBox2f> split_bound(const AxisAlignedBoundingBox2f& bound) {
+std::vector<AxisAlignedBoundingBox2f> split_bound(const AxisAlignedBoundingBox2f &bound) {
     // G---------H---------I
     // |         |         |
     // |   (2)   |   (3)   |
@@ -54,10 +54,9 @@ std::vector<AxisAlignedBoundingBox2f> split_bound(const AxisAlignedBoundingBox2f
     assert(qtbd.sub_shapes_ids.size() >= zones[2].size()); \
     assert(qtbd.sub_shapes_ids.size() >= zones[3].size());
 
-QuadtreeNode *build_quadtree(const QuadtreeBuildDescription& qtbd) {
+QuadtreeNode *build_quadtree(const QuadtreeBuildDescription &qtbd) {
     // no triangles, no cry
     if (qtbd.sub_shapes_ids.empty()) {
-        LOG(INFO) << "Sub shape ids are empty";
         return nullptr;
     }
 
@@ -77,11 +76,11 @@ QuadtreeNode *build_quadtree(const QuadtreeBuildDescription& qtbd) {
 
     // Instead of checking if a triangle overlaps the subtree AABB we only
     // check if the AABB of the triangle overlaps the AABB of the subtree
-    for (auto sub_shape_id : qtbd.sub_shapes_ids) {
+    for (auto sub_shape_id: qtbd.sub_shapes_ids) {
         auto triangle_bounds = qtbd.tip->bounds(sub_shape_id);
 
         for (int i = 0; i < 4; ++i) {
-            if(overlaps(triangle_bounds, subtree_bounds[i])) {
+            if (overlaps(triangle_bounds, subtree_bounds[i])) {
                 zones[i].push_back(sub_shape_id);
             }
         }
@@ -94,13 +93,39 @@ QuadtreeNode *build_quadtree(const QuadtreeBuildDescription& qtbd) {
     auto *parent = new QuadtreeNode();
     parent->bounds = qtbd.bound;
 
-    // Stop if splitting would lead to one child element that has as many triangles as the corresponding parent
-    for (int i = 0; i < 4; ++i) {
-        if (zones[i].size() == qtbd.sub_shapes_ids.size()) {
-            LOG(INFO) << "Splitting does not make sense: " << qtbd.sub_shapes_ids.size();
-            parent->sub_shape_ids = qtbd.sub_shapes_ids;
-            return parent;
-        }
+    switch (qtbd.strategy) {
+        case QuadtreeBuildStrategy::StopSplitIfOneChildHasAsManySubShapesAsParent: {
+                // Stop if splitting would lead to one child element that has as many triangles as the corresponding parent
+                for (int i = 0; i < 4; ++i) {
+                    if (zones[i].size() == qtbd.sub_shapes_ids.size()) {
+                        parent->sub_shape_ids = qtbd.sub_shapes_ids;
+                        return parent;
+                    }
+                }
+            }
+            break;
+        case QuadtreeBuildStrategy::StopSplitIfAtLeastTwoChildsHaveAsManySubShapesAsParent: {
+                int votes = 0;
+                for (int i = 0; i < 4; ++i) {
+                    if (zones[i].size() == qtbd.sub_shapes_ids.size()) {
+                        votes++;
+                    }
+                }
+
+                if(votes > 1) {
+                    parent->sub_shape_ids = qtbd.sub_shapes_ids;
+                    return parent;
+                }
+            }
+            break;
+        case QuadtreeBuildStrategy::StopAtMaxDepth: {
+                const int MAX_DEPTH = 6;
+                if(qtbd.depth >= MAX_DEPTH)
+                    return parent;
+            }
+            break;
+        default:
+            throw std::runtime_error("Unknown strategy.");
     }
 
     for (int i = 0; i < 4; ++i) {
@@ -108,7 +133,9 @@ QuadtreeNode *build_quadtree(const QuadtreeBuildDescription& qtbd) {
                 qtbd.tip,
                 subtree_bounds[i],
                 zones[i],
-                qtbd.maximum_desired_leave_size
+                qtbd.maximum_desired_leave_size,
+                qtbd.depth+1,
+                qtbd.strategy
         };
 
         parent->nodes[i] = build_quadtree(qtbd_child);

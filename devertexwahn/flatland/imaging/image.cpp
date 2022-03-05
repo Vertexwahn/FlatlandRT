@@ -8,7 +8,7 @@
 FLATLAND_BEGIN_NAMESPACE
 
 Image3f::~Image3f() {
-    delete [] data_;
+    delete[] data_;
 }
 
 void Image3f::set_pixel(int x, int y, const Color3f &color) {
@@ -17,9 +17,9 @@ void Image3f::set_pixel(int x, int y, const Color3f &color) {
     assert(x < width_);
     assert(y < height_);
 
-    data_[(width_*y + x) * 3] = color.red();
-    data_[(width_*y + x) * 3 + 1] = color.green();
-    data_[(width_*y + x) * 3 + 2] = color.blue();
+    data_[(width_ * y + x) * 3] = color.red();
+    data_[(width_ * y + x) * 3 + 1] = color.green();
+    data_[(width_ * y + x) * 3 + 2] = color.blue();
 }
 
 void Image3f::set_pixel(const Point2i &point, const Color3f &color) {
@@ -32,11 +32,11 @@ Color3f Image3f::get_pixel(int x, int y) const {
     assert(x < width_);
     assert(y < height_);
 
-    auto r = data_[(width_*y + x) * 3];
-    auto g = data_[(width_*y + x) * 3 + 1];
-    auto b = data_[(width_*y + x) * 3 + 2];
+    auto r = data_[(width_ * y + x) * 3];
+    auto g = data_[(width_ * y + x) * 3 + 1];
+    auto b = data_[(width_ * y + x) * 3 + 2];
 
-    return Color3f{r,g,b};
+    return Color3f{r, g, b};
 }
 
 Image3f::Image3f(const int width, const int height) : width_(width), height_(height) {
@@ -48,9 +48,9 @@ Image3f::Image3f(const int width, const int height) : width_(width), height_(hei
             auto g = 0.f;
             auto b = 0.f;
 
-            data_[(width*y + x) * 3] = r;
-            data_[(width*y + x) * 3 + 1] = g;
-            data_[(width*y + x) * 3 + 2] = b;
+            data_[(width * y + x) * 3] = r;
+            data_[(width * y + x) * 3 + 1] = g;
+            data_[(width * y + x) * 3 + 2] = b;
         }
     }
 }
@@ -60,9 +60,9 @@ Image3f::Image3f(const Image3f &src) : width_(src.width_), height_(src.height_) 
 
     for (int x = 0; x < width_; ++x) {
         for (int y = 0; y < height_; ++y) {
-            data_[(width_*y + x) * 3] = src.data_[(width_*y + x) * 3];
-            data_[(width_*y + x) * 3 + 1] = src.data_[(width_*y + x) * 3 + 1];
-            data_[(width_*y + x) * 3 + 2] = src.data_[(width_*y + x) * 3 + 2];
+            data_[(width_ * y + x) * 3] = src.data_[(width_ * y + x) * 3];
+            data_[(width_ * y + x) * 3 + 1] = src.data_[(width_ * y + x) * 3 + 1];
+            data_[(width_ * y + x) * 3 + 2] = src.data_[(width_ * y + x) * 3 + 2];
         }
     }
 

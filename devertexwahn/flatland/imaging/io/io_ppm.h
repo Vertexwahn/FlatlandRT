@@ -13,7 +13,7 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-void store_image_ppm(std::string_view filename, const Image4b& image);
+void store_image_ppm(std::string_view filename, const Image4b &image);
 
 FLATLAND_END_NAMESPACE
 

@@ -15,19 +15,19 @@ using namespace flatland;
 
 TEST(Warping, warp_uniform_square_to_concentric_disk) {
     Point2f sample[] = {
-            {0.f, 0.f},
+            {0.f,  0.f},
             {0.5f, 0.5f},
-            {1.f, 1.f},
+            {1.f,  1.f},
     };
 
     Point2f expectedWarpSamples[] = {
             {-0.707107f, -0.707107f},
-            {0.f, 0.f},
-            {0.707107f, 0.707107f},
+            {0.f,        0.f},
+            {0.707107f,  0.707107f},
     };
 
     constexpr size_t point_count = sizeof(sample) / sizeof(sample[0]);
-    static_assert(point_count == sizeof(expectedWarpSamples)/sizeof(expectedWarpSamples[0]));
+    static_assert(point_count == sizeof(expectedWarpSamples) / sizeof(expectedWarpSamples[0]));
 
     for (size_t index = 0; index < point_count; ++index) {
         auto warpped_sample = warp_uniform_square_to_concentric_disk(sample[index]);
@@ -47,15 +47,15 @@ TEST(Warping, GivenArotation_angle_WhenComputingRotatedUnitVector_ThenExpectProp
     };
 
     Vector2d expected_rotated_unit_vector[] = {
-            {1.f, 0.f},
-            {0.707107f, 0.707107f},
-            {0.f, 1.f},
+            {1.f,        0.f},
+            {0.707107f,  0.707107f},
+            {0.f,        1.f},
             {-0.707107f, 0.707107f},
-            {0.f, -1.f},
+            {0.f,        -1.f},
     };
 
     constexpr size_t Count = sizeof(expected_rotated_unit_vector) / sizeof(expected_rotated_unit_vector[0]);
-    static_assert(Count == sizeof(rotation_angle)/sizeof(rotation_angle[0]));
+    static_assert(Count == sizeof(rotation_angle) / sizeof(rotation_angle[0]));
 
     for (size_t i = 0; i < Count; ++i) {
         auto v = rotated_unit_vector(degree_to_radian(rotation_angle[i]));
@@ -79,7 +79,7 @@ TEST(Warping, sample_half_circle) {
 }
 
 TEST(Warping, XiQuadartTest_warpUniformSquareToConcentricDisk) {
-	// Arrange
+    // Arrange
     PropertySet ps;
     ps.add_property("deterministic_seed", true);
     IndependentSampler sampler{ps};
@@ -89,9 +89,9 @@ TEST(Warping, XiQuadartTest_warpUniformSquareToConcentricDisk) {
     constexpr int resolution = resolution_x * resolution_y;
     constexpr int sampleCount = 1000 * resolution;
 
-    std::array<double, resolution> observedFrequencies{ 0.0 };
+    std::array<double, resolution> observedFrequencies{0.0};
 
-	// Act
+    // Act
     for (size_t i = 0; i < sampleCount; ++i) {
         auto sample = warp_uniform_square_to_concentric_disk(sampler.next_2d());
         int x = std::floor((sample.x() * 0.5 + 0.5) * resolution_x);
@@ -100,7 +100,7 @@ TEST(Warping, XiQuadartTest_warpUniformSquareToConcentricDisk) {
         observedFrequencies[bucketIndex] += 1.0;
     }
 
-    std::array<double, resolution> expectedFrequencies{ 0.0 };
+    std::array<double, resolution> expectedFrequencies{0.0};
 
     auto f = [&](double y, double x) -> double {
         x = x * 2 - 1;
@@ -112,8 +112,8 @@ TEST(Warping, XiQuadartTest_warpUniformSquareToConcentricDisk) {
 
     for (int x = 0; x < resolution_x; ++x) {
         for (int y = 0; y < resolution_y; ++y) {
-            double x0 = (double)x / resolution_x;
-            double y0 = (double)y / resolution_y;
+            double x0 = (double) x / resolution_x;
+            double y0 = (double) y / resolution_y;
             double x1 = (x + 1.0) / resolution_x;
             double y1 = (y + 1.0) / resolution_y;
 
@@ -125,13 +125,13 @@ TEST(Warping, XiQuadartTest_warpUniformSquareToConcentricDisk) {
         }
     }
 
-	// Assert
+    // Assert
     const int minExpFrequency = 5;
     const float significanceLevel = 0.01f;
 
     std::pair<bool, std::string> result = hypothesis::chi2_test(resolution_y * resolution_x, observedFrequencies.data(),
-        expectedFrequencies.data(), sampleCount,
-        minExpFrequency, significanceLevel, 1);
+                                                                expectedFrequencies.data(), sampleCount,
+                                                                minExpFrequency, significanceLevel, 1);
 
     EXPECT_THAT(result.second, testing::HasSubstr("(d.o.f. = 2125)"));
     EXPECT_THAT(result.second, testing::HasSubstr("Accepted the null hypothesis"));

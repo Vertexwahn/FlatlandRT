@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Okapi_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
-#define Okapi_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
+#ifndef Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
+#define Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
 
 #include "flatland/rendering/canvas/label.h"
 #include "flatland/rendering/integrator/integrator.h"
@@ -18,7 +18,7 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-template <unsigned int Dimension, typename ScalarType>
+template<unsigned int Dimension, typename ScalarType>
 class SceneType {
 public:
     using Shape = ShapeType<Dimension, ScalarType>;
@@ -38,9 +38,11 @@ public:
     void add_shape(ReferenceCounted<Shape> shape) {
         shapes_.push_back(shape);
     }
+
     std::vector<ReferenceCounted<Shape>> shapes() const {
         return shapes_;
     }
+
     size_t shape_count() const { return shapes_.size(); }
 
     bool intersect(const Ray &ray, MediumEvent &me) const {
@@ -56,6 +58,7 @@ public:
     void set_sensor(ReferenceCounted<Sensor> sensor) {
         sensor_ = sensor;
     }
+
     ReferenceCounted<Sensor> sensor() const {
         return sensor_;
     }
@@ -63,16 +66,19 @@ public:
     void set_integrator(ReferenceCounted<Integrator> integrator) {
         integrator_ = integrator;
     }
+
     ReferenceCounted<Integrator> integrator() const {
         return integrator_;
     }
 
-    void add_annotation(const Label& text)  {
+    void add_annotation(const Label &text) {
         annotations_.push_back(text);
     }
+
     std::vector<Label> annotations() {
         return annotations_;
     }
+
     size_t annotation_count() {
         return annotations_.size();
     }
@@ -80,6 +86,7 @@ public:
     void set_sampler(ReferenceCounted<Sampler> sampler) {
         sampler_ = sampler;
     }
+
     ReferenceCounted<Sampler> sampler() const {
         return sampler_;
     }
@@ -105,9 +112,9 @@ private:
     ReferenceCounted<Intersector> intersector_;
 };
 
-template <typename ScalarType>
+template<typename ScalarType>
 using Scene2 = SceneType<2, ScalarType>;
-template <typename ScalarType>
+template<typename ScalarType>
 using Scene3 = SceneType<3, ScalarType>;
 
 using Scene2f = Scene2<float>;
@@ -118,4 +125,4 @@ using Scene3d = Scene3<double>;
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Okapi_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
+#endif // end define Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h

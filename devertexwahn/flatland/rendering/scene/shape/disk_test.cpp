@@ -3,9 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/scene/shape/disk.h"
-#include "flatland/math/util.h"
 #include "flatland/math/refract.h"
+#include "flatland/math/util.h"
+#include "flatland/rendering/scene/shape/disk.h"
 
 #include "gmock/gmock.h"
 
@@ -178,14 +178,14 @@ TEST(Disk2f, GivenADiskAndRay_WhenRayRefracts_ThenInnerIntersection) {
 TEST(Disk2f, GivenADiskAndARay_WhenRayIntersectsSphere_ThenValidNormal) {
     // Arrange
     Ray2f rays[] = {
-        {Point2f{-100.f, 0.f}, Vector2f{1.f, 0.f}, 0.f, 1000.f},
-        {Point2f{100.f, 0.f}, Vector2f{-1.f, 0.f}, 0.f, 1000.f},
-        {Point2f{0.f, 100.f}, Vector2f{0.f, -1.f}, 0.f, 1000.f},
-        {Point2f{0.f, -100.f}, Vector2f{0.f, 1.f}, 0.f, 1000.f},
-        {Point2f{-100.f, -100.f}, Vector2f{std::sqrt(.5f), std::sqrt(.5f)}, 0.f, 1000.f},
-        {Point2f{-100.f, 100.f}, Vector2f{std::sqrt(.5f), -std::sqrt(.5f)}, 0.f, 1000.f},
+            {Point2f{-100.f, 0.f},    Vector2f{1.f, 0.f},                        0.f, 1000.f},
+            {Point2f{100.f, 0.f},     Vector2f{-1.f, 0.f},                       0.f, 1000.f},
+            {Point2f{0.f, 100.f},     Vector2f{0.f, -1.f},                       0.f, 1000.f},
+            {Point2f{0.f, -100.f},    Vector2f{0.f, 1.f},                        0.f, 1000.f},
+            {Point2f{-100.f, -100.f}, Vector2f{std::sqrt(.5f), std::sqrt(.5f)},  0.f, 1000.f},
+            {Point2f{-100.f, 100.f},  Vector2f{std::sqrt(.5f), -std::sqrt(.5f)}, 0.f, 1000.f},
     };
-    constexpr int rayCount = sizeof(rays)/ sizeof(Ray2f);
+    constexpr int rayCount = sizeof(rays) / sizeof(Ray2f);
     auto transform = identity<float>();
 
     PropertySet ps;
@@ -196,7 +196,7 @@ TEST(Disk2f, GivenADiskAndARay_WhenRayIntersectsSphere_ThenValidNormal) {
 
     // Act
     MediumEvent2f its[rayCount];
-    for(int i = 0; i < rayCount; ++i) {
+    for (int i = 0; i < rayCount; ++i) {
         disk.intersect(rays[i], its[i]);
     }
 

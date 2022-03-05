@@ -4,8 +4,6 @@
 """
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-
-#load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
@@ -20,7 +18,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-ea55f1f52c489535f0d3b583c81529762c9cb5ea",
+        path = "../third_party/googletest-c9461a9b55ba954df0489bab6420eb297bed846b",
     )
 
     # Use github.com
@@ -76,7 +74,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "glog",
-        path = "../third_party/glog-9f0b7d3bfe1542848f784e8d1c545b916cec6b3e",
+        path = "../third_party/glog-d153e294b8c44a1806fdfb523c4fe556ed537581",
     )
 
     # Use github.com
@@ -125,7 +123,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-0a24a0714ef5f6ff4bbd17a43a17289133414338",
+        path = "../third_party/fmt-0cef1f819e9811209a6b110ae37fe65e70aa79b0",
     )
 
     # Live at Head
@@ -372,7 +370,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "oneTBB",
-        path = "../third_party/oneTBB-c9e43df34675ae5d9481c7ceab048085e3d5dae1",
+        path = "../third_party/oneTBB-af90f6cffc04988a995296de5c2016758e1969a3",
     )
 
     # Use git repository from com_github_oneapi_src_onetbb
@@ -470,7 +468,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "bazel_clang_tidy",
-        path = "../third_party/bazel_clang_tidy-9871a95dbb150dc595aa91355fe99c500196cf3c",
+        path = "../third_party/bazel_clang_tidy-c2fe98cfec0430e78bff4169e9ca0a43123e4c99",
     )
 
     #-------------------------------------------------------------------------------------

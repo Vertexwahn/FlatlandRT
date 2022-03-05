@@ -46,15 +46,15 @@ TEST(TriangleMeshesBoundsProvider2f, bounds) {
 
 TEST(TriangleMeshesBoundsProvider2f, GivenNoShape_WhenComputingBound_ThenExpectZeroAABB) {
     TriangleMeshesBoundsProvider2f tmbp{{}};
-    EXPECT_THAT(tmbp.bounds(), (AxisAlignedBoundingBox2f{{0.f, 0.f},{0.f, 0.f}}));
+    EXPECT_THAT(tmbp.bounds(), (AxisAlignedBoundingBox2f{{0.f, 0.f}, {0.f, 0.f}}));
 }
 
 TEST(TriangleMeshesBoundsProvider2f, Given2Shapes_WhenComputingBound_ThenExpectUnionBox) {
     // Arrange
     std::vector<Point2f> points = {
-        {0.f, 0.f},
-        {1.f, 0.f},
-        {1.f, 1.f}
+            {0.f, 0.f},
+            {1.f, 0.f},
+            {1.f, 1.f}
     };
     std::vector<std::uint32_t> indices = {0, 1, 2};
 
@@ -70,12 +70,13 @@ TEST(TriangleMeshesBoundsProvider2f, Given2Shapes_WhenComputingBound_ThenExpectU
 
     TriangleMeshesBoundsProvider2f tmbp{{tm1, tm2}};
 
-    EXPECT_THAT(tmbp.bounds(), (AxisAlignedBoundingBox2f{{0.f, 0.f},{2.f, 1.f}}));
+    EXPECT_THAT(tmbp.bounds(), (AxisAlignedBoundingBox2f{{0.f, 0.f}, {2.f, 1.f}}));
 }
 
 TEST(QuadtreeNode, is_parent_or_leave) {
     // Arrange
-    QuadtreeNode node{{{0u,0u}}, {{0.f, 0.f}, {1.f, 1.f}}};
+    QuadtreeNode node{{{0u,  0u}},
+                      {{0.f, 0.f}, {1.f, 1.f}}};
 
     // Act
     EXPECT_THAT(node.is_leave(), true);
@@ -177,7 +178,7 @@ TEST(build_quadtree, GivenNoTriangles_WhenBuildingQuadtree_ExpectNullptrRoot) {
         }
 
         [[nodiscard]]
-        AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier& id) const override {
+        AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier &id) const override {
             return AxisAlignedBoundingBox2f{Point2f{0.f, 0.f}, Point2f{0.f, 0.f}};
         }
 
@@ -191,13 +192,13 @@ TEST(build_quadtree, GivenNoTriangles_WhenBuildingQuadtree_ExpectNullptrRoot) {
     const size_t MAX_LEAVE_SIZE = 4;
 
     QuadtreeBuildDescription qtbd{
-        &tip,
-        tip.bounds(),
-        tip.sub_shape_ids(),
-        MAX_LEAVE_SIZE
+            &tip,
+            tip.bounds(),
+            tip.sub_shape_ids(),
+            MAX_LEAVE_SIZE
     };
 
-    auto* root = build_quadtree(qtbd);
+    auto *root = build_quadtree(qtbd);
     EXPECT_THAT(root, nullptr);
 }
 
@@ -210,11 +211,10 @@ TEST(build_quadtree, GivenSingleTriangle_WhenBuildingQuadtree_ExpectRootAsLeave)
         }
 
         [[nodiscard]]
-        AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier& id) const override {
-            if(id.parent_shape_index == 0 && id.sub_shape_index == 0) {
+        AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier &id) const override {
+            if (id.parent_shape_index == 0 && id.sub_shape_index == 0) {
                 return AxisAlignedBoundingBox2f{Point2f{0.f, 0.f}, Point2f{10.f, 10.f}};
-            }
-            else {
+            } else {
                 return AxisAlignedBoundingBox2f{Point2f{0.f, 0.f}, Point2f{0.f, 0.f}};
             }
         }
@@ -236,7 +236,7 @@ TEST(build_quadtree, GivenSingleTriangle_WhenBuildingQuadtree_ExpectRootAsLeave)
             sub_shape_ids,
             MAX_LEAVE_SIZE
     };
-    auto* root = build_quadtree(qtbd);
+    auto *root = build_quadtree(qtbd);
     EXPECT_FALSE(root == nullptr);
 
     EXPECT_THAT(root->bounds.min_, (Point2f{0.f, 0.f}));
@@ -259,19 +259,19 @@ TEST(build_quadtree, Given4Triangles_WhenBuildingQuadtree_ExpectCorrectQuadtree)
         }
 
         [[nodiscard]]
-        AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier& id) const override {
+        AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier &id) const override {
             assert(id.sub_shape_index < 4);
             assert(id.parent_shape_index == 0);
 
-            if(id.sub_shape_index > 4 || id.parent_shape_index != 0) {
+            if (id.sub_shape_index > 4 || id.parent_shape_index != 0) {
                 return AxisAlignedBoundingBox2f{Point2f{0.f, 0.f}, Point2f{0.f, 0.f}};
             }
 
             std::vector<AxisAlignedBoundingBox2f> bounding_boxes = {
-                AxisAlignedBoundingBox2f{Point2f{0.f, 0.f}, Point2f{100.f, 100.f}},
-                AxisAlignedBoundingBox2f{Point2f{100.f, 0.f}, Point2f{200.f, 100.f}},
-                AxisAlignedBoundingBox2f{Point2f{0.f, 100.f}, Point2f{100.f, 200.f}},
-                AxisAlignedBoundingBox2f{Point2f{100.f, 100.f}, Point2f{200.f, 200.f}},
+                    AxisAlignedBoundingBox2f{Point2f{0.f, 0.f}, Point2f{100.f, 100.f}},
+                    AxisAlignedBoundingBox2f{Point2f{100.f, 0.f}, Point2f{200.f, 100.f}},
+                    AxisAlignedBoundingBox2f{Point2f{0.f, 100.f}, Point2f{100.f, 200.f}},
+                    AxisAlignedBoundingBox2f{Point2f{100.f, 100.f}, Point2f{200.f, 200.f}},
             };
 
             return bounding_boxes.at(id.sub_shape_index);
@@ -279,7 +279,10 @@ TEST(build_quadtree, Given4Triangles_WhenBuildingQuadtree_ExpectCorrectQuadtree)
 
         [[nodiscard]]
         std::vector<SubShapeIdentifier> sub_shape_ids() const override {
-            return std::vector<SubShapeIdentifier>{{0, 0}, {0, 1}, {0, 2}, {0, 3}};
+            return std::vector<SubShapeIdentifier>{{0, 0},
+                                                   {0, 1},
+                                                   {0, 2},
+                                                   {0, 3}};
         };
     };
 
@@ -294,7 +297,7 @@ TEST(build_quadtree, Given4Triangles_WhenBuildingQuadtree_ExpectCorrectQuadtree)
             sub_shape_ids,
             MAX_LEAVE_SIZE
     };
-    auto* root = build_quadtree(qtbd);
+    auto *root = build_quadtree(qtbd);
     EXPECT_FALSE(root == nullptr);
 
     ASSERT_THAT(root->sub_shape_ids.size(), 4);
@@ -322,18 +325,18 @@ TEST(build_quadtree, Given4Triangles_WhenBuildingQuadtree_ExpectCorrectQuadtree_
         }
 
         [[nodiscard]]
-        AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier& id) const override {
+        AxisAlignedBoundingBox2f bounds(const SubShapeIdentifier &id) const override {
             assert(id.parent_shape_index == 0);
             assert(id.sub_shape_index < 4);
-            if(id.parent_shape_index != 0 || id.sub_shape_index > 4) {
+            if (id.parent_shape_index != 0 || id.sub_shape_index > 4) {
                 return AxisAlignedBoundingBox2f{Point2f{0.f, 0.f}, Point2f{0.f, 0.f}};
             }
 
             std::vector<AxisAlignedBoundingBox2f> bounding_boxes = {
-                AxisAlignedBoundingBox2f{Point2f{1.f, 1.f}, Point2f{49.f, 49.f}},
-                AxisAlignedBoundingBox2f{Point2f{51.f, 1.f}, Point2f{99.f, 49.f}},
-                AxisAlignedBoundingBox2f{Point2f{1.f, 51.f}, Point2f{49.f, 99.f}},
-                AxisAlignedBoundingBox2f{Point2f{51.f, 51.f}, Point2f{99.f, 99.f}},
+                    AxisAlignedBoundingBox2f{Point2f{1.f, 1.f}, Point2f{49.f, 49.f}},
+                    AxisAlignedBoundingBox2f{Point2f{51.f, 1.f}, Point2f{99.f, 49.f}},
+                    AxisAlignedBoundingBox2f{Point2f{1.f, 51.f}, Point2f{49.f, 99.f}},
+                    AxisAlignedBoundingBox2f{Point2f{51.f, 51.f}, Point2f{99.f, 99.f}},
             };
 
             return bounding_boxes.at(id.sub_shape_index);
@@ -341,7 +344,10 @@ TEST(build_quadtree, Given4Triangles_WhenBuildingQuadtree_ExpectCorrectQuadtree_
 
         [[nodiscard]]
         std::vector<SubShapeIdentifier> sub_shape_ids() const override {
-            return std::vector<SubShapeIdentifier>{{0,0}, {0,1}, {0,2}, {0,3}};
+            return std::vector<SubShapeIdentifier>{{0, 0},
+                                                   {0, 1},
+                                                   {0, 2},
+                                                   {0, 3}};
         };
     };
 
@@ -356,7 +362,7 @@ TEST(build_quadtree, Given4Triangles_WhenBuildingQuadtree_ExpectCorrectQuadtree_
             sub_shape_ids,
             MAX_LEAVE_SIZE
     };
-    auto* root = build_quadtree(qtbd);
+    auto *root = build_quadtree(qtbd);
 
     // Assert
     ASSERT_TRUE(root);
@@ -425,12 +431,12 @@ TEST(QuadtreeIntersector, build_acceleration_structure) {
     std::vector<ReferenceCounted<Shape2f>> shapes = {tm};
     intersector.build_acceleration_structure(shapes);
 
-    QuadtreeNode* root = intersector.root_node();
+    QuadtreeNode *root = intersector.root_node();
 
     // Assert
     ASSERT_TRUE(root);
 
-    for(int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; ++i) {
         EXPECT_THAT(root->nodes[i], nullptr);
     }
 }
@@ -442,6 +448,13 @@ TEST(QuadtreeIntersector, to_string) {
     EXPECT_THAT(intersector.to_string(), "QuadtreeIntersector");
 }
 
+TEST(QuadtreeIntersector, invalid_strategy) {
+    PropertySet ps;
+    ps.add_property("strategy", std::string("unknown_invalid_not_existing_strategy"));
+
+    EXPECT_THROW(QuadtreeIntersector{ps}, std::runtime_error);
+}
+
 TEST(QuadtreeIntersector, GivenEmptyScene_WhenIntersection_ExpectNoIntersection) {
     // Arrange
     std::vector<ReferenceCounted<Shape2f>> shapes = {};
@@ -450,7 +463,7 @@ TEST(QuadtreeIntersector, GivenEmptyScene_WhenIntersection_ExpectNoIntersection)
     intersector.build_acceleration_structure(shapes);
 
     // Act
-    Ray2f ray{{0.f,50.f}, {1.f,0.f}, 0.f, 1000.f};
+    Ray2f ray{{0.f, 50.f}, {1.f, 0.f}, 0.f, 1000.f};
     MediumEvent2f me;
     bool hit = intersector.intersect(ray, me);
 

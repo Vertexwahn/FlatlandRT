@@ -5,9 +5,9 @@
 
 #pragma once
 
+#include "flatland/math/axis_aligned_bounding_box.h"
 #include "flatland/math/geometry.h"
 #include "flatland/rendering/scene/shape/shape.h"
-#include "flatland/math/axis_aligned_bounding_box.h"
 
 FLATLAND_BEGIN_NAMESPACE
 

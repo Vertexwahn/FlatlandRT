@@ -5,30 +5,30 @@
 
 #include "flatland/imaging/io/io_openexr.h"
 
-#include "ImfChannelList.h"
-#include "ImfIO.h"
-#include "ImfInputFile.h"
-#include "ImfOutputFile.h"
-#include "ImfRgbaFile.h"
-#include "ImfStringAttribute.h"
-#include "ImfArray.h"
+#include "src/lib/OpenEXR/ImfArray.h"
+#include "src/lib/OpenEXR/ImfChannelList.h"
+#include "src/lib/OpenEXR/ImfIO.h"
+#include "src/lib/OpenEXR/ImfInputFile.h"
+#include "src/lib/OpenEXR/ImfOutputFile.h"
+#include "src/lib/OpenEXR/ImfRgbaFile.h"
+#include "src/lib/OpenEXR/ImfStringAttribute.h"
 
 #include <cfloat>
+
+using namespace Imf;
+using namespace Imath;
 
 FLATLAND_BEGIN_NAMESPACE
 
 Image3f load_image_openexr(std::string_view filename) {
-    using namespace Imf;
-    using namespace Imath;
-
     // see https://www.openexr.com/documentation/ReadingAndWritingImageFiles.pdf
     // Heading Reading an Image File
-    Imf::InputFile file(filename.data());
+    InputFile file(filename.data());
     const Header &header = file.header();
 
     Box2i dw = header.dataWindow();
-    int width = dw.max.x-dw.min.x+1;
-    int height = dw.max.y-dw.min.y+1;
+    int width = dw.max.x - dw.min.x + 1;
+    int height = dw.max.y - dw.min.y + 1;
 
     /*
     bool hasRed = false;
@@ -51,49 +51,49 @@ Image3f load_image_openexr(std::string_view filename) {
     Imf::Array2D<float> gPixels;
     Imf::Array2D<float> bPixels;
 
-    rPixels.resizeErase (height, width);
-    gPixels.resizeErase (height, width);
-    bPixels.resizeErase (height, width);
+    rPixels.resizeErase(height, width);
+    gPixels.resizeErase(height, width);
+    bPixels.resizeErase(height, width);
 
     FrameBuffer frameBuffer;
 
-    frameBuffer.insert ("R", // name
-                        Slice (FLOAT, // type
-                               (char *) (&rPixels[0][0] - // base
-                                         dw.min.x -
-                                         dw.min.y * width),
-                               sizeof (rPixels[0][0]) * 1, // xStride
-                               sizeof (rPixels[0][0]) * width,// yStride
-                               1, 1, // x/y sampling
-                               FLT_MAX)); // fillValue
+    frameBuffer.insert("R", // name
+                       Slice(FLOAT, // type
+                             (char *) (&rPixels[0][0] - // base
+                                       dw.min.x -
+                                       dw.min.y * width),
+                             sizeof(rPixels[0][0]) * 1, // xStride
+                             sizeof(rPixels[0][0]) * width,// yStride
+                             1, 1, // x/y sampling
+                             FLT_MAX)); // fillValue
 
-    frameBuffer.insert ("G", // name
-                        Slice (FLOAT, // type
-                               (char *) (&gPixels[0][0] - // base
-                                         dw.min.x -
-                                         dw.min.y * width),
-                               sizeof (gPixels[0][0]) * 1, // xStride
-                               sizeof (gPixels[0][0]) * width,// yStride
-                               1, 1, // x/y sampling
-                               FLT_MAX)); // fillValue
+    frameBuffer.insert("G", // name
+                       Slice(FLOAT, // type
+                             (char *) (&gPixels[0][0] - // base
+                                       dw.min.x -
+                                       dw.min.y * width),
+                             sizeof(gPixels[0][0]) * 1, // xStride
+                             sizeof(gPixels[0][0]) * width,// yStride
+                             1, 1, // x/y sampling
+                             FLT_MAX)); // fillValue
 
-    frameBuffer.insert ("B", // name
-                        Slice (FLOAT, // type
-                               (char *) (&bPixels[0][0] - // base
-                                         dw.min.x -
-                                         dw.min.y * width),
-                               sizeof (bPixels[0][0]) * 1, // xStride
-                               sizeof (bPixels[0][0]) * width,// yStride
-                               1, 1, // x/y sampling
-                               FLT_MAX)); // fillValue
+    frameBuffer.insert("B", // name
+                       Slice(FLOAT, // type
+                             (char *) (&bPixels[0][0] - // base
+                                       dw.min.x -
+                                       dw.min.y * width),
+                             sizeof(bPixels[0][0]) * 1, // xStride
+                             sizeof(bPixels[0][0]) * width,// yStride
+                             1, 1, // x/y sampling
+                             FLT_MAX)); // fillValue
 
-    file.setFrameBuffer (frameBuffer);
+    file.setFrameBuffer(frameBuffer);
     file.readPixels(dw.min.y, dw.max.y);
 
     Image3f img{width, height};
 
-    for(int y = 0; y < height; ++y) {
-        for(int x = 0; x < width; ++x) {
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
             Color3f color{rPixels[y][x], gPixels[y][x], bPixels[y][x]};
             img.set_pixel(x, y, color);
         }
@@ -102,18 +102,18 @@ Image3f load_image_openexr(std::string_view filename) {
 }
 
 void store_open_exr(const std::string_view &filename, const Image3f &image) {
-    Imf::Header header(image.width(), image.height());
+    Header header(image.width(), image.height());
     header.insert("comments", Imf::StringAttribute("Generated by Okapi"));
 
     //Imf::Compression& ctype = header.compression();
     //assert(ctype == Imf::Compression::ZIP_COMPRESSION);
 
-    Imf::ChannelList &channels = header.channels();
+    ChannelList &channels = header.channels();
     channels.insert("R", Imf::Channel(Imf::FLOAT));
     channels.insert("G", Imf::Channel(Imf::FLOAT));
     channels.insert("B", Imf::Channel(Imf::FLOAT));
 
-    Imf::FrameBuffer frameBuffer;
+    FrameBuffer frameBuffer;
     size_t compStride = sizeof(float),
             pixelStride = 3 * compStride,
             rowStride = pixelStride * image.width();
@@ -125,7 +125,7 @@ void store_open_exr(const std::string_view &filename, const Image3f &image) {
     data += compStride;
     frameBuffer.insert("B", Imf::Slice(Imf::FLOAT, data, pixelStride, rowStride));
 
-    Imf::OutputFile file(filename.data(), header);
+    OutputFile file(filename.data(), header);
     file.setFrameBuffer(frameBuffer);
     file.writePixels(image.height());
 }

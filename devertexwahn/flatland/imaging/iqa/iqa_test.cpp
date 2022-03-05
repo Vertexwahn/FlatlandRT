@@ -21,7 +21,7 @@ TEST(IQA, GivenIdenticalImages_WhenComparing_ExpectEqual) {
 TEST(IQA, GivenDifferentImages_WhenComparing_ExpectNotEqual) {
     Image3f a{100, 100};
     Image3f b{100, 100};
-    b.set_pixel(0,0, Color3f{1.f, .5f, .25f});
+    b.set_pixel(0, 0, Color3f{1.f, .5f, .25f});
     EXPECT_THAT(are_equal(a, b), false);
 }
 
@@ -30,8 +30,8 @@ TEST(IQA, mse) {
     Image3f a{4, 4};
     Image3f b{4, 4};
 
-    for(int y = 0; y < 4; ++y) {
-        for(int x = 0; x < 4; ++x) {
+    for (int y = 0; y < 4; ++y) {
+        for (int x = 0; x < 4; ++x) {
             a.set_pixel(x, y, Color3f{1.f, 1.f, 1.f});
             b.set_pixel(x, y, Color3f{0.f, 0.f, 0.f});
         }

@@ -8,51 +8,51 @@
 -->
 <!-- https://github.com/mmp/pbrt-v3/blob/master/scenes/killeroo-simple.pbrt -->
 <scene>
-	<sensor>
-		<film>
-			<integer name="width" value="800" />
-			<integer name="height" value="600" />
-			<string name="filename" value="disk_2.svg" />
-		</film>
+    <sensor>
+        <film>
+            <integer name="width" value="800"/>
+            <integer name="height" value="600"/>
+            <string name="filename" value="disk_2.svg"/>
+        </film>
 
-		<transform>
-			<lookat origin="0, 300" target="800, 300" />
-		</transform>
-	</sensor>
+        <transform>
+            <lookat origin="0, 300" target="800, 300"/>
+        </transform>
+    </sensor>
 
-	<integrator type="path_specular_transmission">
-		<integer name="max_depth" value="7"/>
-	</integrator>
+    <integrator type="path_specular_transmission">
+        <integer name="max_depth" value="7"/>
+    </integrator>
 
-	<shape type="disk">
-		<float name="radius" value="100" />
+    <shape type="disk">
+        <float name="radius" value="100"/>
 
-		<transform>
-			<translate x="200" y="300" />
-		</transform>
+        <transform>
+            <translate x="200" y="300"/>
+        </transform>
 
-		<material>
-			<color name="stroke_color" value="0.0, 0.682, 0.937" />
-			<float name="stroke_width" value="3.0" />
-			<color name="fill_color" value="1.0, 1.0, 1.0" />
-			<float name="refraction_index" value="1.0" />
-			<boolean name="specular_transmission" value="true" />
-		</material>
-	</shape>
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <float name="stroke_width" value="3.0"/>
+            <color name="fill_color" value="1.0, 1.0, 1.0"/>
+            <float name="refraction_index" value="1.0"/>
+            <boolean name="specular_transmission" value="true"/>
+        </material>
+    </shape>
 
-	<shape type="disk">
-		<float name="radius" value="100" />
+    <shape type="disk">
+        <float name="radius" value="100"/>
 
-		<transform>
-			<translate x="500" y="300" />
-		</transform>
+        <transform>
+            <translate x="500" y="300"/>
+        </transform>
 
-		<material>
-			<color name="stroke_color" value="0.0, 0.682, 0.937" />
-			<float name="stroke_width" value="3.0" />
-			<color name="fill_color" value="1.0, 1.0, 1.0" />
-			<float name="refraction_index" value="1.0" />
-			<boolean name="specular_transmission" value="true" />
-		</material>
-	</shape>
+        <material>
+            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <float name="stroke_width" value="3.0"/>
+            <color name="fill_color" value="1.0, 1.0, 1.0"/>
+            <float name="refraction_index" value="1.0"/>
+            <boolean name="specular_transmission" value="true"/>
+        </material>
+    </shape>
 </scene>

@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Okapi_poperty_set_formatter_a272aef3_074e_4168_ae05_64383371db33_h
-#define Okapi_poperty_set_formatter_a272aef3_074e_4168_ae05_64383371db33_h
+#ifndef Flatland_PopertySet_formatter_a272aef3_074e_4168_ae05_64383371db33_h
+#define Flatland_PopertySet_formatter_a272aef3_074e_4168_ae05_64383371db33_h
 
 #include "flatland/math/transform.h"
 #include "flatland/math/util.h"
@@ -95,18 +95,6 @@ struct fmt::formatter<flatland::Transform44f> {
     }
 };
 
-/*
-template<>
-struct fmt::formatter<flatland::ReferenceCounted<flatland::Object>> {
-    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
-
-    template<typename FormatContext>
-    auto format(const flatland::ReferenceCounted<flatland::Object> &obj, FormatContext &ctx) {
-        return format_to(ctx.out(), "({})", "Object");
-    }
-};
-*/
-
 template<typename ObjectType>
 struct fmt::formatter<flatland::ReferenceCounted<ObjectType>> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
@@ -117,4 +105,4 @@ struct fmt::formatter<flatland::ReferenceCounted<ObjectType>> {
     }
 };
 
-#endif // end define Okapi_poperty_set_formatter_a272aef3_074e_4168_ae05_64383371db33_h
+#endif // end define Flatland_PopertySet_formatter_a272aef3_074e_4168_ae05_64383371db33_h

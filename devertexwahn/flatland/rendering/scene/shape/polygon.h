@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Okapi_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
-#define Okapi_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
+#ifndef Flatland_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
+#define Flatland_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
 
 #include "flatland/math/geometry.h"
 #include "flatland/math/intersection.h"
@@ -13,7 +13,7 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-template <typename ScalarType>
+template<typename ScalarType>
 class Polygon2 : public Shape2<ScalarType> {
 public:
     using Point = Point2<ScalarType>;
@@ -22,14 +22,15 @@ public:
     using Frame = Frame2<ScalarType>;
     using Scalar = ScalarType;
 
-	Polygon2(const Transform44Type<ScalarType>& transform, const Point *points, const size_t point_count)  : Shape2<ScalarType>(
+    Polygon2(const Transform44Type<ScalarType> &transform, const Point *points, const size_t point_count)
+            : Shape2<ScalarType>(
             transform) {
         std::copy(&points[0], &points[point_count], std::back_inserter(points_));
 
         ensure_valid_points();
     }
 
-    Polygon2(const PropertySet& ps) : Shape2<Scalar>(ps) {
+    Polygon2(const PropertySet &ps) : Shape2<Scalar>(ps) {
         std::string filename = ps.get_property<std::string>("filename");
 
         std::stringstream ss;
@@ -38,18 +39,18 @@ public:
         points_ = load_2D_ply<float>(ss.str());
 
         ensure_valid_points();
-	}
+    }
 
     [[nodiscard]]
     virtual AxisAlignedBoundingBox2f bounds() const override {
         throw std::runtime_error("Not implemented yet");
     }
 
-	bool intersect(const Ray2<ScalarType> &ray_, MediumEvent2<ScalarType> &me) const override {
+    bool intersect(const Ray2<ScalarType> &ray_, MediumEvent2<ScalarType> &me) const override {
         // transform ray into object space
         auto to_object_space = Shape2<ScalarType>::transform_.inverse();
 
-        Ray2<ScalarType> ray  = to_object_space * ray_;
+        Ray2<ScalarType> ray = to_object_space * ray_;
 
         bool hit = false;
 
@@ -83,12 +84,12 @@ public:
             }
         }
 
-        if(hit) {
+        if (hit) {
             me.p = Shape2<ScalarType>::transform_ * me.p;
             //me.geo_frame.normal.normalize();
             me.material = Shape2<ScalarType>::material_.get();
             me.geo_frame.normal = Shape2<ScalarType>::transform_ * me.geo_frame.normal;
-			me.geo_frame.normal.normalize();
+            me.geo_frame.normal.normalize();
             me.geo_frame.tangent = Shape2<ScalarType>::transform_ * me.geo_frame.tangent;
             me.geo_frame.tangent.normalize();
         }
@@ -96,7 +97,7 @@ public:
         return hit;
     }
 
-    virtual std::string convert_to_svg(const int svgCanvasWidth, const int svgCanvasHeight) const override  {
+    virtual std::string convert_to_svg(const int svgCanvasWidth, const int svgCanvasHeight) const override {
         std::stringstream ss;
         ss << "<path ";
 
@@ -109,7 +110,7 @@ public:
         ss << std::endl;
         ss << " d=\"M ";
 
-        for (const auto &point : points_) {
+        for (const auto &point: points_) {
             auto pt = Shape2<ScalarType>::transform_ * point;
             ss << std::setprecision(10) << pt.x();
             ss << " ";
@@ -123,22 +124,22 @@ public:
 
 protected:
     void ensure_valid_points() {
-	    for(const auto& point : points_) {
-            if(std::isnan(point.x())) {
+        for (const auto &point: points_) {
+            if (std::isnan(point.x())) {
                 throw std::runtime_error("x component of point is NaN");
             }
-            if(std::isnan(point.y())) {
+            if (std::isnan(point.y())) {
                 throw std::runtime_error("y component of point is NaN");
             }
-            if(!std::isfinite(point.x())) {
+            if (!std::isfinite(point.x())) {
                 throw std::runtime_error("x component of point is not finite");
             }
-            if(!std::isfinite(point.y())) {
+            if (!std::isfinite(point.y())) {
                 throw std::runtime_error("y component of point is not finite");
             }
-	    }
+        }
 
-        if(!is_counter_clockwise_order<ScalarType>(points_)) {
+        if (!is_counter_clockwise_order<ScalarType>(points_)) {
             throw std::runtime_error("Points not counter clock wise");
         }
     }
@@ -151,4 +152,4 @@ using Polygon2f = Polygon2<float>;
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Okapi_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
+#endif // end define Flatland_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h

@@ -11,7 +11,8 @@
 using namespace flatland;
 
 TEST(AxisAlignedBoundingBox2i, ctor_and_valid) {
-    AxisAlignedBoundingBox2i a{{0,0}, {100, 100}};
+    AxisAlignedBoundingBox2i a{{0,   0},
+                               {100, 100}};
 
     EXPECT_THAT(a.min_.x(), 0);
     EXPECT_THAT(a.min_.y(), 0);
@@ -21,7 +22,8 @@ TEST(AxisAlignedBoundingBox2i, ctor_and_valid) {
 }
 
 TEST(AxisAlignedBoundingBox2f, ctor_and_valid) {
-    AxisAlignedBoundingBox2f a{{0.f,0.f}, {100.f, 100.f}};
+    AxisAlignedBoundingBox2f a{{0.f,   0.f},
+                               {100.f, 100.f}};
 
     EXPECT_THAT(a.min_.x(), 0.f);
     EXPECT_THAT(a.min_.y(), 0.f);
@@ -80,8 +82,10 @@ TEST(AxisAlignedBoundingBox3i, compare_equal) {
 }
 
 TEST(AxisAlignedBoundingBox3i, compare_not_equal) {
-    AxisAlignedBoundingBox3i a{{0, 0, 0}, {100, 100, 100}};
-    AxisAlignedBoundingBox3i b{{1, 0, 0}, {100, 100, 100}};
+    AxisAlignedBoundingBox3i a{{0,   0,   0},
+                               {100, 100, 100}};
+    AxisAlignedBoundingBox3i b{{1,   0,   0},
+                               {100, 100, 100}};
 
     EXPECT_FALSE(a == b);
 }
@@ -95,7 +99,8 @@ TEST(AxisAlignedBoundingBox2i, size) {
 }
 
 // test function "overlaps"
-class AxisAlignedBoundingBox2iOverlapTests : public ::testing::TestWithParam<std::tuple<AxisAlignedBoundingBox2i, AxisAlignedBoundingBox2i, bool>> {
+class AxisAlignedBoundingBox2iOverlapTests
+        : public ::testing::TestWithParam<std::tuple<AxisAlignedBoundingBox2i, AxisAlignedBoundingBox2i, bool>> {
 protected:
 };
 
@@ -127,26 +132,72 @@ INSTANTIATE_TEST_SUITE_P(
         CheckOvelapp,
         AxisAlignedBoundingBox2iOverlapTests,
         ::testing::Values(
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, true), // a and b identical
-            std::make_tuple(AxisAlignedBoundingBox2i{{25, 25}, {75 , 75}}, AxisAlignedBoundingBox2i{{0, 0}, {100, 100}},  true), // a inside b
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{25, 25}, {75 , 75}}, true), // b inside a
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0+50, 0}, {100+50, 100}}, true), // b overlaps right side of a
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0-50, 0}, {100-50, 100}}, true), // b overlaps left side of a
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0, 0+50}, {100, 100+50}}, true), // b overlaps top side of a
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0, 0-50}, {100, 100-50}}, true), // b overlaps bottom side of a
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0+50, 0+50}, {100+50, 100+50}}, true), // Case A
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{50, 50}, {75 , 75}}, true),
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{300, 300}, {350, 350}}, false),
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{-300, -300}, {-250, -250}}, false),
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{100+0, 0}, {100+100, 100}}, true), // b touches a right
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0-100, 0}, {100-100, 100}}, true), // b touches a left
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0, 0+100}, {100, 100+100}}, true), // b touches a on top
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0, 0-100}, {100, 100-100}}, true), // b touches a on bottom
-            std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{100, 100}, {200, 200}}, true) // a and b are touching in one corner
-    )
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0,   0},
+                                                                                               {100, 100}},
+                                true), // a and b identical
+                std::make_tuple(AxisAlignedBoundingBox2i{{25, 25},
+                                                         {75, 75}}, AxisAlignedBoundingBox2i{{0,   0},
+                                                                                             {100, 100}},
+                                true), // a inside b
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{25, 25},
+                                                                                               {75, 75}},
+                                true), // b inside a
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0 + 50,   0},
+                                                                                               {100 + 50, 100}},
+                                true), // b overlaps right side of a
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0 - 50,   0},
+                                                                                               {100 - 50, 100}},
+                                true), // b overlaps left side of a
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0,   0 + 50},
+                                                                                               {100, 100 + 50}},
+                                true), // b overlaps top side of a
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0,   0 - 50},
+                                                                                               {100, 100 - 50}},
+                                true), // b overlaps bottom side of a
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0 + 50,   0 + 50},
+                                                                                               {100 + 50, 100 + 50}},
+                                true), // Case A
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{50, 50},
+                                                                                               {75, 75}}, true),
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{300, 300},
+                                                                                               {350, 350}}, false),
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{-300, -300},
+                                                                                               {-250, -250}}, false),
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{100 + 0,   0},
+                                                                                               {100 + 100, 100}},
+                                true), // b touches a right
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0 - 100,   0},
+                                                                                               {100 - 100, 100}},
+                                true), // b touches a left
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0,   0 + 100},
+                                                                                               {100, 100 + 100}},
+                                true), // b touches a on top
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0,   0 - 100},
+                                                                                               {100, 100 - 100}},
+                                true), // b touches a on bottom
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{100, 100},
+                                                                                               {200, 200}},
+                                true) // a and b are touching in one corner
+        )
 );
 
-class AxisAlignedBoundingBox3iOverlapTests : public ::testing::TestWithParam<std::tuple<AxisAlignedBoundingBox3i, AxisAlignedBoundingBox3i, bool>> {
+class AxisAlignedBoundingBox3iOverlapTests
+        : public ::testing::TestWithParam<std::tuple<AxisAlignedBoundingBox3i, AxisAlignedBoundingBox3i, bool>> {
 protected:
 };
 
@@ -165,22 +216,78 @@ INSTANTIATE_TEST_SUITE_P(
         CheckOvelapp,
         AxisAlignedBoundingBox3iOverlapTests,
         ::testing::Values(
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, true), // a and b identical
-                std::make_tuple(AxisAlignedBoundingBox3i{{25, 25, 25}, {75 , 75, 75}}, AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, true), // a inside b
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{25, 25, 25}, {75 , 75, 75}}, true), // b inside a
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0+50, 0, 0}, {100+50, 100, 100}}, true), // b overlaps right side of a
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0-50, 0, 0}, {100-50, 100, 100}}, true), // b overlaps left side of a
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0, 0+50, 0}, {100, 100+50, 100}}, true), // b overlaps top side of a
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0, 0-50, 0}, {100, 100-50, 100}}, true), // b overlaps bottom side of a
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0+50, 0+50, 0+50}, {100+50, 100+50, 100+50}}, true), // Case A
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{50, 50, 50}, {75 , 75, 75}}, true),
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{300, 300, 300}, {350, 350, 350}}, false),
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{-300, -300, -300}, {-250, -250, -250}}, false),
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{100+0, 0, 0}, {100+100, 100, 100}}, true), // b touches a right
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0-100, 0, 0}, {100-100, 100, 100}}, true), // b touches a left
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0, 0+100, 0}, {100, 100+100, 100}}, true), // b touches a on top
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0, 0-100, 0}, {100, 100-100, 100}}, true), // b touches a on bottom
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{100, 100, 100}, {200, 200, 200}}, true) // a and b are touching in one corner
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                                                                    {100, 100, 100}},
+                                true), // a and b identical
+                std::make_tuple(AxisAlignedBoundingBox3i{{25, 25, 25},
+                                                         {75, 75, 75}}, AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                                                                 {100, 100, 100}},
+                                true), // a inside b
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{25, 25, 25},
+                                                                                                    {75, 75, 75}},
+                                true), // b inside a
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{0 + 50,   0,   0},
+                                                                                                    {100 +
+                                                                                                     50,       100, 100}},
+                                true), // b overlaps right side of a
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{0 - 50,   0,   0},
+                                                                                                    {100 -
+                                                                                                     50,       100, 100}},
+                                true), // b overlaps left side of a
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{0,   0 + 50,   0},
+                                                                                                    {100, 100 +
+                                                                                                          50,       100}},
+                                true), // b overlaps top side of a
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{0,   0 - 50,   0},
+                                                                                                    {100, 100 -
+                                                                                                          50,       100}},
+                                true), // b overlaps bottom side of a
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}},
+                                AxisAlignedBoundingBox3i{{0 + 50,   0 + 50,   0 + 50},
+                                                         {100 + 50, 100 + 50, 100 + 50}}, true), // Case A
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{50, 50, 50},
+                                                                                                    {75, 75, 75}},
+                                true),
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{300, 300, 300},
+                                                                                                    {350, 350, 350}},
+                                false),
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{-300, -300, -300},
+                                                                                                    {-250, -250, -250}},
+                                false),
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{100 + 0,   0,   0},
+                                                                                                    {100 +
+                                                                                                     100,       100, 100}},
+                                true), // b touches a right
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{0 - 100,   0,   0},
+                                                                                                    {100 -
+                                                                                                     100,       100, 100}},
+                                true), // b touches a left
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{0,   0 + 100,   0},
+                                                                                                    {100, 100 +
+                                                                                                          100,       100}},
+                                true), // b touches a on top
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{0,   0 - 100,   0},
+                                                                                                    {100, 100 -
+                                                                                                          100,       100}},
+                                true), // b touches a on bottom
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{100, 100, 100},
+                                                                                                    {200, 200, 200}},
+                                true) // a and b are touching in one corner
         )
 );
 
@@ -203,7 +310,8 @@ TEST(AxisAlignedBoundingBox2i, intersect) {
 }
 
 // test function "union_aabb"
-class AxisAlignedBoundingBox2iUnionTests : public ::testing::TestWithParam<std::tuple<AxisAlignedBoundingBox2i, AxisAlignedBoundingBox2i, AxisAlignedBoundingBox2i>> {
+class AxisAlignedBoundingBox2iUnionTests
+        : public ::testing::TestWithParam<std::tuple<AxisAlignedBoundingBox2i, AxisAlignedBoundingBox2i, AxisAlignedBoundingBox2i>> {
 protected:
 };
 
@@ -241,17 +349,46 @@ INSTANTIATE_TEST_SUITE_P(
         CheckOvelapp,
         AxisAlignedBoundingBox2iUnionTests,
         ::testing::Values(
-                std::make_tuple(AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}, AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}), // a and b identical
-                std::make_tuple(AxisAlignedBoundingBox2i{{25, 25}, {75 , 75}}, AxisAlignedBoundingBox2i{{0, 0}, {100, 100}},  AxisAlignedBoundingBox2i{{0, 0}, {100, 100}}), // a inside b
-                std::make_tuple(AxisAlignedBoundingBox2i{{0,0},{1,1}}, AxisAlignedBoundingBox2i{{1,0},{2,1}}, AxisAlignedBoundingBox2i{{0,0},{2,1}}), // a and b next to each other
-                std::make_tuple(AxisAlignedBoundingBox2i{{0,0},{1,1}}, AxisAlignedBoundingBox2i{{2,0},{3,1}}, AxisAlignedBoundingBox2i{{0,0},{3,1}}),
-                std::make_tuple(AxisAlignedBoundingBox2i{{0,0},{1,1}}, AxisAlignedBoundingBox2i{{0,2},{1,3}}, AxisAlignedBoundingBox2i{{0,0},{1,3}}),
-                std::make_tuple(AxisAlignedBoundingBox2i{{0,0},{1,1}}, AxisAlignedBoundingBox2i{{2,2},{3,3}}, AxisAlignedBoundingBox2i{{0,0},{3,3}}),
-                std::make_tuple(AxisAlignedBoundingBox2i{{-1,-1},{0,0}}, AxisAlignedBoundingBox2i{{2,2},{3,3}}, AxisAlignedBoundingBox2i{{-1,-1},{3,3}})
+                std::make_tuple(AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}, AxisAlignedBoundingBox2i{{0,   0},
+                                                                                               {100, 100}},
+                                AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}), // a and b identical
+                std::make_tuple(AxisAlignedBoundingBox2i{{25, 25},
+                                                         {75, 75}}, AxisAlignedBoundingBox2i{{0,   0},
+                                                                                             {100, 100}},
+                                AxisAlignedBoundingBox2i{{0,   0},
+                                                         {100, 100}}), // a inside b
+                std::make_tuple(AxisAlignedBoundingBox2i{{0, 0},
+                                                         {1, 1}}, AxisAlignedBoundingBox2i{{1, 0},
+                                                                                           {2, 1}},
+                                AxisAlignedBoundingBox2i{{0, 0},
+                                                         {2, 1}}), // a and b next to each other
+                std::make_tuple(AxisAlignedBoundingBox2i{{0, 0},
+                                                         {1, 1}}, AxisAlignedBoundingBox2i{{2, 0},
+                                                                                           {3, 1}},
+                                AxisAlignedBoundingBox2i{{0, 0},
+                                                         {3, 1}}),
+                std::make_tuple(AxisAlignedBoundingBox2i{{0, 0},
+                                                         {1, 1}}, AxisAlignedBoundingBox2i{{0, 2},
+                                                                                           {1, 3}},
+                                AxisAlignedBoundingBox2i{{0, 0},
+                                                         {1, 3}}),
+                std::make_tuple(AxisAlignedBoundingBox2i{{0, 0},
+                                                         {1, 1}}, AxisAlignedBoundingBox2i{{2, 2},
+                                                                                           {3, 3}},
+                                AxisAlignedBoundingBox2i{{0, 0},
+                                                         {3, 3}}),
+                std::make_tuple(AxisAlignedBoundingBox2i{{-1, -1},
+                                                         {0,  0}}, AxisAlignedBoundingBox2i{{2, 2},
+                                                                                            {3, 3}},
+                                AxisAlignedBoundingBox2i{{-1, -1},
+                                                         {3,  3}})
         )
 );
 
-class AxisAlignedBoundingBox3iUnionTests : public ::testing::TestWithParam<std::tuple<AxisAlignedBoundingBox3i, AxisAlignedBoundingBox3i, AxisAlignedBoundingBox3i>> {
+class AxisAlignedBoundingBox3iUnionTests
+        : public ::testing::TestWithParam<std::tuple<AxisAlignedBoundingBox3i, AxisAlignedBoundingBox3i, AxisAlignedBoundingBox3i>> {
 protected:
 };
 
@@ -275,12 +412,40 @@ INSTANTIATE_TEST_SUITE_P(
         CheckOvelapp,
         AxisAlignedBoundingBox3iUnionTests,
         ::testing::Values(
-                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}, AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}), // a and b identical
-                std::make_tuple(AxisAlignedBoundingBox3i{{25, 25, 25}, {75 , 75, 75}}, AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}},  AxisAlignedBoundingBox3i{{0, 0, 0}, {100, 100, 100}}), // a inside b
-                std::make_tuple(AxisAlignedBoundingBox3i{{0,0,0},{1,1,1}}, AxisAlignedBoundingBox3i{{1,0,0},{2,1,1}}, AxisAlignedBoundingBox3i{{0,0,0},{2,1,1}}), // a and b next to each other
-                std::make_tuple(AxisAlignedBoundingBox3i{{0,0,0},{1,1,1}}, AxisAlignedBoundingBox3i{{2,0,0},{3,1,1}}, AxisAlignedBoundingBox3i{{0,0,0},{3,1,1}}),
-                std::make_tuple(AxisAlignedBoundingBox3i{{0,0,0},{1,1,1}}, AxisAlignedBoundingBox3i{{0,2,0},{1,3,1}}, AxisAlignedBoundingBox3i{{0,0,0},{1,3,1}}),
-                std::make_tuple(AxisAlignedBoundingBox3i{{0,0,0},{1,1,1}}, AxisAlignedBoundingBox3i{{2,2,0},{3,3,1}}, AxisAlignedBoundingBox3i{{0,0,0},{3,3,1}}),
-                std::make_tuple(AxisAlignedBoundingBox3i{{-1,-1,-1},{0,0,0}}, AxisAlignedBoundingBox3i{{2,2,2},{3,3,3}}, AxisAlignedBoundingBox3i{{-1,-1,-1},{3,3,3}})
+                std::make_tuple(AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}, AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                                                                    {100, 100, 100}},
+                                AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}), // a and b identical
+                std::make_tuple(AxisAlignedBoundingBox3i{{25, 25, 25},
+                                                         {75, 75, 75}}, AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                                                                 {100, 100, 100}},
+                                AxisAlignedBoundingBox3i{{0,   0,   0},
+                                                         {100, 100, 100}}), // a inside b
+                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0},
+                                                         {1, 1, 1}}, AxisAlignedBoundingBox3i{{1, 0, 0},
+                                                                                              {2, 1, 1}},
+                                AxisAlignedBoundingBox3i{{0, 0, 0},
+                                                         {2, 1, 1}}), // a and b next to each other
+                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0},
+                                                         {1, 1, 1}}, AxisAlignedBoundingBox3i{{2, 0, 0},
+                                                                                              {3, 1, 1}},
+                                AxisAlignedBoundingBox3i{{0, 0, 0},
+                                                         {3, 1, 1}}),
+                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0},
+                                                         {1, 1, 1}}, AxisAlignedBoundingBox3i{{0, 2, 0},
+                                                                                              {1, 3, 1}},
+                                AxisAlignedBoundingBox3i{{0, 0, 0},
+                                                         {1, 3, 1}}),
+                std::make_tuple(AxisAlignedBoundingBox3i{{0, 0, 0},
+                                                         {1, 1, 1}}, AxisAlignedBoundingBox3i{{2, 2, 0},
+                                                                                              {3, 3, 1}},
+                                AxisAlignedBoundingBox3i{{0, 0, 0},
+                                                         {3, 3, 1}}),
+                std::make_tuple(AxisAlignedBoundingBox3i{{-1, -1, -1},
+                                                         {0,  0,  0}}, AxisAlignedBoundingBox3i{{2, 2, 2},
+                                                                                                {3, 3, 3}},
+                                AxisAlignedBoundingBox3i{{-1, -1, -1},
+                                                         {3,  3,  3}})
         )
 );

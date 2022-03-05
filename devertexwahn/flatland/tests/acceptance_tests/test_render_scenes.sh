@@ -41,3 +41,5 @@ check_flatland_scene_output "flatland/scenes/disk_grid.flatland.xml" "flatland/s
 check_flatland_scene_output "flatland/scenes/mirror.flatland.xml" "flatland/scenes/mirror.svg" "flatland/scenes/reference_images/mirror_ref.svg"
 check_flatland_scene_output "flatland/scenes/mirrors.flatland.xml" "flatland/scenes/mirrors.svg" "flatland/scenes/reference_images/mirrors_ref.svg"
 check_flatland_scene_output "flatland/scenes/rectangles.flatland.xml" "flatland/scenes/rectangles.svg" "flatland/scenes/reference_images/rectangles_ref.svg"
+#check_flatland_scene_output "flatland/scenes/quadtree/quadtree_scene.flatland.xml" "flatland/scenes/quadtree/quadtree.svg" "flatland/scenes/reference_images/quadtree_ref.svg"
+#check_flatland_scene_output "flatland/scenes/quadtree/quadtree_corner_case_scene.flatland.xml" "flatland/scenes/quadtree/quadtree_corner_case.svg" "flatland/scenes/reference_images/quadtree_corner_case_ref.svg"

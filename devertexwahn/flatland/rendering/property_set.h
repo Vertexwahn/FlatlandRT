@@ -23,7 +23,8 @@
 
 FLATLAND_BEGIN_NAMESPACE
 
-using VariantType = std::variant<bool,
+using VariantType = std::variant<
+        bool,
         int,
         float,
         double,

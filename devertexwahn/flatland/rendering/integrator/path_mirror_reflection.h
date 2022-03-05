@@ -4,10 +4,9 @@
  */
 
 #pragma once
-#ifndef Okapi_PathMirrorReflection_747251b4_9a7b_4321_a54f_cdf570fa8dd6_h
-#define Okapi_PathMirrorReflection_747251b4_9a7b_4321_a54f_cdf570fa8dd6_h
+#ifndef Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h
+#define Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h
 
-//#include "flatland/rendering/canvas/svg_canvas.h"
 #include "flatland/rendering/integrator/integrator.h"
 #include "flatland/math/refract.h"
 
@@ -79,4 +78,4 @@ using PathMirrorReflection2d = PathMirrorReflection2<double>;
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Okapi_PathMirrorReflection_747251b4_9a7b_4321_a54f_cdf570fa8dd6_h
+#endif // end define Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h

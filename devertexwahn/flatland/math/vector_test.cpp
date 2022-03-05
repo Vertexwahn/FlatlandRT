@@ -81,43 +81,43 @@ TEST(Vector2f, Vector2f_negate) {
 }
 
 TEST(Vector2f, Vector2f_add) {
-	Vector2f a{1.f, 2.f};
-	Vector2f b{1.f, 2.f};
+    Vector2f a{1.f, 2.f};
+    Vector2f b{1.f, 2.f};
 
-	Vector2f c = a + b;
+    Vector2f c = a + b;
 
     EXPECT_THAT(c.x(), 2.f);
     EXPECT_THAT(c.y(), 4.f);
 }
 
 TEST(Vector2f, Vector2f_subtract) {
-	Vector2f a{1.f, 2.f};
-	Vector2f b{1.f, 2.f};
+    Vector2f a{1.f, 2.f};
+    Vector2f b{1.f, 2.f};
 
-	Vector2f c = a - b;
+    Vector2f c = a - b;
 
     EXPECT_THAT(c.x(), 0.f);
     EXPECT_THAT(c.y(), 0.f);
 }
 
 TEST(Vector2f, Vector2f_normalize) {
-	Vector2f v{1234.f, 0.f};
-	v.normalize();
+    Vector2f v{1234.f, 0.f};
+    v.normalize();
 
     EXPECT_THAT(v.x(), 1.f);
     EXPECT_THAT(v.y(), 0.f);
 }
 
 TEST(Vector2f, Vector2f_norm) {
-	Vector2f v{1234.f, 0.f};
+    Vector2f v{1234.f, 0.f};
 
     EXPECT_THAT(v.norm(), 1234.f);
 }
 
 TEST(Vector2f, Vector2f_scalar_multiplication) {
-	Vector2f a{1.f, 2.f};
+    Vector2f a{1.f, 2.f};
 
-	Vector2f b = 4.f * a;
+    Vector2f b = 4.f * a;
 
     EXPECT_THAT(b.x(), 4.f);
     EXPECT_THAT(b.y(), 8.f);

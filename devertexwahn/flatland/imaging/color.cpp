@@ -17,7 +17,7 @@ FLATLAND_BEGIN_NAMESPACE
    } COLOUR;
 */
 Color3f hot_to_cold_color_ramp(double v, double vmin, double vmax) {
-    Color3f c = {1.0,1.0,1.0}; // white
+    Color3f c = {1.0, 1.0, 1.0}; // white
     double dv;
 
     if (v < vmin)
