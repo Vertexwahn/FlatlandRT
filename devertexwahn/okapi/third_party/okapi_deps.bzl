@@ -18,7 +18,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-c9461a9b55ba954df0489bab6420eb297bed846b",
+        path = "../third_party/googletest-af29db7ec28d6df1c7f0f745186884091e602e07",
     )
 
     # Use github.com
@@ -74,7 +74,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "glog",
-        path = "../third_party/glog-d153e294b8c44a1806fdfb523c4fe556ed537581",
+        path = "../third_party/glog-864ef64920fc9c7b7c4b6efacd29053245632509",
     )
 
     # Use github.com
@@ -123,7 +123,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-0cef1f819e9811209a6b110ae37fe65e70aa79b0",
+        path = "../third_party/fmt-e2408f37c8f7301a1e5d32364675d0077ad09559",
     )
 
     # Live at Head
@@ -313,7 +313,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "openexr",
-        path = "../third_party/openexr-566087f13259f4429d55125d1001b2696ac2bfc3",
+        path = "../third_party/openexr-8587f4eed1d396a9c545d59e7b231d9d4b2cd8ef",
         #path = "../third_party/openexr-3.1.0",
     )
 
@@ -370,7 +370,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "oneTBB",
-        path = "../third_party/oneTBB-af90f6cffc04988a995296de5c2016758e1969a3",
+        path = "../third_party/oneTBB-3e352b48127b3c79d61df5618607d2daab3f2caa",
     )
 
     # Use git repository from com_github_oneapi_src_onetbb
@@ -478,6 +478,6 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_grail_bazel_toolchain",
-        path = "../third_party/bazel-toolchain-560cf0f5b796d68ba758565e8906ac900a056b5a",
+        path = "../third_party/bazel-toolchain-bb6202519dfbd96b4e8d8987ee3c0c266b41101b",
     )
 

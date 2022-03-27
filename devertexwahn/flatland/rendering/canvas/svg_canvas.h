@@ -117,6 +117,8 @@ private:
         Point end2 = ray(ray.max_t);
 
         std::stringstream ss;
+        ss << "    ";
+        ss << "    ";
 
         // do not use marker end for short rays
         if(ray.max_t - ray.min_t < Scalar{20.0}) {
@@ -133,6 +135,8 @@ private:
 
 	std::string convert_to_svg_string(const Label &text) const {
         std::stringstream ss;
+        ss << "    ";
+        ss << "    ";
         ss << "<text x=\"" << text.position.x() << "\" "
            << "y=\""
            << height_ - text.position.y() << "\""
@@ -145,6 +149,8 @@ private:
 
     std::string convert_to_svg_string(const AxisAlignedBoundingBox &aabb) const {
         std::stringstream ss;
+        ss << "    ";
+        ss << "    ";
         ss << "<rect x=\"" << aabb.min_.x() << "\" "
            << "y=\"" << height_ - aabb.min_.y() - aabb.height() << "\" "
            << "width=\"" << aabb.width() << "\" "
@@ -158,28 +164,29 @@ private:
 	std::string build_header() const {
         std::stringstream ss;
 
-        ss << R"SEPARATOR(<?xml version="1.0" encoding="UTF-8"?>)SEPARATOR";
-        ss << R"SEPARATOR(<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width=")SEPARATOR"
+        ss << R"___(<?xml version="1.0" encoding="UTF-8"?>)___" << "\n";
+        ss << R"___(<svg xmlns="http://www.w3.org/2000/svg")___" << "\n"
+           << R"___(    xmlns:xlink="http://www.w3.org/1999/xlink" width=")___"
            << width_ << "\" "
            << "height=\"" << height_ << "\" "
-           << R"SEPARATOR(baseProfile="full" version="1.1" viewBox="0 0 )SEPARATOR" << width_ << " " << height_ << "\">";
-           ss << R"SEPARATOR(
+           << R"___(baseProfile="full" version="1.1" viewBox="0 0 )___" << width_ << " " << height_ << "\">";
+           ss << R"___(
     <defs>
-    <marker id="arrow_head" markerHeight="8" markerWidth="8" orient="auto" refX="0.125" refY="3" viewBox="0 0 5 6">
-             <path fill="rgb(242, 101, 34)" d="M0,0 V6 L5,3 Z"/>
-    </marker>
-     </defs>
+        <marker id="arrow_head" markerHeight="8" markerWidth="8" orient="auto" refX="0.125" refY="3" viewBox="0 0 5 6">
+            <path fill="rgb(242, 101, 34)" d="M0,0 V6 L5,3 Z"/>
+        </marker>
+    </defs>
     <rect width="100%" height="100%" fill="white"/>
-    <g transform="scale(1, 1)">)SEPARATOR";
+    <g transform="scale(1, 1)">)___" << "\n";
 
         return ss.str();
     }
 
     std::string build_footer() const {
-        std::string footer = R"(</g>
-      </svg>)";
-
-        return footer.c_str();
+        std::stringstream footer;
+        footer << "    </g>" << "\n";
+        footer << "</svg>";
+        return footer.str();
     }
 
 protected:

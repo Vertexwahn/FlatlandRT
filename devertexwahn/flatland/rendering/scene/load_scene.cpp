@@ -41,6 +41,9 @@ Transform44f read_transform<3>(const pugi::xml_node &xmlTransform) {
             auto x = node.attribute("x").as_float();
             auto y = node.attribute("y").as_float();
             auto z = node.attribute("z").as_float();
+            if(node.attribute("z").empty()) {
+                z = 1.f;
+            }
             transform = scale(x,y,z) * transform;
         }
 
@@ -78,7 +81,7 @@ std::vector<float> convert_to_float_vector(const std::string& csv) {
     return values;
 }
 
-Vector2f convert_CSV_to_Vector2f(const std::string& csv) {
+Vector2f convert_csv_to_vector2f(const std::string& csv) {
     std::vector<float> values = convert_to_float_vector(csv);
     return Vector2f{values[0], values[1]};
 }
@@ -138,7 +141,7 @@ void read_all_properties(const pugi::xml_node &node, PropertySet& out_ps) {
     for (pugi::xml_node xml_property: node.children("vector")) {
         std::string name = xml_property.attribute("name").as_string();
         auto csv = xml_property.attribute("value").as_string();
-        auto value = convert_CSV_to_Vector2f(csv);
+        auto value = convert_csv_to_vector2f(csv);
         out_ps.add_property(name, value);
     }
 

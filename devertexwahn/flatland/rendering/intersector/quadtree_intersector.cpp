@@ -74,7 +74,7 @@ QuadtreeNode *build_quadtree(const QuadtreeBuildDescription &qtbd) {
 
     std::array<std::vector<SubShapeIdentifier>, 4> zones;
 
-    // Instead of checking if a triangle overlaps the subtree AABB we only
+    // instead of checking if a triangle overlaps the subtree AABB we only
     // check if the AABB of the triangle overlaps the AABB of the subtree
     for (auto sub_shape_id: qtbd.sub_shapes_ids) {
         auto triangle_bounds = qtbd.tip->bounds(sub_shape_id);

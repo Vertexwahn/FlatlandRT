@@ -155,6 +155,7 @@ I have written several blog posts about ray tracing:
 - [Ray tracing 101: Shooting Rays](https://vertexwahn.de/2021/01/03/shootingrays/)
 - [Ray Tracing 101: Image sampling and reconstruction](https://vertexwahn.de/2021/02/28/imagereconstruction/)
 - [Ray Tracing 101: Ray Triangle Intersection](https://vertexwahn.de/2021/05/29/raytriangleintersection/)
+- [Ray Tracing 101: Octrees for faster intersection](https://vertexwahn.de/2022/03/12/octree/)
 
 ## License
 

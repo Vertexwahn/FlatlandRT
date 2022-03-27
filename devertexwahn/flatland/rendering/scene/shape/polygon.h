@@ -99,7 +99,9 @@ public:
 
     virtual std::string convert_to_svg(const int svgCanvasWidth, const int svgCanvasHeight) const override {
         std::stringstream ss;
-        ss << "<path ";
+        ss << "    ";
+        ss << "    ";
+        ss << "<path";
 
         ReferenceCounted<SvgMaterial> material = Shape2<ScalarType>::material();
         if (material) {
@@ -107,7 +109,6 @@ public:
             ss << Shape2<ScalarType>::convert_material_to_svg_style(material.get());
         }
 
-        ss << std::endl;
         ss << " d=\"M ";
 
         for (const auto &point: points_) {
@@ -118,7 +119,7 @@ public:
             ss << " ";
         }
 
-        ss << " Z\" />" << std::endl;
+        ss << " Z\" />" << "\n";
         return ss.str();
     }
 

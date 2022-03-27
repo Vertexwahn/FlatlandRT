@@ -21,3 +21,13 @@ cc_library(
         "//flatland/rendering:property_set",
     ],
 )
+
+cc_test(
+    name = "sensor_test",
+    srcs = ["sensor_test.cpp"],
+    deps = [
+        ":sensor",
+        "//flatland/core:reference_counted",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

@@ -142,3 +142,26 @@ TEST(TriangleMesh2, GivenTriangle_WhenComputingBound_ExpectCorrectBounds) {
     EXPECT_THAT(bounds.max_.y(), 1.f);
 };
 
+TEST(TriangleMesh2, convert_to_svg) {
+    // Arrange
+    std::vector<Point2f> points = {
+            {0.f, 0.f},
+            {1.f, 0.f},
+            {1.f, 1.f}
+    };
+
+    std::vector<std::uint32_t> indices = {0, 1, 2};
+
+    auto transform = identity<float>();
+
+    PropertySet ps;
+    ps.add_property("transform", transform);
+
+    TriangleMesh2f tm{ps, points, indices};
+
+    // Act
+    std::string svg_text = tm.convert_to_svg(200, 200);
+
+    // Assert
+    EXPECT_THAT(svg_text, testing::HasSubstr("M 0 200 1 200 1 199  Z"));
+};

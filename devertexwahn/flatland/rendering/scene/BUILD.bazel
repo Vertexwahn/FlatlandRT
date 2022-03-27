@@ -17,10 +17,10 @@ cc_library(
         "//flatland/rendering/integrator:path_specular_transmission",
         "//flatland/rendering/intersector:brute_force_intersector",
         "//flatland/rendering/intersector:quadtree_intersector",
+        "//flatland/rendering/scene",
         "//flatland/rendering/scene/shape:disk",
         "//flatland/rendering/scene/shape:rectangle",
         "//flatland/rendering/scene/shape:triangle_mesh",
-        "//flatland/rendering/scene",
         "@pugixml",
     ],
 )
@@ -30,6 +30,15 @@ cc_library(
     srcs = ["load_scene_exception.cpp"],
     hdrs = ["load_scene_exception.h"],
     deps = ["//flatland/core:namespace"],
+)
+
+cc_test(
+    name = "load_scene_exception_test",
+    srcs = ["load_scene_exception_test.cpp"],
+    deps = [
+        ":load_scene_exception",
+        "@com_google_googletest//:gtest_main",
+    ],
 )
 
 cc_library(
@@ -42,5 +51,14 @@ cc_library(
         "//flatland/rendering/intersector",
         "//flatland/rendering/scene/shape",
         "//flatland/rendering/sensor",
+    ],
+)
+
+cc_test(
+    name = "load_scene_test",
+    srcs = ["load_scene_test.cpp"],
+    deps = [
+        ":load_scene",
+        "@com_google_googletest//:gtest_main",
     ],
 )

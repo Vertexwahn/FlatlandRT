@@ -7,6 +7,7 @@
 #include "flatland/rendering/sampler.h"
 
 #include "hypothesis.h"
+
 #include "gmock/gmock.h"
 
 #include <array>
@@ -87,17 +88,17 @@ TEST(Warping, XiQuadartTest_warpUniformSquareToConcentricDisk) {
     constexpr int resolution_x = 51;
     constexpr int resolution_y = 51;
     constexpr int resolution = resolution_x * resolution_y;
-    constexpr int sampleCount = 1000 * resolution;
+    constexpr int sample_count = 1000 * resolution;
 
-    std::array<double, resolution> observedFrequencies{0.0};
+    std::array<double, resolution> observed_frequencies{0.0};
 
     // Act
-    for (size_t i = 0; i < sampleCount; ++i) {
+    for (size_t i = 0; i < sample_count; ++i) {
         auto sample = warp_uniform_square_to_concentric_disk(sampler.next_2d());
         int x = std::floor((sample.x() * 0.5 + 0.5) * resolution_x);
         int y = std::floor((sample.y() * 0.5 + 0.5) * resolution_y);
         int bucketIndex = y * resolution_x + x;
-        observedFrequencies[bucketIndex] += 1.0;
+        observed_frequencies[bucketIndex] += 1.0;
     }
 
     std::array<double, resolution> expectedFrequencies{0.0};
@@ -108,7 +109,7 @@ TEST(Warping, XiQuadartTest_warpUniformSquareToConcentricDisk) {
         return warp_uniform_square_to_concentric_disk_pdf(Point2d(x, y));
     };
 
-    double scale = sampleCount * 4.0;
+    double scale = sample_count * 4.0;
 
     for (int x = 0; x < resolution_x; ++x) {
         for (int y = 0; y < resolution_y; ++y) {
@@ -126,12 +127,16 @@ TEST(Warping, XiQuadartTest_warpUniformSquareToConcentricDisk) {
     }
 
     // Assert
-    const int minExpFrequency = 5;
-    const float significanceLevel = 0.01f;
+    const int min_exp_frequency = 5;
+    const float significance_level = 0.01f;
 
-    std::pair<bool, std::string> result = hypothesis::chi2_test(resolution_y * resolution_x, observedFrequencies.data(),
-                                                                expectedFrequencies.data(), sampleCount,
-                                                                minExpFrequency, significanceLevel, 1);
+    std::pair<bool, std::string> result = hypothesis::chi2_test(resolution_y * resolution_x,
+                                                                observed_frequencies.data(),
+                                                                expectedFrequencies.data(),
+                                                                sample_count,
+                                                                min_exp_frequency,
+                                                                significance_level,
+                                                                1);
 
     EXPECT_THAT(result.second, testing::HasSubstr("(d.o.f. = 2125)"));
     EXPECT_THAT(result.second, testing::HasSubstr("Accepted the null hypothesis"));
@@ -145,12 +150,10 @@ TEST(Warping, warp_uniform_square_to_tent_pdf) {
     EXPECT_THAT(s, 1.0f);
 }
 
-/*
 TEST(Warping, warp_uniform_square_to_tent) {
     // Act
     Point2f s = warp_uniform_square_to_tent(Point2f{0.0f, 0.0f});
 
     // Assert
-    //EXPECT_THAT(s, 1.0f);
+    EXPECT_THAT(s.x(), -1.0f);
 }
-*/

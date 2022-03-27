@@ -16,7 +16,6 @@ fi
 
 additional_bazel_config=$1 
 
-# Bazel 5
 bazel coverage --config=gcc9 --config=${additional_bazel_config} --instrumentation_filter="[:]" --instrument_test_targets=true --combined_report=lcov --java_runtime_version=remotejdk_11 -- //...
 
 output_path=$(bazel info output_path)
@@ -24,7 +23,7 @@ output_path=$(bazel info output_path)
 # Get last line of genhtml output
 genhtml "$output_path"/_coverage/_coverage_report.dat -o coverage_report
 
-# extract percantage from genhtml
+# extract percentage from genhtml
 current_line_coverage=$(genhtml "$output_path"/_coverage/_coverage_report.dat -o coverage_report | grep lines......: | cut -d ' ' -f 4 | tr -d '%')
 echo "Current coverage: $current_line_coverage"
 

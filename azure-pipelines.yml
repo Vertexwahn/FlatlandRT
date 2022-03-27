@@ -1,0 +1,14 @@
+#
+#   SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+jobs:
+
+  - job: GCC9
+    displayName: "GCC9 on Ubuntu 20.04"
+    pool:
+      vmImage: 'ubuntu-20.04'
+    steps:
+      - template: ci/ubuntu-20.04-gcc9.yaml
+  

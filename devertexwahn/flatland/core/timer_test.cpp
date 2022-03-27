@@ -5,11 +5,11 @@
 
 #include "flatland/core/timer.h"
 
+#include "gmock/gmock.h"
+
 #include <iostream>
 #include <chrono>
 #include <thread>
-
-#include "gmock/gmock.h"
 
 using namespace flatland;
 using namespace std::chrono_literals;

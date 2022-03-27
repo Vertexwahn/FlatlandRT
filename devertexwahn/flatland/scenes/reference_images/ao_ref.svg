@@ -1,22 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="700" baseProfile="full" version="1.1" viewBox="0 0 600 700">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="700" baseProfile="full" version="1.1" viewBox="0 0 600 700">
     <defs>
-    <marker id="arrow_head" markerHeight="8" markerWidth="8" orient="auto" refX="0.125" refY="3" viewBox="0 0 5 6">
-             <path fill="rgb(242, 101, 34)" d="M0,0 V6 L5,3 Z"/>
-    </marker>
-     </defs>
+        <marker id="arrow_head" markerHeight="8" markerWidth="8" orient="auto" refX="0.125" refY="3" viewBox="0 0 5 6">
+            <path fill="rgb(242, 101, 34)" d="M0,0 V6 L5,3 Z"/>
+        </marker>
+    </defs>
     <rect width="100%" height="100%" fill="white"/>
-    <g transform="scale(1, 1)"><path  style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)"
- d="M 176.2563171 559.098999 459.0990295 276.2563171 423.7436829 240.9009705 140.9009705 523.7436523  Z" />
-<line x1="100.001" y1="175.001" x2="281.034" y2="356.034" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.827" y1="369.814" x2="333.407" y2="299.16" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.824" y1="369.813" x2="311.936" y2="291.152" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.822" y1="369.812" x2="289.079" y2="289.517" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.819" y1="369.813" x2="266.687" y2="294.388" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.816" y1="369.814" x2="246.574" y2="305.371" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.814" y1="369.816" x2="230.371" y2="321.574" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.813" y1="369.819" x2="219.388" y2="341.687" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.812" y1="369.822" x2="214.517" y2="364.079" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.813" y1="369.824" x2="216.152" y2="386.936" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-<line x1="294.814" y1="369.827" x2="224.16" y2="408.407" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
-</g>
-      </svg>
+    <g transform="scale(1, 1)">
+        <path style="fill:rgb(255,255,255);stroke-width:3;stroke:rgb(0,173.91,238.935)" d="M 176.2563171 559.098999 459.0990295 276.2563171 423.7436829 240.9009705 140.9009705 523.7436523  Z" />
+        <line x1="100.001" y1="175.001" x2="281.034" y2="356.034" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.827" y1="369.814" x2="333.407" y2="299.16" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.824" y1="369.813" x2="311.936" y2="291.152" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.822" y1="369.812" x2="289.079" y2="289.517" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.819" y1="369.813" x2="266.687" y2="294.388" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.816" y1="369.814" x2="246.574" y2="305.371" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.814" y1="369.816" x2="230.371" y2="321.574" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.813" y1="369.819" x2="219.388" y2="341.687" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.812" y1="369.822" x2="214.517" y2="364.079" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.813" y1="369.824" x2="216.152" y2="386.936" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+        <line x1="294.814" y1="369.827" x2="224.16" y2="408.407" stroke="rgb(242, 101, 34)" stroke-width="3" marker-end="url(#arrow_head)"/>
+    </g>
+</svg>

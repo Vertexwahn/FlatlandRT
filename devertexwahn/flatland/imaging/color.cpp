@@ -16,27 +16,26 @@ FLATLAND_BEGIN_NAMESPACE
       double r,g,b;
    } COLOUR;
 */
-Color3f hot_to_cold_color_ramp(double v, double vmin, double vmax) {
-    Color3f c = {1.0, 1.0, 1.0}; // white
-    double dv;
+Color3f hot_to_cold_color_ramp(float v, float vmin, float vmax) {
+    Color3f c = {1.f, 1.f, 1.f}; // white
 
     if (v < vmin)
         v = vmin;
     if (v > vmax)
         v = vmax;
-    dv = vmax - vmin;
+    double dv = vmax - vmin;
 
-    if (v < (vmin + 0.25 * dv)) {
+    if (v < (vmin + 0.25f * dv)) {
+        c.red() = 0.f;
+        c.green() = 4.f * (v - vmin) / dv;
+    } else if (v < (vmin + 0.5f * dv)) {
         c.red() = 0;
-        c.green() = 4 * (v - vmin) / dv;
-    } else if (v < (vmin + 0.5 * dv)) {
-        c.red() = 0;
-        c.blue() = 1 + 4 * (vmin + 0.25 * dv - v) / dv;
-    } else if (v < (vmin + 0.75 * dv)) {
-        c.red() = 4 * (v - vmin - 0.5 * dv) / dv;
-        c.blue() = 0;
+        c.blue() = 1.f + 4.f * (vmin + 0.25f * dv - v) / dv;
+    } else if (v < (vmin + 0.75f * dv)) {
+        c.red() = 4.f * (v - vmin - 0.5f * dv) / dv;
+        c.blue() = 0.f;
     } else {
-        c.green() = 1 + 4 * (vmin + 0.75 * dv - v) / dv;
+        c.green() = 1.f + 4.f * (vmin + 0.75f * dv - v) / dv;
         c.blue() = 0;
     }
 

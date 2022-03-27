@@ -48,8 +48,9 @@ public:
         std::stringstream ss;
 
         for (size_t i = 0; i < triangle_count; ++i) {
-
-            ss << "<path ";
+            ss << "    ";
+            ss << "    ";
+            ss << "<path";
 
             ReferenceCounted<SvgMaterial> material = Shape2<ScalarType>::material();
             if (material) {
@@ -57,7 +58,6 @@ public:
                 ss << Shape2<ScalarType>::convert_material_to_svg_style(material.get());
             }
 
-            ss << std::endl;
             ss << " d=\"M ";
 
             int index0 = indices_[i * 3 + 0];
@@ -68,13 +68,13 @@ public:
 
             for (const auto &point : points) {
                 auto pt = Shape2<ScalarType>::transform_ * point;
-                ss << std::setprecision(10) << pt.x();
+                ss << fmt::format("{:.10}", pt.x()); //  std::setprecision(10) << pt.x();
                 ss << " ";
-                ss << std::setprecision(10) << svgCanvasHeight + -1.f * pt.y();
+                ss << fmt::format("{:.10}",  svgCanvasHeight - 1.f * pt.y()); // std::setprecision(10) << svgCanvasHeight + -1.f * pt.y();
                 ss << " ";
             }
 
-            ss << " Z\" />" << std::endl;
+            ss << " Z\" />" << "\n";
 
         }
 

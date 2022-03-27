@@ -65,6 +65,9 @@ public:
         Point center{Scalar{0.0}, Scalar{0.0}};
         center = Shape2<Scalar>::transform() * center;
 
+        ss << "    ";
+        ss << "    ";
+
         ss << "<circle cx=\"" << center.x() << "\" cy=\"" << svgCanvasHeight - center.y() << "\" r=\""
            << radius()
            << "\"";

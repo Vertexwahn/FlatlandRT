@@ -31,6 +31,10 @@ public:
 
     float *data() const;
 
+    float *data() {
+        return data_;
+    }
+
     void set_pixel(int x, int y, const Color3f &color);
 
     void set_pixel(const Point2i &point, const Color3f &color);

@@ -1,0 +1,72 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+cc_test(
+    name = "boost_test",
+    srcs = [
+        "boost_test.cpp",
+    ],
+    deps = [
+        "@boost//:algorithm",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "catch2_test",
+    srcs = [
+        "catch2_test.cpp",
+    ],
+    defines = ["CATCH_CONFIG_MAIN"],
+    deps = [
+        "@catch2//:catch2_main",
+    ],
+)
+
+cc_test(
+    name = "eigen_test",
+    srcs = [
+        "eigen_test.cpp",
+    ],
+    copts = [
+        "-Iexternal/eigen",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@eigen",
+    ],
+)
+
+cc_test(
+    name = "fmt_test",
+    srcs = [
+        "fmt_test.cpp",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@fmt",
+    ],
+)
+
+cc_test(
+    name = "glog_test",
+    srcs = [
+        "glog_test.cpp",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@glog",
+    ],
+)
+
+cc_test(
+    name = "stl_test",
+    srcs = [
+        "stl_test.cpp",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+    ],
+)

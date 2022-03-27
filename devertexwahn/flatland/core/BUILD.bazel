@@ -10,7 +10,6 @@ cc_library(
     hdrs = [
         "logging.h",
     ],
-    # implementation_deps = ["@glog"],  # TODO: switch to implementation_deps, once this feature is available
     deps = ["@glog"],
 )
 

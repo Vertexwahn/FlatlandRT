@@ -93,13 +93,13 @@ using Color4 = ColorType<4, ScalarType>;
 
 using Color3f = Color3<float>;
 using Color3d = Color3<double>;
-using Color3b = Color4<std::uint8_t>;
+using Color3b = Color3<std::uint8_t>;
 
 using Color4f = Color4<float>;
 using Color4d = Color4<double>;
 using Color4b = Color4<std::uint8_t>;
 
-Color3f hot_to_cold_color_ramp(double v, double vmin, double vmax);
+Color3f hot_to_cold_color_ramp(float v, float vmin, float vmax);
 
 FLATLAND_END_NAMESPACE
 
