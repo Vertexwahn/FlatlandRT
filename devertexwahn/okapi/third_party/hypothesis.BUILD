@@ -24,9 +24,8 @@ package(
 
 cc_library(
     name = "hypothesis",
+    srcs = ["cephes.h"],
     hdrs = [
-        "cephes.h",
         "hypothesis.h",
     ],
-    includes = ["."],
 )

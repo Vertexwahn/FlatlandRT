@@ -10,23 +10,25 @@ steps:
 
 
   - script: |
-      echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-      curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-      sudo apt-get update && sudo apt-get install -y bazel
-    displayName: 'Install Bazel'
+      lsb_release -a
+    displayName: "Show OS version"
 
   - script: |
       bazel version
-    displayName: 'Show Bazel version'
+    displayName: "Show Bazel version"
+
+  - script: |
+      gcc --version
+    displayName: "Show GCC version"
 
 
   - script: |
       cd devertexwahn
       bazel build --config=gcc9  -- //...
-    displayName: 'Bazel build gcc9-fastbuild'
+    displayName: "Bazel build gcc9-fastbuild"
 
   - script: |
       cd devertexwahn
       bazel test --config=gcc9  -- //...
-    displayName: 'Bazel test gcc9-fastbuild'
+    displayName: "Bazel test gcc9-fastbuild"
 

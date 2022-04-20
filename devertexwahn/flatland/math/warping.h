@@ -15,14 +15,43 @@
 FLATLAND_BEGIN_NAMESPACE
 
 template <typename ScalarType>
+Point2<ScalarType> warp_uniform_square_to_2x(const Point2<ScalarType> &sample) {
+    auto p_1_inverse = [](const ScalarType x) {
+        if(x < ScalarType{0}) {
+            return ScalarType{0};
+        }
+        if(x > ScalarType{1}) {
+            return ScalarType{1};
+        }
+        return std::sqrt(x);
+    };
+
+    return Point2<ScalarType>(p_1_inverse(sample.x()), p_1_inverse(sample.y()));
+}
+
+template <typename ScalarType>
+ScalarType warp_uniform_square_to_2x_pdf(const Point2<ScalarType> &sample) {
+    auto p_1 = [](const ScalarType x) {
+        if(x < ScalarType{0}) {
+            return ScalarType{0};
+        }
+        if(x > ScalarType{1}) {
+            return ScalarType{1};
+        }
+        return ScalarType{2} * x;
+    };
+    return p_1(sample.x()) * p_1(sample.y());
+}
+
+template <typename ScalarType>
 Point2<ScalarType> warp_uniform_square_to_tent(const Point2<ScalarType> &sample) {
     auto p_1_inverse = [](const ScalarType t) {
-        assert(t <= 0);
+        assert(t >= 0);
         assert(t <= 1);
 
-        if (t >= 0.0f && t < 0.5f) {
+        if (t >= ScalarType{0} && t < ScalarType{0.5}) {
             return -ScalarType{1} + std::sqrt(ScalarType{2} * t);
-        } else if (t >= 0.5 && t < 1.0f) {
+        } else if (t >= 0.5 && t < ScalarType{1}) {
             return ScalarType{1} - std::sqrt(ScalarType{2} * (ScalarType{1} - t));
         } else {
             throw std::runtime_error("Invalid parameter provided");
@@ -99,16 +128,17 @@ Vector2<ScalarType> sample_half_circle(const Point2<ScalarType> &sample) {
     return Vector2<ScalarType>(d.x(), d.y());
 }
 
+
 template <typename ScalarType>
 Vector3<ScalarType> square_to_cosine_hemisphere(const Point2<ScalarType> &sample) {
     // shamelessly taken from pbrt-v3
     Point2<ScalarType> d = warp_uniform_square_to_concentric_disk(sample);
-    ScalarType z = std::sqrt(std::max(ScalarType{0.}, ScalarType{1.} - d.x()*d.x() - d.y()*d.y()));
+    ScalarType z = std::sqrt(std::max(ScalarType{0}, ScalarType{1} - d.x()*d.x() - d.y()*d.y()));
     return Vector3<ScalarType>{d.x(), d.y(), z};
 }
 
 template <typename ScalarType>
-float square_to_cosine_hemisphere_pdf(const Vector3<ScalarType> &v) {
+ScalarType square_to_cosine_hemisphere_pdf(const Vector3<ScalarType> &v) {
     if (v.z() < ScalarType{0.}) {
         return ScalarType{0.};
     }
@@ -127,9 +157,19 @@ Vector3<ScalarType> square_to_uniform_hemisphere(const Point2<ScalarType> &sampl
 
     // taken from PBRT
     ScalarType z = sample.x();
-    ScalarType r = std::sqrt(std::max(0.0f, 1.0f - z * z));
-    ScalarType phi = ScalarType{2.} * ScalarType{M_PI} * sample.y();
-    return Vector3f(r * std::cos(phi), r * std::sin(phi), z);
+    ScalarType r = std::sqrt(std::max(ScalarType{0}, ScalarType{1} - z * z));
+    ScalarType phi = ScalarType{2} * ScalarType{M_PI} * sample.y();
+    return Vector3<ScalarType>(r * std::cos(phi), r * std::sin(phi), z);
+}
+
+template <typename ScalarType>
+ScalarType square_to_uniform_hemisphere_pdf(const Vector3<ScalarType> &sample) {
+    if (sample.z() >= 0.f) {
+        return ScalarType{1}/(ScalarType{2}*M_PI);
+    }
+    else {
+        return ScalarType{0};
+    }
 }
 
 FLATLAND_END_NAMESPACE

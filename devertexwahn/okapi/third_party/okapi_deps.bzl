@@ -11,6 +11,27 @@ def okapi_deps():
     """Fetch external dependencies for Okapi."""
 
     #-------------------------------------------------------------------------------------
+    # Skylib
+    #-------------------------------------------------------------------------------------
+
+    # Use local repository
+    maybe(
+        native.local_repository,
+        name = "bazel_skylib",
+        path = "../third_party/bazel-skylib-d54e8a70ce90a24b921381cbe84fa0b88b22dc46",
+    )
+
+    # Use github.com
+    #maybe(
+    #    git_repository,
+    #    name = "bazel_skylib",
+    #    #branch = "main",
+    #    commit = "6abad3de5fd9c001f67b17fe8c7242b3cc3b8851",
+    #    shallow_since = "1649192995 -0400",
+    #    remote = "https://github.com/bazelbuild/bazel-skylib",
+    #)
+
+    #-------------------------------------------------------------------------------------
     # Google Test
     #-------------------------------------------------------------------------------------
 
@@ -18,7 +39,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-af29db7ec28d6df1c7f0f745186884091e602e07",
+        path = "../third_party/googletest-8ccdb9d56d07b9169ecd17f1164f251a637c250e",
     )
 
     # Use github.com
@@ -74,7 +95,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "glog",
-        path = "../third_party/glog-864ef64920fc9c7b7c4b6efacd29053245632509",
+        path = "../third_party/glog-b33e3bad4c46c8a6345525fd822af355e5ef9446",
     )
 
     # Use github.com
@@ -103,7 +124,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "catch2",
-        path = "../third_party/Catch2-7cf2f88e50f0d1de324489c31db0314188423b6d",
+        path = "../third_party/Catch2-f526ff0fc37ae00ff2c0dc8f6550bf8209c30afc",
     )
 
     # Use github.com
@@ -123,7 +144,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-e2408f37c8f7301a1e5d32364675d0077ad09559",
+        path = "../third_party/fmt-ffb5e6a7328986706b48c3b4964ec596026f5e01",
     )
 
     # Live at Head
@@ -191,8 +212,8 @@ def okapi_deps():
     #    name = "pugixml",
     #    build_file = "//okapi/third_party:pugixml.BUILD",
     #    sha256 = "82226fc0cbdea450a06a4486c6514bd31984a75fbfcf359aea99080f4b878d2a",
-    #    strip_prefix = "pugixml-1.11.4",
-    #    urls = ["https://github.com/zeux/pugixml/releases/download/v1.11.4/pugixml-1.11.4.zip"],
+    #    strip_prefix = "pugixml-1.12.1",
+    #    urls = ["https://github.com/zeux/pugixml/releases/download/v1.11.4/pugixml-1.12.1.zip"],
     #)
 
     # Use local repository
@@ -200,7 +221,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "pugixml",
         build_file = "//okapi/third_party:pugixml.BUILD",
-        path = "../third_party/pugixml-1.11.4",
+        path = "../third_party/pugixml-1.12.1",
     )
 
     #-------------------------------------------------------------------------------------
@@ -212,7 +233,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "zlib",
         build_file = "//okapi/third_party:zlib.BUILD",
-        path = "../third_party/zlib-1.2.11",
+        path = "../third_party/zlib-1.2.12",
     )
 
     # Use https://zlib.net
@@ -244,7 +265,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "pcg",
         build_file = "//okapi/third_party:pcg.BUILD",
-        path = "../third_party/pcg-cpp-ffd522e7188bef30a00c74dc7eb9de5faff90092",
+        path = "../third_party/pcg-cpp-428802d1a5634f96bcd0705fab379ff0113bcf13",
     )
 
     #maybe(
@@ -313,7 +334,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "openexr",
-        path = "../third_party/openexr-8587f4eed1d396a9c545d59e7b231d9d4b2cd8ef",
+        path = "../third_party/openexr-4854db9316efe645628928dd378f389e1671bf18",
         #path = "../third_party/openexr-3.1.0",
     )
 
@@ -322,7 +343,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "Imath",
         build_file = "@openexr//:bazel/third_party/Imath.BUILD",  # openexr must be fetched first, since it provides the Imath build instructions
-        path = "../third_party/Imath-3.1.4",
+        path = "../third_party/Imath-3.1.5",
     )
 
     # Use git repository from com_github_vertexwahn_openexr
@@ -370,7 +391,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "oneTBB",
-        path = "../third_party/oneTBB-3e352b48127b3c79d61df5618607d2daab3f2caa",
+        path = "../third_party/oneTBB-9d2a3477ce276d437bf34b1582781e5b11f9b37a",
     )
 
     # Use git repository from com_github_oneapi_src_onetbb
@@ -478,6 +499,6 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_grail_bazel_toolchain",
-        path = "../third_party/bazel-toolchain-bb6202519dfbd96b4e8d8987ee3c0c266b41101b",
+        path = "../third_party/bazel-toolchain-9e71d562023dc7994e747110ee1ca345ad6b4413",
     )
 

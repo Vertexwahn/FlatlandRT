@@ -85,8 +85,13 @@ TEST(IndependentSampler, GivenSample_WhenDrawingSamples_ExpectUniformDistributio
     expected_frequencies.resize(bucket_count);
     std::fill(std::begin(expected_frequencies), std::end(expected_frequencies), sample_count / bucket_count);
 
-    std::pair<bool, std::string> result = hypothesis::chi2_test(bucket_count, observed_frequencies,
-                                                                &expected_frequencies[0], sample_count, 5, 0.05);
+    std::pair<bool, std::string> result = hypothesis::chi2_test(
+            bucket_count,
+            observed_frequencies,
+            &expected_frequencies[0],
+            sample_count,
+            5,
+            0.05);
 
     EXPECT_THAT(result.second, testing::HasSubstr("Chi^2 statistic = 120.37 (d.o.f. = 99)"));
     EXPECT_THAT(result.second, testing::HasSubstr("Accepted the null hypothesis"));

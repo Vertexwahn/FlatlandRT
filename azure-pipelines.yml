@@ -4,6 +4,20 @@
 #
 
 jobs:
+  - job: AppleClang12
+    displayName: "Apple Clang12 on macOS 10.15 (Catalina)"
+    pool:
+      vmImage: 'macOS-10.15'
+    steps:
+      - template: ci/macOS-10.15-clang12.yaml
+
+  - job: AppleClang13BigSur
+    displayName: "Apple Clang13 on macOS 11 (Big Sur)"
+    pool:
+      vmImage: 'macOS-11'
+    steps:
+      - template: ci/macOS-11-clang13.yaml
+
 
   - job: GCC9
     displayName: "GCC9 on Ubuntu 20.04"
@@ -12,3 +26,17 @@ jobs:
     steps:
       - template: ci/ubuntu-20.04-gcc9.yaml
   
+
+  - job: VisualStudio2019
+    displayName: "VS2019 on Windows Server 2019"
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+      - template: ci/windows-2019-vs2019.yaml
+
+  - job: VisualStudio2022
+    displayName: "VS2022 on Windows Server 2022"
+    pool:
+      vmImage: 'windows-2022'
+    steps:
+      - template: ci/windows-2022-vs2022.yaml

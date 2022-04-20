@@ -31,7 +31,7 @@ TEST(Disk2f, GivenDiskCenterAndRadius_WhenInitializing_ThenInitializedDisk) {
 }
 
 // Trivial hit
-TEST(Disk2f, GivenADiskAndRay_WhenRayIntesectsDisk_ThenIntersectionOnDisk) {
+TEST(Disk2f, GivenADiskAndRay_WhenRayIntersectsDisk_ThenIntersectionOnDisk) {
     // Arrange
     auto diskCenter = Vector2f(500.f, 100.f);
     auto diskRadius = 25.f;

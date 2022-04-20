@@ -22,12 +22,14 @@ FLATLAND_BEGIN_NAMESPACE
 template<class T> inline constexpr T pi_v = M_PI;
 
 inline constexpr float pif = pi_v<float>;
-inline constexpr double pi_over_2f = pi_v<float> / 2.f;
-inline constexpr double pi_over_4f = pi_v<float> / 4.f;
+inline constexpr float pi_over_2f = pi_v<float> / 2.f;
+inline constexpr float pi_over_4f = pi_v<float> / 4.f;
+inline constexpr float inv_2_pif = 1.f / (2.f * pi_v<float>);
 
 inline constexpr double pi = pi_v<double>;
 inline constexpr double pi_over_2 = pi_v<double> / 2.0;
 inline constexpr double pi_over_4 = pi_v<double> / 4.0;
+inline constexpr double inv_2_pid = 1.f / 2.f * pi_v<double>;
 
 template <typename ScalarType>
 ScalarType degree_to_radian(const ScalarType value) {
