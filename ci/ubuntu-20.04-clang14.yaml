@@ -9,7 +9,7 @@ steps:
 
   - script: |
       bazel version
-    displayName: 'Show bazel version'
+    displayName: 'Show Bazel version'
 
 
   # fastbuild

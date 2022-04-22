@@ -43,33 +43,6 @@ ScalarType warp_uniform_square_to_2x_pdf(const Point2<ScalarType> &sample) {
     return p_1(sample.x()) * p_1(sample.y());
 }
 
-template <typename ScalarType>
-Point2<ScalarType> warp_uniform_square_to_tent(const Point2<ScalarType> &sample) {
-    auto p_1_inverse = [](const ScalarType t) {
-        assert(t >= 0);
-        assert(t <= 1);
-
-        if (t >= ScalarType{0} && t < ScalarType{0.5}) {
-            return -ScalarType{1} + std::sqrt(ScalarType{2} * t);
-        } else if (t >= 0.5 && t < ScalarType{1}) {
-            return ScalarType{1} - std::sqrt(ScalarType{2} * (ScalarType{1} - t));
-        } else {
-            throw std::runtime_error("Invalid parameter provided");
-        }
-    };
-
-    return Point2<ScalarType>(p_1_inverse(sample.x()), p_1_inverse(sample.y()));
-}
-
-template <typename ScalarType>
-ScalarType warp_uniform_square_to_tent_pdf(const Point2<ScalarType> &sample) {
-    auto p_1 = [](const ScalarType t) {
-        assert(t >= -ScalarType{1});
-        assert(t <= ScalarType{1});
-        return ScalarType{1} - std::abs(t);
-    };
-    return p_1(sample.x()) * p_1(sample.y());
-}
 
 // The function SampleUniformDiskConcentric has been copied from pbrt-v4
 // and slightly modified
@@ -126,29 +99,6 @@ Vector2<ScalarType> sample_half_circle(const Point2<ScalarType> &sample) {
     }
 
     return Vector2<ScalarType>(d.x(), d.y());
-}
-
-
-template <typename ScalarType>
-Vector3<ScalarType> square_to_cosine_hemisphere(const Point2<ScalarType> &sample) {
-    // shamelessly taken from pbrt-v3
-    Point2<ScalarType> d = warp_uniform_square_to_concentric_disk(sample);
-    ScalarType z = std::sqrt(std::max(ScalarType{0}, ScalarType{1} - d.x()*d.x() - d.y()*d.y()));
-    return Vector3<ScalarType>{d.x(), d.y(), z};
-}
-
-template <typename ScalarType>
-ScalarType square_to_cosine_hemisphere_pdf(const Vector3<ScalarType> &v) {
-    if (v.z() < ScalarType{0.}) {
-        return ScalarType{0.};
-    }
-    else {
-        // Transform v to polar coordinates
-        ScalarType r = v.norm();
-        ScalarType theta = acos(v.z() / r);
-        ScalarType cosTheta = cos(theta);
-        return cosTheta * (ScalarType{1.} / ScalarType{M_PI});
-    }
 }
 
 
