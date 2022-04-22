@@ -151,26 +151,6 @@ ScalarType square_to_cosine_hemisphere_pdf(const Vector3<ScalarType> &v) {
     }
 }
 
-template <typename ScalarType>
-Vector3<ScalarType> square_to_uniform_hemisphere(const Point2<ScalarType> &sample) {
-    // samples are generated to the hemisphere centered at (0,0,1)
-
-    // taken from PBRT
-    ScalarType z = sample.x();
-    ScalarType r = std::sqrt(std::max(ScalarType{0}, ScalarType{1} - z * z));
-    ScalarType phi = ScalarType{2} * ScalarType{M_PI} * sample.y();
-    return Vector3<ScalarType>(r * std::cos(phi), r * std::sin(phi), z);
-}
-
-template <typename ScalarType>
-ScalarType square_to_uniform_hemisphere_pdf(const Vector3<ScalarType> &sample) {
-    if (sample.z() >= 0.f) {
-        return ScalarType{1}/(ScalarType{2}*M_PI);
-    }
-    else {
-        return ScalarType{0};
-    }
-}
 
 FLATLAND_END_NAMESPACE
 

@@ -1,0 +1,20 @@
+# Clang 13 on Ubunutu 20.04
+# Make sure we can build with Clang 13 in all different compilation modes
+steps:
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+  - script: |
+      bazel version
+    displayName: 'Show bazel version'
+
+
+  # fastbuild
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang14  -- //... 
+    displayName: 'Bazel build clang13-fastbuild'
+

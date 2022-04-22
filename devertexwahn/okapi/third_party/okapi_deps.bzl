@@ -39,7 +39,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-8ccdb9d56d07b9169ecd17f1164f251a637c250e",
+        path = "../third_party/googletest-bf66935e07825318ae519675d73d0f3e313b3ec6",
     )
 
     # Use github.com
@@ -472,7 +472,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_github_nelhage_rules_boost",
-        path = "../third_party/rules_boost-ef58870fe00ecb8047cd34324b8c21221387d5fc",
+        path = "../third_party/rules_boost-32164a62e2472077320f48f52b8077207cd0c9c8",
     )
 
     #-------------------------------------------------------------------------------------

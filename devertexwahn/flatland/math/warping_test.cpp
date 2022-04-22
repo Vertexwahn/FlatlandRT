@@ -158,10 +158,3 @@ TEST(Warping, warp_uniform_square_to_tent) {
     EXPECT_THAT(s.x(), -1.0f);
 }
 
-TEST(Warping, square_to_uniform_hemisphere_pdf) {
-    // Act
-    float density = square_to_uniform_hemisphere_pdf(Vector3f{0.f, 0.f, 0.f});
-
-    // Assert
-    EXPECT_THAT(density, ::testing::FloatNear(0.159155f, 0.001f));
-}

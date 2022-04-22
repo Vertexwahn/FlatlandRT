@@ -4,7 +4,7 @@
 #
 
 jobs:
-  - job: AppleClang12
+  - job: AppleClang12Catalina
     displayName: "Apple Clang12 on macOS 10.15 (Catalina)"
     pool:
       vmImage: 'macOS-10.15'
@@ -18,6 +18,20 @@ jobs:
     steps:
       - template: ci/macOS-11-clang13.yaml
 
+  - job: AppleClang13Monterey
+    displayName: "Apple Clang13 on macOS 12 (Monterey)"
+    pool:
+      vmImage: 'macOS-12'
+    steps:
+      - template: ci/macOS-12-clang13.yaml
+
+
+  - job: Clang14
+    displayName: "Clang14 on Ubuntu 20.04"
+    pool:
+      vmImage: 'ubuntu-20.04'
+    steps:
+      - template: ci/ubuntu-20.04-clang14.yaml
 
   - job: GCC9
     displayName: "GCC9 on Ubuntu 20.04"

@@ -1,0 +1,18 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: ubuntu:18.04
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - bazel-cache
+
+      - run: apt-get update && apt-get -y install pkg-config zip g++ zlib1g-dev unzip python curl ocl-icd-opencl-dev opencl-headers
+      - run: cd /tmp/ &&
+          curl -LO https://github.com/bazelbuild/bazel/releases/download/5.1.1/bazel-5.1.1-installer-linux-x86_64.sh &&
+          bash /tmp/bazel-5.1.1-installer-linux-x86_64.sh
+      - run: cd test && cp .bazelrc.ci .bazelrc
+      - run: cd test && bazel test --test_output=errors //...
