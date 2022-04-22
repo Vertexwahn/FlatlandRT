@@ -142,19 +142,3 @@ TEST(Warping, XiQuadartTest_warpUniformSquareToConcentricDisk) {
     EXPECT_THAT(result.second, testing::HasSubstr("Accepted the null hypothesis"));
 }
 
-TEST(Warping, warp_uniform_square_to_tent_pdf) {
-    // Act
-    float s = warp_uniform_square_to_tent_pdf(Point2f{0.0f, 0.0f});
-
-    // Assert
-    EXPECT_THAT(s, 1.0f);
-}
-
-TEST(Warping, warp_uniform_square_to_tent) {
-    // Act
-    Point2f s = warp_uniform_square_to_tent(Point2f{0.0f, 0.0f});
-
-    // Assert
-    EXPECT_THAT(s.x(), -1.0f);
-}
-
