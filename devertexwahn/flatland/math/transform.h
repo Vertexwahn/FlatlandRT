@@ -185,14 +185,14 @@ Transform44Type<ScalarType> scale(const ScalarType x, const ScalarType y) {
 }
 
 template <typename ScalarType>
-Transform44Type<ScalarType> rotate_z(const ScalarType radian) {
+Transform44Type<ScalarType> rotate_x(const ScalarType radian) {
     ScalarType s = sin(radian);
     ScalarType c = cos(radian);
 
     Matrix44<ScalarType> m;
-    m.row(0) = Eigen::Matrix<ScalarType, 4, 1>(c, -s, 0, 0);
-    m.row(1) = Eigen::Matrix<ScalarType, 4, 1>(s, c, 0, 0);
-    m.row(2) = Eigen::Matrix<ScalarType, 4, 1>(0, 0, 1, 0);
+    m.row(0) = Eigen::Matrix<ScalarType, 4, 1>(1, 0, 0, 0);
+    m.row(1) = Eigen::Matrix<ScalarType, 4, 1>(0, c, -s, 0);
+    m.row(2) = Eigen::Matrix<ScalarType, 4, 1>(0, s, c, 0);
     m.row(3) = Eigen::Matrix<ScalarType, 4, 1>(0, 0, 0, 1);
 
     return Transform44Type<ScalarType>{m};
@@ -207,6 +207,20 @@ Transform44Type<ScalarType> rotate_y(const ScalarType radian) {
     m.row(0) = Eigen::Matrix<ScalarType, 4, 1>(c, 0, s, 0);
     m.row(1) = Eigen::Matrix<ScalarType, 4, 1>(0, 1, 0, 0);
     m.row(2) = Eigen::Matrix<ScalarType, 4, 1>(-s, 0, c, 0);
+    m.row(3) = Eigen::Matrix<ScalarType, 4, 1>(0, 0, 0, 1);
+
+    return Transform44Type<ScalarType>{m};
+}
+
+template <typename ScalarType>
+Transform44Type<ScalarType> rotate_z(const ScalarType radian) {
+    ScalarType s = sin(radian);
+    ScalarType c = cos(radian);
+
+    Matrix44<ScalarType> m;
+    m.row(0) = Eigen::Matrix<ScalarType, 4, 1>(c, -s, 0, 0);
+    m.row(1) = Eigen::Matrix<ScalarType, 4, 1>(s, c, 0, 0);
+    m.row(2) = Eigen::Matrix<ScalarType, 4, 1>(0, 0, 1, 0);
     m.row(3) = Eigen::Matrix<ScalarType, 4, 1>(0, 0, 0, 1);
 
     return Transform44Type<ScalarType>{m};

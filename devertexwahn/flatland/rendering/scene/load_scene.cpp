@@ -25,6 +25,11 @@ Transform44f read_transform<3>(const pugi::xml_node &xmlTransform) {
     for( auto node : xmlTransform) {
         std::string transformType = node.name();
 
+        if (transformType == "rotate_x") {
+            auto angle_in_degree = node.attribute("angle").as_float();
+            transform = rotate_x(degree_to_radian(angle_in_degree)) * transform;
+        }
+
         if (transformType == "rotate_z") {
             auto angle_in_degree = node.attribute("angle").as_float();
             transform = rotate_z(degree_to_radian(angle_in_degree)) * transform;

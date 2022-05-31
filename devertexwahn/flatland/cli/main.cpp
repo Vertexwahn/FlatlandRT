@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
         google::InitGoogleLogging(argv[0]);
         gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-        TCLAP::CmdLine cmd("Flatland command line interface", ' ', "1.3.0");
+        TCLAP::CmdLine cmd("Flatland command line interface", ' ', "1.3.1");
 
         TCLAP::UnlabeledValueArg <std::string> scene_filename(
                 "filename",

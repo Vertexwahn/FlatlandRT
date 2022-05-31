@@ -18,7 +18,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "bazel_skylib",
-        path = "../third_party/bazel-skylib-d54e8a70ce90a24b921381cbe84fa0b88b22dc46",
+        path = "../third_party/bazel-skylib-312bccd83b1364fa736dde97ccba3d2b40cdfabc",
     )
 
     # Use github.com
@@ -39,7 +39,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-bf66935e07825318ae519675d73d0f3e313b3ec6",
+        path = "../third_party/googletest-548b13dc3c02b93f60eeff9a0cc6e11c1ea722ca",
     )
 
     # Use github.com
@@ -124,7 +124,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "catch2",
-        path = "../third_party/Catch2-f526ff0fc37ae00ff2c0dc8f6550bf8209c30afc",
+        path = "../third_party/Catch2-8c952bd0762c2962c5ac1b2bf8af075b2b4c3500",
     )
 
     # Use github.com
@@ -144,7 +144,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-ffb5e6a7328986706b48c3b4964ec596026f5e01",
+        path = "../third_party/fmt-a2681aabcb4c8857ce4a2f0f53335e99888e811b",
     )
 
     # Live at Head
@@ -331,10 +331,16 @@ def okapi_deps():
     #-------------------------------------------------------------------------------------
 
     # Use local openexr
+    #git_repository(
+    #    name = "openexr",
+    #    branch = "bazel-bump-openexr-version",
+    #    remote = "https://github.com/Vertexwahn/openexr",
+    #)
+
     maybe(
         native.local_repository,
         name = "openexr",
-        path = "../third_party/openexr-4854db9316efe645628928dd378f389e1671bf18",
+        path = "../third_party/openexr-672c77d7c923402f549371e08b39ece4552cbb85",
         #path = "../third_party/openexr-3.1.0",
     )
 
@@ -391,7 +397,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "oneTBB",
-        path = "../third_party/oneTBB-9d2a3477ce276d437bf34b1582781e5b11f9b37a",
+        path = "../third_party/oneTBB-451e76ef6804257226af42a2e5191cacba3ff2c5",
     )
 
     # Use git repository from com_github_oneapi_src_onetbb
@@ -420,7 +426,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "rules_pkg",
-        path = "../third_party/rules_pkg-0.6.0",
+        path = "../third_party/rules_pkg-0.7.0",
     )
 
     #maybe(
@@ -472,7 +478,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_github_nelhage_rules_boost",
-        path = "../third_party/rules_boost-32164a62e2472077320f48f52b8077207cd0c9c8",
+        path = "../third_party/rules_boost-789a047e61c0292c3b989514f5ca18a9945b0029",
     )
 
     #-------------------------------------------------------------------------------------
@@ -499,6 +505,6 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_grail_bazel_toolchain",
-        path = "../third_party/bazel-toolchain-9e71d562023dc7994e747110ee1ca345ad6b4413",
+        path = "../third_party/bazel-toolchain-c63521c22a2155a3160d0f296c70727ab25e8d2f",
     )
 

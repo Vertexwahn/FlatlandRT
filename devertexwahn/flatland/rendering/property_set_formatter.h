@@ -21,7 +21,7 @@ struct fmt::formatter<flatland::Vector2f> {
 
     template<typename FormatContext>
     auto format(const flatland::Vector2f &v, FormatContext &ctx) {
-        return format_to(ctx.out(), "({}, {})", v.x(), v.y());
+        return fmt::format_to(ctx.out(), "({}, {})", v.x(), v.y());
     }
 };
 
@@ -31,7 +31,7 @@ struct fmt::formatter<flatland::Vector2d> {
 
     template<typename FormatContext>
     auto format(const flatland::Vector2d &v, FormatContext &ctx) {
-        return format_to(ctx.out(), "({}, {})", v.x(), v.y());
+        return fmt::format_to(ctx.out(), "({}, {})", v.x(), v.y());
     }
 };
 
@@ -41,7 +41,7 @@ struct fmt::formatter<flatland::Vector3f> {
 
     template<typename FormatContext>
     auto format(const flatland::Vector3f &v, FormatContext &ctx) {
-        return format_to(ctx.out(), "({}, {}, {})", v.x(), v.y(), v.z());
+        return fmt::format_to(ctx.out(), "({}, {}, {})", v.x(), v.y(), v.z());
     }
 };
 
@@ -51,7 +51,7 @@ struct fmt::formatter<flatland::Vector3d> {
 
     template<typename FormatContext>
     auto format(const flatland::Vector3f &v, FormatContext &ctx) {
-        return format_to(ctx.out(), "({}, {}, {})", v.x(), v.y(), v.z());
+        return fmt::format_to(ctx.out(), "({}, {}, {})", v.x(), v.y(), v.z());
     }
 };
 
@@ -61,7 +61,7 @@ struct fmt::formatter<flatland::Point2f> {
 
     template<typename FormatContext>
     auto format(const flatland::Point2f &v, FormatContext &ctx) {
-        return format_to(ctx.out(), "({}, {})", v.x(), v.y());
+        return fmt::format_to(ctx.out(), "({}, {})", v.x(), v.y());
     }
 };
 
@@ -71,7 +71,7 @@ struct fmt::formatter<flatland::Point2d> {
 
     template<typename FormatContext>
     auto format(const flatland::Point2d &v, FormatContext &ctx) {
-        return format_to(ctx.out(), "({}, {})", v.x(), v.y());
+        return fmt::format_to(ctx.out(), "({}, {})", v.x(), v.y());
     }
 };
 
@@ -81,7 +81,7 @@ struct fmt::formatter<flatland::Color3f> {
 
     template<typename FormatContext>
     auto format(const flatland::Color3f &c, FormatContext &ctx) {
-        return format_to(ctx.out(), "({}, {}, {})", c.red(), c.green(), c.blue());
+        return fmt::format_to(ctx.out(), "({}, {}, {})", c.red(), c.green(), c.blue());
     }
 };
 
@@ -91,7 +91,7 @@ struct fmt::formatter<flatland::Transform44f> {
 
     template<typename FormatContext>
     auto format(const flatland::Transform44f &c, FormatContext &ctx) {
-        return format_to(ctx.out(), "({})", c.matrix()(0, 0));
+        return fmt::format_to(ctx.out(), "({})", c.matrix()(0, 0));
     }
 };
 
@@ -101,7 +101,7 @@ struct fmt::formatter<flatland::ReferenceCounted<ObjectType>> {
 
     template<typename FormatContext>
     auto format(const flatland::ReferenceCounted<ObjectType> &obj, FormatContext &ctx) {
-        return format_to(ctx.out(), "{}", obj->to_string());
+        return fmt::format_to(ctx.out(), "{}", obj->to_string());
     }
 };
 
