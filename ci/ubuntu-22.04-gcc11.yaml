@@ -1,0 +1,34 @@
+# GCC9 on Ubuntu 20.04
+# Make sure we can build with GCC9 in all different compilation modes
+
+steps:
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
+
+  - script: |
+      bazel version
+    displayName: "Show Bazel version"
+
+  - script: |
+      gcc --version
+    displayName: "Show GCC version"
+
+
+  - script: |
+      cd devertexwahn
+      bazel build --config=gcc11  -- //flatland/...
+    displayName: "Bazel build gcc11-fastbuild"
+
+  - script: |
+     cd devertexwahn
+     bazel test --config=gcc11  -- //flatland/...
+    displayName: "Bazel build gcc11-fastbuild"
+
