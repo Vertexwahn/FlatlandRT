@@ -187,24 +187,25 @@ If you find any copyright or license violations or issues please let me know.
 
 ### Third party dependencies
 
+* {fmt} (https://github.com/fmtlib/fmt) (see `third_party` folder)
+* abseil (https://abseil.io/) (see `third_party` folder)
 * Boost (https://www.boost.org/) (third party dependency) ([License](devertexwahn/flatland/LICENSES/boost/LICENSE))
 * Catch2 (https://github.com/catchorg/Catch2) (see `third_party` folder)
 * Eigen (see `third_party` folder)
-* Google Test (https://github.com/google/googletest) (see `third_party` folder)
-* Imath (see `third_party` folder)
-* LLVM toolchain for Bazel (see `third_party` folder)
-* OpenEXR (see `third_party` folder)
 * gflags (https://github.com/gflags/gflags/) (see `third_party` folder)
 * glog (https://github.com/google/glog) (see `third_party` folder)
+* Google Test (https://github.com/google/googletest) (see `third_party` folder)
 * hypothesis (https://github.com/wjakob/hypothesis) (see `third_party` folder)
+* Imath (see `third_party` folder)
 * libpng-1.6.37 (https://github.com/wjakob/hypothesis) (see `third_party` folder)
+* LLVM toolchain for Bazel (see `third_party` folder)
+* OpenEXR (see `third_party` folder)
 * pcg-cpp (https://github.com/imneme/pcg-cpp/)  (see `third_party` folder)
 * pugixml (https://pugixml.org/, https://github.com/zeux/pugixml) (third party dependency) (see `third_party` folder)
 * rules_boost (see `third_party` folder)
 * rules_pkg (see `third_party` folder)
 * yaml-cpp (https://github.com/jbeder/yaml-cpp) (third party dependency) ([License](devertexwahn/flatland/LICENSES/yaml-cpp/LICENSE))
 * zlib (https://zlib.net/) ([License](devertexwahn/flatland/LICENSES/third_party/zlib-1.2.11/README))
-* {fmt} (https://github.com/fmtlib/fmt) (see `third_party` folder)
 
 ### Artwork
 

@@ -486,3 +486,13 @@ def okapi_deps():
         path = "../third_party/bazel-toolchain-f14a8a5de8f7e98a011a52163d4855572c07a1a3",
     )
 
+    #-------------------------------------------------------------------------------------
+    # abseil-cpp
+    #-------------------------------------------------------------------------------------
+
+    maybe(
+        native.local_repository,
+        name = "com_google_absl",
+        path = "../third_party/abseil-cpp-56f5477f15ab63f77a3f34487304d6c7e0965238",
+    )
+
