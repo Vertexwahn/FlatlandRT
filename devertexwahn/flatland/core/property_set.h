@@ -24,6 +24,8 @@ public:
 
     virtual ~PropertyException() = default;
 
+    // virtual ~PropertyException() noexcept {} // Todo: Find out what is better here
+
 protected:
     std::string error_message_;
 };

@@ -12,10 +12,17 @@ build:gcc9 --cxxopt=-Werror
 ##build:gcc9 --cxxopt=-Wextra
 build:gcc9 --define compiler=gcc9_3_0
 
+# GCC 11.2
+build:gcc11 --cxxopt=-std=c++2a
+build:gcc11 --cxxopt=-Wall
+build:gcc11 --cxxopt=-Werror
+##build:gcc11 --cxxopt=-Wextra
+build:gcc11 --define compiler=gcc11
+
 # macOS (e.g. Clang 12.0.0)
 build:macos --cxxopt=-std=c++2a
 build:macos --cxxopt=-Wall
-#build:macos --cxxopt=-Werror # Commented out because of embree
+#build:macos --cxxopt=-Werror # Commented out because of Embree
 ##build:macos --cxxopt=-Wextra
 build:macos --define compiler=clang12
 

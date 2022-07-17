@@ -12,8 +12,9 @@ cc_binary(
     deps = [
         "//flatland/rendering",
         "//flatland/rendering/scene:load_scene",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
         "@fmt",
-        "@tclap",
     ],
 )
 

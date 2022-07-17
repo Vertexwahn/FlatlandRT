@@ -18,7 +18,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "bazel_skylib",
-        path = "../third_party/bazel-skylib-312bccd83b1364fa736dde97ccba3d2b40cdfabc",
+        path = "../third_party/bazel-skylib-872e9b06e18ae8ba2897cb65b9aaa172aa6279f3",
     )
 
     # Use github.com
@@ -39,7 +39,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-548b13dc3c02b93f60eeff9a0cc6e11c1ea722ca",
+        path = "../third_party/googletest-bea621c3c39d8a7f71f07bd543c3a58bfa684f92",
     )
 
     # Use github.com
@@ -95,7 +95,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "glog",
-        path = "../third_party/glog-b33e3bad4c46c8a6345525fd822af355e5ef9446",
+        path = "../third_party/glog-c515e1ae2fc8b36ca19362842f9347e9429be7ad",
     )
 
     # Use github.com
@@ -124,7 +124,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "catch2",
-        path = "../third_party/Catch2-8c952bd0762c2962c5ac1b2bf8af075b2b4c3500",
+        path = "../third_party/Catch2-1bd233866c5ba1d94fbea34b260685b4b4ecb796",
     )
 
     # Use github.com
@@ -144,7 +144,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-a2681aabcb4c8857ce4a2f0f53335e99888e811b",
+        path = "../third_party/fmt-91abfcd6cfde3b083612bcef08be110246dd2883",
     )
 
     # Live at Head
@@ -278,40 +278,19 @@ def okapi_deps():
     #)
 
     #-------------------------------------------------------------------------------------
-    # tclap
-    #-------------------------------------------------------------------------------------
-
-    #maybe(
-    #    http_archive,
-    #    name = "tclap",
-    #    build_file = "//okapi/third_party:tclap.BUILD",
-    #    sha256 = "54d9afd826edf05accd24b56b8a50c7da10e3eaeae0cff698599cd595f50dd6d",
-    #    strip_prefix = "tclap-1.4.0-rc1",
-    #    urls = ["https://github.com/mirror/tclap/archive/1.4.0-rc1.tar.gz"],
-    #)
-
-    maybe(
-        native.new_local_repository,
-        name = "tclap",
-        build_file = "//okapi/third_party:tclap.BUILD",
-        path = "../third_party/tclap-1.4.0-rc1",
-    )
-
-    #-------------------------------------------------------------------------------------
     # yaml-cpp
     #-------------------------------------------------------------------------------------
 
     maybe(
         native.local_repository,
         name = "com_github_jbeder_yaml_cpp",
-        path = "../third_party/yaml-cpp-yaml-cpp-0.7.0",
+        path = "../third_party/yaml-cpp-c73ee34704c512ebe915b283645aefa9f424a22f",
     )
 
     # yaml-cpp-0.6.3
     # Latest release does not support Bazel. Therefore, we use HEAD from master
     #http_archive(
     #    name = "com_github_jbeder_yaml_cpp",
-    #    #build_file = "//okapi/third_party:tclap.BUILD",
     #    sha256 = "77ea1b90b3718aa0c324207cb29418f5bced2354c2e483a9523d98c3460af1ed",
     #    strip_prefix = "yaml-cpp-yaml-cpp-0.6.3",
     #    urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.tar.gz"],
@@ -340,8 +319,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "openexr",
-        path = "../third_party/openexr-672c77d7c923402f549371e08b39ece4552cbb85",
-        #path = "../third_party/openexr-3.1.0",
+        path = "../third_party/openexr-a03aca31fa1ce85d3f28627dbb3e5ded9494724a",
     )
 
     # Use local Imath
@@ -397,7 +375,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "oneTBB",
-        path = "../third_party/oneTBB-451e76ef6804257226af42a2e5191cacba3ff2c5",
+        path = "../third_party/oneTBB-323260671b40db33c9fc0d66d1f1eed6ecc82ce2",
     )
 
     # Use git repository from com_github_oneapi_src_onetbb
@@ -478,7 +456,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_github_nelhage_rules_boost",
-        path = "../third_party/rules_boost-789a047e61c0292c3b989514f5ca18a9945b0029",
+        path = "../third_party/rules_boost-06d26e60e9614bddd42a8ed199179775f7d7f90d",
     )
 
     #-------------------------------------------------------------------------------------
@@ -505,6 +483,6 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_grail_bazel_toolchain",
-        path = "../third_party/bazel-toolchain-c63521c22a2155a3160d0f296c70727ab25e8d2f",
+        path = "../third_party/bazel-toolchain-f14a8a5de8f7e98a011a52163d4855572c07a1a3",
     )
 

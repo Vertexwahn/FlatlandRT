@@ -9,10 +9,12 @@
 #include "flatland/rendering/rendering.h"
 #include "flatland/rendering/scene/load_scene.h"
 
+#include "absl/flags/flag.h"
+#include "absl/flags/parse.h"
+#include "absl/flags/usage_config.h"
 #include "boost/version.hpp"
 #include "fmt/core.h"
 #include "gflags/gflags.h"
-#include "tclap/CmdLine.h"
 
 #include <filesystem>
 
@@ -44,29 +46,24 @@ void plot_quadtree(QuadtreeNode *node, SvgCanvas2f *canvas) {
     }
 }
 
+std::string version_string() { return "Flatland 1.3.2"; }
+
+ABSL_FLAG(std::string, scene_filename, "scene.xml", "Okapi scene filename use as input for rendering");
+
 int main(int argc, char **argv) {
     try {
         FLAGS_logtostderr = true;
         //google::SetLogDestination(google::GLOG_INFO,"log.txt");
         google::InitGoogleLogging(argv[0]);
-        gflags::ParseCommandLineFlags(&argc, &argv, true);
+        //gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-        TCLAP::CmdLine cmd("Flatland command line interface", ' ', "1.3.1");
-
-        TCLAP::UnlabeledValueArg <std::string> scene_filename(
-                "filename",
-                "Flatland scene filename",
-                true,
-                "scene.xml",
-                "Flatland scene filename use as input for rendering");
-
-        cmd.add(scene_filename);
-
-        cmd.parse(argc, argv);
+        absl::FlagsUsageConfig flags_config;
+        flags_config.version_string = &version_string;
+        absl::SetFlagsUsageConfig(flags_config);
+        absl::ParseCommandLine(argc, argv);
+        std::string filename = absl::GetFlag(FLAGS_scene_filename);
 
         print_boost_version();
-
-        std::string_view filename = scene_filename.getValue();
 
         if (!std::filesystem::exists(filename)) {
             LOG(ERROR) << "File " << filename << " does not exist";
@@ -115,9 +112,6 @@ int main(int argc, char **argv) {
 
         LOG(INFO) << "Done.";
         LOG(INFO) << "Shutting down now.";
-    }
-    catch (TCLAP::ArgException &ex) {
-        std::cerr << "error: " << ex.error() << " for arg " << ex.argId() << std::endl;
     }
     catch (LoadSceneException &ex) {
         LOG(ERROR) << ex.what();

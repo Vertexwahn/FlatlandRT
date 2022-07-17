@@ -27,6 +27,33 @@ TEST(PropertySet, Vector2d) {
     EXPECT_THAT(ps.get_property<Vector2d>("v"), v);
 }
 
+TEST(PropertySet, Vector3f) {
+    PropertySet ps;
+
+    auto v = Vector3f(1.f, 2.f, 3.f);
+    ps.add_property("v", v);
+
+    EXPECT_THAT(ps.get_property<Vector3f>("v"), v);
+}
+
+TEST(PropertySet, Point2f) {
+    PropertySet ps;
+
+    auto p = Point2f(1.f, 2.f);
+    ps.add_property("p", p);
+
+    EXPECT_THAT(ps.get_property<Point2f>("p"), p);
+}
+
+TEST(PropertySet, Point3f) {
+    PropertySet ps;
+
+    auto p = Point3f(1.f, 2.f, 3.f);
+    ps.add_property("p", p);
+    
+    EXPECT_THAT(ps.get_property<Point3f>("p"), p);
+}
+
 TEST(PropertySet, Color3f) {
     PropertySet ps;
 

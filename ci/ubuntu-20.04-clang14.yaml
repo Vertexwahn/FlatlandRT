@@ -1,5 +1,5 @@
-# Clang 13 on Ubunutu 20.04
-# Make sure we can build with Clang 13 in all different compilation modes
+# Clang 14 on Ubunutu 20.04
+# Make sure we can build with Clang 14 in all different compilation modes
 steps:
   - checkout: self
     clean: true

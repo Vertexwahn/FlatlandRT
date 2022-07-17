@@ -41,16 +41,46 @@ jobs:
       - template: ci/ubuntu-20.04-gcc9.yaml
   
 
-  - job: VisualStudio2019
-    displayName: "VS2019 on Windows Server 2019"
+  # Visual Studio 2019
+  - job: VisualStudio2019Dbg
+    displayName: "VS2019 debug on Windows Server 2019"
     pool:
       vmImage: 'windows-2019'
     steps:
-      - template: ci/windows-2019-vs2019.yaml
+      - template: ci/windows-2019-vs2019-dbg.yaml
 
-  - job: VisualStudio2022
-    displayName: "VS2022 on Windows Server 2022"
+  - job: VisualStudio2019Fastbuild
+    displayName: "VS2019 fastbuild on Windows Server 2019"
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+      - template: ci/windows-2019-vs2019-fastbuild.yaml
+
+  - job: VisualStudio2019Opt
+    displayName: "VS2019 opt on Windows Server 2019"
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+      - template: ci/windows-2019-vs2019-opt.yaml
+
+  # Visual Studio 2022
+  - job: VisualStudio2022Dbg
+    displayName: "VS2022 dbg on Windows Server 2022"
     pool:
       vmImage: 'windows-2022'
     steps:
-      - template: ci/windows-2022-vs2022.yaml
+      - template: ci/windows-2022-vs2022-dbg.yaml
+
+  - job: VisualStudio2022Fastbuild
+    displayName: "VS2022 fastbuild on Windows Server 2022"
+    pool:
+      vmImage: 'windows-2022'
+    steps:
+      - template: ci/windows-2022-vs2022-fastbuild.yaml
+
+  - job: VisualStudio2022Opt
+    displayName: "VS2022 opt on Windows Server 2022"
+    pool:
+      vmImage: 'windows-2022'
+    steps:
+      - template: ci/windows-2022-vs2022-opt.yaml

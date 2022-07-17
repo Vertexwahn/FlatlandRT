@@ -1,0 +1,25 @@
+# VS2019 on Windows Server 2019
+# Make sure we can build with VS2019 in all different compilation modes
+steps:
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+  - script: |
+      bazel version
+    displayName: "Show Bazel version"
+
+
+  # dbg
+  - script: |    
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base build --config=vs2019 --compilation_mode=dbg  -- //...
+    displayName: "Bazel build vs2019-dbg"
+
+  - script: |    
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base test --config=vs2019 --compilation_mode=dbg  -- //... 
+    displayName: "Bazel test vs2019-dbg"

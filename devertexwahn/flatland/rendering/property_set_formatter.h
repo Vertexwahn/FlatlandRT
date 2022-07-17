@@ -66,6 +66,16 @@ struct fmt::formatter<flatland::Point2f> {
 };
 
 template<>
+struct fmt::formatter<flatland::Point3f> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const flatland::Point3f &v, FormatContext &ctx) {
+        return fmt::format_to(ctx.out(), "({}, {}, {})", v.x(), v.y(), v.z());
+    }
+};
+
+template<>
 struct fmt::formatter<flatland::Point2d> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 

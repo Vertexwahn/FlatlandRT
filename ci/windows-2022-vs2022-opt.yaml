@@ -1,0 +1,48 @@
+# VS2022 on Windows Server 2022
+# Make sure we can build with VS2022 in all different compilation modes
+steps:
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+  - script: |
+      bazel version
+    displayName: "Show Bazel version"
+
+
+
+  # fastbuild
+  #- script: |
+  #    cd devertexwahn
+  #    bazel --output_base=C:/bazel_output_base build --config=vs2022  -- //...
+  #  displayName: "Bazel build vs2022-fastbuild"
+
+  #- script: |
+  #    cd devertexwahn
+  #    bazel --output_base=C:/bazel_output_base test --config=vs2022  -- //... 
+  #  displayName: "Bazel test vs2022-fastbuild"
+
+  # dbg
+  #- script: |    
+  #    cd devertexwahn
+  #    bazel --output_base=C:/bazel_output_base build --config=vs2022  --compilation_mode=dbg -- //...
+  #  displayName: "Bazel build vs2022-dbg"
+
+  #- script: |    
+  #    cd devertexwahn
+  #    bazel --output_base=C:/bazel_output_base test --config=vs2022  --compilation_mode=dbg -- //... 
+  #  displayName: "Bazel test vs2022-dbg"
+
+  # opt
+  - script: |    
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base build --config=vs2022  --compilation_mode=opt -- //...
+    displayName: "Bazel build vs2022-opt"
+  
+  - script: |    
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base build --config=vs2022  --compilation_mode=opt -- //... 
+    displayName: "Bazel test vs2022-opt"

@@ -6,7 +6,7 @@
 #
 
 check_flatland_scene_output() {
-    flatland/cli/flatland.cli "$1"
+    flatland/cli/flatland.cli --scene_filename="$1"
 
     FILE="$2"
     FILE_REF="$3"

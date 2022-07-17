@@ -139,8 +139,19 @@ void read_all_properties(const pugi::xml_node &node, PropertySet& out_ps) {
     for (pugi::xml_node xml_property: node.children("point")) {
         std::string name = xml_property.attribute("name").as_string();
         auto csv = xml_property.attribute("value").as_string();
-        auto value = convert_csv_to_point2f(csv);
-        out_ps.add_property(name, value);
+
+        std::vector<float> values = convert_to_float_vector(csv);
+        if(values.size() == 3) {
+            auto value = convert_csv_to_point3f(csv);
+            out_ps.add_property(name, value);
+        }
+        else if(values.size() == 2) {
+            auto value = convert_csv_to_point2f(csv);
+            out_ps.add_property(name, value);
+        }
+        else {
+            throw std::runtime_error("Point should have 2 or 3 components");
+        }
     }
 
     for (pugi::xml_node xml_property: node.children("vector")) {

@@ -13,9 +13,9 @@ SPDX-License-Identifier: Apache-2.0
 FlatlandRT is a 2D ray tracer visualization tool.
 The following pictures were created using Flatland:
 
-From left to right: Refraction, ambient occulsion and reflection:
+From left to right: Refraction, ambient occlusion and reflection:
 
-![Refraction, ambient occulusion and reflection](docs/images/header.svg)
+![Refraction, ambient occlusion and reflection](docs/images/header.svg)
 
 Quadtree intersection of 2d triangle meshes:
 
@@ -35,8 +35,8 @@ You can use Flatland by invoking the following Bazel command.
 ```bash
 git clone https://github.com/Vertexwahn/FlatlandRT
 cd FlatlandRT
-cd devertexwahn # switch to the location where the WORKSPACE file is located
-bazel --output_base=C:/bazel_output_base  run --config=vs2022 //flatland/cli:flatland.cli C:\scenes\bunny.flatland.xml
+cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+bazel --output_base=C:/bazel_output_base  run --config=vs2022 //flatland/cli:flatland.cli --scene_filename=C:\scenes\bunny.flatland.xml
 ```
 
 For more hints on how to use Bazel on Windows have a look at the [Bazel on Windows](https://docs.google.com/document/d/17YIqUdffxpwcKP-0whHM6TFELN8VohTpjiiEIbbRfts/edit?usp=sharing) document.
@@ -46,8 +46,8 @@ For more hints on how to use Bazel on Windows have a look at the [Bazel on Windo
 ```bash
 git clone https://github.com/Vertexwahn/FlatlandRT
 cd FlatlandRT
-cd devertexwahn # switch to the location where the WORKSPACE file is located
-bazel run --config=gcc9 //flatland/cli:flatland.cli -- $(pwd)/flatland/scenes/bunny/bunny.flatland.xml
+cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+bazel run --config=gcc9 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
 *Render a scene with macOS:*
@@ -55,8 +55,8 @@ bazel run --config=gcc9 //flatland/cli:flatland.cli -- $(pwd)/flatland/scenes/bu
 ```bash
 git clone https://github.com/Vertexwahn/FlatlandRT
 cd FlatlandRT
-cd devertexwahn # switch to the location where the WORKSPACE file is located
-bazel run --config=macos //flatland/cli:flatland.cli -- $(pwd)/flatland/scenes/bunny/bunny.flatland.xml
+cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+bazel run --config=macos //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
 ## Building
@@ -78,7 +78,8 @@ bazel build --config=clang14 //...
 
 #### CLion
 
-There is a Bazel Plugin for CLion. It can be downloaded from [here](https://plugins.jetbrains.com/author/4bb31785-ad06-4671-8e26-266aadc184bd).
+There is a Bazel plug-in for CLion. 
+It can be downloaded from [here](https://plugins.jetbrains.com/author/4bb31785-ad06-4671-8e26-266aadc184bd).
 
 You can use the following `.bazelproject` file:
 
@@ -156,6 +157,7 @@ I have written several blog posts about ray tracing:
 - [Ray Tracing 101: Image sampling and reconstruction](https://vertexwahn.de/2021/02/28/imagereconstruction/)
 - [Ray Tracing 101: Ray Triangle Intersection](https://vertexwahn.de/2021/05/29/raytriangleintersection/)
 - [Ray Tracing 101: Octrees for faster intersection](https://vertexwahn.de/2022/03/12/octree/)
+- [Ray tracing 101: Chi-squared test applied to sampling](https://vertexwahn.de/2022/04/04/chisquaredtest/)
 
 ## License
 
@@ -175,7 +177,6 @@ If you find any copyright or license violations or issues please let me know.
 ### Copied source code/ideas
 
 * Mitsuba Renderer 2 (https://github.com/mitsuba-renderer/mitsuba2) (scene file format) ([License](devertexwahn/flatland/LICENSES/mitsuba2/LICENSE))
-* envoy (https://github.com/glasnostic/envoy) (third party Bazel dependency for tclap, i.e. tclap.BUILD)  ([License](devertexwahn/flatland/LICENSES/envoy/LICENSE))
 * pbrt, Version 3 (https://github.com/mmp/pbrt-v3) (Refract, face_forward functions) ([License](devertexwahn/flatland/LICENSES/pbrt-v3/LICENSE.txt))
 * pbrt, Version 4 (https://github.com/mmp/pbrt-v4) (concentric sampling of unit disk) ([License](devertexwahn/flatland/LICENSES/pbrt-v4/LICENSE.txt))
 * bazel_clang_tidy (https://github.com/erenon/bazel_clang_tidy) (almost everything) ([License](devertexwahn/flatland/LICENSES/bazel_clang_tidy/LICENSE))
@@ -188,12 +189,11 @@ If you find any copyright or license violations or issues please let me know.
 
 * Boost (https://www.boost.org/) (third party dependency) ([License](devertexwahn/flatland/LICENSES/boost/LICENSE))
 * Catch2 (https://github.com/catchorg/Catch2) (see `third_party` folder)
-* Eigen 3.4.0 (see `third_party` folder)
+* Eigen (see `third_party` folder)
 * Google Test (https://github.com/google/googletest) (see `third_party` folder)
-* Imath 3.1.4 (see `third_party` folder)
+* Imath (see `third_party` folder)
 * LLVM toolchain for Bazel (see `third_party` folder)
 * OpenEXR (see `third_party` folder)
-* TCLAP - Templatized Command Line Argument Parser (https://github.com/mirror/tclap)  (see `third_party` folder)
 * gflags (https://github.com/gflags/gflags/) (see `third_party` folder)
 * glog (https://github.com/google/glog) (see `third_party` folder)
 * hypothesis (https://github.com/wjakob/hypothesis) (see `third_party` folder)
@@ -203,7 +203,7 @@ If you find any copyright or license violations or issues please let me know.
 * rules_boost (see `third_party` folder)
 * rules_pkg (see `third_party` folder)
 * yaml-cpp (https://github.com/jbeder/yaml-cpp) (third party dependency) ([License](devertexwahn/flatland/LICENSES/yaml-cpp/LICENSE))
-* zlib 1.2.11 (https://zlib.net/) ([License](devertexwahn/flatland/LICENSES/third_party/zlib-1.2.11/README))
+* zlib (https://zlib.net/) ([License](devertexwahn/flatland/LICENSES/third_party/zlib-1.2.11/README))
 * {fmt} (https://github.com/fmtlib/fmt) (see `third_party` folder)
 
 ### Artwork
