@@ -1,0 +1,36 @@
+# Clang 14 on Ubunutu 20.04
+# Make sure we can build with Clang 14 in all different compilation modes
+steps:
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+  - script: |
+      bazel version
+    displayName: 'Show Bazel version'
+
+
+  # fastbuild
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang14  -- //... 
+    displayName: 'Bazel build clang13-fastbuild'
+
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang14   -- //...  
+    displayName: 'Bazel test clang13-fastbuild'
+
+  # dbg
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang14  --compilation_mode=dbg -- //... 
+    displayName: 'Bazel build clang14-dbg'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang14  --compilation_mode=dbg -- //...  
+    displayName: 'Bazel test clang14-dbg'

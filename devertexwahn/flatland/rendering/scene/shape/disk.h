@@ -53,7 +53,7 @@ public:
 
         me.t = distance;
         me.p = intersection_point;
-        me.material = Shape2<ScalarType>::material_.get();
+        me.shape = this; //Shape2<ScalarType>::material_.get();
         me.geo_frame = Frame{normal, Vector{normal.y(), -normal.x()}};
 
         return bHit;
@@ -72,7 +72,8 @@ public:
            << radius()
            << "\"";
 
-        ReferenceCounted<SvgMaterial> material = Shape2<Scalar>::material();
+        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bsdf());
+
         if (material) {
             ss << " ";
             ss << Shape2<Scalar>::convert_material_to_svg_style(material.get());

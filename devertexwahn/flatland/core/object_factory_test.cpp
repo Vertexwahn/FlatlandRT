@@ -7,6 +7,8 @@
 #include "flatland/rendering/integrator/integrator.h"
 #include "flatland/rendering/scene/shape/disk.h"
 
+#include <filesystem>
+
 #include "gmock/gmock.h"
 
 using namespace flatland;
@@ -32,7 +34,7 @@ public:
     }
 };
 
-TEST(ObjectFactory, Test1) {
+TEST(ObjectFactory, create_instance) {
     auto integrator_name = "mock_integrator";
 
     ObjectFactory<PropertySet> sf;

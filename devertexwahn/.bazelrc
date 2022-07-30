@@ -26,6 +26,9 @@ build:macos --cxxopt=-Wall
 ##build:macos --cxxopt=-Wextra
 build:macos --define compiler=clang12
 
+# Todo: Add apple_debug config
+# https://github.com/RobotLocomotion/drake/search?q=apple_debug
+
 # Clang 14.0.0
 build:clang14 --cxxopt=-std=c++17
 #build:clang14 --cxxopt=-mavx

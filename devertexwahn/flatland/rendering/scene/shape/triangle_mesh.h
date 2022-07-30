@@ -52,7 +52,7 @@ public:
             ss << "    ";
             ss << "<path";
 
-            ReferenceCounted<SvgMaterial> material = Shape2<ScalarType>::material();
+            ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bsdf());
             if (material) {
                 ss << " ";
                 ss << Shape2<ScalarType>::convert_material_to_svg_style(material.get());

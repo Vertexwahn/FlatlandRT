@@ -23,6 +23,7 @@ TEST(Normal2f, Normal3f_ctor) {
     EXPECT_THAT(n.y(), 1.f);
     EXPECT_THAT(n.z(), 0.f);
 }
+
 /*
 TEST(Normal2f, Normal2f_array_ctor) {
 	float na[2] = {1.0, 2.0};

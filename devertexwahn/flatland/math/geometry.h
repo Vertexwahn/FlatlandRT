@@ -9,9 +9,8 @@
 
 #include "flatland/math/point.h"
 
-#include "fmt/core.h"
-
 #include "boost/algorithm/string.hpp"
+#include "fmt/core.h"
 
 #include <filesystem>
 #include <fstream>
@@ -83,7 +82,6 @@ std::vector<Point2<ScalarType>> load_2D_ply(std::string_view filename) {
         if (line == std::string("") || line == "\r")
             continue;
 
-        //std::vector<ScalarType> values;
         std::vector<std::string> tokens;
         boost::split(tokens, line, boost::is_any_of(" "));
 

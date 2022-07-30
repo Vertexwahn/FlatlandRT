@@ -10,11 +10,15 @@
 #include "flatland/core/object.h"
 #include "flatland/math/axis_aligned_bounding_box.h"
 #include "flatland/math/frame.h"
-#include "flatland/rendering/material.h"
+#include "flatland/rendering/bsdf/bsdf.h"
+#include "flatland/rendering/scene/shape/emitter.h"
 
 FLATLAND_BEGIN_NAMESPACE
 
 template <unsigned int Dimension, typename ScalarType>
+class ShapeType;
+
+template<unsigned int Dimension, typename ScalarType>
 struct MediumEventType {
     using Scalar = ScalarType;
     using Point = PointType<Dimension, ScalarType>;
@@ -24,9 +28,9 @@ struct MediumEventType {
     Point p; // intersection point
     Scalar t; // distance to intersection point
     Frame geo_frame; // geo_frame regarding to world space
-	Frame sh_frame; // shading frame
+    Frame sh_frame; // shading frame
 
-    Material *material = nullptr;
+    const ShapeType<Dimension, ScalarType> *shape = nullptr;
 };
 
 template <typename ScalarType>
@@ -44,10 +48,10 @@ class ShapeTypeBase : public Object {
 public:
     ShapeTypeBase() : transform_(identity<ScalarType>()) {}
 
-    ShapeTypeBase(const Transform44f& transform) : transform_(transform) {
+    ShapeTypeBase(const Transform44f &transform) : transform_(transform) {
     };
 
-    ShapeTypeBase(const PropertySet& ps) : transform_(ps.get_property<Transform44f>("transform")) {
+    ShapeTypeBase(const PropertySet &ps) : transform_(ps.get_property<Transform44f>("transform")) {
 
     }
 
@@ -62,8 +66,16 @@ public:
         return transform_;
     };
 
+    void set_bsdf(ReferenceCounted<BSDF> bsdf) {
+        bsdf_ = bsdf;
+    }
+    ReferenceCounted<BSDF> bsdf() const {
+        return bsdf_;
+    }
+
 protected:
     Transform44Type<ScalarType> transform_; // transform from object space to world space
+    ReferenceCounted<BSDF> bsdf_{nullptr};
 };
 
 template <unsigned int Dimension, typename ScalarType>
@@ -78,15 +90,14 @@ public:
 
 	virtual ~ShapeType() {};
 
-	void set_material(ReferenceCounted<Material> material) {
-        material_ = material;
-	}
-	ReferenceCounted<Material> material() const {
-        return material_;
-	}
+    virtual bool is_emitter() const { return emitter_ != nullptr; }
+
+    ReferenceCounted<Emitter> emitter() const {
+        return emitter_;
+    }
 
 protected:
-	ReferenceCounted<Material> material_{nullptr};
+    ReferenceCounted<Emitter> emitter_ = nullptr;
 };
 
 template <typename ScalarType>
@@ -119,16 +130,7 @@ public:
         return ss.str();
     }
 
-    void set_material(ReferenceCounted<SvgMaterial> material) {
-        material_ = material;
-    }
-    ReferenceCounted<SvgMaterial> material() const {
-        return material_;
-    }
-
 protected:
-
-    ReferenceCounted<SvgMaterial> material_{nullptr};
 };
 
 template <typename ScalarType>

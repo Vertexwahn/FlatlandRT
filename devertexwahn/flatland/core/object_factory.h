@@ -7,12 +7,10 @@
 #ifndef Flatland_Core_ShapeFactory_b184faf0_dc66_451e_a52f_615a4caa7c35_h
 #define Flatland_Core_ShapeFactory_b184faf0_dc66_451e_a52f_615a4caa7c35_h
 
-#include "flatland/core/namespace.h"
 #include "flatland/core/object.h"
 #include "flatland/core/property_set.h"
 #include "flatland/core/reference_counted.h"
 
-#include <filesystem>
 #include <functional>
 
 FLATLAND_BEGIN_NAMESPACE

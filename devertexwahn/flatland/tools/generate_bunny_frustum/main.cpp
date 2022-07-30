@@ -58,8 +58,8 @@ int main() {
     ps.add_property("reflection_index", 0.f);
     auto material = make_reference_counted<SvgMaterial>(ps);
 
-    far_polygon->set_material(material);
-    near_polygon->set_material(material);
+    far_polygon->set_bsdf(material);
+    near_polygon->set_bsdf(material);
 
 
     sc.add(far_polygon.get());
@@ -80,7 +80,7 @@ int main() {
     };
 
     auto transformedFrustum = make_reference_counted<Polygon2f>(transform2, &points4[0], points4.size());
-    transformedFrustum->set_material(material);
+    transformedFrustum->set_bsdf(material);
     sc.add(transformedFrustum.get());
 
     // homogeneous division
@@ -104,11 +104,11 @@ int main() {
     auto bunny_points = load_2D_ply<float>("scenes/bunny_coords.ply");
     auto bunny = make_reference_counted<Polygon2f>(transform * translate(350.f, 0.f, 0.f), &bunny_points[0],
                                                    bunny_points.size());
-    bunny->set_material(material);
+    bunny->set_bsdf(material);
     sc.add(bunny.get());
 
     auto transformedFrustumAfterHomo = make_reference_counted<Polygon2f>(transform2, &points5[0], points5.size());
-    transformedFrustumAfterHomo->set_material(material);
+    transformedFrustumAfterHomo->set_bsdf(material);
     sc.add(transformedFrustumAfterHomo.get());
 
     auto bunny_points2 = load_2D_ply<float>("scenes/bunny_coords.ply");
@@ -120,7 +120,7 @@ int main() {
 
     auto bunny2 = make_reference_counted<Polygon2f>(transform2 * translate(350.f, 0.f, 0.f), &bunny_points2[0],
                                                     bunny_points2.size());
-    bunny2->set_material(material);
+    bunny2->set_bsdf(material);
     sc.add(bunny2.get());
 
 

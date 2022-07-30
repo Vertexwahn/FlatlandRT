@@ -115,7 +115,7 @@ TEST(SvgCanvas, GivenRectangle_WhenAssigningMaterial_ExpectSpecificFillAndBoderC
     blue_material->set_stroke_color(Color3f{0.f, 0.682f, 0.937f});
     blue_material->set_stroke_width(3.f);
     blue_material->set_fill_color(Color3f{1.f, 1.f, 1.f});
-    rect.set_material(blue_material);
+    rect.set_bsdf(blue_material);
 
     sc.add(&rect);
 
@@ -139,7 +139,7 @@ TEST(SvgCanvas, When_DiskWithRedMaterial_Then_ExpectCicleWithRedFillAndBoderColo
     ps.add_property("transform", translate(Vector2f{200.f, 200.f}));
 
     Disk2f c{ps};
-    c.set_material(blue_material);
+    c.set_bsdf(blue_material);
     sc.add(&c);
 
     // Act
@@ -178,7 +178,7 @@ TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor) {
     blue_material->set_stroke_color(rect_color);
     blue_material->set_stroke_width(3.f);
     blue_material->set_fill_color(Color3f(1.f, 1.f, 1.f));
-    rect.set_material(blue_material);
+    rect.set_bsdf(blue_material);
     sc.add(&rect);
 
     // todo: Materials seem not to work for spheres - add unit test

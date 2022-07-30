@@ -3,7 +3,7 @@
     SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 
-    The scene file format schema is the same as used in Mitsuba Renderer 2
+    The scene file format schema is the same as used in Mitsuba Renderer 3
     (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
 -->
 <scene>
@@ -32,11 +32,11 @@
 
         <string name="filename" value="bunny_coords.ply"/>
 
-        <material>
+        <bsdf type="svg_material">
             <color name="stroke_color" value="0.0, 0.682, 0.937" />
             <float name="stroke_width" value="3.0" />
             <color name="fill_color" value="1.0, 1.0, 1.0" />
             <string name="interface_interaction" value= "specular_transmission" />
-        </material>
+        </bsdf>
     </shape>
 </scene>

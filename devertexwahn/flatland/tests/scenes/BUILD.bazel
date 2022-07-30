@@ -8,9 +8,10 @@ package(
 )
 
 filegroup(
-    name = "TestSceneFiles",
+    name = "test_scene_files",
     srcs = [
         "integrator_missing.flatland.xml",
+        "no_bsdf_type.flatland.xml",
         "property.test.flatland.xml",
         "scene_tag_missing.flatland.xml",
     ],

@@ -28,6 +28,21 @@ cc_test(
 )
 
 cc_library(
+    name = "emitter",
+    hdrs = ["emitter.h"],
+    deps = ["//flatland/core:object"],
+)
+
+cc_test(
+    name = "emitter_test",
+    srcs = ["emitter_test.cpp"],
+    deps = [
+        ":emitter",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "polygon",
     hdrs = ["polygon.h"],
     deps = [
@@ -86,10 +101,11 @@ cc_library(
     name = "shape",
     hdrs = ["shape.h"],
     deps = [
+        ":emitter",
         "//flatland/core:object",
         "//flatland/math:axis_aligned_bounding_box",
         "//flatland/math:frame",
-        "//flatland/rendering:material",
+        "//flatland/rendering/bsdf",
     ],
 )
 

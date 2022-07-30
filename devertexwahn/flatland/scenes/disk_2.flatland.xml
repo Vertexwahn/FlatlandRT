@@ -3,7 +3,7 @@
     SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 
-    The scene file format schema is the same as used in Mitsuba Renderer 2
+    The scene file format schema is the same as used in Mitsuba Renderer 3
     (https://github.com/mitsuba-renderer/mitsuba2) with minor adaptions.
 -->
 <!-- https://github.com/mmp/pbrt-v3/blob/master/scenes/killeroo-simple.pbrt -->
@@ -31,13 +31,13 @@
             <translate x="200" y="300"/>
         </transform>
 
-        <material>
+        <bsdf type="svg_material">
             <color name="stroke_color" value="0.0, 0.682, 0.937"/>
             <float name="stroke_width" value="3.0"/>
             <color name="fill_color" value="1.0, 1.0, 1.0"/>
             <float name="refraction_index" value="1.0"/>
             <boolean name="specular_transmission" value="true"/>
-        </material>
+        </bsdf>
     </shape>
 
     <shape type="disk">
@@ -47,12 +47,12 @@
             <translate x="500" y="300"/>
         </transform>
 
-        <material>
+        <bsdf type="svg_material">
             <color name="stroke_color" value="0.0, 0.682, 0.937"/>
             <float name="stroke_width" value="3.0"/>
             <color name="fill_color" value="1.0, 1.0, 1.0"/>
             <float name="refraction_index" value="1.0"/>
             <boolean name="specular_transmission" value="true"/>
-        </material>
+        </bsdf>
     </shape>
 </scene>

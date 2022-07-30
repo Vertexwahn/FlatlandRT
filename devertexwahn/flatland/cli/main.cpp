@@ -24,9 +24,10 @@ enum ExitStatus {
     Success = 0,
     SceneFileNotFound = 1,
     SensorMissing = 2,
+    UnknownError = 9999,
 };
 
-void print_boost_version() {
+void log_boost_version() {
     LOG(INFO) << "Using Boost "
               << BOOST_VERSION / 100000 << "."      // major version
               << BOOST_VERSION / 100 % 1000 << "."  // minor version
@@ -46,7 +47,7 @@ void plot_quadtree(QuadtreeNode *node, SvgCanvas2f *canvas) {
     }
 }
 
-std::string version_string() { return "Flatland 1.3.2"; }
+std::string version_string() { return "Flatland 1.3.3"; }
 
 ABSL_FLAG(std::string, scene_filename, "scene.xml", "Okapi scene filename use as input for rendering");
 
@@ -61,9 +62,9 @@ int main(int argc, char **argv) {
         flags_config.version_string = &version_string;
         absl::SetFlagsUsageConfig(flags_config);
         absl::ParseCommandLine(argc, argv);
-        std::string filename = absl::GetFlag(FLAGS_scene_filename);
+        std::filesystem::path filename = absl::GetFlag(FLAGS_scene_filename);
 
-        print_boost_version();
+        log_boost_version();
 
         if (!std::filesystem::exists(filename)) {
             LOG(ERROR) << "File " << filename << " does not exist";
@@ -72,7 +73,7 @@ int main(int argc, char **argv) {
 
         LOG(INFO) << "Loading scene " << std::filesystem::path(filename) << ".";
 
-        auto scene = load_scene2f(filename);
+        auto scene = load_scene2f(filename.string());
 
         auto sensor = scene->sensor();
 
@@ -98,13 +99,11 @@ int main(int argc, char **argv) {
         auto intersector = scene->intersector();
         if (intersector->to_string() == "QuadtreeIntersector") {
             ReferenceCounted<QuadtreeIntersector2f> qti = std::dynamic_pointer_cast<QuadtreeIntersector2f>(intersector);
-
             plot_quadtree(qti->root_node(), canvas.get());
         }
 
         // determine out path
-        std::filesystem::path p(filename);
-        std::filesystem::path out_path = fmt::format("{}/{}", p.parent_path().string(), sensor->film()->filename());
+        std::filesystem::path out_path = fmt::format("{}/{}", filename.parent_path().string(), sensor->film()->filename());
 
         LOG(INFO) << "Store SVG to " << out_path << ".";
 
@@ -113,11 +112,13 @@ int main(int argc, char **argv) {
         LOG(INFO) << "Done.";
         LOG(INFO) << "Shutting down now.";
     }
-    catch (LoadSceneException &ex) {
+    catch (FlatlandException &ex) {
         LOG(ERROR) << ex.what();
+        return ExitStatus::UnknownError;
     }
     catch (std::exception &ex) {
         LOG(ERROR) << ex.what();
+        return ExitStatus::UnknownError;
     }
 
     return ExitStatus::Success;

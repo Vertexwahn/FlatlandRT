@@ -1,3 +1,10 @@
+/*
+ *  This source file contains source code copied from pbrt-v3
+ *  SPDX-FileCopyrightText: 1998-2016 Matt Pharr, Greg Humphreys, and Wenzel Jakob.
+ *  SPDX-License-Identifier: BSD-2-Clause
+ */
+
+
 #pragma once
 #ifndef Flatland_Math_refraction_8ce77914_917c_4236_a751_491f3fe26041_h
 #define Flatland_Math_refraction_8ce77914_917c_4236_a751_491f3fe26041_h

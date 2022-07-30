@@ -4,6 +4,8 @@
  */
 
 #include "flatland/rendering/scene/load_scene.h"
+#include "flatland/rendering/scene/shape/rectangle.h"
+#include "flatland/rendering/scene/shape/disk.h"
 
 #include "gmock/gmock.h"
 
@@ -156,4 +158,136 @@ TEST(load_scene, read_matrix_transform) {
 
     // Act
     EXPECT_THROW(read_transform<3>(xml_transform), std::runtime_error);
+}
+
+TEST(Scene, loadScene_EmptyBSDF) {
+    EXPECT_THAT([]() { load_scene2f("flatland/tests/scenes/no_bsdf_type.flatland.xml"); },
+                ThrowsMessage<FlatlandException>(testing::HasSubstr("No empty BSDF type allowed")));
+}
+
+TEST(Scene, loadScene_MissingSceneTag) {
+    EXPECT_THROW(load_scene2f("flatland/tests/scenes/scene_tag_missing.flatland.xml"), FlatlandException);
+}
+
+TEST(Scene, loadScene_IntegratorMissing) {
+    EXPECT_THROW(load_scene2f("flatland/tests/scenes/integrator_missing.flatland.xml"), FlatlandException);
+}
+
+TEST(Scene, WhenLoadingASceneWithARectangle_ThenSceneContainsARectangle) {
+    // Arrange
+    auto scene = load_scene2f("flatland/scenes/rectangle.flatland.xml");
+
+    EXPECT_NE(scene, nullptr);
+    EXPECT_THAT(scene->shape_count(), 1u);
+    auto rect = std::dynamic_pointer_cast<Rectangle2f>(scene->shapes()[0]);
+    EXPECT_NE(rect, nullptr);
+}
+
+TEST(Scene, TestShapeGetter) {
+    Scene2f scene;
+    PropertySet ps;
+    ps.add_property("radius", 10.f);
+    ps.add_property("transform", identity<float>());
+    scene.add_shape(make_reference_counted<Disk2f>(ps));
+
+    EXPECT_THAT(scene.shapes().size(), 1u);
+}
+
+// todo: is this a sensor test or scene test? should it be moved to sensor test cpp file?
+TEST(Scene, GivenAPointThatIsAlignedWithCameraSpace_WhenPointIsTransformedToCameraSpace_ThenExpectPointIsAtOrigin) {
+    // Arrange
+    auto scene = load_scene2f("flatland/scenes/rectangle.flatland.xml");
+    Point2f world_space_point(100.f, 600.f);
+
+    // Act
+    auto sensor = scene->sensor();
+    auto camera_space_point = sensor->transform() * world_space_point;
+
+    // Assert
+    EXPECT_NEAR(camera_space_point.x(), 0.f, 0.0001f);
+    EXPECT_NEAR(camera_space_point.y(), 0.f, 0.0001f);
+    EXPECT_THAT(sensor->film()->width(), 600);
+    EXPECT_THAT(sensor->film()->height(), 700);
+}
+
+TEST(Scene, TestMaterial) {
+    // Arrange
+    auto scene = load_scene2f("flatland/scenes/disk.flatland.xml");
+    auto material = std::static_pointer_cast<SvgMaterial>(scene->shapes()[0]->bsdf());
+
+    // Assert
+    EXPECT_THAT(material->stroke_width(), 3);
+}
+
+TEST(Scene, loadScene_WhenSceneFileDoesNotExist_ThenNullptr) {
+    auto scene = load_scene2f("non_existing_file.xml");
+
+    EXPECT_THAT(scene, nullptr);
+}
+
+TEST(Scene, loadScene_WhenSceneFileDoesExist_ThenExpectValidSceneObject) {
+    auto scene = load_scene2f("flatland/scenes/disk.flatland.xml");
+
+    EXPECT_NE(scene, nullptr);
+}
+
+TEST(Scene, GivenASceneFileWithCameraParameters_ThenExpectValidCameraParamters_WhenSceneIsLoaded) {
+    auto scene = load_scene2f("flatland/scenes/disk.flatland.xml");
+
+    EXPECT_THAT(scene->sensor()->film()->width(), 800);
+    EXPECT_THAT(scene->sensor()->film()->height(), 600);
+    EXPECT_THAT(scene->sensor()->film()->filename(), "disk.svg");
+}
+
+TEST(Scene, loadScene_LoadLabels) {
+    auto scene = load_scene2f("flatland/scenes/rectangle.flatland.xml");
+
+    EXPECT_THAT(scene->annotations().size(), 2u);
+    EXPECT_THAT(scene->annotations()[0].text, "Incident vector");
+    EXPECT_THAT(scene->annotations()[1].text, "Refracted vector");
+}
+
+TEST(Scene, loadScene_LoadPolygon2) {
+    auto scene = load_scene2f("flatland/scenes/bunny/bunny.flatland.xml");
+}
+
+TEST(Scene, ReadPolygonTransform2) {
+    // Arrange
+    auto scene = load_scene2f("flatland/scenes/bunny/bunny.flatland.xml");
+
+    // Act
+    auto transform = scene->shapes()[0]->transform();
+
+    // Assert
+    Matrix44f scaling;
+    scaling <<  3.f, 0.f, 0.f, 0.f,
+            0.f, 3.f, 0.f, 0.f,
+            0.f, 0.f, 1.f, 0.f,
+            0.f, 0.f, 0.f, 1.f;
+
+    Matrix44f translation;
+    translation <<  1.f, 0.f, 0.f, 400.f,
+            0.f, 1.f, 0.f, 300.f,
+            0.f, 0.f, 1.f, 0.f,
+            0.f, 0.f, 0.f, 1.f;
+
+    Matrix44f expected_result = translation * scaling;
+
+    // Assert
+    EXPECT_THAT(transform.matrix(), expected_result);
+}
+
+TEST(Scene, GivenSceneWithMultipleShapes_WhenRayHitsAllShapes_ThenClosesHit) {
+    // Arrange
+    auto scene = load_scene2f("flatland/scenes/disk_2.flatland.xml");
+    auto ray = scene->sensor()->generate_ray(Point2f{0.f, 0.f});
+
+    // Act
+    MediumEvent2f me;
+    bool hit = scene->intersect(ray, me);
+
+    // Assert
+    EXPECT_TRUE(hit);
+    EXPECT_THAT(me.p.x(), 100.f);
+    EXPECT_THAT(me.p.y(), 300.f);
 }

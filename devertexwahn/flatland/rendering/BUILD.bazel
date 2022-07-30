@@ -6,30 +6,6 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "material",
-    srcs = ["material.cpp"],
-    hdrs = ["material.h"],
-    deps = [
-        ":property_set",
-        "//flatland/core:namespace",
-        "//flatland/core:reference_counted",
-        "//flatland/imaging:color",
-    ],
-)
-
-cc_test(
-    name = "material_test",
-    srcs = [
-        "material_test.cpp",
-    ],
-    deps = [
-        ":material",
-        "@com_google_googletest//:gtest_main",
-        "@hypothesis",
-    ],
-)
-
-cc_library(
     name = "property_set",
     hdrs = [
         "property_set.h",

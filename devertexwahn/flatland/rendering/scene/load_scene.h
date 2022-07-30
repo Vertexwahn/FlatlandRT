@@ -7,7 +7,7 @@
 
 #include "flatland/core/object_factory.h"
 #include "flatland/core/reference_counted.h"
-#include "flatland/rendering/scene/load_scene_exception.h"
+#include "flatland/core/exception.h"
 #include "flatland/rendering/scene/scene.h"
 
 #include "pugixml.hpp"

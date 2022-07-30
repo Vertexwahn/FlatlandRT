@@ -36,12 +36,12 @@ Given this scene file:
 
         <string name="filename" value="bunny_coords.ply"/>
 
-        <material>
+        <bsdf type="svg_material">
             <color name="stroke_color" value="0.0, 0.682, 0.937" />
             <float name="stroke_width" value="3.0" />
             <color name="fill_color" value="1.0, 1.0, 1.0" />
             <string name="interface_interaction" value= "specular_transmission" />
-        </material>
+        </bsdf>
     </shape>
 </scene>
 ```
