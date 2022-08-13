@@ -105,7 +105,7 @@ cc_library(
         "//flatland/core:object",
         "//flatland/math:axis_aligned_bounding_box",
         "//flatland/math:frame",
-        "//flatland/rendering/bsdf",
+        "//flatland/rendering/bsdf:svg_material",
     ],
 )
 

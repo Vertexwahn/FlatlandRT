@@ -39,7 +39,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-dd7a9d29a33de34836c345c3b753d4eba15c5f44",
+        path = "../third_party/googletest-7274ec186442c96e4c7dcc99c684a03e5db2ff48",
     )
 
     # Use github.com
@@ -95,7 +95,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "glog",
-        path = "../third_party/glog-c515e1ae2fc8b36ca19362842f9347e9429be7ad",
+        path = "../third_party/glog-a1b6164ef15cf4be3b1914f2df7125fc7ffc7ca8",
     )
 
     # Use github.com
@@ -124,7 +124,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "catch2",
-        path = "../third_party/Catch2-997a7d4165b3939347f1a95f9311a3e3c066ee0b",
+        path = "../third_party/Catch2-47d56f28a9801911c048d011b375e5631dbb658f",
     )
 
     # Use github.com
@@ -144,7 +144,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-0b2862a1e4cf24797424501a3d13e3e563a90528",
+        path = "../third_party/fmt-fd93b633b8e8e3a671f73abb03c8f88145ae7a7a",
     )
 
     # Live at Head
@@ -319,7 +319,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "openexr",
-        path = "../third_party/openexr-a03aca31fa1ce85d3f28627dbb3e5ded9494724a",
+        path = "../third_party/openexr-635f0b7805f3493345889e31164b34132982ca59",
     )
 
     # Use local Imath
@@ -454,10 +454,19 @@ def okapi_deps():
     #)
 
     maybe(
-        native.local_repository,
+        git_repository,
         name = "com_github_nelhage_rules_boost",
-        path = "../third_party/rules_boost-06d26e60e9614bddd42a8ed199179775f7d7f90d",
+        remote = "https://github.com/Vertexwahn/rules_boost",
+        #branch = "bump-boost-version",
+        commit = "daacea9f72c7b0f9bbc90a6631a29845280e9951",
+        shallow_since = "1660385837 +0200",
     )
+
+    #maybe(
+    #    native.local_repository,
+    #    name = "com_github_nelhage_rules_boost",
+    #    path = "../third_party/rules_boost-03876503436f087427fa206a8909b6109a5291e0",
+    #)
 
     #-------------------------------------------------------------------------------------
     # bazel_clang_tidy
@@ -483,7 +492,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_grail_bazel_toolchain",
-        path = "../third_party/bazel-toolchain-f14a8a5de8f7e98a011a52163d4855572c07a1a3",
+        path = "../third_party/bazel-toolchain-2ef4bbf579fdc3afbca61f11bb955b8770c75867",
     )
 
     #-------------------------------------------------------------------------------------
@@ -493,6 +502,6 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_absl",
-        path = "../third_party/abseil-cpp-dc370a82467cb35066475537b797197aee3e5164",
+        path = "../third_party/abseil-cpp-61f84d623d2a8591501012bf325e1439777a4911",
     )
 

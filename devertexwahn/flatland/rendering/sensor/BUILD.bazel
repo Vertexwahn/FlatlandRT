@@ -6,12 +6,6 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "film",
-    hdrs = ["film.h"],
-    deps = ["//flatland/core:namespace"],
-)
-
-cc_library(
     name = "sensor",
     hdrs = ["sensor.h"],
     deps = [

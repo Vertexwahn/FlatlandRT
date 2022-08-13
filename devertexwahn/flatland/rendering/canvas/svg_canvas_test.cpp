@@ -111,10 +111,11 @@ TEST(SvgCanvas, GivenRectangle_WhenAssigningMaterial_ExpectSpecificFillAndBoderC
     Rectangle2f rect{ps};
 
     // Act
-    ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>();
-    blue_material->set_stroke_color(Color3f{0.f, 0.682f, 0.937f});
-    blue_material->set_stroke_width(3.f);
-    blue_material->set_fill_color(Color3f{1.f, 1.f, 1.f});
+    PropertySet ps_mat;
+    ps_mat.add_property("stroke_color", Color3f{0.f, 0.682f, 0.937f});
+    ps_mat.add_property("stroke_width", 3.f);
+    ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
+    ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
     rect.set_bsdf(blue_material);
 
     sc.add(&rect);
@@ -129,10 +130,11 @@ TEST(SvgCanvas, When_DiskWithRedMaterial_Then_ExpectCicleWithRedFillAndBoderColo
     // Arrange
     SvgCanvas2f sc{800, 600};
 
-    ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>();
-    blue_material->set_stroke_color(Color3f(0.f, 0.682f, 0.937f));
-    blue_material->set_stroke_width(3.f);
-    blue_material->set_fill_color(Color3f(1.f, 1.f, 1.f));
+    PropertySet ps_mat;
+    ps_mat.add_property("stroke_color", Color3f{0.f, 0.682f, 0.937f});
+    ps_mat.add_property("stroke_width", 3.f);
+    ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
+    ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
 
     PropertySet ps;
     ps.add_property("radius", 50.f);
@@ -173,11 +175,12 @@ TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor) {
 
     Rectangle2f rect(ps);
 
-    auto rect_color = Color3f(0.f, 0.682f, 0.937f);
-    ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>();
-    blue_material->set_stroke_color(rect_color);
-    blue_material->set_stroke_width(3.f);
-    blue_material->set_fill_color(Color3f(1.f, 1.f, 1.f));
+    PropertySet ps_mat;
+    ps_mat.add_property("stroke_color", Color3f{0.f, 0.682f, 0.937f});
+    ps_mat.add_property("stroke_width", 3.f);
+    ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
+    ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
+
     rect.set_bsdf(blue_material);
     sc.add(&rect);
 

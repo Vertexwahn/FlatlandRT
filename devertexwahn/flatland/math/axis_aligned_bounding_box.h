@@ -8,8 +8,8 @@
  */
 
 #pragma once
-#ifndef Flatland_Math_Bounds_e49220cc_5ee9_4ba7_95ca_bbecef080bc5_h
-#define Flatland_Math_Bounds_e49220cc_5ee9_4ba7_95ca_bbecef080bc5_h
+#ifndef Flatland_Math_AxisAlignedBoundingBoxType_e49220cc_5ee9_4ba7_95ca_bbecef080bc5_h
+#define Flatland_Math_AxisAlignedBoundingBoxType_e49220cc_5ee9_4ba7_95ca_bbecef080bc5_h
 
 #include "flatland/math/point.h"
 #include "flatland/math/vector.h"
@@ -179,4 +179,4 @@ std::ostream &operator<<(std::ostream &stream, const AxisAlignedBoundingBoxType<
 
 FLATLAND_END_NAMESPACE
 
-#endif // end define Flatland_Math_Bounds_e49220cc_5ee9_4ba7_95ca_bbecef080bc5_h
+#endif // end define Flatland_Math_AxisAlignedBoundingBoxType_e49220cc_5ee9_4ba7_95ca_bbecef080bc5_h

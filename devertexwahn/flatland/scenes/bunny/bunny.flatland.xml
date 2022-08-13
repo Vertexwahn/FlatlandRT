@@ -33,9 +33,9 @@
         <string name="filename" value="bunny_coords.ply"/>
 
         <bsdf type="svg_material">
-            <color name="stroke_color" value="0.0, 0.682, 0.937" />
+            <rgb name="stroke_color" value="0.0, 0.682, 0.937" />
             <float name="stroke_width" value="3.0" />
-            <color name="fill_color" value="1.0, 1.0, 1.0" />
+            <rgb name="fill_color" value="1.0, 1.0, 1.0" />
             <string name="interface_interaction" value= "specular_transmission" />
         </bsdf>
     </shape>

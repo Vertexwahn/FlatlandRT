@@ -25,6 +25,26 @@ cc_test(
     deps = [
         ":bsdf",
         "@com_google_googletest//:gtest_main",
-        "@hypothesis",
+        #"@hypothesis",
+    ],
+)
+
+cc_library(
+    name = "svg_material",
+    srcs = ["svg_material.cpp"],
+    hdrs = ["svg_material.h"],
+    deps = [
+        ":bsdf",
+    ],
+)
+
+cc_test(
+    name = "svg_material_test",
+    srcs = [
+        "svg_material_test.cpp",
+    ],
+    deps = [
+        ":svg_material",
+        "@com_google_googletest//:gtest_main",
     ],
 )

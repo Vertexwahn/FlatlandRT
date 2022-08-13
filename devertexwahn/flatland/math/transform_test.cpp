@@ -235,7 +235,7 @@ TEST(Transform44f, GivenOriginAndTarget_WhenOriginTransformInCameraSpace_ThenOri
     Point2f target{200.f, 200.f};
 
     // Act
-    Transform44f t = look_at(origin, target);
+    Transform44f look_at_transform = look_at(origin, target);
 
     // Assert
     Vector2f forward = target - origin;
@@ -243,9 +243,10 @@ TEST(Transform44f, GivenOriginAndTarget_WhenOriginTransformInCameraSpace_ThenOri
     forward.normalize();
     up.normalize();
 
-    auto originInCameraSpace = t * origin;
+    auto origin_in_camera_space = look_at_transform * origin;
 
-    EXPECT_THAT(originInCameraSpace, (Point2f{0.f, 0.f}));
+    EXPECT_THAT(origin_in_camera_space.x(), testing::FloatNear(0.f, 0.00001f));
+    EXPECT_THAT(origin_in_camera_space.y(), testing::FloatNear(0.f, 0.00001f));
 }
 
 TEST(Transform44f, lookat1) {

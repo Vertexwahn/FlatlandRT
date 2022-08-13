@@ -36,8 +36,15 @@ check_flatland_scene_output() {
     fi
 }
 
-check_flatland_scene_output "flatland/scenes/ao.flatland.xml" "flatland/scenes/ao.svg" "flatland/scenes/reference_images/ao_ref.svg"
-check_flatland_scene_output "flatland/scenes/bunny/bunny.ao.flatland.xml" "flatland/scenes/bunny/bunny.ao.svg" "flatland/scenes/reference_images/bunny.ao_ref.svg"
+# M1 generates slightly different results for some scenes - therefore we have special handling for M1 here
+if [[ $(uname -m) == 'x86_64' ]]; then
+  check_flatland_scene_output "flatland/scenes/ao.flatland.xml" "flatland/scenes/ao.svg" "flatland/scenes/reference_images/ao_ref.svg"
+  check_flatland_scene_output "flatland/scenes/bunny/bunny.ao.flatland.xml" "flatland/scenes/bunny/bunny.ao.svg" "flatland/scenes/reference_images/bunny.ao_ref.svg"
+else
+  check_flatland_scene_output "flatland/scenes/ao.flatland.xml" "flatland/scenes/ao.svg" "flatland/scenes/reference_images/ao_ref.M1_apple_silicon.svg"
+  check_flatland_scene_output "flatland/scenes/bunny/bunny.ao.flatland.xml" "flatland/scenes/bunny/bunny.ao.svg" "flatland/scenes/reference_images/bunny.ao_ref.M1_apple_silicon.svg"
+fi
+
 check_flatland_scene_output "flatland/scenes/bunny/bunny.flatland.xml" "flatland/scenes/bunny/bunny.svg" "flatland/scenes/reference_images/bunny_ref.svg"
 check_flatland_scene_output "flatland/scenes/disk.ao.flatland.xml" "flatland/scenes/disk.ao.svg" "flatland/scenes/reference_images/disk.ao_ref.svg"
 check_flatland_scene_output "flatland/scenes/disk.flatland.xml" "flatland/scenes/disk.svg" "flatland/scenes/reference_images/disk_ref.svg"

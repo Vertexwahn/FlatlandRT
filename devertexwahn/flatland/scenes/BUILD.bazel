@@ -26,7 +26,9 @@ filegroup(
 filegroup(
     name = "reference_images",
     srcs = [
+        "reference_images/ao_ref.M1_apple_silicon.svg",
         "reference_images/ao_ref.svg",
+        "reference_images/bunny.ao_ref.M1_apple_silicon.svg",
         "reference_images/bunny.ao_ref.svg",
         "reference_images/bunny_ref.svg",
         "reference_images/disk.ao_ref.svg",

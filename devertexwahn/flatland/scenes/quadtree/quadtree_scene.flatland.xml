@@ -32,9 +32,9 @@
         <string name="filename" value="donut.obj2d"/>
 
         <bsdf type="svg_material">
-            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <rgb name="stroke_color" value="0.0, 0.682, 0.937"/>
             <float name="stroke_width" value="3"/>
-            <color name="fill_color" value="1, 1, 1"/>
+            <rgb name="fill_color" value="1, 1, 1"/>
         </bsdf>
     </shape>
 
@@ -47,9 +47,9 @@
         <string name="filename" value="bunny.obj2d"/>
 
         <bsdf type="svg_material">
-            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <rgb name="stroke_color" value="0.0, 0.682, 0.937"/>
             <float name="stroke_width" value="3"/>
-            <color name="fill_color" value="1, 1, 1"/>
+            <rgb name="fill_color" value="1, 1, 1"/>
         </bsdf>
     </shape>
 
@@ -62,9 +62,9 @@
         <string name="filename" value="armadillo.obj2d"/>
 
         <bsdf type="svg_material">
-            <color name="stroke_color" value="0.0, 0.682, 0.937"/>
+            <rgb name="stroke_color" value="0.0, 0.682, 0.937"/>
             <float name="stroke_width" value="3"/>
-            <color name="fill_color" value="1, 1, 1"/>
+            <rgb name="fill_color" value="1, 1, 1"/>
         </bsdf>
     </shape>
 

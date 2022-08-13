@@ -47,7 +47,7 @@ void plot_quadtree(QuadtreeNode *node, SvgCanvas2f *canvas) {
     }
 }
 
-std::string version_string() { return "Flatland 1.3.3"; }
+std::string version_string() { return "Flatland 1.3.4"; }
 
 ABSL_FLAG(std::string, scene_filename, "scene.xml", "Okapi scene filename use as input for rendering");
 

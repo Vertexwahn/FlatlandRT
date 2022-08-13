@@ -10,7 +10,7 @@
 #include "flatland/core/object.h"
 #include "flatland/math/axis_aligned_bounding_box.h"
 #include "flatland/math/frame.h"
-#include "flatland/rendering/bsdf/bsdf.h"
+#include "flatland/rendering/bsdf/svg_material.h"
 #include "flatland/rendering/scene/shape/emitter.h"
 
 FLATLAND_BEGIN_NAMESPACE

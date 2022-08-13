@@ -88,26 +88,31 @@ std::vector<float> convert_to_float_vector(const std::string& csv) {
 
 Vector2f convert_csv_to_vector2f(const std::string& csv) {
     std::vector<float> values = convert_to_float_vector(csv);
+    assert(values.size() == 2);
     return Vector2f{values[0], values[1]};
 }
 
 Vector3f convert_csv_to_vector3f(const std::string& csv) {
     std::vector<float> values = convert_to_float_vector(csv);
+    assert(values.size() == 3);
     return Vector3f{values[0], values[1], values[2]};
 }
 
 Point2f convert_csv_to_point2f(const std::string& csv) {
     std::vector<float> values = convert_to_float_vector(csv);
+    assert(values.size() == 2);
     return Point2f{values[0], values[1]};
 }
 
 Point3f convert_csv_to_point3f(const std::string& csv) {
     std::vector<float> values = convert_to_float_vector(csv);
+    assert(values.size() == 3);
     return Point3f{values[0], values[1], values[2]};
 }
 
 Color3f convert_csv_to_color3f(const std::string& csv) {
     std::vector<float> values = convert_to_float_vector(csv);
+    assert(values.size() == 3);
     return Color3f{values[0], values[1], values[2]};
 }
 
@@ -161,7 +166,7 @@ void read_all_properties(const pugi::xml_node &node, PropertySet& out_ps) {
         out_ps.add_property(name, value);
     }
 
-    for (pugi::xml_node xmlProperty: node.children("color")) {
+    for (pugi::xml_node xmlProperty: node.children("rgb")) {
         std::string name = xmlProperty.attribute("name").as_string();
         auto csv = xmlProperty.attribute("value").as_string();
         auto value = convert_csv_to_color3f(csv);

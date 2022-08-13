@@ -29,6 +29,6 @@
 		<string name="string_property" value="This is a string"/>
 		<point name="point_property" value="3, 4"/>
 		<vector name="vector_property" value="1, 2"/>
-		<color name="color_property" value="0, 0.682, 0.937" />
+		<rgb name="color_property" value="0, 0.682, 0.937" />
 	</shape>
 </scene>

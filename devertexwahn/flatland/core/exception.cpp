@@ -10,10 +10,10 @@ FLATLAND_BEGIN_NAMESPACE
 FlatlandException::FlatlandException(std::string_view message) : error_message_(message) {
 }
 
+FlatlandException::~FlatlandException() {}
+
 const char *FlatlandException::what() const throw() {
     return error_message_.c_str();
 }
-
-FlatlandException::~FlatlandException() {}
 
 FLATLAND_END_NAMESPACE
