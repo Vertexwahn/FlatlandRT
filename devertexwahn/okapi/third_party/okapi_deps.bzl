@@ -95,7 +95,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "glog",
-        path = "../third_party/glog-a1b6164ef15cf4be3b1914f2df7125fc7ffc7ca8",
+        path = "../third_party/glog-acc60d0c3832e9b64759698f9f7a0062767c78c3",
     )
 
     # Use github.com
@@ -144,7 +144,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-fd93b633b8e8e3a671f73abb03c8f88145ae7a7a",
+        path = "../third_party/fmt-fd41110d383b7240231718f009b21498e3984ccc",
     )
 
     # Live at Head
@@ -375,7 +375,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "oneTBB",
-        path = "../third_party/oneTBB-323260671b40db33c9fc0d66d1f1eed6ecc82ce2",
+        path = "../third_party/oneTBB-5cb212d44732947396abdd39eae1229c7cd51644",
     )
 
     # Use git repository from com_github_oneapi_src_onetbb
@@ -453,20 +453,20 @@ def okapi_deps():
     #    branch = "introduce-maybe",
     #)
 
-    maybe(
-        git_repository,
-        name = "com_github_nelhage_rules_boost",
-        remote = "https://github.com/Vertexwahn/rules_boost",
-        #branch = "bump-boost-version",
-        commit = "daacea9f72c7b0f9bbc90a6631a29845280e9951",
-        shallow_since = "1660385837 +0200",
-    )
-
     #maybe(
-    #    native.local_repository,
+    #    git_repository,
     #    name = "com_github_nelhage_rules_boost",
-    #    path = "../third_party/rules_boost-03876503436f087427fa206a8909b6109a5291e0",
+    #    remote = "https://github.com/Vertexwahn/rules_boost",
+    #    #branch = "bump-boost-version",
+    #    commit = "daacea9f72c7b0f9bbc90a6631a29845280e9951",
+    #    shallow_since = "1660385837 +0200",
     #)
+
+    maybe(
+        native.local_repository,
+        name = "com_github_nelhage_rules_boost",
+        path = "../third_party/rules_boost-c3fae06e819ed8b93e31b150387dce4864758643",
+    )
 
     #-------------------------------------------------------------------------------------
     # bazel_clang_tidy
