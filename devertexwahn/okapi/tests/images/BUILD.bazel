@@ -1,0 +1,26 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "filtered_images",
+    srcs = [
+        #"IndependentSampler_spp_100_TentFilter_radius_1.exr",
+        "IndependentSampler_spp_1_TentFilter_radius_1_slow.exr",
+        "IndependentSampler_spp_1_TentFilter_radius_1_slow.png",
+        "PixelCenterSampler_spp_1_TentFilter_radius_1_slow.exr",
+        "GaussianFilter_standard_deviation_0.5_radius_2_2_filter_ref.exr",
+        "GaussianFilter_standard_deviation_30_radius_100_100_filter_ref.exr",
+        "tent_filter_ref.exr",
+    ],
+)
+
+filegroup(
+    name = "images",
+    srcs = ["expected_camera_ray_dirs.exr"],
+)

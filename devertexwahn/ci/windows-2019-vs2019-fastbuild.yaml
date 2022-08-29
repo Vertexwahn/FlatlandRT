@@ -1,3 +1,8 @@
+#
+#   SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
 # VS2019 on Windows Server 2019
 # Make sure we can build with VS2019 in all different compilation modes
 steps:

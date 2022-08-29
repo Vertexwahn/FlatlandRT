@@ -1,3 +1,8 @@
+#
+#   SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
 # GCC9 on Ubuntu 20.04
 # Make sure we can build with GCC9 in all different compilation modes
 
@@ -24,11 +29,11 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel build --config=gcc11  -- //flatland/...
+      bazel build --config=gcc11  -- //... 
     displayName: "Bazel build gcc11-fastbuild"
 
   - script: |
      cd devertexwahn
-     bazel test --config=gcc11  -- //flatland/...
-    displayName: "Bazel build gcc11-fastbuild"
+     bazel test --config=gcc11  -- //...  
+    displayName: "Bazel test gcc11-fastbuild"
 

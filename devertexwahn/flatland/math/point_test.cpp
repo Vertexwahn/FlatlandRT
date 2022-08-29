@@ -43,3 +43,10 @@ TEST(Point2f, Point2f_array_ctor) {
 	EXPECT_THAT(p.y(), 2.f);
 }
 */
+
+TEST(Point2f, hasnans) {
+    Point2f a{0.f, 0.0f};
+    Point2f b{0.f, NAN};
+    EXPECT_THAT(a.has_nans(), false);
+    EXPECT_THAT(b.has_nans(), true);
+}

@@ -33,3 +33,10 @@ TEST(Normal2f, Normal2f_array_ctor) {
 	EXPECT_TRUE(n.y() == 2.f);
 }
 */
+
+TEST(Normal2f, hasnans) {
+    Normal2f a{0.f, 0.0f};
+    Normal2f b{0.f, NAN};
+    EXPECT_THAT(a.has_nans(), false);
+    EXPECT_THAT(b.has_nans(), true);
+}

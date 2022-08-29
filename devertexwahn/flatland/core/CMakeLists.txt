@@ -3,6 +3,9 @@
 #   SPDX-License-Identifier: Apache-2.0
 #
 
+# Note: This is a first attempt to support CMake. The main build system for this project is Bazel.
+# Feel free to open a pull request for improvements of the CMake build support.
+
 add_library(flatland.core SHARED
     logging.h
 	namespace.h

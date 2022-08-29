@@ -18,7 +18,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "bazel_skylib",
-        path = "../third_party/bazel-skylib-872e9b06e18ae8ba2897cb65b9aaa172aa6279f3",
+        path = "../third_party/bazel-skylib-1bbb388780f6016b6981a2f075fb457e999bc3bd",
     )
 
     # Use github.com
@@ -39,7 +39,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-7274ec186442c96e4c7dcc99c684a03e5db2ff48",
+        path = "../third_party/googletest-afd902e992b720d1b3e106bc5e425a5768872265",
     )
 
     # Use github.com
@@ -95,7 +95,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "glog",
-        path = "../third_party/glog-acc60d0c3832e9b64759698f9f7a0062767c78c3",
+        path = "../third_party/glog-b70ea80433c2a8f20b832be97b90f1f82b0d29e9",
     )
 
     # Use github.com
@@ -124,7 +124,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "catch2",
-        path = "../third_party/Catch2-47d56f28a9801911c048d011b375e5631dbb658f",
+        path = "../third_party/Catch2-dc001fa935d71b4b77f263fce405c9dbdfcbfe28",
     )
 
     # Use github.com
@@ -144,7 +144,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-fd41110d383b7240231718f009b21498e3984ccc",
+        path = "../third_party/fmt-a33701196adfad74917046096bf5a2aa0ab0bb50",
     )
 
     # Live at Head
@@ -375,7 +375,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "oneTBB",
-        path = "../third_party/oneTBB-5cb212d44732947396abdd39eae1229c7cd51644",
+        path = "../third_party/oneTBB-dce182a7b554becada120472659be1b25f89051c",
     )
 
     # Use git repository from com_github_oneapi_src_onetbb
@@ -465,7 +465,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_github_nelhage_rules_boost",
-        path = "../third_party/rules_boost-c3fae06e819ed8b93e31b150387dce4864758643",
+        path = "../third_party/rules_boost-ea2991b24d68439121130845f7dbef8d1dd383d2",
     )
 
     #-------------------------------------------------------------------------------------
@@ -492,7 +492,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_grail_bazel_toolchain",
-        path = "../third_party/bazel-toolchain-2ef4bbf579fdc3afbca61f11bb955b8770c75867",
+        path = "../third_party/bazel-toolchain-c3131a6894804ee586d059c57ffe8e88d44172e1",
     )
 
     #-------------------------------------------------------------------------------------
@@ -502,6 +502,6 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_absl",
-        path = "../third_party/abseil-cpp-61f84d623d2a8591501012bf325e1439777a4911",
+        path = "../third_party/abseil-cpp-92fdbfb301f8b301b28ab5c99e7361e775c2fb8a",
     )
 

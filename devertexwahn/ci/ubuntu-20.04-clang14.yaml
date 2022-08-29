@@ -1,3 +1,8 @@
+#
+#   SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
 # Clang 14 on Ubunutu 20.04
 # Make sure we can build with Clang 14 in all different compilation modes
 steps:
@@ -16,13 +21,12 @@ steps:
   - script: |
       cd devertexwahn
       bazel build --config=clang14  -- //... 
-    displayName: 'Bazel build clang13-fastbuild'
-
+    displayName: 'Bazel build clang14-fastbuild'
 
   - script: |
       cd devertexwahn
       bazel test --config=clang14   -- //...  
-    displayName: 'Bazel test clang13-fastbuild'
+    displayName: 'Bazel test clang14-fastbuild'
 
   # dbg
   - script: |

@@ -33,3 +33,13 @@ TEST(stl, GivenValueBelowClampRegionAndMinMaxClampValue_WhenClamp_ThenMaxValue) 
 
     EXPECT_THAT(clamped_value, min_value);
 }
+
+TEST(stl, isnan) {
+    EXPECT_TRUE(std::isnan(NAN));
+    EXPECT_FALSE(std::isnan(INFINITY));
+    EXPECT_FALSE(std::isnan(0.0));
+    EXPECT_FALSE(std::isnan(DBL_MIN/2.0));
+    //EXPECT_TRUE(std::isnan(0.0 / 0.0)); // reports errr error C2124: Division by Zero on Visual Studio 2019
+    double zero = 0.0;
+    EXPECT_TRUE(std::isnan(0.0 / zero)); 
+}

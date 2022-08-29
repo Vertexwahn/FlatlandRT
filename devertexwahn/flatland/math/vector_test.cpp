@@ -165,3 +165,10 @@ TEST(Vector2f, cross_product_2) {
 
     EXPECT_THAT(cross_product_2(a, b), -17.f);
 }
+
+TEST(Vector2f, hasnans) {
+    Vector2f a{0.f, 0.0f};
+    Vector2f b{0.f, NAN};
+    EXPECT_THAT(a.has_nans(), false);
+    EXPECT_THAT(b.has_nans(), true);
+}

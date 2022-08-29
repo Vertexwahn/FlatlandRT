@@ -32,8 +32,10 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     }
 
     template<typename Derived>
-    ColorType(const Eigen::MatrixBase<Derived> &src) : Base(src) {
+    ColorType(const Eigen::MatrixBase <Derived> &src) : Base(src) {
     }
+
+    using Base::operator=;
 
     Scalar &red() {
         static_assert(Dimension > 0);
@@ -73,7 +75,14 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
         return *this;
     }
 
-    using Base::operator=;
+    bool has_nans() const {
+        for (size_t i = 0; i < Dimension; ++i) {
+            if (std::isnan(this->coeff(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 template<typename ScalarType>

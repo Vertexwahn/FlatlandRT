@@ -23,6 +23,7 @@ void Image3f::set_pixel(int x, int y, const Color3f &color) {
 }
 
 void Image3f::set_pixel(const Point2i &point, const Color3f &color) {
+    assert(!color.has_nans());
     set_pixel(point.x(), point.y(), color);
 }
 

@@ -38,6 +38,15 @@ struct PointType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     }
 
     using Base::operator=;
+
+    bool has_nans() const {
+        for (size_t i=0; i<Dimension; ++i) {
+            if(std::isnan(this->coeff(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 template <typename ScalarType>

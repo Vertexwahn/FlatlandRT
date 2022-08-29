@@ -1,3 +1,8 @@
+#
+#   SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
 # Apple Clang 13 on macOS 11
 # Make sure we can build with Apple Clang13 in all different compilation modes
 steps:

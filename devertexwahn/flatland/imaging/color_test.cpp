@@ -99,3 +99,10 @@ TEST(Color3f, clamp) {
     EXPECT_THAT(c1.green(), 0.0f);
     EXPECT_THAT(c1.blue(), 1.0f);
 }
+
+TEST(Color3f, hasnans) {
+    Color3f a{0.f, 0.f, 0.f};
+    Color3f b{0.f, NAN, 0.f};
+    EXPECT_THAT(a.has_nans(), false);
+    EXPECT_THAT(b.has_nans(), true);
+}

@@ -4,12 +4,23 @@
 """
 
 cc_test(
-    name = "boost_test",
+    name = "boost_algorithm_test",
     srcs = [
-        "boost_test.cpp",
+        "boost_algorithm_test.cpp",
     ],
     deps = [
         "@boost//:algorithm",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "boost_predef_test",
+    srcs = [
+        "boost_predef_test.cpp",
+    ],
+    deps = [
+        "@boost//:predef",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -62,6 +73,27 @@ cc_test(
 )
 
 cc_test(
+    name = "libpng_test",
+    srcs = ["libpng_test.cpp"],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@libpng",
+    ],
+)
+
+cc_test(
+    name = "openexr_test",
+    srcs = [
+        "openexr_test.cpp",
+    ],
+    deps = [
+        "//flatland/imaging:image",
+        "@com_google_googletest//:gtest_main",
+        "@openexr//:OpenEXR",
+    ],
+)
+
+cc_test(
     name = "pcg_test",
     srcs = [
         "pcg_test.cpp",
@@ -73,11 +105,48 @@ cc_test(
 )
 
 cc_test(
+    name = "pugixml_test",
+    srcs = [
+        "pugixml_test.cpp",
+    ],
+    data = ["//flatland/scenes"],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@pugixml",
+    ],
+)
+
+cc_test(
+    name = "png_test",
+    srcs = [
+        "png_test.cpp",
+    ],
+    data = [
+        "//okapi/tests/images:filtered_images",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@libpng",
+    ],
+)
+
+cc_test(
     name = "stl_test",
     srcs = [
         "stl_test.cpp",
     ],
     deps = [
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "zlib_test",
+    srcs = [
+        "zlib_test.cpp",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@zlib",
     ],
 )

@@ -28,9 +28,18 @@ See the [user manual](devertexwahn/flatland/docs/user_manual.md) if you want to 
 
 This project uses [Bazel](https://bazel.build/) as a build system. The current used version is defined in [.bazelversion](devertexwahn/.bazelversion).
 
-You can use Flatland by invoking the following Bazel command.
+You can use Flatland by invoking the following commands:
 
-*Render a scene with Windows 10/11 x64 with Visual Studio 2019/2022:*
+*Render a scene with Windows 10/11 x64 with Visual Studio 2019:*
+
+```bash
+git clone https://github.com/Vertexwahn/FlatlandRT
+cd FlatlandRT
+cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+bazel --output_base=C:/bazel_output_base  run --config=vs2019 //flatland/cli:flatland.cli --scene_filename=C:\scenes\bunny.flatland.xml
+```
+
+*Render a scene with Windows 10/11 x64 with Visual Studio 2022:*
 
 ```bash
 git clone https://github.com/Vertexwahn/FlatlandRT
@@ -41,7 +50,7 @@ bazel --output_base=C:/bazel_output_base  run --config=vs2022 //flatland/cli:fla
 
 For more hints on how to use Bazel on Windows have a look at the [Bazel on Windows](https://docs.google.com/document/d/17YIqUdffxpwcKP-0whHM6TFELN8VohTpjiiEIbbRfts/edit?usp=sharing) document.
 
-*Render a scene with Linux (e.g. Ubunutu 20.04):*
+*Render a scene with Ubunutu 20.04:*
 
 ```bash
 git clone https://github.com/Vertexwahn/FlatlandRT
@@ -50,7 +59,16 @@ cd devertexwahn # switch to the location where the WORKSPACE.bazel file is locat
 bazel run --config=gcc9 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
-*Render a scene with macOS:*
+*Render a scene with Ubunutu 22.04:*
+
+```bash
+git clone https://github.com/Vertexwahn/FlatlandRT
+cd FlatlandRT
+cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+bazel run --config=gcc11 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
+```
+
+*Render a scene with macOS 11/12:*
 
 ```bash
 git clone https://github.com/Vertexwahn/FlatlandRT
@@ -70,7 +88,11 @@ bazel run --config=macos //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/
 bazel test --config=gcc9 //...
 # Build all targets uing GCC 9.3
 bazel build --config=gcc9 //... 
-# Run all tests using Clang 13
+# Run all tests using GCC 11
+bazel test --config=gcc11 //...
+# Build all targets uing GCC 11
+bazel build --config=gcc11 //...
+# Run all tests using Clang 14
 bazel test --config=clang14 //...
 # Build all targets uing Clang 14
 bazel build --config=clang14 //...
