@@ -28,62 +28,64 @@ See the [user manual](devertexwahn/flatland/docs/user_manual.md) if you want to 
 
 This project uses [Bazel](https://bazel.build/) as a build system. The current used version is defined in [.bazelversion](devertexwahn/.bazelversion).
 
+**Prerequisites:**
+
+The following tools should be installed:
+- [Git](https://git-scm.com/)
+- [Bazel](https://bazel.build/install)
+- A C++ compiler (GCC, Visual Studio, Clang, etc.)
+
+**Checkout, build, and run:**
+
 You can use Flatland by invoking the following commands:
+
+*All platforms:*
+
+```shell
+git clone https://github.com/Vertexwahn/FlatlandRT # clone the repository
+cd FlatlandRT # change directory to cloned repository
+cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+```
 
 *Render a scene with Windows 10/11 x64 with Visual Studio 2019:*
 
-```bash
-git clone https://github.com/Vertexwahn/FlatlandRT
-cd FlatlandRT
-cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+```shell
 bazel --output_base=C:/bazel_output_base  run --config=vs2019 //flatland/cli:flatland.cli --scene_filename=C:\scenes\bunny.flatland.xml
 ```
 
 *Render a scene with Windows 10/11 x64 with Visual Studio 2022:*
 
-```bash
-git clone https://github.com/Vertexwahn/FlatlandRT
-cd FlatlandRT
-cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+```shell
 bazel --output_base=C:/bazel_output_base  run --config=vs2022 //flatland/cli:flatland.cli --scene_filename=C:\scenes\bunny.flatland.xml
 ```
 
 For more hints on how to use Bazel on Windows have a look at the [Bazel on Windows](https://docs.google.com/document/d/17YIqUdffxpwcKP-0whHM6TFELN8VohTpjiiEIbbRfts/edit?usp=sharing) document.
 
-*Render a scene with Ubunutu 20.04:*
+*Render a scene with Ubuntu 20.04:*
 
-```bash
-git clone https://github.com/Vertexwahn/FlatlandRT
-cd FlatlandRT
-cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+```shell
 bazel run --config=gcc9 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
-*Render a scene with Ubunutu 22.04:*
+*Render a scene with Ubuntu 22.04:*
 
-```bash
-git clone https://github.com/Vertexwahn/FlatlandRT
-cd FlatlandRT
-cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+```shell
 bazel run --config=gcc11 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
 *Render a scene with macOS 11/12:*
 
-```bash
-git clone https://github.com/Vertexwahn/FlatlandRT
-cd FlatlandRT
-cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+```shell
 bazel run --config=macos //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
-## Building
+## Building & Testing
 
-### Building with Linux
+### Building and testing with Linux
 
 #### Command line (bash/zsh)
 
-```bash
+```shell
 # Run all tests using GCC 9.3
 bazel test --config=gcc9 //...
 # Build all targets uing GCC 9.3
@@ -129,7 +131,7 @@ Make sure that lcov is installed.
 
 Go to the directory that contains the `WORKSPACE` file and execute:
 
-```bash
+```shell
 ./coverage.sh buchgr_remote_cache
 xdg-open coverage_report/index.html
 ```
@@ -138,24 +140,30 @@ xdg-open coverage_report/index.html
 
 There is a build config called `asan` that can be used for detection memory errors.
 
-    bazel run --config=asan --compilation_mode=opt //flatland/cli:flatland.cli --  $(pwd)/flatland/scenes/sphere.flatland.xml
+```shell
+bazel run --config=asan --compilation_mode=opt //flatland/cli:flatland.cli --  $(pwd)/flatland/scenes/sphere.flatland.xml
+```
 
 #### Clang Tidy
 
-    bazel build --config=clang-tidy //flatland/core/...
+```shell
+bazel build --config=clang-tidy //flatland/core/...
+```
 
 ### Building with Windows
 
 #### Command line (Powershell)
 
-    # Build with Visual Studio C++ Compiler
-    bazel build --config=vs2022 //...
+```shell
+# Build with Visual Studio C++ Compiler
+bazel build --config=vs2022 //...
+```
 
 #### Using Visual Studio
 
 Use [Lavender](https://github.com/tmandry/lavender) to generate a solution and project files for Visual Studio.
 
-```bash
+```shell
 python3 G:\dev\lavender\generate.py --config=vs2022  //...
 ```
 

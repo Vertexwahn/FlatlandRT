@@ -86,7 +86,6 @@ public:
 
         if (hit) {
             me.p = Shape2<ScalarType>::transform_ * me.p;
-            //me.geo_frame.normal.normalize();
             me.shape = this;
             me.geo_frame.normal = Shape2<ScalarType>::transform_ * me.geo_frame.normal;
             me.geo_frame.normal.normalize();
@@ -127,11 +126,13 @@ public:
 protected:
     void ensure_valid_points() {
         for (const auto &point: points_) {
-            if (std::isnan(point.x())) {
-                throw std::runtime_error("x component of point is NaN");
-            }
-            if (std::isnan(point.y())) {
-                throw std::runtime_error("y component of point is NaN");
+            if(point.has_nans()) {
+                if (point.x()) {
+                    throw std::runtime_error("x component of point is NaN");
+                }
+                if (std::isnan(point.y())) {
+                    throw std::runtime_error("y component of point is NaN");
+                }
             }
             if (!std::isfinite(point.x())) {
                 throw std::runtime_error("x component of point is not finite");

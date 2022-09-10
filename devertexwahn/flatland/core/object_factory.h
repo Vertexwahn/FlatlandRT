@@ -28,12 +28,12 @@ protected:
 
 class ObjectFactoryClassAlreadyRegisteredException : public ObjectFactoryException {
 public:
-    explicit ObjectFactoryClassAlreadyRegisteredException(std::string_view className);
+    explicit ObjectFactoryClassAlreadyRegisteredException(std::string_view class_name);
 };
 
 class ObjectFactoryClassDoesNotExist : public ObjectFactoryException {
 public:
-    explicit ObjectFactoryClassDoesNotExist(std::string_view className);
+    explicit ObjectFactoryClassDoesNotExist(std::string_view class_name);
 };
 
 template<class PropertySetType>
@@ -52,16 +52,16 @@ public:
     }
 
     template<typename ObjectType>
-    void register_class(const std::string &className) {
-        if (creation_function_.find(className) != creation_function_.end()) {
-            throw ObjectFactoryClassAlreadyRegisteredException(className);
+    void register_class(const std::string &class_name) {
+        if (creation_function_.find(class_name) != creation_function_.end()) {
+            throw ObjectFactoryClassAlreadyRegisteredException(class_name);
         }
 
         std::function<ReferenceCounted<Object>(PropertySetType)> createObject = [](const PropertySetType &ps) {
             return make_reference_counted<ObjectType>(ps);
         };
 
-        creation_function_[className] = createObject;
+        creation_function_[class_name] = createObject;
     }
 
 private:

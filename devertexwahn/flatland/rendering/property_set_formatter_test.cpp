@@ -18,7 +18,7 @@ TEST(fmtFormatter, Color3f) {
 TEST(fmtFormatter, RefCountedObject) {
     ReferenceCounted<Object> obj = make_reference_counted<Object>();
     std::string str = fmt::format("{}", obj);
-    EXPECT_THAT(str, "A object. Implement to_string method to improve description.");
+    EXPECT_THAT(str, "A object. Implement the to_string method to improve this description.");
 }
 
 TEST(fmtFormatter, Point2f) {
@@ -42,7 +42,7 @@ TEST(fmtFormatter, Point2d) {
 TEST(fmtFormatter, Transform44f) {
     Transform44f t{identity<float>()};
     std::string str = fmt::format("{}", t);
-    EXPECT_THAT(str, "(1)");  // todo - fix this behaviour
+    EXPECT_THAT(str, "(1)");
 }
 
 TEST(fmtFormatter, Vector2f) {

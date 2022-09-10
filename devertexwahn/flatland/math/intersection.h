@@ -19,14 +19,14 @@ bool intersect_ray_n_sphere(
         const PointType<Dimension, ScalarType>& ray_origin,
         const VectorType<Dimension, ScalarType>& ray_direction,
         const PointType<Dimension, ScalarType>& circle_center,
-        ScalarType circleRadius,
+        ScalarType circle_radius,
         PointType<Dimension, ScalarType>& intersection_point,
         ScalarType& t,
         NormalType<Dimension, ScalarType>& normal /* world space normal */) {
     VectorType<Dimension, ScalarType> tmp = ray_origin - circle_center;
     ScalarType a = ray_direction.dot(ray_direction);
     ScalarType b = 2 * tmp.dot(ray_direction);
-    ScalarType c = tmp.dot(tmp) - circleRadius * circleRadius;
+    ScalarType c = tmp.dot(tmp) - circle_radius * circle_radius;
     ScalarType discriminant = b*b-4*a*c;
 
     if( discriminant < 0 ) {
@@ -59,8 +59,8 @@ bool intersect_ray_n_sphere(
     }
 
     intersection_point = ray_origin + t * ray_direction;
-    ScalarType invRadius = ScalarType{1.0} / circleRadius;
-    normal = (intersection_point - circle_center) * invRadius;
+    ScalarType inverse_radius = ScalarType{1.0} / circle_radius;
+    normal = (intersection_point - circle_center) * inverse_radius;
 
     return true;
 }

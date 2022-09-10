@@ -82,11 +82,11 @@ TEST(RefractionGlassToVaccum, When_IncidentVectorIsCriticalAnglePlus5Degrees_The
 
     const float theta = criticalAngle + degree_to_radian(5.f);
     const Eigen::Rotation2Df t(theta);
-    const Vector2f rotatedVector = t.toRotationMatrix() * Vector2f(.0, 1.0);
+    const Vector2f rotated_vector = t.toRotationMatrix() * Vector2f(.0, 1.0);
 
     // Act
     Vector2f refracted_direction;
-    bool valid_refraction = refract(rotatedVector, n, refraction_index_glass / refraction_index_vacuum,
+    bool valid_refraction = refract(rotated_vector, n, refraction_index_glass / refraction_index_vacuum,
                                     refracted_direction);
 
     // Assert

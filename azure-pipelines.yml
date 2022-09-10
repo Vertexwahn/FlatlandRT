@@ -37,11 +37,18 @@ jobs:
   
 
   - job: Ubuntu22GCC11
-    displayName: "GCC11 on Ubuntu 22.04"
+    displayName: "GCC11 fast opt on Ubuntu 22.04"
     pool:
       vmImage: 'ubuntu-22.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-22.04-gcc11.yaml
+      - template: devertexwahn/ci/ubuntu-22.04-gcc11-fast-opt.yaml
+
+  - job: Ubuntu22GCC11Debug
+    displayName: "GCC11 dbg on Ubuntu 22.04"
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-22.04-gcc11-dbg.yaml
 
   - job: Ubuntu22Clang14
     displayName: "Clang14 on Ubuntu 22.04"
@@ -50,6 +57,7 @@ jobs:
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-clang14.yaml
 
+  
   # Visual Studio 2019
   - job: VisualStudio2019Dbg
     displayName: "VS2019 debug on Windows Server 2019"

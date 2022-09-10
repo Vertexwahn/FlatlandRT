@@ -18,7 +18,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "bazel_skylib",
-        path = "../third_party/bazel-skylib-1bbb388780f6016b6981a2f075fb457e999bc3bd",
+        path = "../third_party/bazel-skylib-61d9c6283308410d91f769e489e53855d446d995",
     )
 
     # Use github.com
@@ -39,7 +39,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-afd902e992b720d1b3e106bc5e425a5768872265",
+        path = "../third_party/googletest-c29315dda476f195298ab8da180e564478649b9e",
     )
 
     # Use github.com
@@ -124,7 +124,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "catch2",
-        path = "../third_party/Catch2-dc001fa935d71b4b77f263fce405c9dbdfcbfe28",
+        path = "../third_party/Catch2-dea1a6abd92b5892956fa474540ab4424a8ca1c3",
     )
 
     # Use github.com
@@ -144,7 +144,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-a33701196adfad74917046096bf5a2aa0ab0bb50",
+        path = "../third_party/fmt-ecffca672656d6e4a2d39314237289f5740e8562",
     )
 
     # Live at Head
@@ -375,7 +375,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "oneTBB",
-        path = "../third_party/oneTBB-dce182a7b554becada120472659be1b25f89051c",
+        path = "../third_party/oneTBB-8155aaeb6baead9bd571bbb76a9b5dc56a1a9403",
     )
 
     # Use git repository from com_github_oneapi_src_onetbb
@@ -489,6 +489,13 @@ def okapi_deps():
     # LLVM
     #-------------------------------------------------------------------------------------
 
+    #maybe(
+    #    git_repository,
+    #    name = "com_grail_bazel_toolchain",
+    #    remote = "https://github.com/Vertexwahn/bazel-toolchain",
+    #    branch = "clang-15-support",
+    #)
+
     maybe(
         native.local_repository,
         name = "com_grail_bazel_toolchain",
@@ -502,6 +509,6 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_absl",
-        path = "../third_party/abseil-cpp-92fdbfb301f8b301b28ab5c99e7361e775c2fb8a",
+        path = "../third_party/abseil-cpp-0a066f31d981d69f7bde961055691906dabd4a3c",
     )
 

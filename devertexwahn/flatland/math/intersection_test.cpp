@@ -94,6 +94,6 @@ TEST(Intersection, RayLineSegmentIntersection2) {
 
     EXPECT_TRUE(result);
 
-    EXPECT_THAT(n.x(), testing::FloatEq(sqrt(.5f)));
-    EXPECT_THAT(n.y(), testing::FloatEq(-sqrt(.5f)));
+    EXPECT_THAT(n.x(), testing::FloatEq(std::sqrt(.5f)));
+    EXPECT_THAT(n.y(), testing::FloatEq(-std::sqrt(.5f)));
 }

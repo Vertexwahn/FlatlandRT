@@ -15,14 +15,14 @@ TEST(Transform44f, WhenDefaultInitalizingATransform_ExpectIdentityTransform) {
     Transform44f transform;
 
     // Assert
-    Matrix44f identityMatrix;
-    identityMatrix << 1.f, 0.f, 0.f, 0.f,
+    Matrix44f identity_matrix;
+    identity_matrix << 1.f, 0.f, 0.f, 0.f,
                       0.f, 1.f, 0.f, 0.f,
                       0.f, 0.f, 1.f, 0.f,
                       0.f, 0.f, 0.f, 1.f;
 
-    EXPECT_THAT(transform.matrix(), identityMatrix);
-    EXPECT_THAT(transform.inverse(), identityMatrix);
+    EXPECT_THAT(transform.matrix(), identity_matrix);
+    EXPECT_THAT(transform.inverse(), identity_matrix);
 }
 
 TEST(Transform44f, GivenAMatrix_WhenInitalizingATransformWithThisMatrix_ExpectExactlyThisMatrix) {
@@ -136,14 +136,14 @@ TEST(Transform44f, ComapreOperators) {
 
 TEST(Transform44f, GivenRayInWorldSpace_ExpetRayInObjectSpace_WhenTransformedWithInverseOfWorldSpaceTransform) {
     auto translation = Vector2f{200.f, 100.f};
-    auto toWorld = translate(translation);
+    auto to_world = translate(translation);
     Vector2f direction{1.f, 0.f};
     Point2f origin{0.f, 0.f};
     auto min_distance = 1.f;
     auto max_distance = 10.f;
     Ray2f r{origin, direction, min_distance, max_distance};
     
-    auto toObjectSpace = toWorld.inverse();
+    auto toObjectSpace = to_world.inverse();
     Ray2f ray = toObjectSpace * r;
 
     EXPECT_THAT(ray.origin, (Point2f{-translation.x(), -translation.y()}));
@@ -154,15 +154,15 @@ TEST(Transform44f, GivenRayInWorldSpace_ExpetRayInObjectSpace_WhenTransformedWit
 
 TEST(Transform44f, dir) {
     auto translation = Vector2f{400.f, 300.f};
-    auto toWorld = translate(translation) * scale(3.f, 3.f, 1.f);
+    auto to_world = translate(translation) * scale(3.f, 3.f, 1.f);
     Vector2f direction{1.f, 0.f};
     Point2f origin{0.f, 0.f};
     auto min_distance = 1.f;
     auto max_distance = 10.f;
     Ray2f r{origin, direction, min_distance, max_distance};
 
-    auto toObjectSpace = toWorld.inverse();
-    Ray2f ray = toObjectSpace * r;
+    auto to_object_space = to_world.inverse();
+    Ray2f ray = to_object_space * r;
 
     EXPECT_THAT(ray.origin, (Point2f{-translation.x()*1.f/3.f, -translation.y()*1.f/3.f}));
     //EXPECT_THAT(ray.direction, direction);

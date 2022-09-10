@@ -11,15 +11,15 @@ const char *ObjectFactoryException::what() const throw() {
     return error_message_.c_str();
 }
 
-ObjectFactoryClassDoesNotExist::ObjectFactoryClassDoesNotExist(std::string_view className) {
+ObjectFactoryClassDoesNotExist::ObjectFactoryClassDoesNotExist(std::string_view class_name) {
     error_message_ = fmt::format("Class with name '{}' does not exist registered",
-                                 className);
+                                 class_name);
 }
 
 ObjectFactoryClassAlreadyRegisteredException::ObjectFactoryClassAlreadyRegisteredException(
-        std::string_view className) {
+        std::string_view class_name) {
     error_message_ = fmt::format("Class with name '{}' was already registered",
-                                 className);
+                                 class_name);
 }
 
 FLATLAND_END_NAMESPACE

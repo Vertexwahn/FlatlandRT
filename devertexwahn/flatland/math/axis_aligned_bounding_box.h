@@ -62,27 +62,28 @@ struct AxisAlignedBoundingBoxType {
         return (n * MachineEpsilon) / (1 - n * MachineEpsilon);
     }
 
-    // Copied from PBRTv4
-    bool intersect(Point o, Vector d, Scalar tMax, Scalar *hitt) {
-        Scalar t0 = 0, t1 = tMax;
+    // Copied from PBRTv4 (with minor modifications)
+    bool intersect(const Point& origin, const Vector& direction, Scalar t_max, Scalar *hitt) {
+        Scalar t0 = 0, t1 = t_max;
         for (size_t i = 0; i < Dimension; ++i) {
             // Update interval for _i_th bounding box slab
-            Scalar invRayDir = Scalar{1} / d[i];
-            Scalar tNear = (min_[i] - o[i]) * invRayDir;
-            Scalar tFar = (max_[i] - o[i]) * invRayDir;
+            Scalar inverse_ray_direction = Scalar{1} / direction[i];
+            Scalar t_near = (min_[i] - origin[i]) * inverse_ray_direction;
+            Scalar t_far = (max_[i] - origin[i]) * inverse_ray_direction;
             // Update parametric interval from slab intersection $t$ values
-            if (tNear > tFar)
-                std::swap(tNear, tFar);
+            if (t_near > t_far)
+                std::swap(t_near, t_far);
             // Update _tFar_ to ensure robust ray--bounds intersection
-            tFar *= 1 + 2 * gamma(3);
+            t_far *= 1 + 2 * gamma(3);
 
-            t0 = tNear > t0 ? tNear : t0;
-            t1 = tFar < t1 ? tFar : t1;
+            t0 = t_near > t0 ? t_near : t0;
+            t1 = t_far < t1 ? t_far : t1;
             if (t0 > t1)
                 return false;
         }
-        if (hitt)
+        if (hitt) {
             *hitt = t0;
+        }
         return true;
     }
 

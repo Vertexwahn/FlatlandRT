@@ -43,20 +43,20 @@ TEST(Image4b, ctor) {
 
 TEST(Image, copy_ctor) {
     // Arrange
-    Image3f image{100, 100};
+    Image3f image_a{100, 100};
     auto color = Color3f{1.f, 0.5f, 0.1f};
-    image.set_pixel(50, 50, color);
-    Image3f image2{50, 50};
+    image_a.set_pixel(50, 50, color);
+    Image3f image_b{50, 50};
 
     // Act
-    image2 = image;
+    image_b = image_a;
 
     // Assert
-    EXPECT_THAT(image2.width(), 100);
-    EXPECT_THAT(image2.height(), 100);
-    EXPECT_THAT(image2.size(), (Vector2i(100, 100)));
-    EXPECT_TRUE(image2.data());
-    EXPECT_THAT(image2.get_pixel(50, 50), color);
+    EXPECT_THAT(image_b.width(), 100);
+    EXPECT_THAT(image_b.height(), 100);
+    EXPECT_THAT(image_b.size(), (Vector2i(100, 100)));
+    EXPECT_TRUE(image_b.data());
+    EXPECT_THAT(image_b.get_pixel(50, 50), color);
 }
 
 TEST(Image, WriteAndReadFile) {

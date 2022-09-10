@@ -11,6 +11,5 @@ using namespace flatland;
 
 TEST(FlatlandException, what) {
     FlatlandException ex{"file.flatland.xml"};
-
     EXPECT_STREQ(ex.what(), "file.flatland.xml");
 }

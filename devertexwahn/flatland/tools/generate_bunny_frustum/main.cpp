@@ -123,7 +123,6 @@ int main() {
     bunny2->set_bsdf(material);
     sc.add(bunny2.get());
 
-
     //sc.store("/home/vertexwahn/Desktop/frustum.svg");
     sc.store("C:\\Users\\verte\\Desktop\\frustum.svg");
 

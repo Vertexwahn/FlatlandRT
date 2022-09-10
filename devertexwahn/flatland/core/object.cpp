@@ -8,7 +8,7 @@
 FLATLAND_BEGIN_NAMESPACE
 
 std::string Object::to_string() const {
-    return "A object. Implement to_string method to improve description.";
+    return "A object. Implement the to_string method to improve this description.";
 }
 
 FLATLAND_END_NAMESPACE
