@@ -39,7 +39,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-c29315dda476f195298ab8da180e564478649b9e",
+        path = "../third_party/googletest-1336c4b6d1a6f4bc6beebccb920e5ff858889292",
     )
 
     # Use github.com
@@ -95,7 +95,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "glog",
-        path = "../third_party/glog-b70ea80433c2a8f20b832be97b90f1f82b0d29e9",
+        path = "../third_party/glog-9ad08ac6cc7899947deb934a695d150f0ae360d0",
     )
 
     # Use github.com
@@ -124,7 +124,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "catch2",
-        path = "../third_party/Catch2-dea1a6abd92b5892956fa474540ab4424a8ca1c3",
+        path = "../third_party/Catch2-98d37da03ee21e8a87cd3e0e6542c794c667e78b",
     )
 
     # Use github.com
@@ -144,7 +144,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-ecffca672656d6e4a2d39314237289f5740e8562",
+        path = "../third_party/fmt-afcf424294ee25ea0f22e7f0f20abddb8329d643",
     )
 
     # Live at Head
@@ -465,7 +465,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_github_nelhage_rules_boost",
-        path = "../third_party/rules_boost-ea2991b24d68439121130845f7dbef8d1dd383d2",
+        path = "../third_party/rules_boost-88ce413e61b1b549e44e3dc889251f14d4702abd",
     )
 
     #-------------------------------------------------------------------------------------
@@ -509,6 +509,6 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_absl",
-        path = "../third_party/abseil-cpp-0a066f31d981d69f7bde961055691906dabd4a3c",
+        path = "../third_party/abseil-cpp-6b7b11a97fc72849f74610ee4d53403ad417d3cd",
     )
 

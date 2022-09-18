@@ -52,7 +52,7 @@ This output is generated:
 
 ### Command-Line Reference
 
-```bash
+```shell
 flatland <filename.scene.xml>
 ```
 

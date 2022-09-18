@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 #
 
-# GCC9 on Ubuntu 20.04
+# GCC 11 on Ubuntu 22.04
 # Make sure we can build with GCC9 in all different compilation modes
 
 steps:

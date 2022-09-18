@@ -4,7 +4,7 @@
 #
 
 # GCC9 on Ubuntu 20.04
-# Make sure we can build with GCC9 in all different compilation modes
+# Make sure we can build with GCC 9 in all different compilation modes
 
 steps:
   - checkout: self

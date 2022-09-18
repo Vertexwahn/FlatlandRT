@@ -3,8 +3,9 @@
 #   SPDX-License-Identifier: Apache-2.0
 #
 
-# Clang 14 on Ubunutu 20.04
+# Clang 14 on Ubuntu 22.04
 # Make sure we can build with Clang 14 in all different compilation modes
+
 steps:
   - checkout: self
     clean: true
@@ -20,10 +21,33 @@ steps:
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=clang14 -- //...   
+      bazel build --config=clang14  -- //... 
     displayName: 'Bazel build clang14-fastbuild'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14 -- //...    
+      bazel test --config=clang14  -- //... 
     displayName: 'Bazel test clang14-fastbuild'
+
+  # dbg
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang14  --compilation_mode=dbg -- //... 
+    displayName: 'Bazel build clang14-dbg'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang14  --compilation_mode=dbg -- //... 
+    displayName: 'Bazel test clang14-dbg'
+
+  # opt
+  # Qt compilation error: "You must build your code with position independent code if Qt was built with -reduce-relocation"
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang14  --compilation_mode=opt -- //...  -//okapi/tests/warp_tester/... -//testbed/...  
+    displayName: 'Bazel build clang14-opt'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang14  --compilation_mode=opt -- //...  -//okapi/tests/warp_tester/... -//testbed/...  
+    displayName: 'Bazel test clang14-opt'
