@@ -4,18 +4,18 @@
  */
 
 #pragma once
-#ifndef Flatland_Rendering_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
-#define Flatland_Rendering_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
+#ifndef De_Vertexwahn_Flatland_Rendering_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
+#define De_Vertexwahn_Flatland_Rendering_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
 
-#include "flatland/math/axis_aligned_bounding_box.h"
-#include "flatland/math/ray.h"
+#include "math/axis_aligned_bounding_box.h"
+#include "math/ray.h"
 #include "flatland/rendering/canvas/label.h"
 #include "flatland/rendering/scene/shape/shape.h"
 
 #include <cstdint>
 #include <fstream>
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template <typename ScalarType>
 class SvgCanvasType {
@@ -202,6 +202,6 @@ protected:
 using SvgCanvas2f = SvgCanvasType<float>;
 using SvgCanvas2d = SvgCanvasType<double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Rendering_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h
+#endif // end define De_Vertexwahn_Flatland_Rendering_SvgCanvas_40c12871_00a2_441f_842c_9fb53ad77721_h

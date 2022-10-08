@@ -29,12 +29,12 @@ def main(argv):
 	print(TEXT_HEADER)
 	
 	print("#pragma once")
-	print("#ifndef Flatland_Core_" + class_name + "_" + str_uuid + "_h")
-	print("#define Flatland_Core_" + class_name + "_" + str_uuid + "_h")
+	print("#ifndef De_Vertexwahn_Core_" + class_name + "_" + str_uuid + "_h")
+	print("#define De_Vertexwahn_Core_" + class_name + "_" + str_uuid + "_h")
 	print("")
 	print("#include \"flatland/core/namespace.h\"")
 	print("")
-	print("FLATLAND_BEGIN_NAMESPACE")
+	print("DE_VERTEXWAHN_BEGIN_NAMESPACE")
 	print("")
 	
 	print("class " + class_name + " {");
@@ -49,7 +49,7 @@ def main(argv):
 	print("};")
 	print("")
 	
-	print("FLATLAND_END_NAMESPACE")
+	print("DE_VERTEXWAHN_END_NAMESPACE")
 	print("")
 	
 	print("#endif // end define Okapi_" + class_name + "_" + str_uuid + "_h")

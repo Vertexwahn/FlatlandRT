@@ -3,10 +3,10 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/math/util.h"
+#include "math/util.h"
 #include "flatland/rendering/scene/shape/rectangle.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 #include "catch2/catch_test_macros.hpp"
 

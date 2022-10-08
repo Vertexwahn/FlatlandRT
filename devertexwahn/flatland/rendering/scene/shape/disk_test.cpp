@@ -3,13 +3,13 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/math/refract.h"
-#include "flatland/math/util.h"
+#include "math/refract.h"
+#include "math/util.h"
 #include "flatland/rendering/scene/shape/disk.h"
 
 #include "gmock/gmock.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(Disk2f, GivenDiskCenterAndRadius_WhenInitializing_ThenInitializedDisk) {
     // Arrange

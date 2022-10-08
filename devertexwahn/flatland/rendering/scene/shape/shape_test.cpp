@@ -7,7 +7,7 @@
 
 #include "include/gmock/gmock.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 class DummyShape : public Shape2f {
 public:

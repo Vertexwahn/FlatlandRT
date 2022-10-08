@@ -3,6 +3,10 @@
 #   SPDX-License-Identifier: Apache-2.0
 #
 
+# Supported OS identifiers are linux, macos, windows, freebsd, and openbsd.
+# Ignored for now - details here: https://stackoverflow.com/questions/73873449/can-enable-platform-specific-config-be-ignored-or-overriden
+# build --enable_platform_specific_config
+
 build --symlink_prefix=/ # Suppress symlink creation (to avoid untracked files issues with git)
 
 # GCC 9.3
@@ -23,11 +27,14 @@ build:gcc11 --cxxopt=-Wall
 #build:gcc11 --cxxopt=-Wno-error=volatile # blocked by emsdk
 ##build:gcc11 --cxxopt=-Wextra
 
+build:linux --config=gcc11
+
 # macOS (e.g. Clang 12.0.0)
 build:macos --cxxopt=-std=c++2a
 build:macos --cxxopt=-Wall
 #build:macos --cxxopt=-Werror # Commented out because of Embree
 ##build:macos --cxxopt=-Wextra
+#build:macos --spawn_strategy=local
 
 # Todo: Add apple_debug config
 # https://github.com/RobotLocomotion/drake/search?q=apple_debug
@@ -64,6 +71,8 @@ build:vs2022 --copt=-DWIN32_LEAN_AND_MEAN
 build:vs2022 --copt=-DNOGDI
 build:vs2022 --host_copt=-DWIN32_LEAN_AND_MEAN
 build:vs2022 --host_copt=-DNOGDI
+
+build:windows --config=vs2022
 
 # Address Sanitizer
 build:asan --config=gcc9

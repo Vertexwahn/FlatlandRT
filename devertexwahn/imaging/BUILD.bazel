@@ -1,0 +1,70 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "color",
+    srcs = ["color.cpp"],
+    hdrs = ["color.h"],
+    deps = [
+        "//core:namespace",
+        "//math:util",
+    ],
+)
+
+cc_test(
+    name = "color_test",
+    srcs = [
+        "color_test.cpp",
+    ],
+    deps = [
+        "//imaging:color",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "image",
+    srcs = ["image.cpp"],
+    hdrs = ["image.h"],
+    deps = [
+        ":color",
+        "//math:point",
+        "//math:vector",
+    ],
+)
+
+cc_test(
+    name = "image_test",
+    srcs = [
+        "image_test.cpp",
+    ],
+    deps = [
+        "//imaging/io",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "iqa",
+    srcs = ["iqa/iqa.cpp"],
+    hdrs = ["iqa/iqa.h"],
+    deps = [
+        "//core:reference_counted",
+        "//imaging:image",
+    ],
+)
+
+cc_test(
+    name = "iqa_test",
+    srcs = [
+        "iqa/iqa_test.cpp",
+    ],
+    deps = [
+        ":iqa",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

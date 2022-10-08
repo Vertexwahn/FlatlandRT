@@ -4,14 +4,14 @@
  */
 
 #pragma once
-#ifndef Flatland_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
-#define Flatland_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
+#ifndef De_Vertexwahn_Flatland_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
+#define De_Vertexwahn_Flatland_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
 
-#include "flatland/math/geometry.h"
-#include "flatland/math/intersection.h"
+#include "math/geometry.h"
+#include "math/intersection.h"
 #include "flatland/rendering/scene/shape/shape.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<typename ScalarType>
 class Polygon2 : public Shape2<ScalarType> {
@@ -102,7 +102,7 @@ public:
         ss << "    ";
         ss << "<path";
 
-        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bsdf());
+        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bxdf());
 
         if (material) {
             ss << " ";
@@ -153,6 +153,6 @@ protected:
 
 using Polygon2f = Polygon2<float>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h
+#endif // end define De_Vertexwahn_Flatland_Polygon2f_53d2e474_422c_4d90_a16d_ace0175300ea_h

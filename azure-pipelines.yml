@@ -27,12 +27,12 @@ jobs:
       - template: devertexwahn/ci/macOS-12-clang14.yaml
 
 
-  - job: Ubuntu20Clang14
-    displayName: "Clang14 on Ubuntu 20.04"
-    pool:
-      vmImage: 'ubuntu-20.04'
-    steps:
-      - template: devertexwahn/ci/ubuntu-20.04-clang14.yaml
+  #- job: Ubuntu20Clang14
+  #  displayName: "Clang14 on Ubuntu 20.04"
+  #  pool:
+  #    vmImage: 'ubuntu-20.04'
+  #  steps:
+  #    - template: devertexwahn/ci/ubuntu-20.04-clang14.yaml
 
   - job: Ubuntu20GCC9
     displayName: "GCC9 on Ubuntu 20.04"

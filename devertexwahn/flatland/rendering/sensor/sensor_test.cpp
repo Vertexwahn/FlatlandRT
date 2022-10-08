@@ -3,12 +3,12 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/core/reference_counted.h"
+#include "core/reference_counted.h"
 #include "flatland/rendering/sensor/sensor.h"
 
 #include "gmock/gmock.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(Film, to_string) {
     Film_ film{{{"width", 100}, {"height", 100}, {"filename", std::string("file.exr")}}};

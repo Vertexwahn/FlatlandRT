@@ -9,8 +9,8 @@ cc_library(
     name = "ambient_occlusion",
     hdrs = ["ambient_occlusion.h"],
     deps = [
-        "//flatland/core:namespace",
-        "//flatland/math:warping",
+        "//core:namespace",
+        "//math:warping",
         "//flatland/rendering/integrator",
     ],
 )
@@ -33,9 +33,9 @@ cc_library(
     name = "integrator",
     srcs = ["integrator.h"],
     deps = [
-        "//flatland/core:logging",
-        "//flatland/core:object",
-        "//flatland/imaging:color",
+        "//core:logging",
+        "//core:object",
+        "//imaging:color",
         "//flatland/rendering:sampler",
         "//flatland/rendering/canvas:svg_canvas",
     ],
@@ -45,7 +45,7 @@ cc_library(
     name = "path_mirror_reflection",
     hdrs = ["path_mirror_reflection.h"],
     deps = [
-        "//flatland/math:refract",
+        "//math:refract",
         "//flatland/rendering/integrator",
     ],
 )
@@ -69,7 +69,7 @@ cc_library(
     srcs = ["path_specular_transmission.cpp"],
     hdrs = ["path_specular_transmission.h"],
     deps = [
-        "//flatland/math:refract",
+        "//math:refract",
         "//flatland/rendering/scene",
     ],
 )

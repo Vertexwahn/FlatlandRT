@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "flatland/math/axis_aligned_bounding_box.h"
-#include "flatland/math/geometry.h"
+#include "math/axis_aligned_bounding_box.h"
+#include "math/geometry.h"
 #include "flatland/rendering/scene/shape/shape.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<typename ScalarType>
 class TriangleMesh2 : public Shape2<ScalarType> {
@@ -52,7 +52,7 @@ public:
             ss << "    ";
             ss << "<path";
 
-            ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bsdf());
+            ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bxdf());
             if (material) {
                 ss << " ";
                 ss << Shape2<ScalarType>::convert_material_to_svg_style(material.get());
@@ -191,4 +191,4 @@ private:
 
 using TriangleMesh2f = TriangleMesh2<float>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE

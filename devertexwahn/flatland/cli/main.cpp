@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/core/logging.h"
+#include "core/logging.h"
 #include "flatland/rendering/canvas/svg_canvas.h"
 #include "flatland/rendering/intersector/quadtree_intersector.h"
 #include "flatland/rendering/rendering.h"
@@ -18,7 +18,7 @@
 
 #include <filesystem>
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 enum ExitStatus {
     Success = 0,

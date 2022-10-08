@@ -4,14 +4,14 @@
  */
 
 #pragma once
-#ifndef Flatland_Core_Emitter_aa809b1b_b839_4c53_895c_664674b0ab30_h
-#define Flatland_Core_Emitter_aa809b1b_b839_4c53_895c_664674b0ab30_h
+#ifndef De_Vertexwahn_Core_Emitter_aa809b1b_b839_4c53_895c_664674b0ab30_h
+#define De_Vertexwahn_Core_Emitter_aa809b1b_b839_4c53_895c_664674b0ab30_h
 
-#include "flatland/core/object.h"
+#include "core/object.h"
 
 #include <string>
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 class Emitter : public Object {
 public:
@@ -26,6 +26,6 @@ public:
     }
 };
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
 #endif // end define Okapi_Emitter_aa809b1b_b839_4c53_895c_664674b0ab30_h

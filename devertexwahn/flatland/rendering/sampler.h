@@ -4,18 +4,18 @@
  */
 
 #pragma once
-#ifndef Flatland_Rendering_Sampler_e951b5eb_3019_4678_be3e_764686c28239_h
-#define Flatland_Rendering_Sampler_e951b5eb_3019_4678_be3e_764686c28239_h
+#ifndef De_Vertexwahn_Flatland_Rendering_Sampler_e951b5eb_3019_4678_be3e_764686c28239_h
+#define De_Vertexwahn_Flatland_Rendering_Sampler_e951b5eb_3019_4678_be3e_764686c28239_h
 
-#include "flatland/core/object.h"
-#include "flatland/math/point.h"
+#include "core/object.h"
+#include "math/point.h"
 #include "flatland/rendering/property_set.h"
 
 #include "pcg_random.hpp"
 
 #include <random>
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<typename ScalarType>
 class SamplerType : public Object {
@@ -118,6 +118,6 @@ using Sampler2d = SamplerType<double>;
 using PixelCenterSampler = PixelCenterSamplerType<float>;
 using IndependentSampler = IndependentSamplerType<float>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Rendering_Sampler_e951b5eb_3019_4678_be3e_764686c28239_h
+#endif // end define De_Vertexwahn_Flatland_Rendering_Sampler_e951b5eb_3019_4678_be3e_764686c28239_h

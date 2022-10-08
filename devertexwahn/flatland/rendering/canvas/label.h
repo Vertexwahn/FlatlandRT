@@ -4,14 +4,14 @@
  */
 
 #pragma once
-#ifndef Flatland_Label2f_48266b1d_7018_4d01_b3fc_973b6e6bdf84_h
-#define Flatland_Label2f_48266b1d_7018_4d01_b3fc_973b6e6bdf84_h
+#ifndef De_Vertexwahn_Flatland_Label2f_48266b1d_7018_4d01_b3fc_973b6e6bdf84_h
+#define De_Vertexwahn_Flatland_Label2f_48266b1d_7018_4d01_b3fc_973b6e6bdf84_h
 
-#include "flatland/math/point.h"
+#include "math/point.h"
 
 #include <string>
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<typename ScalarType>
 struct LabelType2 {
@@ -22,6 +22,6 @@ struct LabelType2 {
 using Label2f = LabelType2<float>;
 using Label2d = LabelType2<double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Label2f_48266b1d_7018_4d01_b3fc_973b6e6bdf84_h
+#endif // end define De_Vertexwahn_Flatland_Label2f_48266b1d_7018_4d01_b3fc_973b6e6bdf84_h

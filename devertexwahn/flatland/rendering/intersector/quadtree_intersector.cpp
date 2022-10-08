@@ -5,10 +5,10 @@
 
 #include "flatland/rendering/intersector/quadtree_intersector.h"
 
-#include "flatland/core/logging.h"
-#include "flatland/math/util.h"
+#include "core/logging.h"
+#include "math/util.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 std::vector<AxisAlignedBoundingBox2f> split_bound(const AxisAlignedBoundingBox2f &bound) {
     // G---------H---------I
@@ -144,4 +144,4 @@ QuadtreeNode *build_quadtree(const QuadtreeBuildDescription &qtbd) {
     return parent;
 }
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE

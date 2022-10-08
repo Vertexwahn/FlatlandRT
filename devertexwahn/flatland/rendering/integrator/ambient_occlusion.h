@@ -4,14 +4,14 @@
  */
 
 #pragma once
-#ifndef Flatland_Core_AmbientOcclusion2_b609d24d_c389_4692_82df_bcb7e77f756a_h
-#define Flatland_Core_AmbientOcclusion2_b609d24d_c389_4692_82df_bcb7e77f756a_h
+#ifndef De_Vertexwahn_Core_AmbientOcclusion2_b609d24d_c389_4692_82df_bcb7e77f756a_h
+#define De_Vertexwahn_Core_AmbientOcclusion2_b609d24d_c389_4692_82df_bcb7e77f756a_h
 
-#include "flatland/core/namespace.h"
-#include "flatland/math/warping.h"
+#include "core/namespace.h"
+#include "math/warping.h"
 #include "flatland/rendering/integrator/integrator.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<unsigned int Dimension, typename ScalarType>
 class AmbientOcclusion : public IntegratorType<Dimension, ScalarType> {
@@ -84,7 +84,7 @@ private:
 using AmbientOcclusion2f = AmbientOcclusion<2, float>;
 using AmbientOcclusion2d = AmbientOcclusion<2, double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
 #endif // end define Okapi_AmbientOcclusion2_b609d24d_c389_4692_82df_bcb7e77f756a_h
 

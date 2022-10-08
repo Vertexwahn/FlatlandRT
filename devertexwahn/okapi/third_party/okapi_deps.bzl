@@ -18,7 +18,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "bazel_skylib",
-        path = "../third_party/bazel-skylib-61d9c6283308410d91f769e489e53855d446d995",
+        path = "../third_party/bazel-skylib",
     )
 
     # Use github.com
@@ -32,14 +32,14 @@ def okapi_deps():
     #)
 
     #-------------------------------------------------------------------------------------
-    # Google Test
+    # GoogleTest
     #-------------------------------------------------------------------------------------
 
     # Use local repository
     maybe(
         native.local_repository,
         name = "com_google_googletest",
-        path = "../third_party/googletest-1336c4b6d1a6f4bc6beebccb920e5ff858889292",
+        path = "../third_party/googletest",
     )
 
     # Use github.com
@@ -88,14 +88,14 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_github_gflags_gflags",
-        path = "../third_party/gflags-a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd",
+        path = "../third_party/gflags",
     )
 
     # Use local repository
     maybe(
         native.local_repository,
         name = "glog",
-        path = "../third_party/glog-9ad08ac6cc7899947deb934a695d150f0ae360d0",
+        path = "../third_party/glog",
     )
 
     # Use github.com
@@ -124,7 +124,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "catch2",
-        path = "../third_party/Catch2-98d37da03ee21e8a87cd3e0e6542c794c667e78b",
+        path = "../third_party/Catch2",
     )
 
     # Use github.com
@@ -144,7 +144,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "fmt",
-        path = "../third_party/fmt-afcf424294ee25ea0f22e7f0f20abddb8329d643",
+        path = "../third_party/fmt",
     )
 
     # Live at Head
@@ -265,7 +265,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "pcg",
         build_file = "//okapi/third_party:pcg.BUILD",
-        path = "../third_party/pcg-cpp-428802d1a5634f96bcd0705fab379ff0113bcf13",
+        path = "../third_party/pcg-cpp",
     )
 
     #maybe(
@@ -284,7 +284,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_github_jbeder_yaml_cpp",
-        path = "../third_party/yaml-cpp-c73ee34704c512ebe915b283645aefa9f424a22f",
+        path = "../third_party/yaml-cpp",
     )
 
     # yaml-cpp-0.6.3
@@ -319,7 +319,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "openexr",
-        path = "../third_party/openexr-635f0b7805f3493345889e31164b34132982ca59",
+        path = "../third_party/openexr",
     )
 
     # Use local Imath
@@ -353,7 +353,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "libpng",
         build_file = "//okapi/third_party:libpng.BUILD",
-        path = "../third_party/libpng-1.6.37",
+        path = "../third_party/libpng-1.6.38",
     )
 
     # libpng
@@ -375,8 +375,14 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "oneTBB",
-        path = "../third_party/oneTBB-8155aaeb6baead9bd571bbb76a9b5dc56a1a9403",
+        path = "../third_party/oneTBB",
     )
+
+    #maybe(
+    #    native.local_repository,
+    #    name = "oneTBB",
+    #    path = "../third_party/oneTBB-85792ca411c3faaf6494c761b0fc575dd0168304",
+    #)
 
     # Use git repository from com_github_oneapi_src_onetbb
     #maybe(
@@ -404,7 +410,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "rules_pkg",
-        path = "../third_party/rules_pkg-0.7.0",
+        path = "../third_party/rules_pkg-0.7.1",
     )
 
     #maybe(
@@ -465,7 +471,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_github_nelhage_rules_boost",
-        path = "../third_party/rules_boost-88ce413e61b1b549e44e3dc889251f14d4702abd",
+        path = "../third_party/rules_boost",
     )
 
     #-------------------------------------------------------------------------------------
@@ -499,7 +505,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_grail_bazel_toolchain",
-        path = "../third_party/bazel-toolchain-c3131a6894804ee586d059c57ffe8e88d44172e1",
+        path = "../third_party/bazel-toolchain",
     )
 
     #-------------------------------------------------------------------------------------
@@ -509,6 +515,6 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "com_google_absl",
-        path = "../third_party/abseil-cpp-6b7b11a97fc72849f74610ee4d53403ad417d3cd",
+        path = "../third_party/abseil-cpp",
     )
 

@@ -12,12 +12,12 @@ cc_library(
         "property_set_formatter.h",
     ],
     deps = [
-        "//flatland/core:object",
-        "//flatland/core:property_set",
-        "//flatland/core:reference_counted",
-        "//flatland/imaging:color",
-        "//flatland/math:point",
-        "//flatland/math:transform",
+        "//core:object",
+        "//core:property_set",
+        "//core:reference_counted",
+        "//imaging:color",
+        "//math:point",
+        "//math:transform",
     ],
 )
 
@@ -60,8 +60,8 @@ cc_library(
     name = "sampler",
     hdrs = ["sampler.h"],
     deps = [
-        "//flatland/core:object",
-        "//flatland/math:point",
+        "//core:object",
+        "//math:point",
         "//flatland/rendering:property_set",
         "@pcg",
     ],

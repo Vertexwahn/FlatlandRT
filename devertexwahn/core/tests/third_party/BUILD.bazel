@@ -1,0 +1,26 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+cc_test(
+    name = "fmt_test",
+    srcs = [
+        "fmt_test.cpp",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@fmt",
+    ],
+)
+
+cc_test(
+    name = "glog_test",
+    srcs = [
+        "glog_test.cpp",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@glog",
+    ],
+)

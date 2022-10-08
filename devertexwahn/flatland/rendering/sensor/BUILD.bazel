@@ -9,9 +9,9 @@ cc_library(
     name = "sensor",
     hdrs = ["sensor.h"],
     deps = [
-        "//flatland/core:namespace",
-        "//flatland/core:object",
-        "//flatland/math:transform",
+        "//core:namespace",
+        "//core:object",
+        "//math:transform",
         "//flatland/rendering:property_set",
     ],
 )
@@ -21,7 +21,7 @@ cc_test(
     srcs = ["sensor_test.cpp"],
     deps = [
         ":sensor",
-        "//flatland/core:reference_counted",
+        "//core:reference_counted",
         "@com_google_googletest//:gtest_main",
     ],
 )

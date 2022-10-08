@@ -4,14 +4,14 @@
  */
 
 #pragma once
-#ifndef Flatland_Rendering_BruteForceIntersector_81859627_2b07_46f2_b5f4_026825b75239_h
-#define Flatland_Rendering_BruteForceIntersector_81859627_2b07_46f2_b5f4_026825b75239_h
+#ifndef De_Vertexwahn_Flatland_Rendering_BruteForceIntersector_81859627_2b07_46f2_b5f4_026825b75239_h
+#define De_Vertexwahn_Flatland_Rendering_BruteForceIntersector_81859627_2b07_46f2_b5f4_026825b75239_h
 
-#include "flatland/core/logging.h"
+#include "core/logging.h"
 #include "flatland/rendering/intersector/intersector.h"
 #include "flatland/rendering/property_set.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<unsigned int Dimension, typename ScalarType>
 class BruteForceIntersector : public IntersectorType<Dimension, ScalarType> {
@@ -59,6 +59,6 @@ using BruteForceIntersector2d = BruteForceIntersector<2, double>;
 using BruteForceIntersector3f = BruteForceIntersector<3, float>;
 using BruteForceIntersector3d = BruteForceIntersector<3, double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Rendering_BruteForceIntersector_81859627_2b07_46f2_b5f4_026825b75239_h
+#endif // end define De_Vertexwahn_Flatland_Rendering_BruteForceIntersector_81859627_2b07_46f2_b5f4_026825b75239_h

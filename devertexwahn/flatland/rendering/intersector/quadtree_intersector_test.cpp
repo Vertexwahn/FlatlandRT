@@ -7,7 +7,7 @@
 
 #include "gmock/gmock.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(TriangleMeshesBoundsProvider2f, bounds) {
     // Arrange

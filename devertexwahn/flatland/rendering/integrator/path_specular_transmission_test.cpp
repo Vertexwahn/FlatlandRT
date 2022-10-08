@@ -9,7 +9,7 @@
 
 #include "gmock/gmock.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(PathSpecularTransmission, Path_render) {
     auto scene = load_scene2f("flatland/scenes/bunny/bunny.flatland.xml");

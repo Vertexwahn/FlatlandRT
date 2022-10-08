@@ -4,13 +4,13 @@
  */
 
 #pragma once
-#ifndef Flatland_Rendering_PropertySet_608cdb99_2475_4a1e_86ce_3daa47c29247_h
-#define Flatland_Rendering_PropertySet_608cdb99_2475_4a1e_86ce_3daa47c29247_h
+#ifndef De_Vertexwahn_Flatland_Rendering_PropertySet_608cdb99_2475_4a1e_86ce_3daa47c29247_h
+#define De_Vertexwahn_Flatland_Rendering_PropertySet_608cdb99_2475_4a1e_86ce_3daa47c29247_h
 
-#include "flatland/core/namespace.h"
-#include "flatland/core/object.h"
-#include "flatland/core/property_set.h"
-#include "flatland/core/reference_counted.h"
+#include "core/namespace.h"
+#include "core/object.h"
+#include "core/property_set.h"
+#include "core/reference_counted.h"
 #include "flatland/rendering/property_set_formatter.h"
 
 #include "fmt/core.h"
@@ -21,7 +21,7 @@
 #include <string_view>
 #include <variant>
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 using VariantType = std::variant<
         bool,
@@ -42,6 +42,6 @@ using VariantType = std::variant<
 
 using PropertySet = PropertySetType<VariantType>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Rendering_PropertySet_608cdb99_2475_4a1e_86ce_3daa47c29247_h
+#endif // end define De_Vertexwahn_Flatland_Rendering_PropertySet_608cdb99_2475_4a1e_86ce_3daa47c29247_h

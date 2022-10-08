@@ -7,7 +7,7 @@
 
 #include "flatland/rendering/scene/shape/triangle_mesh.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(TriangleMesh2, GivenPointWithInfiniteValue_WhenConstructionTriangleMesh_ThenExpectException) {
     // Arrange

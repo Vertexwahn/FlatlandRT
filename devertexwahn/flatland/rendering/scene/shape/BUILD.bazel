@@ -9,7 +9,7 @@ cc_library(
     name = "disk",
     srcs = ["disk.h"],
     deps = [
-        "//flatland/math:intersection",
+        "//math:intersection",
         "//flatland/rendering:property_set",
         "//flatland/rendering/scene/shape",
     ],
@@ -22,7 +22,7 @@ cc_test(
     ],
     deps = [
         ":disk",
-        "//flatland/math:refract",
+        "//math:refract",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -30,7 +30,7 @@ cc_test(
 cc_library(
     name = "emitter",
     hdrs = ["emitter.h"],
-    deps = ["//flatland/core:object"],
+    deps = ["//core:object"],
 )
 
 cc_test(
@@ -46,8 +46,8 @@ cc_library(
     name = "polygon",
     hdrs = ["polygon.h"],
     deps = [
-        "//flatland/math:geometry",
-        "//flatland/math:intersection",
+        "//math:geometry",
+        "//math:intersection",
         "//flatland/rendering/scene/shape",
     ],
 )
@@ -67,8 +67,8 @@ cc_library(
     name = "rectangle",
     hdrs = ["rectangle.h"],
     deps = [
-        "//flatland/math:geometry",
-        "//flatland/math:intersection",
+        "//math:geometry",
+        "//math:intersection",
         "//flatland/rendering/scene/shape",
     ],
 )
@@ -102,10 +102,10 @@ cc_library(
     hdrs = ["shape.h"],
     deps = [
         ":emitter",
-        "//flatland/core:object",
-        "//flatland/math:axis_aligned_bounding_box",
-        "//flatland/math:frame",
-        "//flatland/rendering/bsdf:svg_material",
+        "//core:object",
+        "//math:axis_aligned_bounding_box",
+        "//math:frame",
+        "//flatland/rendering/bxdf:svg_material",
     ],
 )
 
@@ -124,9 +124,9 @@ cc_library(
     name = "triangle_mesh",
     hdrs = ["triangle_mesh.h"],
     deps = [
-        "//flatland/math:axis_aligned_bounding_box",
-        "//flatland/math:geometry",
-        "//flatland/math:intersection",
+        "//math:axis_aligned_bounding_box",
+        "//math:geometry",
+        "//math:intersection",
         "//flatland/rendering/scene/shape",
     ],
 )

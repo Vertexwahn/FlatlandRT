@@ -4,14 +4,14 @@
  */
 
 #pragma once
-#ifndef Flatland_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
-#define Flatland_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
+#ifndef De_Vertexwahn_Flatland_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
+#define De_Vertexwahn_Flatland_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
 
-#include "flatland/math/intersection.h"
+#include "math/intersection.h"
 #include "flatland/rendering/property_set.h"
 #include "flatland/rendering/scene/shape/shape.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<typename ScalarType>
 class Disk2 : public Shape2<ScalarType> {
@@ -72,7 +72,7 @@ public:
            << radius()
            << "\"";
 
-        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bsdf());
+        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bxdf());
 
         if (material) {
             ss << " ";
@@ -96,6 +96,6 @@ private:
 using Disk2f = Disk2<float>;
 using Disk2d = Disk2<double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h
+#endif // end define De_Vertexwahn_Flatland_Disk2f_9deef3ad_50b0_4b94_b279_21c462b565e7_h

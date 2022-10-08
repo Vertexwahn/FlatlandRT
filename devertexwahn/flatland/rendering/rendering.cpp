@@ -5,10 +5,10 @@
 
 #include "flatland/rendering/rendering.h"
 
-#include "flatland/core/logging.h"
+#include "core/logging.h"
 #include "flatland/rendering/scene/scene.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 void render(Integrator2f *integrator, ReferenceCounted<SvgCanvas2f> canvas_, const Scene2f *scene) {
     assert(scene);
@@ -30,4 +30,4 @@ void render(Integrator2f *integrator, ReferenceCounted<SvgCanvas2f> canvas_, con
     integrator->trace(scene, sampler.get(), ray, 1);
 }
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE

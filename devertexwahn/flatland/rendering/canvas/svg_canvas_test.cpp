@@ -5,14 +5,14 @@
 
 #include "flatland/rendering/scene/load_scene.h"
 
-#include "flatland/math/refract.h"
+#include "math/refract.h"
 #include "flatland/rendering/canvas/svg_canvas.h"
 #include "flatland/rendering/scene/shape/disk.h"
 #include "flatland/rendering/scene/shape/rectangle.h"
 
 #include "gmock/gmock.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(SvgCanvas, GivenASvgCanvas_WhenConvertingToString_ThenUTF8EncodingHeader) {
     // Arrange
@@ -116,7 +116,7 @@ TEST(SvgCanvas, GivenRectangle_WhenAssigningMaterial_ExpectSpecificFillAndBoderC
     ps_mat.add_property("stroke_width", 3.f);
     ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
     ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
-    rect.set_bsdf(blue_material);
+    rect.set_bxdf(blue_material);
 
     sc.add(&rect);
 
@@ -141,7 +141,7 @@ TEST(SvgCanvas, When_DiskWithRedMaterial_Then_ExpectCicleWithRedFillAndBoderColo
     ps.add_property("transform", translate(Vector2f{200.f, 200.f}));
 
     Disk2f c{ps};
-    c.set_bsdf(blue_material);
+    c.set_bxdf(blue_material);
     sc.add(&c);
 
     // Act
@@ -181,7 +181,7 @@ TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor) {
     ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
     ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
 
-    rect.set_bsdf(blue_material);
+    rect.set_bxdf(blue_material);
     sc.add(&rect);
 
     // todo: Materials seem not to work for spheres - add unit test

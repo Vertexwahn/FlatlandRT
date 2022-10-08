@@ -5,7 +5,7 @@
 
 #include "flatland/rendering/scene/load_scene.h"
 
-#include "flatland/core/object_factory.h"
+#include "core/object_factory.h"
 #include "flatland/rendering/integrator/path_mirror_reflection.h"
 #include "flatland/rendering/integrator/path_specular_transmission.h"
 #include "flatland/rendering/intersector/brute_force_intersector.h"
@@ -16,7 +16,7 @@
 #include "flatland/rendering/scene/shape/triangle_mesh.h"
 #include "flatland/rendering/integrator/ambient_occlusion.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template <>
 Transform44f read_transform<3>(const pugi::xml_node &xmlTransform) {
@@ -309,13 +309,13 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     auto xml_bsdf = scene_elements.child("bsdf");
                     std::string str_bsdf_type = xml_bsdf.attribute("type").as_string();
                     if(str_bsdf_type == "") {
-                        throw FlatlandException("No empty BSDF type allowed.");
+                        throw FlatlandException("No empty BxDF type allowed.");
                     }
                     if (xml_bsdf) {
                         auto bsdf_ps = read_all_properties(xml_bsdf);
-                        auto bsdf = std::dynamic_pointer_cast<BSDF>(
+                        auto bsdf = std::dynamic_pointer_cast<BxDF>(
                                 object_factory.create_instance(str_bsdf_type, bsdf_ps));
-                        shape->set_bsdf(bsdf);
+                        shape->set_bxdf(bsdf);
                     }
 
                     scene->add_shape(shape);
@@ -359,4 +359,4 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
     return scene;
 }
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE

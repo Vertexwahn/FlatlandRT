@@ -7,7 +7,7 @@ cc_binary(
     name = "bunny_ply_generator",
     srcs = ["main.cpp"],
     deps = [
-        "//flatland/math:geometry",
+        "//math:geometry",
         "//flatland/rendering/canvas:svg_canvas",
     ],
 )

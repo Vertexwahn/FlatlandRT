@@ -7,7 +7,7 @@
 
 #include "gmock/gmock.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(fmtFormatter, Color3f) {
     Color3f c{1.f, 0.f, 1.f};

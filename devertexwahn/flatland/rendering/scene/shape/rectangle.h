@@ -4,16 +4,16 @@
  */
 
 #pragma once
-#ifndef Flatland_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
-#define Flatland_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
+#ifndef De_Vertexwahn_Flatland_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
+#define De_Vertexwahn_Flatland_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
 
-#include "flatland/core/namespace.h"
-#include "flatland/math/intersection.h"
+#include "core/namespace.h"
+#include "math/intersection.h"
 #include "flatland/rendering/scene/shape/shape.h"
 
 #include <iomanip>
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template <typename ScalarType>
 class Rectangle2 : public Shape2<ScalarType> {
@@ -91,7 +91,7 @@ public:
         ss << "    ";
         ss << "<path";
 
-        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bsdf());
+        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bxdf());
         if (material) {
             ss << " ";
             ss << Shape2<ScalarType>::convert_material_to_svg_style(material.get());
@@ -129,6 +129,6 @@ private:
 using Rectangle2f = Rectangle2<float>;
 using Rectangle2d = Rectangle2<double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h
+#endif // end define De_Vertexwahn_Flatland_Rectangle2_28cd6d3d_9cf6_4418_a453_ca763c184461_h

@@ -1,6 +1,0 @@
-imports:
-- tests.yml
-- examples_naming.yml
-- examples_rich_structure.yml
-- examples_stamping.yml
-- integration.yml

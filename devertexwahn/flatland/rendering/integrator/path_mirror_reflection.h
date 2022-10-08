@@ -4,13 +4,13 @@
  */
 
 #pragma once
-#ifndef Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h
-#define Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h
+#ifndef De_Vertexwahn_Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h
+#define De_Vertexwahn_Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h
 
 #include "flatland/rendering/integrator/integrator.h"
-#include "flatland/math/refract.h"
+#include "math/refract.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 // from pbrt v3 with modifications
 template<typename ScalarType>
@@ -76,6 +76,6 @@ private:
 using PathMirrorReflection2f = PathMirrorReflection2<float>;
 using PathMirrorReflection2d = PathMirrorReflection2<double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h
+#endif // end define De_Vertexwahn_Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h

@@ -9,7 +9,7 @@
 
 #include "gmock/gmock.h"
 
-namespace flatland {
+namespace de_vertexwahn {
     // defined in load_scene.cpp
     Vector2f convert_csv_to_vector2f(const std::string& csv);
     Vector3f convert_csv_to_vector3f(const std::string& csv);
@@ -18,7 +18,7 @@ namespace flatland {
     Transform44f read_transform<3>(const pugi::xml_node &xmlTransform);
 }
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(load_scene, convert_csv_to_vector2f) {
     std::string input = "2.3, 3.4";
@@ -162,7 +162,7 @@ TEST(load_scene, read_matrix_transform) {
 
 TEST(Scene, loadScene_EmptyBSDF) {
     EXPECT_THAT([]() { load_scene2f("flatland/tests/scenes/no_bsdf_type.flatland.xml"); },
-                ThrowsMessage<FlatlandException>(testing::HasSubstr("No empty BSDF type allowed")));
+                ThrowsMessage<FlatlandException>(testing::HasSubstr("No empty BxDF type allowed")));
 }
 
 TEST(Scene, loadScene_MissingSceneTag) {
@@ -213,7 +213,7 @@ TEST(Scene, GivenAPointThatIsAlignedWithCameraSpace_WhenPointIsTransformedToCame
 TEST(Scene, TestMaterial) {
     // Arrange
     auto scene = load_scene2f("flatland/scenes/disk.flatland.xml");
-    auto material = std::static_pointer_cast<SvgMaterial>(scene->shapes()[0]->bsdf());
+    auto material = std::static_pointer_cast<SvgMaterial>(scene->shapes()[0]->bxdf());
 
     // Assert
     EXPECT_THAT(material->stroke_width(), 3);
@@ -260,13 +260,13 @@ TEST(Scene, ReadPolygonTransform2) {
 
     // Assert
     Matrix44f scaling;
-    scaling <<  3.f, 0.f, 0.f, 0.f,
+    scaling << 3.f, 0.f, 0.f, 0.f,
             0.f, 3.f, 0.f, 0.f,
             0.f, 0.f, 1.f, 0.f,
             0.f, 0.f, 0.f, 1.f;
 
     Matrix44f translation;
-    translation <<  1.f, 0.f, 0.f, 400.f,
+    translation << 1.f, 0.f, 0.f, 400.f,
             0.f, 1.f, 0.f, 300.f,
             0.f, 0.f, 1.f, 0.f,
             0.f, 0.f, 0.f, 1.f;

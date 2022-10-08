@@ -4,12 +4,12 @@
  */
 
 #include "flatland/rendering/canvas/svg_canvas.h"
-#include "flatland/math/geometry.h"
+#include "math/geometry.h"
 
 #include <iomanip>
 #include <iostream>
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 int main(int argc, char **argv) {
     auto points = create_stanford_bunny_point_list < double > ();

@@ -4,15 +4,15 @@
  */
 
 #pragma once
-#ifndef Flatland_Core_Sensor2_84975de0_f654_425b_85f1_5cbf7a1f77eb_h
-#define Flatland_Core_Sensor2_84975de0_f654_425b_85f1_5cbf7a1f77eb_h
+#ifndef De_Vertexwahn_Core_Sensor2_84975de0_f654_425b_85f1_5cbf7a1f77eb_h
+#define De_Vertexwahn_Core_Sensor2_84975de0_f654_425b_85f1_5cbf7a1f77eb_h
 
-#include "flatland/core/namespace.h"
-#include "flatland/core/object.h"
-#include "flatland/math/transform.h"
+#include "core/namespace.h"
+#include "core/object.h"
+#include "math/transform.h"
 #include "flatland/rendering/property_set.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template <unsigned int Dimension, typename ScalarType>
 class SensorTypeBase : public Object {
@@ -116,6 +116,6 @@ protected:
 using Sensor2f = SensorType<2, float>;
 using Sensor2d = SensorType<2, double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
 #endif // end define Okapi_Sensor2_84975de0_f654_425b_85f1_5cbf7a1f77eb_h

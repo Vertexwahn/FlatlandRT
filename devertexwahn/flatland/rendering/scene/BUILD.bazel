@@ -10,8 +10,8 @@ cc_library(
     srcs = ["load_scene.cpp"],
     hdrs = ["load_scene.h"],
     deps = [
-        "//flatland/core:exception",
-        "//flatland/core:object_factory",
+        "//core:exception",
+        "//core:object_factory",
         "//flatland/rendering/integrator:ambient_occlusion",
         "//flatland/rendering/integrator:path_mirror_reflection",
         "//flatland/rendering/integrator:path_specular_transmission",

@@ -51,49 +51,6 @@ cc_test(
 )
 
 cc_test(
-    name = "fmt_test",
-    srcs = [
-        "fmt_test.cpp",
-    ],
-    deps = [
-        "@com_google_googletest//:gtest_main",
-        "@fmt",
-    ],
-)
-
-cc_test(
-    name = "glog_test",
-    srcs = [
-        "glog_test.cpp",
-    ],
-    deps = [
-        "@com_google_googletest//:gtest_main",
-        "@glog",
-    ],
-)
-
-cc_test(
-    name = "libpng_test",
-    srcs = ["libpng_test.cpp"],
-    deps = [
-        "@com_google_googletest//:gtest_main",
-        "@libpng",
-    ],
-)
-
-cc_test(
-    name = "openexr_test",
-    srcs = [
-        "openexr_test.cpp",
-    ],
-    deps = [
-        "//flatland/imaging:image",
-        "@com_google_googletest//:gtest_main",
-        "@openexr//:OpenEXR",
-    ],
-)
-
-cc_test(
     name = "pcg_test",
     srcs = [
         "pcg_test.cpp",
@@ -117,36 +74,11 @@ cc_test(
 )
 
 cc_test(
-    name = "png_test",
-    srcs = [
-        "png_test.cpp",
-    ],
-    data = [
-        "//okapi/tests/images:filtered_images",
-    ],
-    deps = [
-        "@com_google_googletest//:gtest_main",
-        "@libpng",
-    ],
-)
-
-cc_test(
     name = "stl_test",
     srcs = [
         "stl_test.cpp",
     ],
     deps = [
         "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "zlib_test",
-    srcs = [
-        "zlib_test.cpp",
-    ],
-    deps = [
-        "@com_google_googletest//:gtest_main",
-        "@zlib",
     ],
 )

@@ -10,7 +10,7 @@ cc_library(
     hdrs = ["brute_force_intersector.h"],
     deps = [
         ":intersector",
-        "//flatland/core:logging",
+        "//core:logging",
         "//flatland/rendering:property_set",
     ],
 )
@@ -19,9 +19,9 @@ cc_library(
     name = "intersector",
     hdrs = ["intersector.h"],
     deps = [
-        "//flatland/core:object",
-        "//flatland/core:reference_counted",
-        "//flatland/math:ray",
+        "//core:object",
+        "//core:reference_counted",
+        "//math:ray",
     ],
 )
 
@@ -31,9 +31,9 @@ cc_library(
     hdrs = ["quadtree_intersector.h"],
     deps = [
         ":intersector",
-        "//flatland/core:logging",
-        "//flatland/math:axis_aligned_bounding_box",
-        "//flatland/math:util",
+        "//core:logging",
+        "//math:axis_aligned_bounding_box",
+        "//math:util",
         "//flatland/rendering/scene/shape:polygon",
         "//flatland/rendering/scene/shape:triangle_mesh",
     ],

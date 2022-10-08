@@ -1,0 +1,50 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+cc_test(
+    name = "libpng_test",
+    srcs = ["libpng_test.cpp"],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@libpng",
+    ],
+)
+
+cc_test(
+    name = "openexr_test",
+    srcs = [
+        "openexr_test.cpp",
+    ],
+    deps = [
+        "//imaging:image",
+        "@com_google_googletest//:gtest_main",
+        "@openexr//:OpenEXR",
+    ],
+)
+
+cc_test(
+    name = "png_test",
+    srcs = [
+        "png_test.cpp",
+    ],
+    data = [
+        "//okapi/tests/images:filtered_images",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@libpng",
+    ],
+)
+
+cc_test(
+    name = "zlib_test",
+    srcs = [
+        "zlib_test.cpp",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@zlib",
+    ],
+)

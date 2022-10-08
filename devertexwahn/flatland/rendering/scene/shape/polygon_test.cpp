@@ -3,13 +3,13 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/math/geometry.h"
-#include "flatland/math/util.h"
+#include "math/geometry.h"
+#include "math/util.h"
 #include "flatland/rendering/scene/shape/polygon.h"
 
 #include "gmock/gmock.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 class Polygon2fTest : public testing::Test {
 protected:

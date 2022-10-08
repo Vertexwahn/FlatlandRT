@@ -3,12 +3,12 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/math/vector.h"
+#include "math/vector.h"
 
 #include <vector>
 #include <iostream>
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 //struct VertexPosition2f {
 //    Vector2f position;

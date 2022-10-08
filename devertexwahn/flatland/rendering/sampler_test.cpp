@@ -11,7 +11,7 @@
 
 #include <array>
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(IndependentSampler, GivenSampler_WhenGettingAUniformRandomNumber_ExpectCertainAverageValue) {
     PropertySet ps;

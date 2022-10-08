@@ -7,7 +7,7 @@
 
 #include "gmock/gmock.h"
 
-using namespace flatland;
+using namespace de_vertexwahn;
 
 TEST(Rectangle2f, GivenApreferredSizeForARectangle_WhenInitializing_ThenExpectedCorrectParameters) {
     // Arrange

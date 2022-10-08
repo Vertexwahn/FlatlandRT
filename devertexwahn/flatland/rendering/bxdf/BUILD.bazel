@@ -1,0 +1,50 @@
+"""
+    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "bxdf",
+    srcs = ["bxdf.cpp"],
+    hdrs = ["bxdf.h"],
+    deps = [
+        "//core:object",
+        "//core:reference_counted",
+        "//flatland/rendering:property_set",
+        "//imaging:color",
+    ],
+)
+
+cc_test(
+    name = "bxdf_test",
+    srcs = [
+        "bxdf_test.cpp",
+    ],
+    deps = [
+        ":bxdf",
+        "@com_google_googletest//:gtest_main",
+        #"@hypothesis",
+    ],
+)
+
+cc_library(
+    name = "svg_material",
+    srcs = ["svg_material.cpp"],
+    hdrs = ["svg_material.h"],
+    deps = [
+        ":bxdf",
+    ],
+)
+
+cc_test(
+    name = "svg_material_test",
+    srcs = [
+        "svg_material_test.cpp",
+    ],
+    deps = [
+        ":svg_material",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

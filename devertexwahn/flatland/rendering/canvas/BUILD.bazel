@@ -16,7 +16,7 @@ cc_library(
     hdrs = ["svg_canvas.h"],
     deps = [
         ":label",
-        "//flatland/math:axis_aligned_bounding_box",
+        "//math:axis_aligned_bounding_box",
         "//flatland/rendering/scene/shape",
     ],
 )

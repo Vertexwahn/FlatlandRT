@@ -20,7 +20,7 @@ TEST(pugixml, load_file) {
     EXPECT_THAT(result.status, pugi::xml_parse_status::status_ok);
 }
 
-TEST(pugixml, load_flatland_file) {
+TEST(pugixml, load_De_Vertexwahn_Flatland_file) {
     // Arrange
     pugi::xml_document doc;
 

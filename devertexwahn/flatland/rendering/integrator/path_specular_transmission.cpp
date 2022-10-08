@@ -5,11 +5,11 @@
 
 #include "flatland/rendering/integrator/path_specular_transmission.h"
 
-#include "flatland/core/logging.h"
-#include "flatland/math/refract.h"
+#include "core/logging.h"
+#include "math/refract.h"
 #include "flatland/rendering/scene/scene.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 PathSpecularTransmission::PathSpecularTransmission(const PropertySet &ps) : Integrator2f(ps) {
     max_depth = ps.get_property("max_depth", 5);
@@ -65,4 +65,4 @@ Color3f PathSpecularTransmission::trace(
     return Color3f{0.f, 0.f, 0.f};
 }
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE

@@ -4,14 +4,14 @@
  */
 
 #pragma once
-#ifndef Flatland_Rendering_Intersector_fa38b1e4_1fd0_4ac7_b5c0_116ac6d531c8_h
-#define Flatland_Rendering_Intersector_fa38b1e4_1fd0_4ac7_b5c0_116ac6d531c8_h
+#ifndef De_Vertexwahn_Flatland_Rendering_Intersector_fa38b1e4_1fd0_4ac7_b5c0_116ac6d531c8_h
+#define De_Vertexwahn_Flatland_Rendering_Intersector_fa38b1e4_1fd0_4ac7_b5c0_116ac6d531c8_h
 
-#include "flatland/core/object.h"
-#include "flatland/core/reference_counted.h"
-#include "flatland/math/ray.h"
+#include "core/object.h"
+#include "core/reference_counted.h"
+#include "math/ray.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<unsigned int Dimension, typename ScalarType>
 struct MediumEventType;
@@ -33,6 +33,6 @@ public:
     virtual bool intersect(const Ray &ray, MediumEvent &me) const = 0;
 };
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Rendering_Intersector_fa38b1e4_1fd0_4ac7_b5c0_116ac6d531c8_h
+#endif // end define De_Vertexwahn_Flatland_Rendering_Intersector_fa38b1e4_1fd0_4ac7_b5c0_116ac6d531c8_h

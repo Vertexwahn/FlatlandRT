@@ -4,16 +4,16 @@
  */
 
 #pragma once
-#ifndef Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
-#define Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
+#ifndef De_Vertexwahn_Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
+#define De_Vertexwahn_Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
 
-#include "flatland/core/object.h"
-#include "flatland/math/axis_aligned_bounding_box.h"
-#include "flatland/math/frame.h"
-#include "flatland/rendering/bsdf/svg_material.h"
+#include "core/object.h"
+#include "math/axis_aligned_bounding_box.h"
+#include "math/frame.h"
+#include "flatland/rendering/bxdf/svg_material.h"
 #include "flatland/rendering/scene/shape/emitter.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template <unsigned int Dimension, typename ScalarType>
 class ShapeType;
@@ -66,16 +66,16 @@ public:
         return transform_;
     };
 
-    void set_bsdf(ReferenceCounted<BSDF> bsdf) {
-        bsdf_ = bsdf;
+    void set_bxdf(ReferenceCounted<BxDF> bsdf) {
+        bxdf_ = bsdf;
     }
-    ReferenceCounted<BSDF> bsdf() const {
-        return bsdf_;
+    ReferenceCounted<BxDF> bxdf() const {
+        return bxdf_;
     }
 
 protected:
     Transform44Type<ScalarType> transform_; // transform from object space to world space
-    ReferenceCounted<BSDF> bsdf_{nullptr};
+    ReferenceCounted<BxDF> bxdf_{nullptr};
 };
 
 template <unsigned int Dimension, typename ScalarType>
@@ -143,6 +143,6 @@ using Shape2d = Shape2<double>;
 using Shape3f = Shape3<float>;
 using Shape3d = Shape3<double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
+#endif // end define De_Vertexwahn_Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h

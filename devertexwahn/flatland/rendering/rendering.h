@@ -4,15 +4,15 @@
  */
 
 #pragma once
-#ifndef Flatland_Rendering_render_9fbae968_34ec_4c10_942b_a94e982cd3e8_h
-#define Flatland_Rendering_render_9fbae968_34ec_4c10_942b_a94e982cd3e8_h
+#ifndef De_Vertexwahn_Flatland_Rendering_render_9fbae968_34ec_4c10_942b_a94e982cd3e8_h
+#define De_Vertexwahn_Flatland_Rendering_render_9fbae968_34ec_4c10_942b_a94e982cd3e8_h
 
 #include "flatland/rendering/integrator/integrator.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 void render(Integrator2f *integrator, ReferenceCounted<SvgCanvas2f> canvas_, const Scene2f *scene);
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Rendering_render_9fbae968_34ec_4c10_942b_a94e982cd3e8_h
+#endif // end define De_Vertexwahn_Flatland_Rendering_render_9fbae968_34ec_4c10_942b_a94e982cd3e8_h

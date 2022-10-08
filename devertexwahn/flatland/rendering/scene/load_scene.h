@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "flatland/core/object_factory.h"
-#include "flatland/core/reference_counted.h"
-#include "flatland/core/exception.h"
+#include "core/object_factory.h"
+#include "core/reference_counted.h"
+#include "core/exception.h"
 #include "flatland/rendering/scene/scene.h"
 
 #include "pugixml.hpp"
@@ -21,7 +21,7 @@
 #include <string_view>
 #include <vector>
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 ReferenceCounted<Scene2f> load_scene2f(std::string_view filename);
 
@@ -74,4 +74,4 @@ Transform44f read_transform<3>(const pugi::xml_node &xmlTransform);
 PropertySet read_all_properties(const pugi::xml_node &node);
 void read_all_properties(const pugi::xml_node &node, PropertySet& out_ps);
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE

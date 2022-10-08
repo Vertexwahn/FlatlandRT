@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
-#define Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
+#ifndef De_Vertexwahn_Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
+#define De_Vertexwahn_Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
 
 #include "flatland/rendering/canvas/label.h"
 #include "flatland/rendering/integrator/integrator.h"
@@ -16,7 +16,7 @@
 
 #include <cassert>
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<unsigned int Dimension, typename ScalarType>
 class SceneType {
@@ -123,6 +123,6 @@ using Scene2d = Scene2<double>;
 using Scene3f = Scene3<float>;
 using Scene3d = Scene3<double>;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
+#endif // end define De_Vertexwahn_Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h

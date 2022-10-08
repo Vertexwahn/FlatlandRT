@@ -4,16 +4,16 @@
  */
 
 #pragma once
-#ifndef Flatland_Rendering_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
-#define Flatland_Rendering_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
+#ifndef De_Vertexwahn_Flatland_Rendering_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
+#define De_Vertexwahn_Flatland_Rendering_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
 
-#include "flatland/math/axis_aligned_bounding_box.h"
-#include "flatland/math/util.h"
+#include "math/axis_aligned_bounding_box.h"
+#include "math/util.h"
 #include "flatland/rendering/intersector/intersector.h"
 #include "flatland/rendering/scene/shape/polygon.h"
 #include "flatland/rendering/scene/shape/triangle_mesh.h"
 
-FLATLAND_BEGIN_NAMESPACE
+DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 using ShapeId = unsigned int;
 using SubShapeId = unsigned int;
@@ -282,6 +282,6 @@ private:
 
 using QuadtreeIntersector2f = QuadtreeIntersector;
 
-FLATLAND_END_NAMESPACE
+DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Flatland_Rendering_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
+#endif // end define De_Vertexwahn_Flatland_Rendering_QuadtreeIntersector_f0b7e663_c015_4d14_bb05_707399d47537_h
