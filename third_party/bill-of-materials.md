@@ -1,0 +1,27 @@
+# Bill of materials
+
+In this folder (`third_party`) you can find different libraries.
+Usually, those libraries are just copied into the project and used as is.
+This file documents the commit hash of each library if it is not given in the filename.
+
+```
+abseil-cpp-76466b85fb9c86be56bfe773667ee6ad4fc3b87f
+bazel-latex-38090017f733ad0b556b7bd12e1f29191274636a
+bazel-skylib-bc112d41fd71a5abf51ff827f19a6af9ed81af43
+bazel-toolchain-c3131a6894804ee586d059c57ffe8e88d44172e1
+benchmark-12e0d70a436f01951f857f6b2fc63c8c92a1884e
+Catch2-728de353be6a6d3658932bfc8e1ea5c7742a61c6
+cpuinfo-de2fa78ebb431db98489e78603e4f77c1f6c5c57
+fmt-d2c47c0df23d95e3d7c5def06e5f67f32eb7ffc7
+gflags-a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd
+glog-05fbc65278db1aa545ca5cb743c31bc717a48d0f
+googletest-9fbb6575035e3ac97ad9547d042c026a1296c705
+json-a3e6e26dc83a726b292f5be0492fcc408663ce55
+oneTBB-6bfd29bde7e9c47bdfc3ae8a1670ea961c95c78c
+openexr-df4f7c9393fb12350459bc76db5eef24e509c23b
+pcg-cpp-428802d1a5634f96bcd0705fab379ff0113bcf13
+rules_boost-630cf5dbad418ee8cfa637b1e33125b11807721d
+rules_k8s-fee80eb69e1921c076167ebebcf5eea3d2e9c707
+tinyobjloader-6db06ee8d959860e92c9252f3dad33bab8e8c454
+yaml-cpp-1b50109f7bea60bd382d8ea7befce3d2bd67da5f
+```
