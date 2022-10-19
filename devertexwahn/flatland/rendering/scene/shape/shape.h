@@ -66,16 +66,25 @@ public:
         return transform_;
     };
 
-    void set_bxdf(ReferenceCounted<BxDF> bsdf) {
-        bxdf_ = bsdf;
+    void set_bxdf(ReferenceCounted<BxDF<Dimension,ScalarType>> bxdf) {
+        bxdf_ = bxdf;
     }
-    ReferenceCounted<BxDF> bxdf() const {
+    ReferenceCounted<BxDF<Dimension,ScalarType>> bxdf() const {
         return bxdf_;
     }
 
+    void set_emitter(ReferenceCounted<Emitter<Dimension,ScalarType>> emitter) {
+        emitter_ = emitter;
+    }
+    ReferenceCounted<Emitter<Dimension,ScalarType>> emitter() const {
+        return emitter_;
+    }
+    virtual bool is_emitter() const { return emitter_ != nullptr; }
+
 protected:
     Transform44Type<ScalarType> transform_; // transform from object space to world space
-    ReferenceCounted<BxDF> bxdf_{nullptr};
+    ReferenceCounted<BxDF<Dimension,ScalarType>> bxdf_{nullptr};
+    ReferenceCounted<Emitter<Dimension,ScalarType>> emitter_{nullptr};
 };
 
 template <unsigned int Dimension, typename ScalarType>
@@ -89,15 +98,6 @@ public:
     }
 
 	virtual ~ShapeType() {};
-
-    virtual bool is_emitter() const { return emitter_ != nullptr; }
-
-    ReferenceCounted<Emitter> emitter() const {
-        return emitter_;
-    }
-
-protected:
-    ReferenceCounted<Emitter> emitter_ = nullptr;
 };
 
 template <typename ScalarType>

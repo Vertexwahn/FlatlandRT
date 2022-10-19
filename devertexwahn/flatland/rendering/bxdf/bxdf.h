@@ -19,22 +19,48 @@ enum class InterfaceInteraction {
     MirrorReflection
 };
 
+template <unsigned int Dimension, typename ScalarType>
 class BxDF : public Object {
 public:
-    BxDF(const PropertySet &ps);
+    using Scalar = ScalarType;
+    using Color = ColorType<3, ScalarType>;
+    using Vector = VectorType<Dimension, ScalarType>;
+  
+    BxDF(const PropertySet &ps) {
+        refraction_index_ = ps.get_property<float>("refraction_index", 1.f);
 
-    float refraction_index() const;
+        std::string interface_interaction = ps.get_property<std::string>("interface_interaction",
+                                                                         "specular_transmission");
 
-    InterfaceInteraction interface_interaction_type() const;
+        if (interface_interaction == "specular_transmission") {
+            interface_interaction_ = InterfaceInteraction::SpecularTransmission;
+        } else if (interface_interaction == "mirror_reflection") {
+            interface_interaction_ = InterfaceInteraction::MirrorReflection;
+        } else {
+            interface_interaction_ = InterfaceInteraction::SpecularTransmission;
+        }
+    }
 
-    [[nodiscard]] virtual Color3f evaluate(const Vector3f &wo, const Vector3f &wi) const = 0;
-    virtual Vector3f sample(const Vector3f &wo, Vector3f& out_wi) const = 0;
+    Scalar refraction_index() const {
+        return refraction_index_;
+    }
+
+    InterfaceInteraction interface_interaction_type() const {
+        return interface_interaction_;
+    }
+
+    [[nodiscard]] virtual Color evaluate(const Vector &wo, const Vector &wi) const = 0;
+    virtual Vector sample(const Vector &wo, Vector& wi) const = 0;
 
 private:
-    //Color3f color_{1.f, 1.f, 1.f};
-    float refraction_index_ = 0.f;
+    Scalar refraction_index_ = Scalar{0};
     InterfaceInteraction interface_interaction_ = InterfaceInteraction::SpecularTransmission;
 };
+
+using BxDF2f = BxDF<2, float>;
+using BxDF2d = BxDF<2, double>;
+using BxDF3f = BxDF<3, float>;
+using BxDF3d = BxDF<3, double>;
 
 DE_VERTEXWAHN_END_NAMESPACE
 

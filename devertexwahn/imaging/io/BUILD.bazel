@@ -6,10 +6,36 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "io_jpeg",
+    srcs = ["io_jpeg.cpp"],
+    hdrs = ["io_jpeg.h"],
+    deps = [
+        "//core:reference_counted",
+        "//imaging:image",
+        "@libjpeg_turbo//:jpeg",
+    ],
+)
+
+cc_test(
+    name = "io_jpeg_test",
+    srcs = [
+        "io_jpeg_test.cpp",
+    ],
+    data = [
+        "//imaging/tests/data:reference_images",
+    ],
+    deps = [
+        ":io_jpeg",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "io",
     srcs = ["io.cpp"],
     hdrs = ["io.h"],
     deps = [
+        ":io_jpeg",
         ":io_openexr",
         ":io_png",
         ":io_ppm",

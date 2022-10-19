@@ -5,7 +5,7 @@
 
 #include "imaging/iqa/iqa.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 using namespace de_vertexwahn;
 

@@ -8,10 +8,14 @@
 #define De_Vertexwahn_Core_ShapeFactory_b184faf0_dc66_451e_a52f_615a4caa7c35_h
 
 #include "core/object.h"
-#include "core/property_set.h"
 #include "core/reference_counted.h"
+#include "core/namespace.h"
 
+#include <exception>
 #include <functional>
+#include <map>
+#include <string>
+#include <string_view>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
@@ -57,11 +61,11 @@ public:
             throw ObjectFactoryClassAlreadyRegisteredException(class_name);
         }
 
-        std::function<ReferenceCounted<Object>(PropertySetType)> createObject = [](const PropertySetType &ps) {
+        std::function<ReferenceCounted<Object>(PropertySetType)> create_object = [](const PropertySetType &ps) {
             return make_reference_counted<ObjectType>(ps);
         };
 
-        creation_function_[class_name] = createObject;
+        creation_function_[class_name] = create_object;
     }
 
 private:

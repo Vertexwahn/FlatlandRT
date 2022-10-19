@@ -9,7 +9,9 @@
 
 #include "core/namespace.h"
 
+#include <exception>
 #include <string>
+#include <string_view>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

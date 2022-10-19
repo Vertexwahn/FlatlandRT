@@ -9,7 +9,16 @@
 
 using namespace de_vertexwahn;
 
+class DummyEmitter : public Emitter<2, float> {
+public:
+    DummyEmitter() : Emitter<2, float>() {}
+
+    virtual ColorType<3, float> evaluate() const {
+        return ColorType<3, float>(1.f);
+    }
+};
+
 TEST(Emitter, to_string) {
-    Emitter emitter;
+    DummyEmitter emitter;
     EXPECT_THAT(emitter.to_string(), "Emitter");
 };

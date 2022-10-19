@@ -10,7 +10,13 @@
 
 #include "external/fmt/_virtual_includes/fmt/fmt/core.h"
 
+#include <cstddef>
+#include <exception>
+#include <initializer_list>
 #include <map>
+#include <string>
+#include <string_view>
+#include <utility>
 #include <variant>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE

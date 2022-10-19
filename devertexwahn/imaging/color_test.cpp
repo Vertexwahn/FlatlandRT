@@ -5,7 +5,7 @@
 
 #include "imaging/color.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 using namespace de_vertexwahn;
 
@@ -105,4 +105,26 @@ TEST(Color3f, hasnans) {
     Color3f b{0.f, NAN, 0.f};
     EXPECT_THAT(a.has_nans(), false);
     EXPECT_THAT(b.has_nans(), true);
+}
+
+TEST(Color3f, multiply) {
+    Color3f a{.5f};
+    Color3f b{.5f};
+
+    Color3f c = a.cwiseProduct(b);
+
+    EXPECT_THAT(c.red(), 0.25f);
+    EXPECT_THAT(c.green(), 0.25f);
+    EXPECT_THAT(c.blue(), 0.25f);
+
+    Color3f d = a * b;
+
+    EXPECT_THAT(d.red(), 0.25f);
+    EXPECT_THAT(d.green(), 0.25f);
+    EXPECT_THAT(d.blue(), 0.25f);
+}
+
+TEST(Color3f, to_string) {
+    Color3f c{.5f, .6f, .7f};
+    EXPECT_THAT(c.to_string(), "0.5, 0.6, 0.7");
 }

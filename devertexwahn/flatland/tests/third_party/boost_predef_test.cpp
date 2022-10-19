@@ -5,7 +5,7 @@
 
 #include "boost/predef.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 #include <string>
 

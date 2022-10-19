@@ -1,0 +1,7 @@
+STD: version
+%define __NASM_MAJOR__ 2
+%define __NASM_MINOR__ 14
+%define __NASM_SUBMINOR__ 2
+%define __NASM_PATCHLEVEL__ 0
+%define __NASM_VERSION_ID__ 0020E0200h
+%define __NASM_VER__ "2.14.02"

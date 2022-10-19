@@ -10,6 +10,7 @@
 #include "core/namespace.h"
 #include "math/util.h"
 
+#include "fmt/core.h"
 #include "Eigen/Core"
 #include "Eigen/Dense"
 
@@ -83,7 +84,22 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
         }
         return false;
     }
+
+    std::string to_string() const {
+        return fmt::format("{}, {}, {}", red(), green(), blue());
+    }
 };
+
+template<unsigned int Dimension, typename ScalarType>
+inline ColorType<Dimension, ScalarType> operator*(const ColorType<Dimension, ScalarType>& lhs, const ColorType<Dimension, ScalarType>& rhs)
+{
+    ColorType<Dimension, ScalarType> result;
+
+    for (size_t i = 0; i < Dimension; ++i)
+        result[i] = lhs[i] * rhs[i];
+
+    return result;
+}
 
 template<typename ScalarType>
 struct ColorConstants3 {

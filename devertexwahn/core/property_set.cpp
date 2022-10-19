@@ -5,6 +5,8 @@
 
 #include "core/property_set.h"
 
+#include "fmt/core.h"
+
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 PropertyDoesNotExistException::PropertyDoesNotExistException(std::string_view property_name) {

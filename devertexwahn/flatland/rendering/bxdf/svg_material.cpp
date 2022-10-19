@@ -19,4 +19,12 @@ float SvgMaterial::stroke_width() const {
     return stroke_width_;
 }
 
+Color3f SvgMaterial::evaluate(const Vector2f &wo, const Vector2f &wi) const {
+    return Color3f{0.f, 0.f, 0.f};
+}
+
+Vector2f SvgMaterial::sample(const Vector2f &wo, Vector2f &out_wi) const {
+    return Vector2f{0.f, 0.f};
+}
+
 DE_VERTEXWAHN_END_NAMESPACE

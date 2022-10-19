@@ -306,14 +306,14 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     auto shape = std::dynamic_pointer_cast<ShapeType<2, float>>(
                             object_factory.create_instance(type, ps));
 
-                    auto xml_bsdf = scene_elements.child("bsdf");
-                    std::string str_bsdf_type = xml_bsdf.attribute("type").as_string();
+                    auto xml_bxdf = scene_elements.child("bsdf");
+                    std::string str_bsdf_type = xml_bxdf.attribute("type").as_string();
                     if(str_bsdf_type == "") {
                         throw FlatlandException("No empty BxDF type allowed.");
                     }
-                    if (xml_bsdf) {
-                        auto bsdf_ps = read_all_properties(xml_bsdf);
-                        auto bsdf = std::dynamic_pointer_cast<BxDF>(
+                    if (xml_bxdf) {
+                        auto bsdf_ps = read_all_properties(xml_bxdf);
+                        auto bsdf = std::dynamic_pointer_cast<BxDF<2, float>>(
                                 object_factory.create_instance(str_bsdf_type, bsdf_ps));
                         shape->set_bxdf(bsdf);
                     }

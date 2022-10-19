@@ -5,20 +5,20 @@
 
 #include "flatland/rendering/bxdf/bxdf.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 using namespace de_vertexwahn;
 
-class DummyBSDF : public BxDF {
+class DummyBSDF : public BxDF2f {
 public:
-    DummyBSDF(const PropertySet &ps) : BxDF(ps) {}
+    DummyBSDF(const PropertySet &ps) : BxDF2f(ps) {}
 
-    [[nodiscard]] Color3f evaluate(const Vector3f &wo, const Vector3f &wi) const override {
+    [[nodiscard]] Color3f evaluate(const Vector2f &wo, const Vector2f &wi) const override {
         return Color3f(0.f);
     }
 
-    Vector3f sample(const Vector3f &wo, Vector3f& out_wi) const override {
-        return Vector3f{0.f, 0.f, 0.f};
+    Vector2f sample(const Vector2f &wo, Vector2f& out_wi) const override {
+        return Vector2f{0.f, 0.f};
     }
 };
 
@@ -26,9 +26,9 @@ TEST(BxDF, WhenADefaultInitalized_ThenDefaultMaterialValues) {
     PropertySet ps;
     DummyBSDF bsdf{ps};
 
-    EXPECT_THAT(bsdf.evaluate(Vector3f{1.f,0.f,0.f}, Vector3f{0.f,1.f,0.f} ), Color3f(0.f));
-    Vector3f wi{1.f, 0.f, 0.f};
-    EXPECT_THAT(bsdf.sample(Vector3f{1.f,0.f,0.f}, wi), Color3f(0.f));
+    EXPECT_THAT(bsdf.evaluate(Vector2f{1.f,0.f}, Vector2f{0.f,1.f} ), Color3f(0.f));
+    Vector2f wi{1.f, 0.f};
+    EXPECT_THAT(bsdf.sample(Vector2f{1.f,0.f}, wi), Vector2f(0.f,0.f));
     EXPECT_THAT(bsdf.refraction_index(), 1.f);
     EXPECT_THAT(bsdf.interface_interaction_type(), InterfaceInteraction::SpecularTransmission);
 }

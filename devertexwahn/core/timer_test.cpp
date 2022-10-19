@@ -5,7 +5,7 @@
 
 #include "core/timer.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 #include <iostream>
 #include <chrono>

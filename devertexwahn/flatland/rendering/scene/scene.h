@@ -91,6 +91,10 @@ public:
         return sampler_;
     }
 
+    ReferenceCounted<Sampler> sampler() {
+        return sampler_;
+    }
+
     void set_intersector(ReferenceCounted<Intersector> intersector) {
         intersector_ = intersector;
     }

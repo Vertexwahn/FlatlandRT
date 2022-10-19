@@ -26,9 +26,7 @@ public:
     using MediumEvent = MediumEventType<Dimension, ScalarType>;
     using Shape = ShapeType<Dimension, ScalarType>;
 
-    virtual void build_acceleration_structure(std::vector<ReferenceCounted < Shape>>
-
-    shapes) = 0;
+    virtual void build_acceleration_structure(std::vector<ReferenceCounted < Shape>> shapes) = 0;
 
     virtual bool intersect(const Ray &ray, MediumEvent &me) const = 0;
 };

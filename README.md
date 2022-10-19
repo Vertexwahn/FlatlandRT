@@ -129,7 +129,7 @@ Make sure that lcov is installed.
 
     sudo apt install lcov
 
-Go to the directory that contains the `WORKSPACE` file and execute:
+Go to the directory that contains the `WORKSPACE.bazel` file and execute:
 
 ```shell
 ./coverage.sh buchgr_remote_cache
@@ -245,4 +245,4 @@ The data for the Donut, Armadillo and Stanford Bunny for the 2D triangle data wa
 
 ### Credits
 
-A big thank goes to all the providers, developers and maintainers of the aforementioned artifacts.
+A big thank goes to all the providers, developers and maintainers of the aforementioned Open Source projects and artifacts.

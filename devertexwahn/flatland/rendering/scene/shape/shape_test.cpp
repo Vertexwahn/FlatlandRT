@@ -5,7 +5,7 @@
 
 #include "flatland/rendering/scene/shape/shape.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 using namespace de_vertexwahn;
 

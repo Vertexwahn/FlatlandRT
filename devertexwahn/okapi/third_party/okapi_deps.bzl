@@ -190,7 +190,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "hypothesis",
         build_file = "//okapi/third_party:hypothesis.BUILD",
-        path = "../third_party/hypothesis-e165503f7d796d844d5d6ab69b5c7f839cf0ede8",
+        path = "../third_party/hypothesis",
     )
 
     # Use github.com
@@ -233,7 +233,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "zlib",
         build_file = "//okapi/third_party:zlib.BUILD",
-        path = "../third_party/zlib-1.2.12",
+        path = "../third_party/zlib-1.2.13",
     )
 
     # Use https://zlib.net
@@ -367,6 +367,37 @@ def okapi_deps():
     #        "https://sourceforge.net/projects/libpng/files/latest/download
     #    ],
     #)
+
+    #-------------------------------------------------------------------------------------
+    # libjpeg-turbo
+    #-------------------------------------------------------------------------------------
+
+    #maybe(
+    #    http_archive,
+    #    name = "nasm",
+    #    urls = [
+    #        "https://storage.googleapis.com/mirror.tensorflow.org/www.nasm.us/pub/nasm/releasebuilds/2.14.02/nasm-2.14.02.tar.bz2",
+    #        "http://pkgs.fedoraproject.org/repo/pkgs/nasm/nasm-2.14.02.tar.bz2/sha512/d7a6b4cee8dfd603d8d4c976e5287b5cc542fa0b466ff989b743276a6e28114e64289bf02a7819eca63142a5278aa6eed57773007e5f589e15768e6456a8919d/nasm-2.14.02.tar.bz2",
+    #       "http://www.nasm.us/pub/nasm/releasebuilds/2.14.02/nasm-2.14.02.tar.bz2",
+    #    ],
+    #   sha256 = "34fd26c70a277a9fdd54cb5ecf389badedaf48047b269d1008fbc819b24e80bc",
+    #    strip_prefix = "nasm-2.14.02",
+    #    build_file = "//okapi/third_party:nasm.BUILD",
+    #)
+
+    maybe(
+        native.new_local_repository,
+        name = "nasm",
+        build_file = "//okapi/third_party:nasm.BUILD",
+        path = "../third_party/nasm-2.14.02",
+    )
+
+    maybe(
+        native.new_local_repository,
+        name = "libjpeg_turbo",
+        build_file = "//okapi/third_party:libjpeg_turbo.BUILD",
+        path = "../third_party/libjpeg-turbo-2.1.4",
+    )
 
     #-------------------------------------------------------------------------------------
     # oneTBB

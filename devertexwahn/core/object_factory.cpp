@@ -5,6 +5,8 @@
 
 #include "core/object_factory.h"
 
+#include "fmt/core.h"
+
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 const char *ObjectFactoryException::what() const throw() {

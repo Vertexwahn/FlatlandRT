@@ -11,9 +11,9 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-class SvgMaterial final : public BxDF {
+class SvgMaterial final : public BxDF2f {
 public:
-    SvgMaterial(const PropertySet &ps) : BxDF(ps) {
+    SvgMaterial(const PropertySet &ps) : BxDF2f(ps) {
         stroke_color_ = ps.get_property<Color3f>("stroke_color", Color3f{0.f, 0.f, 0.f});
         stroke_width_ = ps.get_property<float>("stroke_width", 1.f);
         fill_color_ = ps.get_property<Color3f>("fill_color", Color3f{1.f, 1.f, 1.f});
@@ -25,13 +25,9 @@ public:
 
     Color3f fill_color() const;
 
-    Color3f evaluate(const Vector3f &wo, const Vector3f &wi) const override {
-        return Color3f{0.f, 0.f, 0.f};
-    }
+    Color3f evaluate(const Vector2f &wo, const Vector2f &wi) const override;
 
-    Vector3f sample(const Vector3f &wo, Vector3f& out_wi) const override {
-        return Vector3f{0.f, 0.f, 0.f};
-    }
+    Vector2f sample(const Vector2f &wo, Vector2f& wi) const override;
 
 private:
     Color3f stroke_color_ = Color3f{0.f, 0.f, 0.f};

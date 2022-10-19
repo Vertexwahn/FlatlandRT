@@ -6,7 +6,7 @@
 #include "fmt/core.h"
 #include "fmt/format.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 TEST(fmt, TextFormatting) {
     std::string message = fmt::format("The answer is {}.", 42);

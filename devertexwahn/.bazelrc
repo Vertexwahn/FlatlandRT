@@ -7,12 +7,13 @@
 # Ignored for now - details here: https://stackoverflow.com/questions/73873449/can-enable-platform-specific-config-be-ignored-or-overriden
 # build --enable_platform_specific_config
 
-build --symlink_prefix=/ # Suppress symlink creation (to avoid untracked files issues with git)
+#build --symlink_prefix=/ # Suppress symlink creation (to avoid untracked files issues with git)
+
 
 # GCC 9.3
 build:gcc9 --cxxopt=-std=c++2a
 build:gcc9 --cxxopt=-Wall
-build:gcc9 --cxxopt=-Werror
+#build:gcc9 --cxxopt=-Werror # blocked by googletest
 ##build:gcc9 --cxxopt=-Wextra
 
 build:remote_gcc9 --cxxopt=-Wall
@@ -24,7 +25,7 @@ build:remote_gcc9 --cxxopt=-Werror
 build:gcc11 --cxxopt=-std=c++20
 build:gcc11 --cxxopt=-Wall
 #build:gcc11 --cxxopt=-Werror
-#build:gcc11 --cxxopt=-Wno-error=volatile # blocked by emsdk
+#build:gcc11 --cxxopt=-Wno-volatile # blocked by emsdk
 ##build:gcc11 --cxxopt=-Wextra
 
 build:linux --config=gcc11
@@ -40,7 +41,7 @@ build:macos --cxxopt=-Wall
 # https://github.com/RobotLocomotion/drake/search?q=apple_debug
 
 # Clang 14.0.0
-build:clang14 --cxxopt=-std=c++17
+build:clang14 --cxxopt=-std=c++20
 #build:clang14 --cxxopt=-mavx
 #build:clang14 --cxxopt=-mavx2
 #build:clang14 --cxxopt=-msse4.2
@@ -90,5 +91,9 @@ build:clang-tidy --cxxopt=-std=c++17
 
 # Optimized build
 build:optimized build --copt=-O3
+
+# IWYU
+build:iwyu --aspects @com_github_storypku_bazel_iwyu//bazel/iwyu:iwyu.bzl%iwyu_aspect
+build:iwyu --output_groups=report
 
 try-import %workspace%/.bazelrc.remote_cache

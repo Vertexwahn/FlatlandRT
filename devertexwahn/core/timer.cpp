@@ -5,6 +5,8 @@
 
 #include "core/timer.h"
 
+#include <stdint.h>
+
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 Timer::Timer() {
