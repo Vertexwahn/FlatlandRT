@@ -35,7 +35,7 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14_macos  -- //...   -//okapi/cli:benchmark_test
+      bazel test --config=clang14_macos  -- //...   
     displayName: "Bazel test clang14-fastbuild"
 
   # dbg
@@ -46,7 +46,7 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14_macos  --compilation_mode=dbg -- //...    -//okapi/cli:benchmark_test
+      bazel test --config=clang14_macos  --compilation_mode=dbg -- //...    
     displayName: 'Bazel test clang14-dbg'
 
   # opt
@@ -57,5 +57,5 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14_macos  --compilation_mode=opt -- //...   -//okapi/cli:benchmark_test
+      bazel test --config=clang14_macos  --compilation_mode=opt -- //...   
     displayName: 'Bazel test clang14-opt'
