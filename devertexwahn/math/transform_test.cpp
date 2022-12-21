@@ -229,6 +229,16 @@ TEST(Transform44f, GivenOriginAndTargetAlignedWithWorldSpace_ThenExpectIdentityM
     EXPECT_THAT(m, expected_matrix);
 }
 
+TEST(Transform44f, look_at_invalid_up_vector) {
+    // Arrange
+    Point3f origin{0.f, 0.f, 0.f};
+    Point3f target{0.f, 0.f, 100.f};
+    Vector3f up{0.f, 0.f, 1.f};
+
+    // Act & Assert
+    EXPECT_THROW(look_at(origin, target, up), std::runtime_error);
+}
+
 TEST(Transform44f, GivenOriginAndTarget_WhenOriginTransformInCameraSpace_ThenOriginIsAtZero) {
     // Arrange
     Point2f origin{100.f, 100.f};
@@ -302,6 +312,30 @@ TEST(Transform44f, rotate_z) {
                       1.f,  0.f, 0.f, 0.f,
                       0.f,  0.f, 1.f, 0.f,
                       0.f,  0.f, 0.f, 1.f;
+
+    EXPECT_TRUE(rotation.matrix().isApprox(expected_matrix));
+}
+
+TEST(Transform44f, rotate_x_zero_degrees) {
+    auto rotation = rotate_x(degree_to_radian(0.f));
+
+    Matrix44f expected_matrix;
+    expected_matrix << 1.f,  0.f, 0.f, 0.f,
+                       0.f,  1.f, 0.f, 0.f,
+                       0.f,  0.f, 1.f, 0.f,
+                       0.f,  0.f, 0.f, 1.f;
+
+    EXPECT_TRUE(rotation.matrix().isApprox(expected_matrix));
+}
+
+TEST(Transform44f, rotate_x_90_degrees) {
+    auto rotation = rotate_x(degree_to_radian(90.f));
+
+    Matrix44f expected_matrix;
+    expected_matrix << 1.f,  0.f, 0.f, 0.f,
+            0.f,  0.f, -1.f, 0.f,
+            0.f,  1.f, 0.f, 0.f,
+            0.f,  0.f, 0.f, 1.f;
 
     EXPECT_TRUE(rotation.matrix().isApprox(expected_matrix));
 }
@@ -475,4 +509,13 @@ TEST(Transform44f, GivenAVector_WhenRotation90Degrees_ExpectRotatedVector) {
     EXPECT_THAT(v.x(), testing::FloatEq(1.f));
     EXPECT_THAT(v.y(), testing::FloatEq(0.f));
     EXPECT_THAT(v.z(), testing::FloatNear(0.f, 0.000001f));
+}
+
+TEST(Transform44f, ostream) {
+    Transform44f t = identity<float>();
+
+    std::stringstream ss;
+    ss << t;
+
+    EXPECT_THAT(ss.str(), "Transform44f[\n  matrix = 1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1]\n");
 }

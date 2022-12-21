@@ -449,3 +449,12 @@ INSTANTIATE_TEST_SUITE_P(
                                                          {3,  3,  3}})
         )
 );
+
+TEST(AxisAlignedBoundingBox2i, contains) {
+    Point2i min_v{0, 0};
+    Point2i max_v{100, 100};
+    AxisAlignedBoundingBox2i bounds{min_v, max_v};
+
+    EXPECT_THAT(bounds.contains(Point2i{-100, 0}), false);
+    EXPECT_THAT(bounds.contains(Point2i{200, 0}), false);
+}

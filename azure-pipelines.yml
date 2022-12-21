@@ -10,17 +10,17 @@ jobs:
     pool:
       vmImage: 'macOS-11'
     steps:
-      - template: devertexwahn/ci/macOS-11-clang13.yaml
+      - template: devertexwahn/ci/macOS-11-apple-clang13.yaml
 
-  - job: MacOSClang13Monterey
-    displayName: "Apple Clang13 on macOS 12 (Monterey)"
+  - job: MacOSAppleClang14Monterey
+    displayName: "Apple Clang14 on macOS 12 (Monterey)"
     pool:
       vmImage: 'macOS-12'
     steps:
-      - template: devertexwahn/ci/macOS-12-clang13.yaml
+      - template: devertexwahn/ci/macOS-12-apple-clang14.yaml
 
   - job: MacOSClang14Monterey
-    displayName: "Apple Clang14 on macOS 12 (Monterey)"
+    displayName: "Clang14 on macOS 12 (Monterey)"
     pool:
       vmImage: 'macOS-12'
     steps:

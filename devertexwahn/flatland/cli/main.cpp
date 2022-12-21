@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
         LOG(INFO) << "Done.";
         LOG(INFO) << "Shutting down now.";
     }
-    catch (FlatlandException &ex) {
+    catch (Exception &ex) {
         LOG(ERROR) << ex.what();
         return ExitStatus::UnknownError;
     }

@@ -26,15 +26,15 @@ To use this toolchain, include this section in your WORKSPACE:
 ```starlark
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-BAZEL_TOOLCHAIN_TAG = "0.7.2"
-BAZEL_TOOLCHAIN_SHA = "f7aa8e59c9d3cafde6edb372d9bd25fb4ee7293ab20b916d867cd0baaa642529"
+BAZEL_TOOLCHAIN_TAG = "0.8"
+BAZEL_TOOLCHAIN_SHA = "d3d218287e76c0ad28bc579db711d1fa019fb0463634dfd944a1c2679ef9565b"
 
 http_archive(
     name = "com_grail_bazel_toolchain",
     sha256 = BAZEL_TOOLCHAIN_SHA,
     strip_prefix = "bazel-toolchain-{tag}".format(tag = BAZEL_TOOLCHAIN_TAG),
     canonical_id = BAZEL_TOOLCHAIN_TAG,
-    url = "https://github.com/grailbio/bazel-toolchain/archive/{tag}.tar.gz".format(tag = BAZEL_TOOLCHAIN_TAG),
+    url = "https://github.com/grailbio/bazel-toolchain/archive/refs/tags/{tag}.tar.gz".format(tag = BAZEL_TOOLCHAIN_TAG),
 )
 
 load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
@@ -239,8 +239,9 @@ that you can reference, and you may have to alias the tools you want with a
 
 As a convenience, some targets are aliased appropriately in the configuration
 repo (as opposed to the LLVM distribution repo) for you to use and will work
-even when using `toolchain_roots`. If your repo is named `llvm_toolchain`, then
-they can be referenced as:
+even when using `toolchain_roots`. The complete list is in the file
+[aliases.bzl](toolchain/aliases.bzl). If your repo is named `llvm_toolchain`,
+then they can be referenced as:
 
 - `@llvm_toolchain//:omp`
 - `@llvm_toolchain//:clang-format`
@@ -250,6 +251,6 @@ they can be referenced as:
 
 Other examples of toolchain configuration:
 
-https://github.com/bazelbuild/bazel/wiki/Building-with-a-custom-toolchain
+https://bazel.build/tutorials/ccp-toolchain-config
 
 https://github.com/vsco/bazel-toolchains

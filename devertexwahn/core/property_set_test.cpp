@@ -55,7 +55,6 @@ TEST(PropertySet, TestBasicTypes) {
 
 TEST(PropertySet, When_PropertyDoesNotExist_Then_RaiseException) {
     using VariantType = std::variant<int>;
-
     using PropertySet = PropertySetType<VariantType>;
 
     PropertySet ps;
@@ -64,7 +63,6 @@ TEST(PropertySet, When_PropertyDoesNotExist_Then_RaiseException) {
 
 TEST(PropertySet, WhenPropertyExist_ThenReturnTrue) {
     using VariantType = std::variant<int>;
-
     using PropertySet = PropertySetType<VariantType>;
 
     PropertySet ps;
@@ -76,7 +74,6 @@ TEST(PropertySet, WhenPropertyExist_ThenReturnTrue) {
 
 TEST(PropertySet, WhenPropertyDoesNotExist_ThenReturnFalse) {
     using VariantType = std::variant<int>;
-
     using PropertySet = PropertySetType<VariantType>;
 
     PropertySet ps;
@@ -85,7 +82,6 @@ TEST(PropertySet, WhenPropertyDoesNotExist_ThenReturnFalse) {
 
 TEST(PropertySet, WhenPropertyDoesNotExist_Then_ReturnDefaultValue) {
     using VariantType = std::variant<int>;
-
     using PropertySet = PropertySetType<VariantType>;
 
     PropertySet ps;
@@ -94,7 +90,6 @@ TEST(PropertySet, WhenPropertyDoesNotExist_Then_ReturnDefaultValue) {
 
 TEST(PropertySet, CopyCtor) {
     using VariantType = std::variant<int>;
-
     using PropertySet = PropertySetType<VariantType>;
 
     PropertySet ps1;
@@ -107,7 +102,6 @@ TEST(PropertySet, CopyCtor) {
 
 TEST(PropertySet, WhenSamePropertyIsAddedTwice_ThenThrowExceptionAndExpectProperErrorMessage) {
     using VariantType = std::variant<int>;
-
     using PropertySet = PropertySetType<VariantType>;
 
     PropertySet ps;
@@ -118,11 +112,38 @@ TEST(PropertySet, WhenSamePropertyIsAddedTwice_ThenThrowExceptionAndExpectProper
 
 TEST(PropertySet, WhenGetIsCalledWithTheWrongType_ThenThrowException) {
     using VariantType = std::variant<int, float>;
-
     using PropertySet = PropertySetType<VariantType>;
 
     PropertySet ps;
     ps.add_property("a", 1);
 
     EXPECT_THROW(ps.get_property<float>("a"), PropertyWithWrongValueTypeRequested);
+}
+
+TEST(PropertySet, set_property) {
+    using VariantType = std::variant<int, float>;
+    using PropertySet = PropertySetType<VariantType>;
+
+    PropertySet ps;
+    ps.add_property("a", 1);
+    ps.set_property("a", 2);
+
+    EXPECT_THAT(ps.get_property<int>("a"), 2);
+}
+
+TEST(PropertySet, WhenTryingToSetAPropertyThatDoesNotExist_ThenThrowException) {
+    using VariantType = std::variant<int, float>;
+    using PropertySet = PropertySetType<VariantType>;
+
+    PropertySet ps;
+    EXPECT_THROW(ps.set_property("a", 1), PropertyDoesNotExistException);
+}
+
+TEST(PropertySet, WhenTryingToSetAPropertyWithAValueOfAnInvalidType_ThenThrowException) {
+    using VariantType = std::variant<int, float>;
+    using PropertySet = PropertySetType<VariantType>;
+
+    PropertySet ps;
+    ps.add_property("a", 1);
+    EXPECT_THROW(ps.set_property("a", 1.f), PropertyWithWrongValueTypeRequested);
 }

@@ -20,7 +20,7 @@ boost_deps()
 #-------------------------------------------------------------------------------------
 # OpenEXR
 #-------------------------------------------------------------------------------------
-load("@openexr//:bazel/third_party/openexr_deps.bzl", "openexr_deps")
+load("@com_openexr//:bazel/third_party/openexr_deps.bzl", "openexr_deps")
 
 openexr_deps()
 

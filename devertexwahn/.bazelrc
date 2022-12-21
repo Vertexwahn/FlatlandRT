@@ -13,17 +13,20 @@
 # GCC 9.3
 build:gcc9 --cxxopt=-std=c++2a
 build:gcc9 --cxxopt=-Wall
+build:gcc9 --define compiler=gcc9
 #build:gcc9 --cxxopt=-Werror # blocked by googletest
 ##build:gcc9 --cxxopt=-Wextra
 
 build:remote_gcc9 --cxxopt=-Wall
 build:remote_gcc9 --cxxopt=-Werror
+build:remote_gcc9 --define compiler=remote_gcc9
 ##build:remote_gcc9 --cxxopt=-Wextra
 
 # GCC 11.2
 #build:gcc11 --cxxopt=-std=c++23 # blocked by emsdk
 build:gcc11 --cxxopt=-std=c++20
 build:gcc11 --cxxopt=-Wall
+build:gcc11 --define compiler=gcc11
 #build:gcc11 --cxxopt=-Werror
 #build:gcc11 --cxxopt=-Wno-volatile # blocked by emsdk
 ##build:gcc11 --cxxopt=-Wextra
@@ -33,6 +36,7 @@ build:linux --config=gcc11
 # macOS (e.g. Clang 12.0.0)
 build:macos --cxxopt=-std=c++2a
 build:macos --cxxopt=-Wall
+build:macos --define compiler=macos
 #build:macos --cxxopt=-Werror # Commented out because of Embree
 ##build:macos --cxxopt=-Wextra
 #build:macos --spawn_strategy=local
@@ -40,7 +44,7 @@ build:macos --cxxopt=-Wall
 # Todo: Add apple_debug config
 # https://github.com/RobotLocomotion/drake/search?q=apple_debug
 
-# Clang 14.0.0
+# Clang 14.0.0 (config is used on Ubuntu)
 build:clang14 --cxxopt=-std=c++20
 #build:clang14 --cxxopt=-mavx
 #build:clang14 --cxxopt=-mavx2
@@ -48,6 +52,23 @@ build:clang14 --cxxopt=-std=c++20
 #build:clang14 --cxxopt=-Werror
 build:clang14 --incompatible_enable_cc_toolchain_resolution
 build:clang14 --cxxopt=-mwaitpkg
+build:clang14 --define compiler=clang14
+
+# macOS Intel (config used in CI jobs)
+build:clang14_macos --cxxopt=-std=c++20
+#build:clang14 --cxxopt=-mavx
+#build:clang14 --cxxopt=-mavx2
+#build:clang14 --cxxopt=-msse4.2
+#build:clang14 --cxxopt=-Werror
+build:clang14_macos --incompatible_enable_cc_toolchain_resolution
+build:clang14_macos --cxxopt=-mwaitpkg
+build:clang14_macos --define compiler=clang14_macos
+
+# macOS M1 (config is used on local MacBook M1 Pro)
+build:clang14_macos_m1 --cxxopt=-std=c++20
+build:clang14_macos_m1 --incompatible_enable_cc_toolchain_resolution
+#build:clang14_macos_m1 --cxxopt=-mwaitpkg # lead to compilation issues on local M1 macBook
+build:clang14_macos_m1 --define compiler=clang14_macos_m1
 
 # Mingw
 build:mingw --cxxopt=-std=c++2a
@@ -63,6 +84,7 @@ build:vs2019 --copt=-DWIN32_LEAN_AND_MEAN
 build:vs2019 --copt=-DNOGDI
 build:vs2019 --host_copt=-DWIN32_LEAN_AND_MEAN
 build:vs2019 --host_copt=-DNOGDI
+build:vs2019 --define compiler=vs2019
 
 # Visual Studio 2022
 build:vs2022 --cxxopt=/std:c++20
@@ -72,6 +94,7 @@ build:vs2022 --copt=-DWIN32_LEAN_AND_MEAN
 build:vs2022 --copt=-DNOGDI
 build:vs2022 --host_copt=-DWIN32_LEAN_AND_MEAN
 build:vs2022 --host_copt=-DNOGDI
+build:vs2022 --define compiler=vs2022
 
 build:windows --config=vs2022
 

@@ -1344,16 +1344,64 @@ TEST(format_test, format_double) {
   EXPECT_EQ(fmt::format("{:f}", 392.65), "392.650000");
   EXPECT_EQ(fmt::format("{:F}", 392.65), "392.650000");
   EXPECT_EQ(fmt::format("{:L}", 42.0), "42");
+  EXPECT_EQ(fmt::format("{:24a}", 4.2f), "           0x1.0cccccp+2");
   EXPECT_EQ(fmt::format("{:24a}", 4.2), "    0x1.0cccccccccccdp+2");
   EXPECT_EQ(fmt::format("{:<24a}", 4.2), "0x1.0cccccccccccdp+2    ");
   EXPECT_EQ(fmt::format("{0:e}", 392.65), "3.926500e+02");
   EXPECT_EQ(fmt::format("{0:E}", 392.65), "3.926500E+02");
   EXPECT_EQ(fmt::format("{0:+010.4g}", 392.65), "+0000392.6");
   char buffer[buffer_size];
-  safe_sprintf(buffer, "%a", -42.0);
-  EXPECT_EQ(fmt::format("{:a}", -42.0), buffer);
-  safe_sprintf(buffer, "%A", -42.0);
-  EXPECT_EQ(fmt::format("{:A}", -42.0), buffer);
+
+#if FMT_CPLUSPLUS >= 201703L
+  double xd = 0x1.ffffffffffp+2;
+  safe_sprintf(buffer, "%.*a", 10, xd);
+  EXPECT_EQ(fmt::format("{:.10a}", xd), buffer);
+  safe_sprintf(buffer, "%.*a", 9, xd);
+  EXPECT_EQ(fmt::format("{:.9a}", xd), buffer);
+
+  if (std::numeric_limits<long double>::digits == 64) {
+    auto ld = 0xf.ffffffffffp-3l;
+    safe_sprintf(buffer, "%La", ld);
+    EXPECT_EQ(fmt::format("{:a}", ld), buffer);
+    safe_sprintf(buffer, "%.*La", 10, ld);
+    EXPECT_EQ(fmt::format("{:.10a}", ld), buffer);
+    safe_sprintf(buffer, "%.*La", 9, ld);
+    EXPECT_EQ(fmt::format("{:.9a}", ld), buffer);
+  }
+#endif
+
+  if (fmt::detail::const_check(std::numeric_limits<double>::is_iec559)) {
+    double d = (std::numeric_limits<double>::min)();
+    EXPECT_EQ(fmt::format("{:a}", d), "0x1p-1022");
+    EXPECT_EQ(fmt::format("{:#a}", d), "0x1.p-1022");
+
+    d = (std::numeric_limits<double>::max)();
+    safe_sprintf(buffer, "%a", d);
+    EXPECT_EQ(fmt::format("{:a}", d), buffer);
+
+    d = std::numeric_limits<double>::denorm_min();
+    EXPECT_EQ(fmt::format("{:a}", d), "0x0.0000000000001p-1022");
+  }
+
+  if (std::numeric_limits<long double>::digits == 64) {
+    auto ld = (std::numeric_limits<long double>::min)();
+    safe_sprintf(buffer, "%La", ld);
+    EXPECT_EQ(fmt::format("{:a}", ld), buffer);
+
+    ld = (std::numeric_limits<long double>::max)();
+    safe_sprintf(buffer, "%La", ld);
+    EXPECT_EQ(fmt::format("{:a}", ld), buffer);
+
+    ld = std::numeric_limits<long double>::denorm_min();
+    EXPECT_EQ(fmt::format("{:a}", ld), "0x0.000000000000001p-16382");
+  }
+
+  safe_sprintf(buffer, "%.*a", 10, 4.2);
+  EXPECT_EQ(fmt::format("{:.10a}", 4.2), buffer);
+
+  EXPECT_EQ(fmt::format("{:a}", -42.0), "-0x1.5p+5");
+  EXPECT_EQ(fmt::format("{:A}", -42.0), "-0X1.5P+5");
+
   EXPECT_EQ(fmt::format("{:f}", 9223372036854775807.0),
             "9223372036854775808.000000");
 }
@@ -1508,6 +1556,12 @@ TEST(format_test, format_pointer) {
   std::unique_ptr<int> up(new int(1));
   EXPECT_EQ(fmt::format("{}", fmt::ptr(up.get())),
             fmt::format("{}", fmt::ptr(up)));
+  struct custom_deleter {
+    void operator()(int* p) const { delete p; }
+  };
+  std::unique_ptr<int, custom_deleter> upcd(new int(1));
+  EXPECT_EQ(fmt::format("{}", fmt::ptr(upcd.get())),
+            fmt::format("{}", fmt::ptr(upcd)));
   std::shared_ptr<int> sp(new int(1));
   EXPECT_EQ(fmt::format("{}", fmt::ptr(sp.get())),
             fmt::format("{}", fmt::ptr(sp)));
@@ -1625,7 +1679,8 @@ template <> struct formatter<date> {
   }
 
   auto format(const date& d, format_context& ctx) -> decltype(ctx.out()) {
-    format_to(ctx.out(), "{}-{}-{}", d.year(), d.month(), d.day());
+    // Namespace-qualify to avoid ambiguity with std::format_to.
+    fmt::format_to(ctx.out(), "{}-{}-{}", d.year(), d.month(), d.day());
     return ctx.out();
   }
 };
@@ -1853,6 +1908,7 @@ TEST(format_test, compile_time_string) {
   EXPECT_EQ("", fmt::format(FMT_STRING("")));
   EXPECT_EQ("", fmt::format(FMT_STRING(""), "arg"_a = 42));
   EXPECT_EQ("42", fmt::format(FMT_STRING("{answer}"), "answer"_a = Answer()));
+  EXPECT_EQ("1 2", fmt::format(FMT_STRING("{} {two}"), 1, "two"_a = 2));
 #endif
 
   (void)static_with_null;
@@ -2361,6 +2417,11 @@ TEST(format_test, format_facet_grouping) {
   auto loc =
       std::locale({}, new fmt::format_facet<std::locale>(",", {1, 2, 3}));
   EXPECT_EQ(fmt::format(loc, "{:L}", 1234567890), "1,234,567,89,0");
+}
+
+TEST(format_test, format_named_arg_with_locale) {
+  EXPECT_EQ(fmt::format(std::locale(), "{answer}", fmt::arg("answer", 42)),
+            "42");
 }
 
 #endif  // FMT_STATIC_THOUSANDS_SEPARATOR

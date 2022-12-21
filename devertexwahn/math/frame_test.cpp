@@ -9,7 +9,7 @@
 
 using namespace de_vertexwahn;
 
-TEST(Frame, ComputerOrthonormalBasis) {
+TEST(Frame, compute_orthonormal_basis) {
     // Arrange
     Normal3f n{0.f, 0.f, 1.f};
     Vector3f b1, b2;

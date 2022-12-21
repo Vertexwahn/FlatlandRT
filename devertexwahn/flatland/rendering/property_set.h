@@ -12,13 +12,12 @@
 #include "core/property_set.h"
 #include "core/reference_counted.h"
 #include "flatland/rendering/property_set_formatter.h"
+#include "imaging/color.h"
+#include "math/point.h"
+#include "math/transform.h"
+#include "math/vector.h"
 
-#include "fmt/core.h"
-
-#include <map>
-#include <sstream>
 #include <string>
-#include <string_view>
 #include <variant>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE

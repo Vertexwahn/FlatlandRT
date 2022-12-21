@@ -9,9 +9,9 @@
 
 using namespace de_vertexwahn;
 
-class DummyBSDF : public BxDF2f {
+class DummyBxDF : public BxDF2f {
 public:
-    DummyBSDF(const PropertySet &ps) : BxDF2f(ps) {}
+    DummyBxDF(const PropertySet &ps) : BxDF2f(ps) {}
 
     [[nodiscard]] Color3f evaluate(const Vector2f &wo, const Vector2f &wi) const override {
         return Color3f(0.f);
@@ -24,7 +24,7 @@ public:
 
 TEST(BxDF, WhenADefaultInitalized_ThenDefaultMaterialValues) {
     PropertySet ps;
-    DummyBSDF bsdf{ps};
+    DummyBxDF bsdf{ps};
 
     EXPECT_THAT(bsdf.evaluate(Vector2f{1.f,0.f}, Vector2f{0.f,1.f} ), Color3f(0.f));
     Vector2f wi{1.f, 0.f};
@@ -38,7 +38,23 @@ TEST(BxDF, GivenAPropertySet_WhenInitializingMaterial_ExpectProperValues) {
     ps.add_property("refraction_index", 1.f);
     ps.add_property("reflection_index", 0.f);
 
-    DummyBSDF bsdf(ps);
+    DummyBxDF bsdf(ps);
     EXPECT_THAT(bsdf.refraction_index(), 1.f);
+    EXPECT_THAT(bsdf.interface_interaction_type(), InterfaceInteraction::SpecularTransmission);
+}
+
+TEST(BxDF, ctor_mirror) {
+    PropertySet ps;
+    ps.add_property("interface_interaction", std::string("mirror_reflection"));
+    DummyBxDF bsdf(ps);
+
+    EXPECT_THAT(bsdf.interface_interaction_type(), InterfaceInteraction::MirrorReflection);
+}
+
+TEST(BxDF, ctor_undefined_type) {
+    PropertySet ps;
+    ps.add_property("interface_interaction", std::string("undefined_type"));
+    DummyBxDF bsdf(ps);
+
     EXPECT_THAT(bsdf.interface_interaction_type(), InterfaceInteraction::SpecularTransmission);
 }

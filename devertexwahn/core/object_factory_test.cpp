@@ -7,11 +7,13 @@
 #include "flatland/rendering/integrator/integrator.h"
 #include "flatland/rendering/scene/shape/disk.h"
 
+using namespace de_vertexwahn;
+
 #include <filesystem>
 
 #include "gmock/gmock.h"
 
-using namespace de_vertexwahn;
+using namespace testing;
 
 TEST(ObjectFactoryClassAlreadyRegisteredException, what) {
     ObjectFactoryClassAlreadyRegisteredException ofe{"houston we have a problem"};
@@ -21,18 +23,29 @@ TEST(ObjectFactoryClassAlreadyRegisteredException, what) {
 
 class MockIntegrator : public IntegratorType<2, float> {
 public:
-    MockIntegrator(const PropertySet &ps) : IntegratorType<2, float>(ps) {
+    MockIntegrator(const PropertySet &ps) : IntegratorType<2, float>(ps) {}
 
-    }
-
-    virtual Color3f trace(
-            const Scene *scene,
-            Sampler *sampler,
-            Ray &ray,
-            const int depth) const override {
-        return Color3f{1.f, 0.f, 0.f};
-    }
+    MOCK_METHOD(Color3f, trace, (const Scene *scene, Sampler *sampler, Ray &ray, const int depth), (const, override));
 };
+
+// This test has only the job to increase the line test coverage to 100%
+// since trace needs to be mock, put gets never called
+TEST(MockIntegrator, trace) {
+    auto integrator_name = "mock_integrator";
+
+    ObjectFactory<PropertySet> sf;
+    sf.register_class<MockIntegrator>(integrator_name);
+
+    PropertySet ps;
+    ReferenceCounted<MockIntegrator> integrator =  std::static_pointer_cast<MockIntegrator>(sf.create_instance(integrator_name, ps));
+
+    EXPECT_CALL(*integrator.get(), trace(_, _, _, _))
+            .Times(1)
+            .WillOnce(Return(Color3f(1.0f, 1.0f, 1.0f)));
+
+    Ray2f ray{{0.f, 0.f}, {1.f, 0.f}, 0.f, 1.f};
+    integrator->trace(nullptr, nullptr, ray, 1);
+}
 
 TEST(ObjectFactory, create_instance) {
     auto integrator_name = "mock_integrator";

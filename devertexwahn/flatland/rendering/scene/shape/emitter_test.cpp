@@ -21,4 +21,5 @@ public:
 TEST(Emitter, to_string) {
     DummyEmitter emitter;
     EXPECT_THAT(emitter.to_string(), "Emitter");
+    EXPECT_THAT(emitter.evaluate(), Color3f(1.f));
 };

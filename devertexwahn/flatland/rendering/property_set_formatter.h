@@ -7,11 +7,11 @@
 #ifndef De_Vertexwahn_Flatland_PopertySet_formatter_a272aef3_074e_4168_ae05_64383371db33_h
 #define De_Vertexwahn_Flatland_PopertySet_formatter_a272aef3_074e_4168_ae05_64383371db33_h
 
-#include "math/transform.h"
-#include "math/util.h"
 #include "core/object.h"
 #include "core/reference_counted.h"
 #include "imaging/color.h"
+#include "math/transform.h"
+#include "math/util.h"
 
 #include "fmt/format.h"
 

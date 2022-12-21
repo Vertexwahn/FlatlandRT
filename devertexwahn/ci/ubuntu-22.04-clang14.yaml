@@ -21,23 +21,23 @@ steps:
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=clang14  -- //... 
+      bazel build --config=clang14  -- //...     
     displayName: 'Bazel build clang14-fastbuild'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14  -- //... 
+      bazel test --config=clang14  -- //...     
     displayName: 'Bazel test clang14-fastbuild'
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=clang14  --compilation_mode=dbg -- //... 
+      bazel build --config=clang14  --compilation_mode=dbg -- //...     
     displayName: 'Bazel build clang14-dbg'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14  --compilation_mode=dbg -- //... 
+      bazel test --config=clang14  --compilation_mode=dbg -- //...     
     displayName: 'Bazel test clang14-dbg'
 
   # opt

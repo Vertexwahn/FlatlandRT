@@ -8,8 +8,8 @@
 #define De_Vertexwahn_Core_AmbientOcclusion2_b609d24d_c389_4692_82df_bcb7e77f756a_h
 
 #include "core/namespace.h"
-#include "math/warping.h"
 #include "flatland/rendering/integrator/integrator.h"
+#include "math/warping.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

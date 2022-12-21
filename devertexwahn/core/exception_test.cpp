@@ -9,7 +9,7 @@
 
 using namespace de_vertexwahn;
 
-TEST(FlatlandException, what) {
-    FlatlandException ex{"file.flatland.xml"};
+TEST(Exception, what) {
+    Exception ex{"file.flatland.xml"};
     EXPECT_STREQ(ex.what(), "file.flatland.xml");
 }

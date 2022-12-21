@@ -1095,6 +1095,11 @@ instantiation of the test suite. The next argument is the name of the test
 pattern, and the last is the
 [parameter generator](reference/testing.md#param-generators).
 
+The parameter generator expression is not evaluated until GoogleTest is
+initialized (via `InitGoogleTest()`). Any prior initialization done in the
+`main` function will be accessible from the parameter generator, for example,
+the results of flag parsing.
+
 You can instantiate a test pattern more than once, so to distinguish different
 instances of the pattern, the instantiation name is added as a prefix to the
 actual test suite name. Remember to pick unique prefixes for different
@@ -1908,8 +1913,12 @@ Repeat the tests whose name matches the filter 1000 times.
 
 If your test program contains
 [global set-up/tear-down](#global-set-up-and-tear-down) code, it will be
-repeated in each iteration as well, as the flakiness may be in it. You can also
-specify the repeat count by setting the `GTEST_REPEAT` environment variable.
+repeated in each iteration as well, as the flakiness may be in it. To avoid
+repeating global set-up/tear-down, specify
+`--gtest_recreate_environments_when_repeating=false`{.nowrap}.
+
+You can also specify the repeat count by setting the `GTEST_REPEAT` environment
+variable.
 
 ### Shuffling the Tests
 

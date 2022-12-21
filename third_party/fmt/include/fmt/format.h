@@ -360,6 +360,10 @@ class uint128_fallback {
       -> uint128_fallback {
     return {lhs.hi_ & rhs.hi_, lhs.lo_ & rhs.lo_};
   }
+  friend constexpr auto operator~(const uint128_fallback& n)
+      -> uint128_fallback {
+    return {~n.hi_, ~n.lo_};
+  }
   friend auto operator+(const uint128_fallback& lhs,
                         const uint128_fallback& rhs) -> uint128_fallback {
     auto result = uint128_fallback(lhs);
@@ -397,6 +401,10 @@ class uint128_fallback {
     FMT_ASSERT(new_hi >= hi_, "");
     lo_ = new_lo;
     hi_ = new_hi;
+  }
+  FMT_CONSTEXPR void operator&=(uint128_fallback n) {
+    lo_ &= n.lo_;
+    hi_ &= n.hi_;
   }
 
   FMT_CONSTEXPR20 uint128_fallback& operator+=(uint64_t n) noexcept {
@@ -462,6 +470,16 @@ inline auto bit_cast(const From& from) -> To {
       result = (result << num_bits<unsigned>()) | data.value[i];
   }
   return result;
+}
+
+FMT_CONSTEXPR20 inline auto countl_zero(uint32_t n) -> int {
+#ifdef FMT_BUILTIN_CLZ
+  if (!is_constant_evaluated()) return FMT_BUILTIN_CLZ(n);
+#endif
+  int lz = 0;
+  constexpr uint32_t msb_mask = 1u << (num_bits<uint32_t>() - 1);
+  for (; (n & msb_mask) == 0; n <<= 1) lz++;
+  return lz;
 }
 
 FMT_INLINE void assume(bool condition) {
@@ -1618,62 +1636,6 @@ FMT_CONSTEXPR inline fp get_cached_power(int min_exponent,
           *(data::pow10_exponents + index)};
 }
 
-#ifndef _MSC_VER
-#  define FMT_SNPRINTF snprintf
-#else
-FMT_API auto fmt_snprintf(char* buf, size_t size, const char* fmt, ...) -> int;
-#  define FMT_SNPRINTF fmt_snprintf
-#endif  // _MSC_VER
-
-// Formats a floating-point number with snprintf using the hexfloat format.
-template <typename T>
-auto snprintf_float(T value, int precision, float_specs specs,
-                    buffer<char>& buf) -> int {
-  // Buffer capacity must be non-zero, otherwise MSVC's vsnprintf_s will fail.
-  FMT_ASSERT(buf.capacity() > buf.size(), "empty buffer");
-  FMT_ASSERT(specs.format == float_format::hex, "");
-  static_assert(!std::is_same<T, float>::value, "");
-
-  // Build the format string.
-  char format[7];  // The longest format is "%#.*Le".
-  char* format_ptr = format;
-  *format_ptr++ = '%';
-  if (specs.showpoint) *format_ptr++ = '#';
-  if (precision >= 0) {
-    *format_ptr++ = '.';
-    *format_ptr++ = '*';
-  }
-  if (std::is_same<T, long double>()) *format_ptr++ = 'L';
-  *format_ptr++ = specs.upper ? 'A' : 'a';
-  *format_ptr = '\0';
-
-  // Format using snprintf.
-  auto offset = buf.size();
-  for (;;) {
-    auto begin = buf.data() + offset;
-    auto capacity = buf.capacity() - offset;
-    abort_fuzzing_if(precision > 100000);
-    // Suppress the warning about a nonliteral format string.
-    // Cannot use auto because of a bug in MinGW (#1532).
-    int (*snprintf_ptr)(char*, size_t, const char*, ...) = FMT_SNPRINTF;
-    int result = precision >= 0
-                     ? snprintf_ptr(begin, capacity, format, precision, value)
-                     : snprintf_ptr(begin, capacity, format, value);
-    if (result < 0) {
-      // The buffer will grow exponentially.
-      buf.try_reserve(buf.capacity() + 1);
-      continue;
-    }
-    auto size = to_unsigned(result);
-    // Size equal to capacity means that the last character was truncated.
-    if (size < capacity) {
-      buf.try_resize(size + offset);
-      return 0;
-    }
-    buf.try_reserve(size + offset + 1);  // Add 1 for the terminating '\0'.
-  }
-}
-
 template <typename T>
 using convert_float_result =
     conditional_t<std::is_same<T, float>::value ||
@@ -2117,12 +2079,10 @@ template <typename Char = char> struct loc_writer {
     return true;
   }
 
-  template <typename T, FMT_ENABLE_IF(is_floating_point<T>::value)>
+  template <typename T, FMT_ENABLE_IF(!is_integer<T>::value)>
   auto operator()(T) -> bool {
     return false;
   }
-
-  auto operator()(...) -> bool { return false; }
 };
 
 template <typename Char, typename OutputIt, typename T>
@@ -3171,6 +3131,88 @@ FMT_CONSTEXPR20 inline void format_dragon(basic_fp<uint128_t> value,
   buf[num_digits - 1] = static_cast<char>('0' + digit);
 }
 
+// Formats a floating-point number using the hexfloat format.
+template <typename Float>
+FMT_CONSTEXPR20 void format_hexfloat(Float value, int precision,
+                                     float_specs specs, buffer<char>& buf) {
+  // float is passed as double to reduce the number of instantiations and to
+  // simplify implementation.
+  static_assert(!std::is_same<Float, float>::value, "");
+
+  using info = dragonbox::float_info<Float>;
+
+  // Assume Float is in the format [sign][exponent][significand].
+  using carrier_uint = typename info::carrier_uint;
+
+  constexpr auto num_float_significand_bits =
+      detail::num_significand_bits<Float>();
+
+  basic_fp<carrier_uint> f(value);
+  f.e += num_float_significand_bits;
+  if (!has_implicit_bit<Float>()) --f.e;
+
+  constexpr auto num_fraction_bits =
+      num_float_significand_bits + (has_implicit_bit<Float>() ? 1 : 0);
+  constexpr auto num_xdigits = (num_fraction_bits + 3) / 4;
+
+  constexpr auto leading_shift = ((num_xdigits - 1) * 4);
+  const auto leading_mask = carrier_uint(0xF) << leading_shift;
+  const auto leading_xdigit =
+      static_cast<uint32_t>((f.f & leading_mask) >> leading_shift);
+  if (leading_xdigit > 1) f.e -= (32 - countl_zero(leading_xdigit) - 1);
+
+  int print_xdigits = num_xdigits - 1;
+  if (precision >= 0 && print_xdigits > precision) {
+    const int shift = ((print_xdigits - precision - 1) * 4);
+    const auto mask = carrier_uint(0xF) << shift;
+    const auto v = static_cast<uint32_t>((f.f & mask) >> shift);
+
+    if (v >= 8) {
+      const auto inc = carrier_uint(1) << (shift + 4);
+      f.f += inc;
+      f.f &= ~(inc - 1);
+    }
+
+    // Check long double overflow
+    if (!has_implicit_bit<Float>()) {
+      const auto implicit_bit = carrier_uint(1) << num_float_significand_bits;
+      if ((f.f & implicit_bit) == implicit_bit) {
+        f.f >>= 4;
+        f.e += 4;
+      }
+    }
+
+    print_xdigits = precision;
+  }
+
+  char xdigits[num_bits<carrier_uint>() / 4];
+  detail::fill_n(xdigits, sizeof(xdigits), '0');
+  format_uint<4>(xdigits, f.f, num_xdigits, specs.upper);
+
+  // Remove zero tail
+  while (print_xdigits > 0 && xdigits[print_xdigits] == '0') --print_xdigits;
+
+  buf.push_back('0');
+  buf.push_back(specs.upper ? 'X' : 'x');
+  buf.push_back(xdigits[0]);
+  if (specs.showpoint || print_xdigits > 0 || print_xdigits < precision)
+    buf.push_back('.');
+  buf.append(xdigits + 1, xdigits + 1 + print_xdigits);
+  for (; print_xdigits < precision; ++print_xdigits) buf.push_back('0');
+
+  buf.push_back(specs.upper ? 'P' : 'p');
+
+  uint32_t abs_e;
+  if (f.e < 0) {
+    buf.push_back('-');
+    abs_e = static_cast<uint32_t>(-f.e);
+  } else {
+    buf.push_back('+');
+    abs_e = static_cast<uint32_t>(f.e);
+  }
+  format_decimal<char>(appender(buf), abs_e, detail::count_digits(abs_e));
+}
+
 template <typename Float>
 FMT_CONSTEXPR20 auto format_float(Float value, int precision, float_specs specs,
                                   buffer<char>& buf) -> int {
@@ -3285,7 +3327,7 @@ FMT_CONSTEXPR20 auto write_float(OutputIt out, T value,
   memory_buffer buffer;
   if (fspecs.format == float_format::hex) {
     if (fspecs.sign) buffer.push_back(detail::sign<char>(fspecs.sign));
-    snprintf_float(convert_float(value), specs.precision, fspecs, buffer);
+    format_hexfloat(convert_float(value), specs.precision, fspecs, buffer);
     return write_bytes<align::right>(out, {buffer.data(), buffer.size()},
                                      specs);
   }
@@ -3888,7 +3930,8 @@ template <typename T> auto ptr(T p) -> const void* {
   static_assert(std::is_pointer<T>::value, "");
   return detail::bit_cast<const void*>(p);
 }
-template <typename T> auto ptr(const std::unique_ptr<T>& p) -> const void* {
+template <typename T, typename Deleter>
+auto ptr(const std::unique_ptr<T, Deleter>& p) -> const void* {
   return p.get();
 }
 template <typename T> auto ptr(const std::shared_ptr<T>& p) -> const void* {
@@ -4263,7 +4306,7 @@ template <typename Locale, typename... T,
           FMT_ENABLE_IF(detail::is_locale<Locale>::value)>
 inline auto format(const Locale& loc, format_string<T...> fmt, T&&... args)
     -> std::string {
-  return vformat(loc, string_view(fmt), fmt::make_format_args(args...));
+  return fmt::vformat(loc, string_view(fmt), fmt::make_format_args(args...));
 }
 
 template <typename OutputIt, typename Locale,

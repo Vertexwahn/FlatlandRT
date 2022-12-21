@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef De_Vertexwahn_Core_FlatlandException_6da089b7_f446_4ee4_ab38_24473b87d6ab_h
-#define De_Vertexwahn_Core_FlatlandException_6da089b7_f446_4ee4_ab38_24473b87d6ab_h
+#ifndef De_Vertexwahn_Core_Exception_6da089b7_f446_4ee4_ab38_24473b87d6ab_h
+#define De_Vertexwahn_Core_Exception_6da089b7_f446_4ee4_ab38_24473b87d6ab_h
 
 #include "core/namespace.h"
 
@@ -15,13 +15,13 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-class FlatlandException : public std::exception {
+class Exception : public std::exception {
 public:
-    explicit FlatlandException(std::string_view message);
+    explicit Exception(std::string_view message);
 
     const char *what() const throw() override;
 
-    virtual ~FlatlandException();
+    virtual ~Exception();
 
 protected:
     std::string error_message_;
@@ -29,4 +29,4 @@ protected:
 
 DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define Okapi_LoadSceneException_6da089b7_f446_4ee4_ab38_24473b87d6ab_h
+#endif // end define De_Vertexwahn_Core_Exception_6da089b7_f446_4ee4_ab38_24473b87d6ab_h

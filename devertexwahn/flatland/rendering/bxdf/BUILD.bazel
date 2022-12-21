@@ -7,7 +7,6 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "bxdf",
-    srcs = ["bxdf.cpp"],
     hdrs = ["bxdf.h"],
     deps = [
         "//core:object",

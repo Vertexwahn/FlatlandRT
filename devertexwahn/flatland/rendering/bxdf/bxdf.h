@@ -25,7 +25,7 @@ public:
     using Scalar = ScalarType;
     using Color = ColorType<3, ScalarType>;
     using Vector = VectorType<Dimension, ScalarType>;
-  
+
     BxDF(const PropertySet &ps) {
         refraction_index_ = ps.get_property<float>("refraction_index", 1.f);
 

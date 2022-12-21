@@ -43,3 +43,17 @@ TEST(IQA, mse) {
     // Assert
     EXPECT_THAT(result, 1.f);
 }
+
+TEST(IQA, mean_squared_error) {
+    ReferenceCounted<Image3f> a = make_reference_counted<Image3f>(4, 4);
+    ReferenceCounted<Image3f> b = make_reference_counted<Image3f>(4, 4);
+
+    for (int y = 0; y < 4; ++y) {
+        for (int x = 0; x < 4; ++x) {
+            a->set_pixel(x, y, Color3f{1.f, 1.f, 1.f});
+            b->set_pixel(x, y, Color3f{1.f, 1.f, 1.f});
+        }
+    }
+
+    EXPECT_THAT(mean_squared_error(a, b), 0.f);
+}

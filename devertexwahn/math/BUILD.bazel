@@ -201,6 +201,24 @@ cc_test(
 )
 
 cc_library(
+    name = "tensor",
+    hdrs = ["tensor.h"],
+    deps = [
+        "//core:namespace",
+        "@xtensor",
+    ],
+)
+
+cc_test(
+    name = "tensor_test",
+    srcs = ["tensor_test.cpp"],
+    deps = [
+        ":tensor",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "transform",
     hdrs = ["transform.h"],
     deps = [

@@ -271,7 +271,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                                 object_factory.create_instance(type, ps));
                         scene->set_integrator(integrator);
                     } catch (...) {
-                        throw FlatlandException("Integrator missing");
+                        throw Exception("Integrator missing");
                     }
 
                     integrator_tag_found = true;
@@ -309,7 +309,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     auto xml_bxdf = scene_elements.child("bsdf");
                     std::string str_bsdf_type = xml_bxdf.attribute("type").as_string();
                     if(str_bsdf_type == "") {
-                        throw FlatlandException("No empty BxDF type allowed.");
+                        throw Exception("No empty BxDF type allowed.");
                     }
                     if (xml_bxdf) {
                         auto bsdf_ps = read_all_properties(xml_bxdf);
@@ -332,12 +332,12 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                 }
             }
         } else {
-            throw FlatlandException("scene_node xml tag missing");
+            throw Exception("scene_node xml tag missing");
         }
     }
 
     if (!integrator_tag_found) {
-        throw FlatlandException("Integrator missing");
+        throw Exception("Integrator missing");
     }
 
     if (!scene->has_intersector()) {

@@ -221,7 +221,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "pugixml",
         build_file = "//okapi/third_party:pugixml.BUILD",
-        path = "../third_party/pugixml-1.12.1",
+        path = "../third_party/pugixml-1.13",
     )
 
     #-------------------------------------------------------------------------------------
@@ -318,7 +318,7 @@ def okapi_deps():
 
     maybe(
         native.local_repository,
-        name = "openexr",
+        name = "com_openexr",
         path = "../third_party/openexr",
     )
 
@@ -326,8 +326,8 @@ def okapi_deps():
     maybe(
         native.new_local_repository,
         name = "Imath",
-        build_file = "@openexr//:bazel/third_party/Imath.BUILD",  # openexr must be fetched first, since it provides the Imath build instructions
-        path = "../third_party/Imath-3.1.5",
+        build_file = "@com_openexr//:bazel/third_party/Imath.BUILD",  # OpenEXR must be fetched first, since it provides the Imath build instructions
+        path = "../third_party/Imath-3.1.6",
     )
 
     # Use git repository from com_github_vertexwahn_openexr
@@ -353,7 +353,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "libpng",
         build_file = "//okapi/third_party:libpng.BUILD",
-        path = "../third_party/libpng-1.6.38",
+        path = "../third_party/libpng-1.6.39",
     )
 
     # libpng
@@ -441,7 +441,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "rules_pkg",
-        path = "../third_party/rules_pkg-0.7.1",
+        path = "../third_party/rules_pkg-0.8.0",
     )
 
     #maybe(
@@ -500,6 +500,21 @@ def okapi_deps():
     #)
 
     maybe(
+        native.new_local_repository,
+        name = "org_lzma_lzma",
+        build_file = "@com_github_nelhage_rules_boost//:BUILD.lzma",
+        #path = "../third_party/xz-5.2.7",
+        path = "../third_party/xz-5.4.0",
+    )
+
+    maybe(
+        native.new_local_repository,
+        name = "org_bzip_bzip2",
+        build_file = "@com_github_nelhage_rules_boost//:BUILD.bzip2",
+        path = "../third_party/bzip2-1.0.8",
+    )
+
+    maybe(
         native.local_repository,
         name = "com_github_nelhage_rules_boost",
         path = "../third_party/rules_boost",
@@ -548,4 +563,38 @@ def okapi_deps():
         name = "com_google_absl",
         path = "../third_party/abseil-cpp",
     )
+
+    #-------------------------------------------------------------------------------------
+    # xtensor
+    #-------------------------------------------------------------------------------------
+
+    maybe(
+        native.new_local_repository,
+        name = "xtl",
+        path = "../third_party/xtl",
+        build_file = "//okapi/third_party:xtl.BUILD",
+    )
+
+    #maybe(
+    #    http_archive,
+    #    name = "xtl",
+    #    urls = ["https://github.com/xtensor-stack/xtl/archive/e697c91e2a3ac571d120d2b093fb3b250d060a7d.zip"],
+    #    strip_prefix = "xtl-e697c91e2a3ac571d120d2b093fb3b250d060a7d",
+    #    build_file = "//okapi/third_party:xtl.BUILD",
+    #)
+
+    maybe(
+        native.new_local_repository,
+        name = "xtensor",
+        path = "../third_party/xtensor",
+        build_file = "//okapi/third_party:xtensor.BUILD",
+    )
+
+    #maybe(
+    #    http_archive,
+    #    name = "xtensor",
+    #    urls = ["https://github.com/xtensor-stack/xtensor/archive/275a4efb0faaa78b3b2132ea001d9167d4382109.zip"],
+    #    strip_prefix = "xtensor-275a4efb0faaa78b3b2132ea001d9167d4382109",
+    #    build_file = "//okapi/third_party:xtensor.BUILD",
+    #)
 

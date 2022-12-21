@@ -162,15 +162,15 @@ TEST(load_scene, read_matrix_transform) {
 
 TEST(Scene, loadScene_EmptyBSDF) {
     EXPECT_THAT([]() { load_scene2f("flatland/tests/scenes/no_bsdf_type.flatland.xml"); },
-                ThrowsMessage<FlatlandException>(testing::HasSubstr("No empty BxDF type allowed")));
+                ThrowsMessage<Exception>(testing::HasSubstr("No empty BxDF type allowed")));
 }
 
 TEST(Scene, loadScene_MissingSceneTag) {
-    EXPECT_THROW(load_scene2f("flatland/tests/scenes/scene_tag_missing.flatland.xml"), FlatlandException);
+    EXPECT_THROW(load_scene2f("flatland/tests/scenes/scene_tag_missing.flatland.xml"), Exception);
 }
 
 TEST(Scene, loadScene_IntegratorMissing) {
-    EXPECT_THROW(load_scene2f("flatland/tests/scenes/integrator_missing.flatland.xml"), FlatlandException);
+    EXPECT_THROW(load_scene2f("flatland/tests/scenes/integrator_missing.flatland.xml"), Exception);
 }
 
 TEST(Scene, WhenLoadingASceneWithARectangle_ThenSceneContainsARectangle) {

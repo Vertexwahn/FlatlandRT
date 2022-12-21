@@ -1181,6 +1181,8 @@ bool is_left_endpoint_integer_shorter_interval(int exponent) noexcept {
 // Remove trailing zeros from n and return the number of zeros removed (float)
 FMT_INLINE int remove_trailing_zeros(uint32_t& n) noexcept {
   FMT_ASSERT(n != 0, "");
+  // Modular inverse of 5 (mod 2^32): (mod_inv_5 * 5) mod 2^32 = 1.
+  // See https://github.com/fmtlib/fmt/issues/3163 for more details.
   const uint32_t mod_inv_5 = 0xcccccccd;
   const uint32_t mod_inv_25 = mod_inv_5 * mod_inv_5;
 
@@ -1196,7 +1198,6 @@ FMT_INLINE int remove_trailing_zeros(uint32_t& n) noexcept {
     n = q;
     s |= 1;
   }
-
   return s;
 }
 
@@ -1425,17 +1426,6 @@ small_divisor_case_label:
   return ret_value;
 }
 }  // namespace dragonbox
-
-#ifdef _MSC_VER
-FMT_FUNC auto fmt_snprintf(char* buf, size_t size, const char* fmt, ...)
-    -> int {
-  auto args = va_list();
-  va_start(args, fmt);
-  int result = vsnprintf_s(buf, size, _TRUNCATE, fmt, args);
-  va_end(args);
-  return result;
-}
-#endif
 }  // namespace detail
 
 template <> struct formatter<detail::bigint> {

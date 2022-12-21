@@ -63,7 +63,7 @@ Platform](https://vfxplatform.com).
 
 With the release of OpenEXR 3, the Imath library formerly distributed
 via the IlmBase component of OpenEXR is now an independent library
-dependency, available for download from https:://github.com/AcademySoftwareFoundation/Imath.
+dependency, available for download from https://github.com/AcademySoftwareFoundation/Imath.
 You can choose to build OpenEXR against an external installation of
 Imath, or the default CMake configuration will download and build it
 automatically during the OpenEXR build process.  Note that the half
@@ -136,8 +136,8 @@ OpenEXR is intended solely for 2D data. It is not appropriate for
 storage of volumetric data, cached or lit 3D scenes, or more complex
 3D data such as light fields.
 
-The goals of the IlmBase project are simplicity, ease of use,
-correctness and verifiability, and breadth of adoption. IlmBase is not
+The goals of the Imath project are simplicity, ease of use,
+correctness and verifiability, and breadth of adoption. Imath is not
 intended to be a comprehensive linear algebra or numerical analysis
 package.
 

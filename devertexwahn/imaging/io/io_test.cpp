@@ -34,6 +34,15 @@ TEST(Image, WriteAndReadFile) {
     EXPECT_THAT(text, "Writing this to a file.");
 }
 
+TEST(io, WhenTryToLoadANonExistingImage_ThenThrowException) {
+    EXPECT_THROW(load_image("muh.unknown_extension"), std::runtime_error);
+}
+
+TEST(io, WhenTryToStoreImageWithUnkownExtension_ThenThrowException) {
+    Image4b img{100, 100};
+    EXPECT_THROW(store_image("muh.unknown_extension", img), std::runtime_error);
+}
+
 TEST(Image, GivenTestImage3f_WhenStoreImageAsPng_ExpectCorectColorValues) {
     // Arrange
     Image3f image{100, 100};

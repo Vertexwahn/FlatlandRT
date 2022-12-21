@@ -3,16 +3,15 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "math/warping.h"
 #include "flatland/rendering/sampler.h"
+#include "math/warping.h"
+using namespace de_vertexwahn;
 
 #include "hypothesis.h"
 
-#include "gmock/gmock.h"
-
 #include <array>
 
-using namespace de_vertexwahn;
+#include "gmock/gmock.h"
 
 TEST(Warping, warp_uniform_square_to_concentric_disk) {
     Point2f sample[] = {

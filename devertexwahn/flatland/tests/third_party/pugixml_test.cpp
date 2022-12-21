@@ -5,6 +5,7 @@
 
 #include "pugixml.hpp"
 #include "gmock/gmock.h"
+
 #include <fstream>
 
 TEST(pugixml, load_file) {

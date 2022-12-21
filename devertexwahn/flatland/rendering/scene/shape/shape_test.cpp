@@ -35,4 +35,7 @@ TEST(Shape, GivenADummyShape_WhenInitializedWithTranslation_ExpectTranslationTra
 
     EXPECT_EQ(s.getTransform().matrix()(0, 3), 10.f);
     EXPECT_EQ(s.getTransform().matrix()(1, 3), 20.f);
+
+    EXPECT_THROW(s.bounds(), std::runtime_error);
+    EXPECT_THAT(s.convert_to_svg(100, 100), "");
 }

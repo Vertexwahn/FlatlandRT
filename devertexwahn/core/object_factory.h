@@ -4,12 +4,12 @@
  */
 
 #pragma once
-#ifndef De_Vertexwahn_Core_ShapeFactory_b184faf0_dc66_451e_a52f_615a4caa7c35_h
-#define De_Vertexwahn_Core_ShapeFactory_b184faf0_dc66_451e_a52f_615a4caa7c35_h
+#ifndef De_Vertexwahn_Core_ObjectFactory_b184faf0_dc66_451e_a52f_615a4caa7c35_h
+#define De_Vertexwahn_Core_ObjectFactory_b184faf0_dc66_451e_a52f_615a4caa7c35_h
 
+#include "core/namespace.h"
 #include "core/object.h"
 #include "core/reference_counted.h"
-#include "core/namespace.h"
 
 #include <exception>
 #include <functional>
@@ -74,4 +74,4 @@ private:
 
 DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define De_Vertexwahn_Core_ShapeFactory_b184faf0_dc66_451e_a52f_615a4caa7c35_h
+#endif // end define De_Vertexwahn_Core_ObjectFactory_b184faf0_dc66_451e_a52f_615a4caa7c35_h

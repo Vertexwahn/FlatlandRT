@@ -3,11 +3,11 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "gmock/gmock.h"
-
 #include "flatland/rendering/scene/shape/triangle_mesh.h"
 
 using namespace de_vertexwahn;
+
+#include "gmock/gmock.h"
 
 TEST(TriangleMesh2, GivenPointWithInfiniteValue_WhenConstructionTriangleMesh_ThenExpectException) {
     // Arrange

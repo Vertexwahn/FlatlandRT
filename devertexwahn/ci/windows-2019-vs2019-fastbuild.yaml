@@ -12,7 +12,6 @@ steps:
     lfs: false
     submodules: false
 
-
   - script: |
       bazel version
     displayName: "Show Bazel version"

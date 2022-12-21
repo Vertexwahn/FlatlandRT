@@ -30,32 +30,32 @@ steps:
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=clang14  -- //...  
+      bazel build --config=clang14_macos  -- //... 
     displayName: "Bazel build clang14-fastbuild"
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14  -- //...  
+      bazel test --config=clang14_macos  -- //...   -//okapi/cli:benchmark_test
     displayName: "Bazel test clang14-fastbuild"
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=clang14  --compilation_mode=dbg -- //... 
+      bazel build --config=clang14_macos  --compilation_mode=dbg -- //... 
     displayName: 'Bazel build clang14-dbg'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14  --compilation_mode=dbg -- //...   
+      bazel test --config=clang14_macos  --compilation_mode=dbg -- //...    -//okapi/cli:benchmark_test
     displayName: 'Bazel test clang14-dbg'
 
   # opt
   - script: |
       cd devertexwahn
-      bazel build --config=clang14  --compilation_mode=opt -- //... 
+      bazel build --config=clang14_macos  --compilation_mode=opt -- //... 
     displayName: 'Bazel build clang14-opt'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14  --compilation_mode=opt -- //...   
+      bazel test --config=clang14_macos  --compilation_mode=opt -- //...   -//okapi/cli:benchmark_test
     displayName: 'Bazel test clang14-opt'

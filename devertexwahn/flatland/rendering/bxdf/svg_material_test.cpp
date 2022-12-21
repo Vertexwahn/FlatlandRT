@@ -17,12 +17,23 @@ TEST(SvgMaterial, SetGetStrokeColor) {
     EXPECT_THAT(material.stroke_color(), stroke_color);
 }
 
-TEST(SvgMaterial, SetGetfill_color) {
+TEST(SvgMaterial, SetGetFillColor) {
     auto fill_color = Color3f{1.f, 0.5f, 0.1f};
     PropertySet ps;
     ps.add_property("fill_color", fill_color);
     SvgMaterial material{ps};
     EXPECT_THAT(material.fill_color(), fill_color);
+}
+
+TEST(SvgMaterial, bxrf) {
+    PropertySet ps;
+    auto stroke_color = Color3f{1.f, 0.5f, 0.1f};
+    ps.add_property("stroke_color", stroke_color);
+    SvgMaterial material{ps};
+
+    EXPECT_THAT(material.evaluate(Vector2f(0.f, 1.f), Vector2f(0.f, 1.f)), Color3f(0.f));
+    Vector2f wo(0.f, 1.f);
+    EXPECT_THAT(material.sample(Vector2f(0.f, 1.f), wo), Vector2f(0.f, 0.f));
 }
 
 TEST(SvgMaterial, WhenADefaultInitalized_ThenDefaultMaterialValues) {

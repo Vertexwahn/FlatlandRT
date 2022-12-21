@@ -39,7 +39,8 @@ public:
             const Scene *scene,
             Sampler* sampler,
             Ray &ray,
-            const int depth) const = 0;
+            const int depth,
+            ScalarType *aovs = nullptr) const = 0;
 };
 
 template <typename ScalarType>

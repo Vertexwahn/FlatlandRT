@@ -33,9 +33,6 @@ public:
     int sample_count() const {
         return sample_count_;
     };
-    void set_sample_count(int sample_count) {
-        sample_count_ = sample_count;
-    }
 
     virtual std::unique_ptr<SamplerType> clone() = 0;
 

@@ -1,0 +1,48 @@
+# Software bill of materials (SBOM)
+
+In this folder (`third_party`) you can find different libraries.
+Usually, those libraries are just copied into the project and used as is.
+This file documents the commit hash of each library if it is not given in the filename.
+
+
+# Flatland/Okapi depencencies
+
+```
+abseil-cpp-0064d9db90d32d35e9f9d70e2df4ddf8d0ab1257
+bazel-latex-bac6e1c425ef9e8e8410456d6dd95eeeae8ba69e
+bazel-skylib-5bfcb1a684550626ce138fe0fe8f5f702b3764c3
+bazel-toolchain-d46339675a83e3517d955f5456e525501c3e05b8
+bazelisk-b484ae2270ed6a8e9b54682042ca7b47471c9186
+benchmark-62edc4fb00e1aeab86cc69c70eafffb17219d047
+Catch2-78bb4fda05b2fdb2c951b005b8e142410362ea26
+cpuinfo-de2fa78ebb431db98489e78603e4f77c1f6c5c57
+depend_on_what_you_use-7adfec381ca8051f650b67a2b714017850304e61
+fmt-b90895412f46e18e5b17efdea2c8f79e7d7504b3
+gflags-a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd
+glog-c18db3903b9f0abd80ae740fde94f7e32aa40b92
+googletest-5ab508a01f9eb089207ee87fd547d290da39d015
+hypothesis-e165503f7d796d844d5d6ab69b5c7f839cf0ede8
+json-4c6cde72e533158e044252718c013a48bcff346c
+oneTBB-e6104c9599f7f10473caf545199f7468c0a8e52f
+openexr-71bffa3d7d89e46a37108732f5e63d554c10e018
+pcg-cpp-428802d1a5634f96bcd0705fab379ff0113bcf13
+rules_boost-b1aebc75a69ac4bea10bd55cb7061d5e6bac2dfe
+tinyobjloader-45f683cb3122fafdc3b126b406fc8ecab61b9033
+xtensor-9563ff713385d099f3e45125f7c615e1cae72494
+xtl-48e759554b2a4ce8937abf2410c15a87808d5229
+yaml-cpp-1b50109f7bea60bd382d8ea7befce3d2bd67da5f
+```
+
+# Other dependencies
+
+```
+bazel-central-registry-ad95a8e589a03e9a1d67eb147aa7bd22e3e7ab82
+bazel-diff-f6014ee4681af397d581a35d48bc71a15f9aac69
+copybara-2afcc6413be20ba2ea2732e04b2b32e039631ade
+dvpe-helm-cecfe7a55977023178dc65ec7a0ef38e6236c5cd
+figure-gen-a09e0f67e34455c0e7923302e26214b892fcd1e5
+hello-webgpu-5143f98d2e4089714f4a3ec83ddb0bd04b1b2967
+mitsuba3-7e7d7b97c08b7ee918d022cf6861aab23b8d9b17
+rules_docker-48ad6d6df43d1e4b9feeec961995aef01dd72080
+rules_k8s-efb59bf40dcaea6356ccdaf6882a9266414fc298
+```

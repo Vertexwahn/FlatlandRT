@@ -29,7 +29,7 @@ cc_test(
     deps = [
         "//imaging:image",
         "@com_google_googletest//:gtest_main",
-        "@openexr//:OpenEXR",
+        "@com_openexr//:OpenEXR",
     ],
 )
 

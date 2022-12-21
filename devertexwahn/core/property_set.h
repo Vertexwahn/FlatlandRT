@@ -8,7 +8,7 @@
 
 #include "core/namespace.h"
 
-#include "external/fmt/_virtual_includes/fmt/fmt/core.h"
+#include "fmt/core.h"
 
 #include <cstddef>
 #include <exception>
@@ -126,6 +126,24 @@ public:
     [[nodiscard]]
     bool has_property(const std::string &name) const {
         return property_name_to_value_.find(name) != property_name_to_value_.end();
+    }
+
+    /*
+     * Sets the value of an existing property. If the property is not exising an exception it thrown.
+     */
+    template<typename ValueType>
+    void set_property(const std::string &name, const ValueType &value) {
+        if (has_property(name)) {
+            VariantType &vt = property_name_to_value_.at(name);
+            if (vt.index() != variant_index<VariantType, ValueType>()) {
+                throw PropertyWithWrongValueTypeRequested(name.c_str());
+            }
+            auto &property = std::get<ValueType>(vt);
+
+            property = value;
+        } else {
+            throw PropertyDoesNotExistException(name);
+        }
     }
 
 private:

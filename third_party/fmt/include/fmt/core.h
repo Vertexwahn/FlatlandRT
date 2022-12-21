@@ -408,13 +408,13 @@ FMT_CONSTEXPR auto to_unsigned(Int value) ->
   return static_cast<typename std::make_unsigned<Int>::type>(value);
 }
 
-FMT_MSC_WARNING(suppress : 4566) constexpr unsigned char micro[] = "\u00B5";
+FMT_MSC_WARNING(suppress : 4566) constexpr unsigned char section[] = "\u00A7";
 
 constexpr auto is_utf8() -> bool {
   // Avoid buggy sign extensions in MSVC's constant evaluation mode (#2297).
   using uchar = unsigned char;
-  return FMT_UNICODE || (sizeof(micro) == 3 && uchar(micro[0]) == 0xC2 &&
-                         uchar(micro[1]) == 0xB5);
+  return FMT_UNICODE || (sizeof(section) == 3 && uchar(section[0]) == 0xC2 &&
+                         uchar(section[1]) == 0xA7);
 }
 FMT_END_DETAIL_NAMESPACE
 
@@ -641,7 +641,6 @@ FMT_NORETURN FMT_API void throw_format_error(const char* message);
 
 struct error_handler {
   constexpr error_handler() = default;
-  constexpr error_handler(const error_handler&) = default;
 
   // This function is intentionally not constexpr to give a compile-time error.
   FMT_NORETURN void on_error(const char* message) {
@@ -2218,9 +2217,6 @@ template <typename Char> class specs_setter {
   explicit FMT_CONSTEXPR specs_setter(basic_format_specs<Char>& specs)
       : specs_(specs) {}
 
-  FMT_CONSTEXPR specs_setter(const specs_setter& other)
-      : specs_(other.specs_) {}
-
   FMT_CONSTEXPR void on_align(align_t align) { specs_.align = align; }
   FMT_CONSTEXPR void on_fill(basic_string_view<Char> fill) {
     specs_.fill = fill;
@@ -2254,11 +2250,6 @@ class dynamic_specs_handler
   FMT_CONSTEXPR dynamic_specs_handler(dynamic_format_specs<char_type>& specs,
                                       ParseContext& ctx)
       : specs_setter<char_type>(specs), specs_(specs), context_(ctx) {}
-
-  FMT_CONSTEXPR dynamic_specs_handler(const dynamic_specs_handler& other)
-      : specs_setter<char_type>(other),
-        specs_(other.specs_),
-        context_(other.context_) {}
 
   template <typename Id> FMT_CONSTEXPR void on_dynamic_width(Id arg_id) {
     specs_.width_ref = make_arg_ref(arg_id);
@@ -2984,7 +2975,7 @@ class format_string_checker {
 #if FMT_USE_NONTYPE_TEMPLATE_ARGS
     auto index = get_arg_index_by_name<Args...>(id);
     if (index == invalid_arg_index) on_error("named argument is not found");
-    return context_.check_arg_id(index), index;
+    return index;
 #else
     (void)id;
     on_error("compile-time checks for named arguments require C++20 support");
@@ -3121,8 +3112,8 @@ struct formatter<T, Char,
                          U == detail::type::cstring_type ||
                          U == detail::type::char_type),
                         int> = 0>
-  FMT_CONSTEXPR void set_debug_format() {
-    specs_.type = presentation_type::debug;
+  FMT_CONSTEXPR void set_debug_format(bool set = true) {
+    specs_.type = set ? presentation_type::debug : presentation_type::none;
   }
 
   template <typename FormatContext>

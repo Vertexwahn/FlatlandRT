@@ -7,6 +7,6 @@
 
 #include "include/gmock/gmock.h"
 
-TEST(Zlib, VersionCheck) {
+TEST(zlib, version_check) {
     EXPECT_THAT(ZLIB_VERSION, testing::StrCaseEq("1.2.13"));
 }
