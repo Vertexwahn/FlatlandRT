@@ -207,11 +207,11 @@ def boost_deps():
         build_file = "@com_github_nelhage_rules_boost//:BUILD.boost",
         patch_cmds = ["rm -f doc/pdf/BUILD"],
         patch_cmds_win = ["Remove-Item -Force doc/pdf/BUILD"],
-        sha256 = "4b2136f98bdd1f5857f1c3dea9ac2018effe65286cf251534b6ae20cc45e1847",
-        strip_prefix = "boost_1_80_0",
+        sha256 = "205666dea9f6a7cfed87c7a6dfbeb52a2c1b9de55712c9c1a87735d7181452b6",
+        strip_prefix = "boost_1_81_0",
         urls = [
-            "https://mirror.bazel.build/boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz",
-            "https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz",
+            "https://mirror.bazel.build/boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz",
+            "https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz",
         ],
     )
 
@@ -219,7 +219,7 @@ def boost_deps():
     maybe(
         http_archive,
         name = "openssl",
-        url = "https://github.com/hedronvision/boringssl/archive/4c7b68107eacbbf4e7711d1891317069f8fb3e16.tar.gz",
-        sha256 = "298676cf08a9816670bd119cbf234b6879e233b263515dc4e91f06435dcd9486",
-        strip_prefix = "boringssl-4c7b68107eacbbf4e7711d1891317069f8fb3e16",
+        url = "https://github.com/hedronvision/boringssl/archive/752749be9c555a72cb7dd8f16044bd03ef77871d.tar.gz",
+        sha256 = "61c279b2c52ffefa4e0ce101fb6e1105b157ce9f647247eae4f87f27844bc21c",
+        strip_prefix = "boringssl-752749be9c555a72cb7dd8f16044bd03ef77871d",
     )
