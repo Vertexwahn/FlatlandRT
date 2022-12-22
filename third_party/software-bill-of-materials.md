@@ -33,20 +33,3 @@ xtl-48e759554b2a4ce8937abf2410c15a87808d5229
 yaml-cpp-1b50109f7bea60bd382d8ea7befce3d2bd67da5f
 ```
 
-# BEGIN-INTERNAL
-
-# Other dependencies
-
-```
-bazel-central-registry-ad95a8e589a03e9a1d67eb147aa7bd22e3e7ab82
-bazel-diff-f6014ee4681af397d581a35d48bc71a15f9aac69
-copybara-2afcc6413be20ba2ea2732e04b2b32e039631ade
-dvpe-helm-cecfe7a55977023178dc65ec7a0ef38e6236c5cd
-figure-gen-a09e0f67e34455c0e7923302e26214b892fcd1e5
-hello-webgpu-5143f98d2e4089714f4a3ec83ddb0bd04b1b2967
-mitsuba3-7e7d7b97c08b7ee918d022cf6861aab23b8d9b17
-rules_docker-48ad6d6df43d1e4b9feeec961995aef01dd72080
-rules_k8s-efb59bf40dcaea6356ccdaf6882a9266414fc298
-```
-
-# END-INTERNAL
