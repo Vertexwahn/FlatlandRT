@@ -5,7 +5,7 @@ Usually, those libraries are just copied into the project and used as is.
 This file documents the commit hash of each library if it is not given in the filename.
 
 
-# Flatland/Okapi depencencies
+# Flatland/Okapi dependencies
 
 ```
 abseil-cpp-0064d9db90d32d35e9f9d70e2df4ddf8d0ab1257
@@ -33,6 +33,8 @@ xtl-48e759554b2a4ce8937abf2410c15a87808d5229
 yaml-cpp-1b50109f7bea60bd382d8ea7befce3d2bd67da5f
 ```
 
+# BEGIN-INTERNAL
+
 # Other dependencies
 
 ```
@@ -46,3 +48,5 @@ mitsuba3-7e7d7b97c08b7ee918d022cf6861aab23b8d9b17
 rules_docker-48ad6d6df43d1e4b9feeec961995aef01dd72080
 rules_k8s-efb59bf40dcaea6356ccdaf6882a9266414fc298
 ```
+
+# END-INTERNAL
