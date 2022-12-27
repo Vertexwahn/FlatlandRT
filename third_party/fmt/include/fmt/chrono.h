@@ -1655,7 +1655,7 @@ OutputIt format_duration_value(OutputIt out, Rep val, int) {
 template <typename Char, typename Rep, typename OutputIt,
           FMT_ENABLE_IF(std::is_floating_point<Rep>::value)>
 OutputIt format_duration_value(OutputIt out, Rep val, int precision) {
-  auto specs = basic_format_specs<Char>();
+  auto specs = format_specs<Char>();
   specs.precision = precision;
   specs.type = precision >= 0 ? presentation_type::fixed_lower
                               : presentation_type::general_lower;
@@ -1991,7 +1991,7 @@ template <typename Char> struct formatter<weekday, Char> {
 template <typename Rep, typename Period, typename Char>
 struct formatter<std::chrono::duration<Rep, Period>, Char> {
  private:
-  basic_format_specs<Char> specs;
+  format_specs<Char> specs;
   int precision = -1;
   using arg_ref_type = detail::arg_ref<Char>;
   arg_ref_type width_ref;
@@ -1999,45 +1999,6 @@ struct formatter<std::chrono::duration<Rep, Period>, Char> {
   bool localized = false;
   basic_string_view<Char> format_str;
   using duration = std::chrono::duration<Rep, Period>;
-
-  struct spec_handler {
-    formatter& f;
-    basic_format_parse_context<Char>& context;
-    basic_string_view<Char> format_str;
-
-    template <typename Id> FMT_CONSTEXPR arg_ref_type make_arg_ref(Id arg_id) {
-      context.check_arg_id(arg_id);
-      return arg_ref_type(arg_id);
-    }
-
-    FMT_CONSTEXPR arg_ref_type make_arg_ref(basic_string_view<Char> arg_id) {
-      context.check_arg_id(arg_id);
-      return arg_ref_type(arg_id);
-    }
-
-    FMT_CONSTEXPR arg_ref_type make_arg_ref(detail::auto_id) {
-      return arg_ref_type(context.next_arg_id());
-    }
-
-    void on_error(const char* msg) { FMT_THROW(format_error(msg)); }
-    FMT_CONSTEXPR void on_fill(basic_string_view<Char> fill) {
-      f.specs.fill = fill;
-    }
-    FMT_CONSTEXPR void on_align(align_t align) { f.specs.align = align; }
-    FMT_CONSTEXPR void on_width(int width) { f.specs.width = width; }
-    FMT_CONSTEXPR void on_precision(int _precision) {
-      f.precision = _precision;
-    }
-    FMT_CONSTEXPR void end_precision() {}
-
-    template <typename Id> FMT_CONSTEXPR void on_dynamic_width(Id arg_id) {
-      f.width_ref = make_arg_ref(arg_id);
-    }
-
-    template <typename Id> FMT_CONSTEXPR void on_dynamic_precision(Id arg_id) {
-      f.precision_ref = make_arg_ref(arg_id);
-    }
-  };
 
   using iterator = typename basic_format_parse_context<Char>::iterator;
   struct parse_range {
@@ -2048,15 +2009,22 @@ struct formatter<std::chrono::duration<Rep, Period>, Char> {
   FMT_CONSTEXPR parse_range do_parse(basic_format_parse_context<Char>& ctx) {
     auto begin = ctx.begin(), end = ctx.end();
     if (begin == end || *begin == '}') return {begin, begin};
-    spec_handler handler{*this, ctx, format_str};
-    begin = detail::parse_align(begin, end, handler);
+
+    auto align_result = detail::parse_align(begin, end);
+    specs.align = align_result.align;
+    auto fill_size = align_result.end - begin - 1;
+    if (fill_size > 0) specs.fill = {begin, detail::to_unsigned(fill_size)};
+    begin = align_result.end;
     if (begin == end) return {begin, begin};
-    begin = detail::parse_width(begin, end, handler);
+
+    begin = detail::parse_dynamic_spec(begin, end, specs.width, width_ref, ctx);
     if (begin == end) return {begin, begin};
+
     auto checker = detail::chrono_format_checker();
     if (*begin == '.') {
       checker.has_precision_integral = !std::is_floating_point<Rep>::value;
-      begin = detail::parse_precision(begin, end, handler);
+      begin =
+          detail::parse_precision(begin, end, precision, precision_ref, ctx);
     }
     if (begin != end && *begin == 'L') {
       ++begin;

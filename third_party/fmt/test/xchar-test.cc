@@ -22,6 +22,13 @@
 using fmt::detail::max_value;
 using testing::Contains;
 
+#if defined(__MINGW32__) && !defined(_UCRT)
+// Only C89 conversion specifiers when using MSVCRT instead of UCRT
+#  define FMT_HAS_C99_STRFTIME 0
+#else
+#  define FMT_HAS_C99_STRFTIME 1
+#endif
+
 namespace test_ns {
 template <typename Char> class test_string {
  private:
@@ -294,16 +301,16 @@ TEST(chrono_test_wchar, time_point) {
       L"%OU", L"%W",  L"%OW", L"%V",  L"%OV", L"%j",  L"%d",  L"%Od", L"%e",
       L"%Oe", L"%a",  L"%A",  L"%w",  L"%Ow", L"%u",  L"%Ou", L"%H",  L"%OH",
       L"%I",  L"%OI", L"%M",  L"%OM", L"%S",  L"%OS", L"%x",  L"%Ex", L"%X",
-      L"%EX", L"%D",  L"%F",  L"%R",  L"%T",  L"%p",  L"%z",  L"%Z"};
+      L"%EX", L"%D",  L"%F",  L"%R",  L"%T",  L"%p"};
 #ifndef _WIN32
   // Disabled on Windows, because these formats is not consistent among
   // platforms.
   spec_list.insert(spec_list.end(), {L"%c", L"%Ec", L"%r"});
-#elif defined(__MINGW32__) && !defined(_UCRT)
+#elif !FMT_HAS_C99_STRFTIME
   // Only C89 conversion specifiers when using MSVCRT instead of UCRT
   spec_list = {L"%%", L"%Y", L"%y", L"%b", L"%B", L"%m", L"%U",
                L"%W", L"%j", L"%d", L"%a", L"%A", L"%w", L"%H",
-               L"%I", L"%M", L"%S", L"%x", L"%X", L"%p", L"%Z"};
+               L"%I", L"%M", L"%S", L"%x", L"%X", L"%p"};
 #endif
   spec_list.push_back(L"%Y-%m-%d %H:%M:%S");
 
@@ -316,6 +323,53 @@ TEST(chrono_test_wchar, time_point) {
     auto fmt_spec = fmt::format(L"{{:{}}}", spec);
     EXPECT_EQ(sys_output, fmt::format(fmt::runtime(fmt_spec), t1));
     EXPECT_EQ(sys_output, fmt::format(fmt::runtime(fmt_spec), tm));
+  }
+
+  // Timezone formatters tests makes sense for localtime.
+#if FMT_HAS_C99_STRFTIME
+  spec_list = {L"%z", L"%Z"};
+#else
+  spec_list = {L"%Z"};
+#endif
+  for (const auto& spec : spec_list) {
+    auto t = std::chrono::system_clock::to_time_t(t1);
+    auto tm = *std::localtime(&t);
+
+    auto sys_output = system_wcsftime(spec, &tm);
+
+    auto fmt_spec = fmt::format(L"{{:{}}}", spec);
+    EXPECT_EQ(sys_output, fmt::format(fmt::runtime(fmt_spec), tm));
+
+    if (spec == L"%z") {
+      sys_output.insert(sys_output.end() - 2, 1, L':');
+      EXPECT_EQ(sys_output, fmt::format(L"{:%Ez}", tm));
+      EXPECT_EQ(sys_output, fmt::format(L"{:%Oz}", tm));
+    }
+  }
+
+  // Separate tests for UTC, since std::time_put can use local time and ignoring
+  // the timezone in std::tm (if it presents on platform).
+  if (fmt::detail::has_member_data_tm_zone<std::tm>::value) {
+    auto t = std::chrono::system_clock::to_time_t(t1);
+    auto tm = *std::gmtime(&t);
+
+    std::vector<std::wstring> tz_names = {L"GMT", L"UTC"};
+    EXPECT_THAT(tz_names, Contains(fmt::format(L"{:%Z}", t1)));
+    EXPECT_THAT(tz_names, Contains(fmt::format(L"{:%Z}", tm)));
+  }
+
+  if (fmt::detail::has_member_data_tm_gmtoff<std::tm>::value) {
+    auto t = std::chrono::system_clock::to_time_t(t1);
+    auto tm = *std::gmtime(&t);
+
+    EXPECT_EQ(L"+0000", fmt::format(L"{:%z}", t1));
+    EXPECT_EQ(L"+0000", fmt::format(L"{:%z}", tm));
+
+    EXPECT_EQ(L"+00:00", fmt::format(L"{:%Ez}", t1));
+    EXPECT_EQ(L"+00:00", fmt::format(L"{:%Ez}", tm));
+
+    EXPECT_EQ(L"+00:00", fmt::format(L"{:%Oz}", t1));
+    EXPECT_EQ(L"+00:00", fmt::format(L"{:%Oz}", tm));
   }
 }
 
@@ -464,13 +518,10 @@ template <class charT> struct formatter<std::complex<double>, charT> {
  public:
   FMT_CONSTEXPR typename basic_format_parse_context<charT>::iterator parse(
       basic_format_parse_context<charT>& ctx) {
-    using handler_type =
-        detail::dynamic_specs_handler<basic_format_parse_context<charT>>;
-    detail::specs_checker<handler_type> handler(handler_type(specs_, ctx),
-                                                detail::type::string_type);
-    auto it = parse_format_specs(ctx.begin(), ctx.end(), handler);
-    detail::parse_float_type_spec(specs_, ctx.error_handler());
-    return it;
+    auto end = parse_format_specs(ctx.begin(), ctx.end(), specs_, ctx,
+                                  detail::type::string_type);
+    detail::parse_float_type_spec(specs_, detail::error_handler());
+    return end;
   }
 
   template <class FormatContext>

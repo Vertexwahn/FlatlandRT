@@ -799,6 +799,17 @@ TEST(format_test, zero_flag) {
       format_error, "format specifier requires numeric argument");
 }
 
+TEST(format_test, zero_flag_and_align) {
+  // If the 0 character and an align option both appear, the 0 character is
+  // ignored.
+  EXPECT_EQ("42   ", fmt::format("{0:<05}", 42));
+  EXPECT_EQ("-42  ", fmt::format("{0:<05}", -42));
+  EXPECT_EQ(" 42  ", fmt::format("{0:^05}", 42));
+  EXPECT_EQ(" -42 ", fmt::format("{0:^05}", -42));
+  EXPECT_EQ("   42", fmt::format("{0:>05}", 42));
+  EXPECT_EQ("  -42", fmt::format("{0:>05}", -42));
+}
+
 TEST(format_test, width) {
   char format_str[buffer_size];
   safe_sprintf(format_str, "{0:%u", UINT_MAX);
@@ -833,7 +844,7 @@ TEST(format_test, width) {
   EXPECT_EQ(fmt::format("{:*^8}", "你好"), "**你好**");
   EXPECT_EQ(fmt::format("{:#6}", 42.0), "  42.0");
   EXPECT_EQ(fmt::format("{:6c}", static_cast<int>('x')), "x     ");
-  EXPECT_EQ(fmt::format("{:>06.0f}", 0.00884311), "000000");
+  EXPECT_EQ(fmt::format("{:>06.0f}", 0.00884311), "     0");
 }
 
 TEST(format_test, runtime_width) {
@@ -918,9 +929,9 @@ TEST(format_test, precision) {
                    "number is too big");
 
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0:."), 0), format_error,
-                   "missing precision specifier");
+                   "missing precision");
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.}"), 0), format_error,
-                   "missing precision specifier");
+                   "missing precision");
 
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.2"), 0), format_error,
                    "precision not allowed for this argument type");
@@ -1047,50 +1058,50 @@ TEST(format_test, runtime_precision) {
   char format_str[buffer_size];
   safe_sprintf(format_str, "{0:.{%u", UINT_MAX);
   increment(format_str + 5);
-  EXPECT_THROW_MSG((void)fmt::format(runtime(format_str), 0), format_error,
+  EXPECT_THROW_MSG((void)fmt::format(runtime(format_str), 0.0), format_error,
                    "invalid format string");
   size_t size = std::strlen(format_str);
   format_str[size] = '}';
   format_str[size + 1] = 0;
-  EXPECT_THROW_MSG((void)fmt::format(runtime(format_str), 0), format_error,
+  EXPECT_THROW_MSG((void)fmt::format(runtime(format_str), 0.0), format_error,
                    "argument not found");
   format_str[size + 1] = '}';
   format_str[size + 2] = 0;
-  EXPECT_THROW_MSG((void)fmt::format(runtime(format_str), 0), format_error,
+  EXPECT_THROW_MSG((void)fmt::format(runtime(format_str), 0.0), format_error,
                    "argument not found");
 
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{"), 0), format_error,
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{"), 0.0), format_error,
                    "invalid format string");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{}"), 0), format_error,
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{}"), 0.0), format_error,
                    "cannot switch from manual to automatic argument indexing");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{?}}"), 0), format_error,
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{?}}"), 0.0), format_error,
                    "invalid format string");
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}"), 0, 0), format_error,
                    "precision not allowed for this argument type");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0), format_error,
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0.0), format_error,
                    "argument not found");
 
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{0:}}"), 0), format_error,
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{0:}}"), 0.0), format_error,
                    "invalid format string");
 
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0, -1), format_error,
-                   "negative precision");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0, (INT_MAX + 1u)),
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0.0, -1),
+                   format_error, "negative precision");
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0.0, (INT_MAX + 1u)),
                    format_error, "number is too big");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0, -1l), format_error,
-                   "negative precision");
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0.0, -1l),
+                   format_error, "negative precision");
   if (fmt::detail::const_check(sizeof(long) > sizeof(int))) {
     long value = INT_MAX;
-    EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0, (value + 1)),
+    EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0.0, (value + 1)),
                      format_error, "number is too big");
   }
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0, (INT_MAX + 1ul)),
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0.0, (INT_MAX + 1ul)),
                    format_error, "number is too big");
 
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0, '0'), format_error,
-                   "precision is not integer");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0, 0.0), format_error,
-                   "precision is not integer");
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0.0, '0'),
+                   format_error, "precision is not integer");
+  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0.0, 0.0),
+                   format_error, "precision is not integer");
 
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 42, 2), format_error,
                    "precision not allowed for this argument type");
@@ -1974,46 +1985,6 @@ TEST(format_test, non_null_terminated_format_string) {
   EXPECT_EQ("42", fmt::format(string_view("{}foo", 2), 42));
 }
 
-struct variant {
-  enum { int_type, string_type } type;
-  explicit variant(int) : type(int_type) {}
-  explicit variant(const char*) : type(string_type) {}
-};
-
-FMT_BEGIN_NAMESPACE
-template <> struct formatter<variant> : dynamic_formatter<> {
-  auto format(variant value, format_context& ctx) -> decltype(ctx.out()) {
-    if (value.type == variant::int_type)
-      return dynamic_formatter<>::format(42, ctx);
-    return dynamic_formatter<>::format("foo", ctx);
-  }
-};
-FMT_END_NAMESPACE
-
-TEST(format_test, dynamic_formatter) {
-  auto num = variant(42);
-  auto str = variant("foo");
-  EXPECT_EQ("42", fmt::format("{:d}", num));
-  EXPECT_EQ("foo", fmt::format("{:s}", str));
-  EXPECT_EQ(" 42 foo ", fmt::format("{:{}} {:{}}", num, 3, str, 4));
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{0:{}}"), num), format_error,
-                   "cannot switch from manual to automatic argument indexing");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{:{0}}"), num), format_error,
-                   "cannot switch from automatic to manual argument indexing");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{:+}"), str), format_error,
-                   "format specifier requires numeric argument");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{:-}"), str), format_error,
-                   "format specifier requires numeric argument");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{: }"), str), format_error,
-                   "format specifier requires numeric argument");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{:#}"), str), format_error,
-                   "format specifier requires numeric argument");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{:0}"), str), format_error,
-                   "format specifier requires numeric argument");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{:.2}"), num), format_error,
-                   "precision not allowed for this argument type");
-}
-
 namespace adl_test {
 namespace fmt {
 namespace detail {
@@ -2046,6 +2017,10 @@ TEST(format_test, to_string) {
 
 #if FMT_USE_FLOAT128
   EXPECT_EQ(fmt::to_string(__float128(0.5)), "0.5");
+#endif
+
+#if defined(FMT_USE_STRING_VIEW) && FMT_CPLUSPLUS >= 201703L
+  EXPECT_EQ(fmt::to_string(std::string_view()), "");
 #endif
 }
 
@@ -2163,118 +2138,6 @@ TEST(format_test, format_to_n_output_iterator) {
   EXPECT_STREQ(buf, "42");
 }
 
-#if FMT_USE_CONSTEXPR
-struct test_error_handler {
-  const char*& error;
-
-  FMT_CONSTEXPR test_error_handler(const char*& err) : error(err) {}
-
-  FMT_CONSTEXPR test_error_handler(const test_error_handler& other)
-      : error(other.error) {}
-
-  FMT_CONSTEXPR void on_error(const char* message) {
-    if (!error) error = message;
-  }
-};
-
-FMT_CONSTEXPR size_t len(const char* s) {
-  size_t len = 0;
-  while (*s++) ++len;
-  return len;
-}
-
-FMT_CONSTEXPR bool equal(const char* s1, const char* s2) {
-  if (!s1 || !s2) return s1 == s2;
-  while (*s1 && *s1 == *s2) {
-    ++s1;
-    ++s2;
-  }
-  return *s1 == *s2;
-}
-
-template <typename... Args>
-FMT_CONSTEXPR bool test_error(const char* fmt, const char* expected_error) {
-  const char* actual_error = nullptr;
-  auto s = string_view(fmt, len(fmt));
-  auto checker =
-      fmt::detail::format_string_checker<char, test_error_handler, Args...>(
-          s, test_error_handler(actual_error));
-  fmt::detail::parse_format_string<true>(s, checker);
-  return equal(actual_error, expected_error);
-}
-
-#  define EXPECT_ERROR_NOARGS(fmt, error) \
-    static_assert(test_error(fmt, error), "")
-#  define EXPECT_ERROR(fmt, error, ...) \
-    static_assert(test_error<__VA_ARGS__>(fmt, error), "")
-
-TEST(format_test, format_string_errors) {
-  EXPECT_ERROR_NOARGS("foo", nullptr);
-  EXPECT_ERROR_NOARGS("}", "unmatched '}' in format string");
-  EXPECT_ERROR("{0:s", "unknown format specifier", date);
-#  if !FMT_MSC_VERSION || FMT_MSC_VERSION >= 1916
-  // This causes an detail compiler error in MSVC2017.
-  EXPECT_ERROR("{:{<}", "invalid fill character '{'", int);
-  EXPECT_ERROR("{:10000000000}", "number is too big", int);
-  EXPECT_ERROR("{:.10000000000}", "number is too big", int);
-  EXPECT_ERROR_NOARGS("{:x}", "argument not found");
-  EXPECT_ERROR("{:+}", "format specifier requires numeric argument",
-               const char*);
-  EXPECT_ERROR("{:-}", "format specifier requires numeric argument",
-               const char*);
-  EXPECT_ERROR("{:#}", "format specifier requires numeric argument",
-               const char*);
-  EXPECT_ERROR("{: }", "format specifier requires numeric argument",
-               const char*);
-  EXPECT_ERROR("{:0}", "format specifier requires numeric argument",
-               const char*);
-  EXPECT_ERROR("{:+}", "format specifier requires signed argument", unsigned);
-  EXPECT_ERROR("{:-}", "format specifier requires signed argument", unsigned);
-  EXPECT_ERROR("{: }", "format specifier requires signed argument", unsigned);
-  EXPECT_ERROR("{:{}}", "argument not found", int);
-  EXPECT_ERROR("{:.{}}", "argument not found", double);
-#    if defined(__cpp_lib_is_constant_evaluated) && !defined(__LCC__)
-  EXPECT_ERROR("{:{}}", "width/precision is not integer", int, double);
-#    endif
-  EXPECT_ERROR("{:.2}", "precision not allowed for this argument type", int);
-  EXPECT_ERROR("{:s}", "invalid type specifier", int);
-  EXPECT_ERROR("{:s}", "invalid type specifier", char);
-  EXPECT_ERROR("{:+}", "invalid format specifier for char", char);
-  EXPECT_ERROR("{:s}", "invalid type specifier", double);
-  EXPECT_ERROR("{:d}", "invalid type specifier", const char*);
-  EXPECT_ERROR("{:d}", "invalid type specifier", std::string);
-  EXPECT_ERROR("{:s}", "invalid type specifier", void*);
-#  else
-  fmt::print("warning: constexpr is broken in this version of MSVC\n");
-#  endif
-#  if FMT_USE_NONTYPE_TEMPLATE_ARGS
-  using namespace fmt::literals;
-  EXPECT_ERROR("{foo}", "named argument is not found", decltype("bar"_a = 42));
-  EXPECT_ERROR("{foo}", "named argument is not found",
-               decltype(fmt::arg("foo", 42)));
-#  else
-  EXPECT_ERROR("{foo}",
-               "compile-time checks for named arguments require C++20 support",
-               int);
-#  endif
-  EXPECT_ERROR_NOARGS("{10000000000}", "argument not found");
-  EXPECT_ERROR_NOARGS("{0x}", "invalid format string");
-  EXPECT_ERROR_NOARGS("{-}", "invalid format string");
-  EXPECT_ERROR("{:{0x}}", "invalid format string", int);
-  EXPECT_ERROR("{:{-}}", "invalid format string", int);
-  EXPECT_ERROR("{:.{0x}}", "invalid format string", int);
-  EXPECT_ERROR("{:.{-}}", "invalid format string", int);
-  EXPECT_ERROR("{:.x}", "missing precision specifier", int);
-  EXPECT_ERROR_NOARGS("{}", "argument not found");
-  EXPECT_ERROR("{1}", "argument not found", int);
-  EXPECT_ERROR("{1}{}",
-               "cannot switch from manual to automatic argument indexing", int,
-               int);
-  EXPECT_ERROR("{}{1}",
-               "cannot switch from automatic to manual argument indexing", int,
-               int);
-}
-
 TEST(format_test, vformat_to) {
   using context = fmt::format_context;
   fmt::basic_format_arg<context> arg = fmt::detail::make_arg<context>(42);
@@ -2286,8 +2149,6 @@ TEST(format_test, vformat_to) {
   fmt::vformat_to(std::back_inserter(s), FMT_STRING("{}"), args);
   EXPECT_EQ("42", s);
 }
-
-#endif  // FMT_USE_CONSTEXPR
 
 TEST(format_test, char_traits_is_not_ambiguous) {
   // Test that we don't inject detail names into the std namespace.
@@ -2389,11 +2250,11 @@ class format_facet : public fmt::format_facet<std::locale> {
   };
 
   auto do_put(fmt::appender out, fmt::loc_value val,
-              const fmt::format_specs&) const -> bool override;
+              const fmt::format_specs<>&) const -> bool override;
 };
 
 auto format_facet::do_put(fmt::appender out, fmt::loc_value val,
-                          const fmt::format_specs&) const -> bool {
+                          const fmt::format_specs<>&) const -> bool {
   return val.visit(int_formatter{out});
 }
 
