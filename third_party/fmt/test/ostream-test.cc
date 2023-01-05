@@ -86,13 +86,13 @@ TEST(ostream_test, format_specs) {
   EXPECT_EQ(" def ", fmt::format("{0:^5}", test_string("def")));
   EXPECT_EQ("def**", fmt::format("{0:*<5}", test_string("def")));
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0:+}"), test_string()),
-                   format_error, "format specifier requires numeric argument");
+                   format_error, "invalid format specifier");
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0:-}"), test_string()),
-                   format_error, "format specifier requires numeric argument");
+                   format_error, "invalid format specifier");
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0: }"), test_string()),
-                   format_error, "format specifier requires numeric argument");
+                   format_error, "invalid format specifier");
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0:#}"), test_string()),
-                   format_error, "format specifier requires numeric argument");
+                   format_error, "invalid format specifier");
   EXPECT_THROW_MSG((void)fmt::format(runtime("{0:05}"), test_string()),
                    format_error, "format specifier requires numeric argument");
   EXPECT_EQ("test         ", fmt::format("{0:13}", test_string("test")));
@@ -240,21 +240,6 @@ std::ostream& operator<<(std::ostream& os, streamable_and_convertible_to_bool) {
 TEST(ostream_test, format_convertible_to_bool) {
   // operator<< is intentionally not used because of potential ODR violations.
   EXPECT_EQ(fmt::format("{}", streamable_and_convertible_to_bool()), "true");
-}
-
-struct streamable_and_convertible_to_string_view {
-  operator fmt::string_view() const { return "foo"; }
-};
-
-std::ostream& operator<<(std::ostream& os,
-                         streamable_and_convertible_to_string_view) {
-  return os << "bar";
-}
-
-TEST(ostream_test, format_convertible_to_string_vew) {
-  // operator<< is intentionally not used because of potential ODR violations.
-  EXPECT_EQ(fmt::format("{}", streamable_and_convertible_to_string_view()),
-            "foo");
 }
 
 struct copyfmt_test {};

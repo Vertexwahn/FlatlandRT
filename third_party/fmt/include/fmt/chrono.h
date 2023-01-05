@@ -558,6 +558,49 @@ inline std::tm gmtime(
 
 FMT_BEGIN_DETAIL_NAMESPACE
 
+// DEPRECATED!
+template <typename Char>
+FMT_CONSTEXPR auto parse_align(const Char* begin, const Char* end,
+                               format_specs<Char>& specs) -> const Char* {
+  FMT_ASSERT(begin != end, "");
+  auto align = align::none;
+  auto p = begin + code_point_length(begin);
+  if (end - p <= 0) p = begin;
+  for (;;) {
+    switch (to_ascii(*p)) {
+    case '<':
+      align = align::left;
+      break;
+    case '>':
+      align = align::right;
+      break;
+    case '^':
+      align = align::center;
+      break;
+    }
+    if (align != align::none) {
+      if (p != begin) {
+        auto c = *begin;
+        if (c == '}') return begin;
+        if (c == '{') {
+          throw_format_error("invalid fill character '{'");
+          return begin;
+        }
+        specs.fill = {begin, to_unsigned(p - begin)};
+        begin = p + 1;
+      } else {
+        ++begin;
+      }
+      break;
+    } else if (p == begin) {
+      break;
+    }
+    p = begin;
+  }
+  specs.align = align;
+  return begin;
+}
+
 // Writes two-digit numbers a, b and c separated by sep to buf.
 // The method by Pavel Novikov based on
 // https://johnnylee-sde.github.io/Fast-unsigned-integer-to-time-string/.
@@ -2010,11 +2053,7 @@ struct formatter<std::chrono::duration<Rep, Period>, Char> {
     auto begin = ctx.begin(), end = ctx.end();
     if (begin == end || *begin == '}') return {begin, begin};
 
-    auto align_result = detail::parse_align(begin, end);
-    specs.align = align_result.align;
-    auto fill_size = align_result.end - begin - 1;
-    if (fill_size > 0) specs.fill = {begin, detail::to_unsigned(fill_size)};
-    begin = align_result.end;
+    begin = detail::parse_align(begin, end, specs);
     if (begin == end) return {begin, begin};
 
     begin = detail::parse_dynamic_spec(begin, end, specs.width, width_ref, ctx);

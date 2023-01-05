@@ -120,10 +120,12 @@ struct custom_char {
   template <typename T>
   constexpr custom_char(T val) : value(static_cast<int>(val)) {}
 
-  operator int() const { return value; }
+  operator char() const {
+    return value <= 0xff ? static_cast<char>(value) : '\0';
+  }
 };
 
-int to_ascii(custom_char c) { return c; }
+auto to_ascii(custom_char c) -> char { return c; }
 
 FMT_BEGIN_NAMESPACE
 template <> struct is_char<custom_char> : std::true_type {};
@@ -519,7 +521,7 @@ template <class charT> struct formatter<std::complex<double>, charT> {
   FMT_CONSTEXPR typename basic_format_parse_context<charT>::iterator parse(
       basic_format_parse_context<charT>& ctx) {
     auto end = parse_format_specs(ctx.begin(), ctx.end(), specs_, ctx,
-                                  detail::type::string_type);
+                                  detail::type::float_type);
     detail::parse_float_type_spec(specs_, detail::error_handler());
     return end;
   }
