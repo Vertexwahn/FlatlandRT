@@ -1,7 +1,7 @@
 // copy https://github.com/mitsuba-renderer/drjit/blob/77d2873a38d50a8d195bdcb3f2292f12987b0040/include/drjit/tensor.h#L187
 
 /*
- *  SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 

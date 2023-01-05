@@ -1,5 +1,5 @@
 """
-    SPDX-FileCopyrightText: 2022 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
@@ -32,10 +32,10 @@ cc_library(
     deps = [
         ":intersector",
         "//core:logging",
-        "//math:axis_aligned_bounding_box",
-        "//math:util",
         "//flatland/rendering/scene/shape:polygon",
         "//flatland/rendering/scene/shape:triangle_mesh",
+        "//math:axis_aligned_bounding_box",
+        "//math:util",
     ],
 )
 
