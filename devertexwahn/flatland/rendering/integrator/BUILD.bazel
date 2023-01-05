@@ -17,6 +17,7 @@ cc_library(
 
 cc_test(
     name = "ambient_occlusion_test",
+    size = "small",
     srcs = [
         "ambient_occlusion_test.cpp",
     ],
@@ -52,6 +53,7 @@ cc_library(
 
 cc_test(
     name = "path_mirror_reflection_test",
+    size = "small",
     srcs = [
         "path_mirror_reflection_test.cpp",
     ],
@@ -76,6 +78,7 @@ cc_library(
 
 cc_test(
     name = "path_specular_transmission_test",
+    size = "small",
     srcs = [
         "path_specular_transmission_test.cpp",
     ],

@@ -40,6 +40,7 @@ cc_library(
 
 cc_test(
     name = "load_scene_test",
+    size = "small",
     srcs = ["load_scene_test.cpp"],
     data = [
         "//flatland/scenes",

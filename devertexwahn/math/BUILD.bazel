@@ -16,6 +16,7 @@ cc_library(
 
 cc_test(
     name = "axis_aligned_bounding_box_test",
+    size = "small",
     srcs = [
         "axis_aligned_bounding_box_test.cpp",
     ],
@@ -37,6 +38,7 @@ cc_library(
 
 cc_test(
     name = "frame_test",
+    size = "small",
     srcs = [
         "frame_test.cpp",
     ],
@@ -61,6 +63,7 @@ cc_library(
 
 cc_test(
     name = "geometry_test",
+    size = "small",
     srcs = [
         "geometry_test.cpp",
     ],
@@ -86,6 +89,7 @@ cc_library(
 
 cc_test(
     name = "intersection_test",
+    size = "small",
     srcs = [
         "intersection_test.cpp",
     ],
@@ -106,6 +110,7 @@ cc_library(
 
 cc_test(
     name = "matrix_test",
+    size = "small",
     srcs = [
         "matrix_test.cpp",
     ],
@@ -126,6 +131,7 @@ cc_library(
 
 cc_test(
     name = "normal_test",
+    size = "small",
     srcs = [
         "normal_test.cpp",
     ],
@@ -146,6 +152,7 @@ cc_library(
 
 cc_test(
     name = "point_test",
+    size = "small",
     srcs = [
         "point_test.cpp",
     ],
@@ -168,6 +175,7 @@ cc_library(
 
 cc_test(
     name = "ray_test",
+    size = "small",
     srcs = [
         "ray_test.cpp",
     ],
@@ -190,6 +198,7 @@ cc_library(
 
 cc_test(
     name = "refract_test",
+    size = "small",
     srcs = [
         "refract_test.cpp",
     ],
@@ -211,6 +220,7 @@ cc_library(
 
 cc_test(
     name = "tensor_test",
+    size = "small",
     srcs = ["tensor_test.cpp"],
     deps = [
         ":tensor",
@@ -232,6 +242,7 @@ cc_library(
 
 cc_test(
     name = "transform_test",
+    size = "small",
     srcs = [
         "transform_test.cpp",
     ],
@@ -253,6 +264,7 @@ cc_library(
 
 cc_test(
     name = "util_test",
+    size = "small",
     srcs = [
         "util_test.cpp",
     ],
@@ -273,6 +285,7 @@ cc_library(
 
 cc_test(
     name = "vector_test",
+    size = "small",
     srcs = [
         "vector_test.cpp",
     ],
@@ -295,6 +308,7 @@ cc_library(
 
 cc_test(
     name = "warping_test",
+    size = "small",
     srcs = [
         "warping_test.cpp",
     ],

@@ -17,6 +17,7 @@ cc_library(
 
 cc_test(
     name = "disk_test",
+    size = "small",
     srcs = [
         "disk_test.cpp",
     ],
@@ -38,6 +39,7 @@ cc_library(
 
 cc_test(
     name = "emitter_test",
+    size = "small",
     srcs = ["emitter_test.cpp"],
     deps = [
         ":emitter",
@@ -57,6 +59,7 @@ cc_library(
 
 cc_test(
     name = "polygon_test",
+    size = "small",
     srcs = [
         "polygon_test.cpp",
     ],
@@ -78,6 +81,7 @@ cc_library(
 
 cc_test(
     name = "rectangle_test",
+    size = "small",
     srcs = [
         "rectangle_test.cpp",
     ],
@@ -89,6 +93,7 @@ cc_test(
 
 cc_test(
     name = "rectangle_test_via_catch2",
+    size = "small",
     timeout = "short",
     srcs = [
         "rectangle_test_via_catch2.cpp",
@@ -114,6 +119,7 @@ cc_library(
 
 cc_test(
     name = "shape_test",
+    size = "small",
     srcs = [
         "shape_test.cpp",
     ],
@@ -136,6 +142,7 @@ cc_library(
 
 cc_test(
     name = "triangle_mesh_test",
+    size = "small",
     srcs = [
         "triangle_mesh_test.cpp",
     ],

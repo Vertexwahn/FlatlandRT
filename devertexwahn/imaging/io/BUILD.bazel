@@ -18,6 +18,7 @@ cc_library(
 
 cc_test(
     name = "io_jpeg_test",
+    size = "small",
     srcs = [
         "io_jpeg_test.cpp",
     ],
@@ -45,6 +46,7 @@ cc_library(
 
 cc_test(
     name = "io_test",
+    size = "small",
     srcs = [
         "io_test.cpp",
     ],
@@ -67,6 +69,7 @@ cc_library(
 
 cc_test(
     name = "io_openexr_test",
+    size = "small",
     srcs = [
         "io_openexr_test.cpp",
     ],
@@ -90,6 +93,7 @@ cc_library(
 
 cc_test(
     name = "io_png_test",
+    size = "small",
     srcs = ["io_png_test.cpp"],
     deps = [
         ":io_png",
@@ -109,6 +113,7 @@ cc_library(
 
 cc_test(
     name = "io_ppm_test",
+    size = "small",
     srcs = ["io_ppm_test.cpp"],
     deps = [
         ":io_ppm",

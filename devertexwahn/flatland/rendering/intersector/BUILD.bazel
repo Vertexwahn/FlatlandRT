@@ -41,6 +41,7 @@ cc_library(
 
 cc_test(
     name = "quadtree_intersector_test",
+    size = "small",
     srcs = [
         "quadtree_intersector_test.cpp",
     ],

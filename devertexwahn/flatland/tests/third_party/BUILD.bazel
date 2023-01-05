@@ -5,6 +5,7 @@
 
 cc_test(
     name = "boost_algorithm_test",
+    size = "small",
     srcs = [
         "boost_algorithm_test.cpp",
     ],
@@ -16,6 +17,7 @@ cc_test(
 
 cc_test(
     name = "boost_predef_test",
+    size = "small",
     srcs = [
         "boost_predef_test.cpp",
     ],
@@ -39,6 +41,7 @@ cc_test(
 
 cc_test(
     name = "eigen_test",
+    size = "small",
     srcs = [
         "eigen_test.cpp",
     ],
@@ -53,6 +56,7 @@ cc_test(
 
 cc_test(
     name = "pcg_test",
+    size = "small",
     srcs = [
         "pcg_test.cpp",
     ],
@@ -64,6 +68,7 @@ cc_test(
 
 cc_test(
     name = "pugixml_test",
+    size = "small",
     srcs = [
         "pugixml_test.cpp",
     ],
@@ -76,6 +81,7 @@ cc_test(
 
 cc_test(
     name = "stl_test",
+    size = "small",
     srcs = [
         "stl_test.cpp",
     ],

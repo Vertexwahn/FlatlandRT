@@ -5,6 +5,7 @@
 
 cc_test(
     name = "libjpeg_turbo_test",
+    size = "small",
     srcs = ["libjpeg_turbo_test.cpp"],
     deps = [
         "@com_google_googletest//:gtest_main",
@@ -14,6 +15,7 @@ cc_test(
 
 cc_test(
     name = "libpng_test",
+    size = "small",
     srcs = ["libpng_test.cpp"],
     deps = [
         "@com_google_googletest//:gtest_main",
@@ -23,6 +25,7 @@ cc_test(
 
 cc_test(
     name = "openexr_test",
+    size = "small",
     srcs = [
         "openexr_test.cpp",
     ],
@@ -35,6 +38,7 @@ cc_test(
 
 cc_test(
     name = "png_test",
+    size = "small",
     srcs = [
         "png_test.cpp",
     ],
@@ -49,6 +53,7 @@ cc_test(
 
 cc_test(
     name = "zlib_test",
+    size = "small",
     srcs = [
         "zlib_test.cpp",
     ],

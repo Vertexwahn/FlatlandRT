@@ -23,6 +23,7 @@ cc_library(
 
 cc_test(
     name = "svg_canvas_test",
+    size = "small",
     srcs = [
         "svg_canvas_test.cpp",
     ],
