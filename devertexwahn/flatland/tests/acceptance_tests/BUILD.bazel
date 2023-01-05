@@ -6,7 +6,6 @@
 sh_test(
     name = "acceptance_test",
     size = "small",
-    timeout = "moderate",
     srcs = ["test_render_scenes.sh"],
     data = [
         "//flatland/cli:flatland.cli",
