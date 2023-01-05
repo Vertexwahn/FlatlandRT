@@ -16,7 +16,12 @@ fi
 
 additional_bazel_config=$1 
 
-bazel coverage --config=gcc11 --config=${additional_bazel_config} --instrumentation_filter="[:]" --instrument_test_targets=true --combined_report=lcov --java_runtime_version=remotejdk_11 -- //... 
+bazel coverage \
+--config=gcc11 \
+--instrument_test_targets=true \
+--config=${additional_bazel_config} \
+--combined_report=lcov \
+-- //...
 
 output_path=$(bazel info output_path)
 
@@ -36,4 +41,4 @@ if (( $(echo "$current_line_coverage < $old_line_coverage"|bc -l) )); then
     exit 1
 fi
 
-#xdg-open coverage_report/index.html
+#open coverage_report/index.html
