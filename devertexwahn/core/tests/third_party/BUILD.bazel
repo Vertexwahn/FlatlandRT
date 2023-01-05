@@ -5,6 +5,7 @@
 
 cc_test(
     name = "fmt_test",
+    size = "small",
     srcs = [
         "fmt_test.cpp",
     ],
@@ -16,6 +17,7 @@ cc_test(
 
 cc_test(
     name = "glog_test",
+    size = "small",
     srcs = [
         "glog_test.cpp",
     ],
