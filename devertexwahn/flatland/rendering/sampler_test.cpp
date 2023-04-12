@@ -34,18 +34,18 @@ TEST(IndependentSampler, GivenSampler_WhenGettingAUniformRandomNumber_ExpectNotA
     ps.add_property("deterministic_seed", true);
     IndependentSampler sampler{ps};
 
-    bool notAlwaysEqual = false;
+    bool not_always_equal = false;
 
     constexpr int rounds = 100000;
     float lastRandomNumber = sampler.next_1d();
     for (int i = 0; i < rounds - 1; ++i) {
         auto random_number = sampler.next_1d();
         if (lastRandomNumber != random_number) {
-            notAlwaysEqual = true;
+            not_always_equal = true;
         }
     }
 
-    EXPECT_TRUE(notAlwaysEqual);
+    EXPECT_TRUE(not_always_equal);
 }
 
 TEST(IndependentSampler, GivenSampler_WhenGettingAUniformPoint_ExpectCertainAverageValue) {
@@ -134,8 +134,24 @@ TEST(IndependentSampler, WhenRequestingNonDeterministicBehaviour_ExpectNonDeterm
     EXPECT_THAT(random_array1, testing::Not(random_array2));
 }
 
+TEST(IndependentSampler, to_string) {
+    PropertySet ps;
+    IndependentSampler sampler{ps};
+
+    EXPECT_THAT(sampler.to_string(), ::testing::HasSubstr("IndependentSampler"));
+}
+
+TEST(IndependentSampler, clone) {
+    PropertySet ps;
+    IndependentSampler sampler{ps};
+
+    auto cloned_sampler = sampler.clone();
+
+    EXPECT_THAT(cloned_sampler->to_string(), ::testing::HasSubstr("IndependentSampler"));
+}
+
 TEST(PixelCenterSampler, GivenPixelCenterSample_WhenRequestingSample_ThenExpectAlwaysCenterPosition) {
-    PixelCenterSampler pcs{{}};
+    StaticDebugSampler pcs{{}};
 
     EXPECT_THAT(pcs.next_1d(), .5f);
     EXPECT_THAT(pcs.next_2d(), Point2f(.5f, .5f));

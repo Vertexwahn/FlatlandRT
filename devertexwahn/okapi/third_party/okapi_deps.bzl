@@ -327,7 +327,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "Imath",
         build_file = "@com_openexr//:bazel/third_party/Imath.BUILD",  # OpenEXR must be fetched first, since it provides the Imath build instructions
-        path = "../third_party/Imath-3.1.6",
+        path = "../third_party/Imath-3.1.7",
     )
 
     # Use git repository from com_github_vertexwahn_openexr
@@ -441,7 +441,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "rules_pkg",
-        path = "../third_party/rules_pkg-0.8.0",
+        path = "../third_party/rules_pkg-0.9.0",
     )
 
     #maybe(
@@ -502,15 +502,14 @@ def okapi_deps():
     maybe(
         native.new_local_repository,
         name = "org_lzma_lzma",
-        build_file = "@com_github_nelhage_rules_boost//:BUILD.lzma",
-        #path = "../third_party/xz-5.2.7",
-        path = "../third_party/xz-5.4.0",
+        build_file = "@com_github_nelhage_rules_boost//:lzma.BUILD",
+        path = "../third_party/xz-5.4.1",
     )
 
     maybe(
         native.new_local_repository,
         name = "org_bzip_bzip2",
-        build_file = "@com_github_nelhage_rules_boost//:BUILD.bzip2",
+        build_file = "@com_github_nelhage_rules_boost//:bzip2.BUILD",
         path = "../third_party/bzip2-1.0.8",
     )
 
@@ -548,10 +547,16 @@ def okapi_deps():
     #    branch = "clang-15-support",
     #)
 
+    #maybe(
+    #    native.local_repository,
+    #    name = "com_grail_bazel_toolchain",
+    #    path = "../third_party/bazel-toolchain",
+    #)
+
     maybe(
         native.local_repository,
         name = "com_grail_bazel_toolchain",
-        path = "../third_party/bazel-toolchain",
+        path = "../third_party/bazel-toolchain-0.8",
     )
 
     #-------------------------------------------------------------------------------------
@@ -597,4 +602,5 @@ def okapi_deps():
     #    strip_prefix = "xtensor-275a4efb0faaa78b3b2132ea001d9167d4382109",
     #    build_file = "//okapi/third_party:xtensor.BUILD",
     #)
+
 

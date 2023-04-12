@@ -1,1 +1,0 @@
-int foocore = 1;

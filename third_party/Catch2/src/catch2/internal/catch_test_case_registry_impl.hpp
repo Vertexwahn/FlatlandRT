@@ -8,15 +8,17 @@
 #ifndef CATCH_TEST_CASE_REGISTRY_IMPL_HPP_INCLUDED
 #define CATCH_TEST_CASE_REGISTRY_IMPL_HPP_INCLUDED
 
-#include <catch2/internal/catch_test_registry.hpp>
+#include <catch2/interfaces/catch_interfaces_testcase.hpp>
 #include <catch2/interfaces/catch_interfaces_config.hpp>
+#include <catch2/internal/catch_unique_ptr.hpp>
 
 #include <vector>
 
 namespace Catch {
 
-    class TestCaseHandle;
     class IConfig;
+    class ITestInvoker;
+    class TestCaseHandle;
     class TestSpec;
 
     std::vector<TestCaseHandle> sortTests( IConfig const& config, std::vector<TestCaseHandle> const& unsortedTestCases );
@@ -49,18 +51,6 @@ namespace Catch {
         std::vector<TestCaseHandle> m_handles;
         mutable TestRunOrder m_currentSortOrder = TestRunOrder::Declared;
         mutable std::vector<TestCaseHandle> m_sortedFunctions;
-    };
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    class TestInvokerAsFunction final : public ITestInvoker {
-        using TestType = void(*)();
-        TestType m_testAsFunction;
-    public:
-        TestInvokerAsFunction(TestType testAsFunction) noexcept:
-            m_testAsFunction(testAsFunction) {}
-
-        void invoke() const override;
     };
 
     ///////////////////////////////////////////////////////////////////////////

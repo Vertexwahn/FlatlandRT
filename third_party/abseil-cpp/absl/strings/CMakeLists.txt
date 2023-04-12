@@ -23,6 +23,7 @@ absl_cc_library(
     "escaping.h"
     "internal/damerau_levenshtein_distance.h"
     "internal/string_constant.h"
+    "internal/has_absl_stringify.h"
     "match.h"
     "numbers.h"
     "str_cat.h"
@@ -412,6 +413,7 @@ absl_cc_library(
     "internal/str_format/arg.h"
     "internal/str_format/bind.h"
     "internal/str_format/checker.h"
+    "internal/str_format/constexpr_parser.h"
     "internal/str_format/extension.h"
     "internal/str_format/float_conversion.h"
     "internal/str_format/output.h"
@@ -602,7 +604,9 @@ absl_cc_library(
     absl::base_internal
     absl::compressed_tuple
     absl::config
+    absl::container_memory
     absl::core_headers
+    absl::crc_cord_state
     absl::endian
     absl::inlined_vector
     absl::layout
@@ -741,6 +745,7 @@ absl_cc_library(
     absl::raw_logging_internal
     absl::stacktrace
     absl::synchronization
+    absl::time
 )
 
 absl_cc_test(
@@ -781,6 +786,7 @@ absl_cc_test(
     absl::cordz_statistics
     absl::cordz_update_scope
     absl::cordz_update_tracker
+    absl::crc_cord_state
     absl::thread_pool
     GTest::gmock_main
 )
@@ -880,6 +886,7 @@ absl_cc_library(
     absl::cordz_update_scope
     absl::cordz_update_tracker
     absl::core_headers
+    absl::crc_cord_state
     absl::endian
     absl::fixed_array
     absl::function_ref
@@ -1052,6 +1059,7 @@ absl_cc_test(
     absl::config
     absl::cord_internal
     absl::cord_rep_test_util
+    absl::crc_cord_state
     GTest::gmock_main
 )
 

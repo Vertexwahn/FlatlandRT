@@ -58,6 +58,8 @@ using absl::cord_internal::CordRepSubstring;
 using absl::cord_internal::CordzUpdateTracker;
 using absl::cord_internal::kFlatOverhead;
 using absl::cord_internal::kMaxFlatLength;
+using ::testing::ElementsAre;
+using ::testing::Le;
 
 static std::string RandomLowercaseString(RandomEngine* rng);
 static std::string RandomLowercaseString(RandomEngine* rng, size_t length);
@@ -618,7 +620,7 @@ TEST_P(CordTest, AppendEmptyBufferToTree) {
 TEST_P(CordTest, AppendSmallBuffer) {
   absl::Cord cord;
   absl::CordBuffer buffer = absl::CordBuffer::CreateWithDefaultLimit(3);
-  ASSERT_THAT(buffer.capacity(), ::testing::Le(15));
+  ASSERT_THAT(buffer.capacity(), Le(15));
   memcpy(buffer.data(), "Abc", 3);
   buffer.SetLength(3);
   cord.Append(std::move(buffer));
@@ -632,7 +634,7 @@ TEST_P(CordTest, AppendSmallBuffer) {
   EXPECT_EQ(buffer.length(), 0);    // NOLINT
   EXPECT_GT(buffer.capacity(), 0);  // NOLINT
 
-  EXPECT_THAT(cord.Chunks(), ::testing::ElementsAre("Abcdefgh"));
+  EXPECT_THAT(cord.Chunks(), ElementsAre("Abcdefgh"));
 }
 
 TEST_P(CordTest, AppendAndPrependBufferArePrecise) {
@@ -671,7 +673,7 @@ TEST_P(CordTest, AppendAndPrependBufferArePrecise) {
 TEST_P(CordTest, PrependSmallBuffer) {
   absl::Cord cord;
   absl::CordBuffer buffer = absl::CordBuffer::CreateWithDefaultLimit(3);
-  ASSERT_THAT(buffer.capacity(), ::testing::Le(15));
+  ASSERT_THAT(buffer.capacity(), Le(15));
   memcpy(buffer.data(), "Abc", 3);
   buffer.SetLength(3);
   cord.Prepend(std::move(buffer));
@@ -685,7 +687,7 @@ TEST_P(CordTest, PrependSmallBuffer) {
   EXPECT_EQ(buffer.length(), 0);    // NOLINT
   EXPECT_GT(buffer.capacity(), 0);  // NOLINT
 
-  EXPECT_THAT(cord.Chunks(), ::testing::ElementsAre("defghAbc"));
+  EXPECT_THAT(cord.Chunks(), ElementsAre("defghAbc"));
 }
 
 TEST_P(CordTest, AppendLargeBuffer) {
@@ -707,7 +709,7 @@ TEST_P(CordTest, AppendLargeBuffer) {
   EXPECT_EQ(buffer.length(), 0);    // NOLINT
   EXPECT_GT(buffer.capacity(), 0);  // NOLINT
 
-  EXPECT_THAT(cord.Chunks(), ::testing::ElementsAre(s1, s2));
+  EXPECT_THAT(cord.Chunks(), ElementsAre(s1, s2));
 }
 
 TEST_P(CordTest, PrependLargeBuffer) {
@@ -729,7 +731,7 @@ TEST_P(CordTest, PrependLargeBuffer) {
   EXPECT_EQ(buffer.length(), 0);    // NOLINT
   EXPECT_GT(buffer.capacity(), 0);  // NOLINT
 
-  EXPECT_THAT(cord.Chunks(), ::testing::ElementsAre(s2, s1));
+  EXPECT_THAT(cord.Chunks(), ElementsAre(s2, s1));
 }
 
 class CordAppendBufferTest : public testing::TestWithParam<bool> {
@@ -3057,3 +3059,69 @@ TEST_P(CordTest, ChecksummedEmptyCord) {
   EXPECT_EQ(absl::HashOf(c3), absl::HashOf(absl::Cord()));
   EXPECT_EQ(absl::HashOf(c3), absl::HashOf(absl::string_view()));
 }
+
+#if defined(GTEST_HAS_DEATH_TEST) && defined(ABSL_INTERNAL_CORD_HAVE_SANITIZER)
+
+// Returns an expected poison / uninitialized death message expression.
+const char* MASanDeathExpr() {
+  return "(use-after-poison|use-of-uninitialized-value)";
+}
+
+TEST(CordSanitizerTest, SanitizesEmptyCord) {
+  absl::Cord cord;
+  const char* data = cord.Flatten().data();
+  EXPECT_DEATH(EXPECT_EQ(data[0], 0), MASanDeathExpr());
+}
+
+TEST(CordSanitizerTest, SanitizesSmallCord) {
+  absl::Cord cord("Hello");
+  const char* data = cord.Flatten().data();
+  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
+}
+
+TEST(CordSanitizerTest, SanitizesCordOnSetSSOValue) {
+  absl::Cord cord("String that is too big to be an SSO value");
+  cord = "Hello";
+  const char* data = cord.Flatten().data();
+  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
+}
+
+TEST(CordSanitizerTest, SanitizesCordOnCopyCtor) {
+  absl::Cord src("hello");
+  absl::Cord dst(src);
+  const char* data = dst.Flatten().data();
+  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
+}
+
+TEST(CordSanitizerTest, SanitizesCordOnMoveCtor) {
+  absl::Cord src("hello");
+  absl::Cord dst(std::move(src));
+  const char* data = dst.Flatten().data();
+  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
+}
+
+TEST(CordSanitizerTest, SanitizesCordOnAssign) {
+  absl::Cord src("hello");
+  absl::Cord dst;
+  dst = src;
+  const char* data = dst.Flatten().data();
+  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
+}
+
+TEST(CordSanitizerTest, SanitizesCordOnMoveAssign) {
+  absl::Cord src("hello");
+  absl::Cord dst;
+  dst = std::move(src);
+  const char* data = dst.Flatten().data();
+  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
+}
+
+TEST(CordSanitizerTest, SanitizesCordOnSsoAssign) {
+  absl::Cord src("hello");
+  absl::Cord dst("String that is too big to be an SSO value");
+  dst = src;
+  const char* data = dst.Flatten().data();
+  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
+}
+
+#endif  // GTEST_HAS_DEATH_TEST && ABSL_INTERNAL_CORD_HAVE_SANITIZER

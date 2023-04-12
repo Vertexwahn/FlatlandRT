@@ -44,8 +44,7 @@ Image3f load_image_openexr(std::string_view filename) {
             //return (IEFileCantOpen);
         }
     }
-     */
-
+    */
 
     Imf::Array2D<float> rPixels;
     Imf::Array2D<float> gPixels;

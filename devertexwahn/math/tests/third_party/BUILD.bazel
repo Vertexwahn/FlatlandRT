@@ -1,0 +1,16 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+cc_test(
+    name = "xtensor_test",
+    size = "small",
+    srcs = [
+        "xtensor_test.cpp",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@xtensor",
+    ],
+)

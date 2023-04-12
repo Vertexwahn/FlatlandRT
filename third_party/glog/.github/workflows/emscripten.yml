@@ -7,16 +7,15 @@ jobs:
     defaults:
       run:
         shell: bash
-    name: Emscripten-C++${{matrix.std}}-${{matrix.build_type}}-${{matrix.lib}}-${{matrix.extra}}
+    name: Emscripten-C++${{matrix.std}}-${{matrix.build_type}}-${{matrix.lib}}
     runs-on: ubuntu-latest
     container: emscripten/emsdk
     strategy:
       fail-fast: true
       matrix:
         build_type: [Release, Debug]
-        extra: [no-custom-prefix, custom-prefix]
         lib: [static]
-        std: [98, 11, 14, 17, 20]
+        std: [14, 17, 20]
 
     steps:
       - uses: actions/checkout@v3
@@ -28,11 +27,6 @@ jobs:
             cmake \
             ninja-build
 
-      - name: Setup C++98 Environment
-        if: matrix.std == '98'
-        run: |
-          echo 'CXXFLAGS=-Wno-error=variadic-macros -Wno-error=long-long ${{env.CXXFLAGS}}' >> $GITHUB_ENV
-
       - name: Configure
         env:
           CXXFLAGS: -Wall -Wextra -Wsign-conversion -Wtautological-compare -Wformat-nonliteral -Wundef -Werror -Wno-error=wasm-exception-spec ${{env.CXXFLAGS}}
@@ -40,7 +34,6 @@ jobs:
           cmake -S . -B build_${{matrix.build_type}} \
             -DBUILD_SHARED_LIBS=${{matrix.lib == 'shared'}} \
             -DCMAKE_AR=$(which emar) \
-            -DCMAKE_C_COMPILER=$(which emcc) \
             -DCMAKE_CXX_COMPILER=$(which em++) \
             -DCMAKE_CXX_STANDARD=${{matrix.std}} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -50,7 +43,6 @@ jobs:
             -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
             -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install \
             -DCMAKE_RANLIB=$(which emranlib) \
-            -DWITH_CUSTOM_PREFIX=${{matrix.extra == 'custom-prefix'}} \
             -G Ninja \
             -Werror
 

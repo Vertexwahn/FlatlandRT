@@ -84,7 +84,7 @@ public:
     PropertySetType() = default;
 
     PropertySetType(const std::initializer_list<MapElementType> &list) {
-        for (const auto &element: list) {
+        for (const auto &element : list) {
             property_name_to_value_.emplace(element);
         }
     }
@@ -129,7 +129,7 @@ public:
     }
 
     /*
-     * Sets the value of an existing property. If the property is not exising an exception it thrown.
+     * Sets the value of an existing property. If the property is not existing an exception it thrown.
      */
     template<typename ValueType>
     void set_property(const std::string &name, const ValueType &value) {

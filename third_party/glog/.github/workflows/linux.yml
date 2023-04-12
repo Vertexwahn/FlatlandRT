@@ -7,15 +7,14 @@ jobs:
     defaults:
       run:
         shell: bash
-    name: GCC-C++${{matrix.std}}-${{matrix.build_type}}-${{matrix.lib}}-${{matrix.extra}}
+    name: GCC-C++${{matrix.std}}-${{matrix.build_type}}-${{matrix.lib}}
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
       matrix:
         build_type: [Release, Debug]
-        extra: [no-custom-prefix, custom-prefix]
         lib: [shared, static]
-        std: [98, 11, 14, 17, 20]
+        std: [14, 17, 20]
 
     steps:
       - uses: actions/checkout@v3
@@ -60,11 +59,6 @@ jobs:
           echo 'CXXFLAGS=--coverage' >> $GITHUB_ENV
           echo 'GTest_ROOT=${{github.workspace}}/gtest' >> $GITHUB_ENV
 
-      - name: Setup C++98 Environment
-        if: matrix.std == '98'
-        run: |
-          echo 'CXXFLAGS=-Wno-error=variadic-macros -Wno-error=long-long ${{env.CXXFLAGS}}' >> $GITHUB_ENV
-
       - name: Configure
         env:
           CXXFLAGS: -Wall -Wextra -Wsign-conversion -Wtautological-compare -Wformat-nonliteral -Wundef -Werror ${{env.CXXFLAGS}}
@@ -74,7 +68,6 @@ jobs:
             -DCMAKE_CXX_STANDARD=${{matrix.std}} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install \
-            -DWITH_CUSTOM_PREFIX=${{matrix.extra == 'custom-prefix'}} \
             -G Ninja \
             -Werror
 

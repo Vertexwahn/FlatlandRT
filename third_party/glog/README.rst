@@ -1,9 +1,9 @@
 Google Logging Library
 ======================
 
-|Linux Github actions| |Windows Github actions| |macOS Github actions| |Total alerts| |Language grade: C++| |Codecov|
+|Linux Github actions| |Windows Github actions| |macOS Github actions| |Codecov|
 
-Google Logging (glog) is a C++98 library that implements application-level
+Google Logging (glog) is a C++14 library that implements application-level
 logging. The library provides logging APIs based on C++-style streams and
 various helper macros.
 
@@ -49,7 +49,7 @@ Building from Source
 --------------------
 
 glog supports multiple build systems for compiling the project from
-source: `Bazel <#bazel>`__, `CMake <#cmake>`__, and `vcpkg <#vcpkg>`__.
+source: `Bazel <#bazel>`__, `CMake <#cmake>`__, `vcpkg <#vcpkg>`__, and `conan <#conan>`__.
 
 Bazel
 ~~~~~
@@ -192,6 +192,22 @@ You can download and install glog using the `vcpkg
 The glog port in vcpkg is kept up to date by Microsoft team members and
 community contributors. If the version is out of date, please create an
 issue or pull request on the vcpkg repository.
+
+conan
+~~~~~
+
+You can download and install glog using the `conan
+<https://conan.io>`__ package manager:
+
+.. code:: bash
+
+   pip install conan
+   conan install -r conancenter glob/<glob-version>@
+
+The glog recipe in conan center is kept up to date by conan center index community
+contributors. If the version is out of date, please create an
+issue or pull request on the `conan-center-index
+<https://github.com/conan-io/conan-center-index>`__ repository.
 
 User Guide
 ----------
@@ -414,12 +430,12 @@ for example:
    CHECK_EQ(string("abc")[1], ’b’);
 
 The compiler reports an error if one of the arguments is a pointer and the other
-is :cpp:`NULL`. To work around this, simply :cpp:`static_cast` :cpp:`NULL` to
+is :cpp:`nullptr`. To work around this, simply :cpp:`static_cast` :cpp:`nullptr` to
 the type of the desired pointer.
 
 .. code:: cpp
 
-   CHECK_EQ(some_ptr, static_cast<SomeType*>(NULL));
+   CHECK_EQ(some_ptr, static_cast<SomeType*>(nullptr));
 
 Better yet, use the ``CHECK_NOTNULL`` macro:
 
@@ -445,8 +461,8 @@ aborting the application.
 If you are comparing C strings (:cpp:`char *`), a handy set of macros performs
 case sensitive as well as case insensitive comparisons - ``CHECK_STREQ``,
 ``CHECK_STRNE``, ``CHECK_STRCASEEQ``, and ``CHECK_STRCASENE``. The CASE versions
-are case-insensitive. You can safely pass :cpp:`NULL` pointers for this macro. They
-treat :cpp:`NULL` and any non-:cpp:`NULL` string as not equal. Two :cpp:`NULL`\
+are case-insensitive. You can safely pass :cpp:`nullptr` pointers for this macro. They
+treat :cpp:`nullptr` and any non-:cpp:`nullptr` string as not equal. Two :cpp:`nullptr`\
 s are equal.
 
 Note that both arguments may be temporary strings which are destructed
@@ -534,8 +550,7 @@ Custom Log Prefix Format
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 glog supports changing the format of the prefix attached to log messages by
-receiving a user-provided callback to be used to generate such strings.  That
-feature must be enabled at compile time by the ``WITH_CUSTOM_PREFIX`` flag.
+receiving a user-provided callback to be used to generate such strings.
 
 For each log entry, the callback will be invoked with a ``LogMessageInfo``
 struct containing the severity, filename, line number, thread ID, and time of
@@ -548,7 +563,7 @@ For example:
 
     /* This function writes a prefix that matches glog's default format.
      * (The third parameter can be used to receive user-supplied data, and is
-     * NULL by default.)
+     * nullptr by default.)
      */
     void CustomPrefix(std::ostream &s, const LogMessageInfo &l, void*) {
        s << l.severity[0]
@@ -653,13 +668,13 @@ description of the current state of errno to their output lines. E.g.
 
 .. code:: cpp
 
-   PCHECK(write(1, NULL, 2) >= 0) << "Write NULL failed";
+   PCHECK(write(1, nullptr, 2) >= 0) << "Write nullptr failed";
 
 This check fails with the following error message.
 
 ::
 
-   F0825 185142 test.cc:22] Check failed: write(1, NULL, 2) >= 0 Write NULL failed: Bad address [14]
+   F0825 185142 test.cc:22] Check failed: write(1, nullptr, 2) >= 0 Write nullptr failed: Bad address [14]
 
 Syslog
 ~~~~~~
@@ -871,9 +886,5 @@ Submitting a Patch
    :target: https://github.com/google/glog/actions
 .. |macOS Github actions| image:: https://github.com/google/glog/actions/workflows/macos.yml/badge.svg
    :target: https://github.com/google/glog/actions
-.. |Total alerts| image:: https://img.shields.io/lgtm/alerts/g/google/glog.svg?logo=lgtm&logoWidth=18
-   :target: https://lgtm.com/projects/g/google/glog/alerts/
-.. |Language grade: C++| image:: https://img.shields.io/lgtm/grade/cpp/g/google/glog.svg?logo=lgtm&logoWidth=18)
-   :target: https://lgtm.com/projects/g/google/glog/context:cpp
 .. |Codecov| image:: https://codecov.io/gh/google/glog/branch/master/graph/badge.svg?token=8an420vNju
    :target: https://codecov.io/gh/google/glog

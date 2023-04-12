@@ -1,3 +1,0 @@
-User-agent: *
-Disallow: /0.4.0/
-Disallow: /0.5.0/

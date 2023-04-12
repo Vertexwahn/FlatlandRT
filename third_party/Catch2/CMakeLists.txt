@@ -31,7 +31,7 @@ if (CMAKE_BINARY_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 project(Catch2
-  VERSION 3.2.1 # CML version placeholder, don't delete
+  VERSION 3.3.2 # CML version placeholder, don't delete
   LANGUAGES CXX
   # HOMEPAGE_URL is not supported until CMake version 3.12, which
   # we do not target yet.
@@ -148,6 +148,8 @@ if (NOT_SUBPROJECT)
             "extras/ParseAndAddCatchTests.cmake"
             "extras/Catch.cmake"
             "extras/CatchAddTests.cmake"
+            "extras/CatchShardTests.cmake"
+            "extras/CatchShardTestsImpl.cmake"
           DESTINATION
             ${CATCH_CMAKE_CONFIG_DESTINATION}
         )

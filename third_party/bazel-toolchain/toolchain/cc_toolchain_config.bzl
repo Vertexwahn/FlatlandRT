@@ -69,6 +69,15 @@ def cc_toolchain_config(
             "darwin_x86_64",
             "darwin_x86_64",
         ),
+        "darwin-aarch64": (
+            "clang-aarch64-darwin",
+            "aarch64-apple-macosx",
+            "darwin",
+            "macosx",
+            "clang",
+            "darwin_aarch64",
+            "darwin_aarch64",
+        ),
         "linux-aarch64": (
             "clang-aarch64-linux",
             "aarch64-unknown-linux-gnu",
@@ -147,6 +156,9 @@ def cc_toolchain_config(
         use_lld = False
         link_flags.extend([
             "-headerpad_max_install_names",
+            # This will issue a warning on macOS ventura; see:
+            #  https://github.com/python/cpython/issues/97524
+            #  https://developer.apple.com/forums/thread/719961
             "-undefined",
             "dynamic_lookup",
         ])
@@ -188,11 +200,31 @@ def cc_toolchain_config(
                 "-ldl",
             ])
         else:
-            # TODO: Not sure how to achieve static linking of bundled libraries
-            # with ld64; maybe we don't really need it.
+            # The only known mechanism to static link libraries in ld64 is to
+            # not have the corresponding .dylib files in the library search
+            # path. The link time sandbox does not include the .dylib files, so
+            # anything we pick up from the toolchain should be statically
+            # linked. However, several system libraries on macOS dynamically
+            # link libc++ and libc++abi, so static linking them becomes a problem.
+            # We need to ensure that they are dynamic linked from the system
+            # sysroot and not static linked from the toolchain, so explicitly
+            # have the sysroot directory on the search path and then add the
+            # toolchain directory back after we are done.
             link_flags.extend([
+                "-L{}/usr/lib".format(compiler_configuration["sysroot_path"]),
                 "-lc++",
                 "-lc++abi",
+            ])
+
+            # Let's provide the path to the toolchain library directory
+            # explicitly as part of the search path to make it easy for a user
+            # to pick up something. This also makes the behavior consistent with
+            # targets when a user explicitly depends on something like
+            # libomp.dylib, which adds this directory to the search path, and would
+            # (unintentionally) lead to static linking of libraries from the
+            # toolchain.
+            link_flags.extend([
+                "-L{}lib".format(toolchain_path_prefix),
             ])
     elif stdlib == "libc++":
         cxx_flags = [
@@ -240,6 +272,7 @@ def cc_toolchain_config(
             toolchain_path_prefix + "include/c++/v1",
             toolchain_path_prefix + "include/{}/c++/v1".format(target_system_name),
             toolchain_path_prefix + "lib/clang/{}/include".format(llvm_version),
+            toolchain_path_prefix + "lib/clang/{}/share".format(llvm_version),
             toolchain_path_prefix + "lib64/clang/{}/include".format(llvm_version),
         ])
 

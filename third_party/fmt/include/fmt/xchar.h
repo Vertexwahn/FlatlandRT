@@ -37,7 +37,7 @@ inline auto write_loc(std::back_insert_iterator<detail::buffer<wchar_t>> out,
 }
 }  // namespace detail
 
-FMT_MODULE_EXPORT_BEGIN
+FMT_BEGIN_EXPORT
 
 using wstring_view = basic_string_view<wchar_t>;
 using wformat_parse_context = basic_format_parse_context<wchar_t>;
@@ -238,13 +238,22 @@ template <typename... T> void print(wformat_string<T...> fmt, T&&... args) {
   return vprint(wstring_view(fmt), fmt::make_wformat_args(args...));
 }
 
+template <typename... T>
+void println(std::FILE* f, wformat_string<T...> fmt, T&&... args) {
+  return print(f, L"{}\n", fmt::format(fmt, std::forward<T>(args)...));
+}
+
+template <typename... T> void println(wformat_string<T...> fmt, T&&... args) {
+  return print(L"{}\n", fmt::format(fmt, std::forward<T>(args)...));
+}
+
 /**
   Converts *value* to ``std::wstring`` using the default format for type *T*.
  */
 template <typename T> inline auto to_wstring(const T& value) -> std::wstring {
   return format(FMT_STRING(L"{}"), value);
 }
-FMT_MODULE_EXPORT_END
+FMT_END_EXPORT
 FMT_END_NAMESPACE
 
 #endif  // FMT_XCHAR_H_

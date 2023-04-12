@@ -5,12 +5,18 @@ option(OPENEXR_RUN_FUZZ_TESTS  "Controls whether to include the fuzz tests (slow
 if(OPENEXR_RUN_FUZZ_TESTS)
   add_executable( OpenEXRFuzzTest
     fuzzFile.cpp
+    fuzzFile.h
     main.cpp
-    testFuzzDeepTiles.cpp
     testFuzzDeepScanLines.cpp
+    testFuzzDeepScanLines.h
+    testFuzzDeepTiles.cpp
+    testFuzzDeepTiles.h
     testFuzzScanLines.cpp
+    testFuzzScanLines.h
     testFuzzTiles.cpp
+    testFuzzTiles.h
   )
+  target_include_directories(OpenEXRFuzzTest PRIVATE ../OpenEXRTest)
   target_link_libraries(OpenEXRFuzzTest OpenEXR::OpenEXR)
   set_target_properties(OpenEXRFuzzTest PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"

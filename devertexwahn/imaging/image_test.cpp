@@ -11,9 +11,25 @@
 
 using namespace de_vertexwahn;
 
-TEST(Image3f, ctor) {
+TEST(Image3f, ctorViaWidthHeight) {
     // Act
     Image3f image{100, 100};
+
+    image.set_pixel(50, 50, Color3f{1.f, 0.f, 0.f});
+
+    // Assert
+    EXPECT_THAT(image.width(), 100);
+    EXPECT_THAT(image.height(), 100);
+    EXPECT_THAT(image.size(), (Vector2i(100, 100)));
+    EXPECT_TRUE(image.data());
+    EXPECT_THAT(image.get_pixel(50, 50), (Color3f{1.f, 0.f, 0.f}));
+    EXPECT_THAT(image.get_pixel(0, 0), (Color3f{0.f, 0.f, 0.f}));
+}
+
+TEST(Image3f, ctorViaSize) {
+    // Act
+    Vector2i size{100, 100};
+    Image3f image{size};
 
     image.set_pixel(50, 50, Color3f{1.f, 0.f, 0.f});
 

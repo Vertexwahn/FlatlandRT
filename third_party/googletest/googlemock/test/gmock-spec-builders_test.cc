@@ -1088,16 +1088,7 @@ TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
 
   // Verifies that the failure message contains the two unsatisfied
   // pre-requisites but not the satisfied one.
-#if GTEST_USES_PCRE
-  EXPECT_THAT(
-      r.message(),
-      ContainsRegex(
-          // PCRE has trouble using (.|\n) to match any character, but
-          // supports the (?s) prefix for using . to match any character.
-          "(?s)the following immediate pre-requisites are not satisfied:\n"
-          ".*: pre-requisite #0\n"
-          ".*: pre-requisite #1"));
-#elif GTEST_USES_POSIX_RE
+#ifdef GTEST_USES_POSIX_RE
   EXPECT_THAT(r.message(),
               ContainsRegex(
                   // POSIX RE doesn't understand the (?s) prefix, but has no
@@ -1112,7 +1103,7 @@ TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
                   "the following immediate pre-requisites are not satisfied:"));
   EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #0"));
   EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #1"));
-#endif  // GTEST_USES_PCRE
+#endif  // GTEST_USES_POSIX_RE
 
   b.DoB(1);
   b.DoB(3);
@@ -1779,16 +1770,11 @@ TEST(DeletingMockEarlyTest, Success2) {
 
 // Suppresses warning on unreferenced formal parameter in MSVC with
 // -W4.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 ACTION_P(Delete, ptr) { delete ptr; }
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
   MockA* const a = new MockA;
@@ -2064,7 +2050,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "See "
         "https://github.com/google/googletest/blob/main/docs/"
         "gmock_cook_book.md#"
-        "knowing-when-to-expect for details.";
+        "knowing-when-to-expect-useoncall for details.";
 
     // A void-returning function.
     CaptureStdout();
@@ -2602,14 +2588,7 @@ TEST(ParameterlessExpectationsTest,
 }  // namespace
 }  // namespace testing
 
-// Allows the user to define their own main and then invoke gmock_main
-// from it. This might be necessary on some platforms which require
-// specific setup and teardown.
-#if GMOCK_RENAME_MAIN
-int gmock_main(int argc, char** argv) {
-#else
 int main(int argc, char** argv) {
-#endif  // GMOCK_RENAME_MAIN
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.

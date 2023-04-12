@@ -17,6 +17,8 @@ class Image3f {
 public:
     Image3f(const int width, const int height);
 
+    explicit Image3f(const Vector2i& size);
+
     Image3f(const Image3f &src);
 
     virtual ~Image3f();

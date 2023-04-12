@@ -40,6 +40,7 @@ cc_library(
         ":io_openexr",
         ":io_png",
         ":io_ppm",
+        ":io_pfm",
         "@boost//:algorithm",
     ],
 )
@@ -75,6 +76,27 @@ cc_test(
     ],
     deps = [
         ":io_openexr",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "io_pfm",
+    srcs = ["io_pfm.cpp"],
+    hdrs = ["io_pfm.h"],
+    deps = [
+        "//core:logging",
+        "//core:reference_counted",
+        "//imaging:image",
+    ],
+)
+
+cc_test(
+    name = "io_pmf_test",
+    size = "small",
+    srcs = ["io_pfm_test.cpp"],
+    deps = [
+        ":io_pfm",
         "@com_google_googletest//:gtest_main",
     ],
 )

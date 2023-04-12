@@ -11,7 +11,7 @@
 #include <chrono>
 #include <thread>
 
-using namespace de_vertexwahn;
+using de_vertexwahn::Timer;
 using namespace std::chrono_literals;
 
 TEST(Timer, wait_for_one_second) {

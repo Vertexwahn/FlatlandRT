@@ -1,5 +1,9 @@
-Reading and Writing OpenEXR Image Files with the OpenEXR Library
-################################################################
+..
+  SPDX-License-Identifier: BSD-3-Clause
+  Copyright Contributors to the OpenEXR Project.
+
+Reading and Writing Image Files with the OpenEXR Library
+########################################################
 
 Document Purpose and Audience
 =============================
@@ -37,7 +41,8 @@ the following eight C++ classes:
 
 .. list-table::
    :header-rows: 1
-      
+   :align: left
+   
    * -
      - tiles
      - scan lines
@@ -797,6 +802,7 @@ each with a different resolution. Each version is called a
 stored in the file.  There are three different level modes:
 
 .. list-table::
+   :align: left
 
    * - ``ONE_LEVEL``
      - The file contains only a single, full-resolution level.  A ONE_LEVEL
@@ -1910,6 +1916,7 @@ pixel locations and 3D directions. ``Envmap`` is an enumeration
 type. Two values are possible:
 
 .. list-table::
+   :align: left
 
    * - ``ENVMAP_LATLONG``
      - **Latitude-Longitude Map** The environment is projected onto
@@ -1985,7 +1992,7 @@ To specify the compression algorithm, set the ``compression()`` value
 on the ``Header`` object:
 
 .. code-block::
-   :linenos
+   :linenos:
 
     Header header (width, height);
     header.channels().insert ("G", Channel (HALF));
@@ -2038,7 +2045,7 @@ previous versions. The default DWA compression level is 45.0f.
 Alternatively, set the compression level on the ``Header`` object:
 
 .. code-block::
-   :linenos
+   :linenos:
 
     Header header (width, height);
     header.channels().insert ("G", Channel (HALF));

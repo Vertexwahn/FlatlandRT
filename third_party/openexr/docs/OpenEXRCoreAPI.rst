@@ -1,5 +1,9 @@
-Reading and Writing OpenEXR Image Files with the C-language API
-###############################################################
+..
+  SPDX-License-Identifier: BSD-3-Clause
+  Copyright Contributors to the OpenEXR Project.
+
+Reading and Writing Image Files with the C-language API
+#######################################################
 
 The OpenEXRCore library has a few notable features to consider prior
 to beginning use:
@@ -257,7 +261,7 @@ Context
 .. doxygentypedef:: exr_context_t
 .. doxygentypedef:: exr_const_context_t
                     
-.. doxygenstruct:: _exr_context_initializer
+.. doxygenstruct:: _exr_context_initializer_v3
    :members:
 .. doxygentypedef:: exr_context_initializer_t
 
@@ -281,7 +285,7 @@ Decoding
 Encoding
 ^^^^^^^^
 
-.. doxygenenum:: transcoding_pipeline_buffer_id
+.. doxygenenum:: exr_transcoding_pipeline_buffer_id
                     
 .. doxygenstruct:: _exr_encode_pipeline
    :members:

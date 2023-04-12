@@ -106,9 +106,17 @@ TEST(ostream_test, empty_custom_output) {
 }
 
 TEST(ostream_test, print) {
-  std::ostringstream os;
-  fmt::print(os, "Don't {}!", "panic");
-  EXPECT_EQ("Don't panic!", os.str());
+  {
+    std::ostringstream os;
+    fmt::print(os, "Don't {}!", "panic");
+    EXPECT_EQ("Don't panic!", os.str());
+  }
+
+  {
+    std::ostringstream os;
+    fmt::println(os, "Don't {}!", "panic");
+    EXPECT_EQ("Don't panic!\n", os.str());
+  }
 }
 
 TEST(ostream_test, write_to_ostream) {
@@ -216,30 +224,6 @@ TEST(ostream_test, format_to_n) {
   EXPECT_EQ(5u, result.size);
   EXPECT_EQ(buffer + 3, result.out);
   EXPECT_EQ("xabx", fmt::string_view(buffer, 4));
-}
-
-template <typename T> struct convertible {
-  T value;
-  explicit convertible(const T& val) : value(val) {}
-  operator T() const { return value; }
-};
-
-TEST(ostream_test, disable_builtin_ostream_operators) {
-  EXPECT_EQ("42", fmt::format("{:d}", convertible<unsigned short>(42)));
-  EXPECT_EQ("foo", fmt::format("{}", convertible<const char*>("foo")));
-}
-
-struct streamable_and_convertible_to_bool {
-  operator bool() const { return true; }
-};
-
-std::ostream& operator<<(std::ostream& os, streamable_and_convertible_to_bool) {
-  return os << "foo";
-}
-
-TEST(ostream_test, format_convertible_to_bool) {
-  // operator<< is intentionally not used because of potential ODR violations.
-  EXPECT_EQ(fmt::format("{}", streamable_and_convertible_to_bool()), "true");
 }
 
 struct copyfmt_test {};

@@ -31,20 +31,20 @@
 //
 // Produce stack trace using libgcc
 
-#include <cstdlib> // for NULL
-#include <unwind.h> // ABI defined unwinder
+#include <unwind.h>  // ABI defined unwinder
+
+#include <cstdlib>  // for nullptr
 
 #include "stacktrace.h"
 
 _START_GOOGLE_NAMESPACE_
 
-typedef struct {
+struct trace_arg_t {
   void **result;
   int max_depth;
   int skip_count;
   int count;
-} trace_arg_t;
-
+};
 
 // Workaround for the malloc() in _Unwind_Backtrace() issue.
 static _Unwind_Reason_Code nop_backtrace(struct _Unwind_Context */*uc*/, void */*opq*/) {
@@ -60,7 +60,7 @@ class StackTraceInit {
  public:
    StackTraceInit() {
      // Extra call to force initialization
-     _Unwind_Backtrace(nop_backtrace, NULL);
+     _Unwind_Backtrace(nop_backtrace, nullptr);
      ready_to_run = true;
    }
 };
@@ -68,13 +68,13 @@ class StackTraceInit {
 static StackTraceInit module_initializer;  // Force initialization
 
 static _Unwind_Reason_Code GetOneFrame(struct _Unwind_Context *uc, void *opq) {
-  trace_arg_t *targ = static_cast<trace_arg_t *>(opq);
+   auto *targ = static_cast<trace_arg_t *>(opq);
 
-  if (targ->skip_count > 0) {
-    targ->skip_count--;
-  } else {
-    targ->result[targ->count++] = reinterpret_cast<void *>(_Unwind_GetIP(uc));
-  }
+   if (targ->skip_count > 0) {
+     targ->skip_count--;
+   } else {
+     targ->result[targ->count++] = reinterpret_cast<void *>(_Unwind_GetIP(uc));
+   }
 
   if (targ->count == targ->max_depth) {
     return _URC_END_OF_STACK;

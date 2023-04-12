@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...3.25)
+cmake_minimum_required(VERSION 3.8...3.26)
 
 # Fallback for using newer policies on CMake <3.12.
 if(${CMAKE_VERSION} VERSION_LESS 3.12)
@@ -30,9 +30,9 @@ function(enable_module target)
     target_compile_options(${target}
       PRIVATE /interface /ifcOutput ${BMI}
       INTERFACE /reference fmt=${BMI})
+    set_target_properties(${target} PROPERTIES ADDITIONAL_CLEAN_FILES ${BMI})
+    set_source_files_properties(${BMI} PROPERTIES GENERATED ON)
   endif ()
-  set_target_properties(${target} PROPERTIES ADDITIONAL_CLEAN_FILES ${BMI})
-  set_source_files_properties(${BMI} PROPERTIES GENERATED ON)
 endfunction()
 
 include(CMakeParseArguments)
@@ -75,7 +75,7 @@ option(FMT_WERROR "Halt the compilation with an error on compiler warnings."
 
 # Options that control generation of various targets.
 option(FMT_DOC "Generate the doc target." ${FMT_MASTER_PROJECT})
-option(FMT_INSTALL "Generate the install target." ${FMT_MASTER_PROJECT})
+option(FMT_INSTALL "Generate the install target." ON)
 option(FMT_TEST "Generate the test target." ${FMT_MASTER_PROJECT})
 option(FMT_FUZZ "Generate the fuzz target." OFF)
 option(FMT_CUDA_TEST "Generate the cuda-test target." OFF)
@@ -99,6 +99,10 @@ set(FMT_SYSTEM_HEADERS_ATTRIBUTE "")
 if (FMT_SYSTEM_HEADERS)
   set(FMT_SYSTEM_HEADERS_ATTRIBUTE SYSTEM)
 endif ()
+if(CMAKE_SYSTEM_NAME STREQUAL "MSDOS")
+  set(FMT_TEST OFF)
+  message(STATUS "MSDOS is incompatible with gtest")
+endif()
 
 # Get version from core.h
 file(READ include/fmt/core.h core_h)
@@ -227,8 +231,24 @@ endif ()
 if (FMT_PEDANTIC)
   target_compile_options(fmt PRIVATE ${PEDANTIC_COMPILE_FLAGS})
 endif ()
+
 if (FMT_MODULE)
+  if (CMAKE_VERSION VERSION_LESS 3.26)
+    message(FATAL_ERROR "Modules require CMake 3.26+.")
+  endif ()
+  set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API
+      "2182bf5c-ef0d-489a-91da-49dbc3090d2a")
+  set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
   enable_module(fmt)
+  target_sources(fmt PUBLIC
+                 FILE_SET cxx_modules TYPE CXX_MODULES FILES src/fmt.cc)
+  # Workaround a CMake issue when using fmt as a subdirectory.
+  target_compile_options(
+    fmt PUBLIC
+    -fprebuilt-module-path=${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/fmt.dir)
+  # Workaround a bug in clang-scan-deps.
+  target_include_directories(
+    fmt PUBLIC /usr/lib/gcc/x86_64-linux-gnu/12/include)
 endif ()
 
 target_compile_features(fmt PUBLIC cxx_std_11)
@@ -252,7 +272,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif ()
 
 if (BUILD_SHARED_LIBS)
-  target_compile_definitions(fmt PRIVATE FMT_EXPORT INTERFACE FMT_SHARED)
+  target_compile_definitions(fmt PRIVATE FMT_LIB_EXPORT INTERFACE FMT_SHARED)
 endif ()
 if (FMT_SAFE_DURATION_CAST)
   target_compile_definitions(fmt PUBLIC FMT_SAFE_DURATION_CAST)
@@ -314,6 +334,7 @@ if (FMT_INSTALL)
           LIBRARY DESTINATION ${FMT_LIB_DIR}
           ARCHIVE DESTINATION ${FMT_LIB_DIR}
           PUBLIC_HEADER DESTINATION "${FMT_INC_DIR}/fmt"
+          FILE_SET cxx_modules DESTINATION ${FMT_LIB_DIR}
           FRAMEWORK DESTINATION "."
           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
@@ -329,8 +350,6 @@ if (FMT_INSTALL)
   install(EXPORT ${targets_export_name} DESTINATION ${FMT_CMAKE_DIR}
           NAMESPACE fmt::)
 
-  install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGETS}>
-          DESTINATION ${FMT_LIB_DIR} OPTIONAL)
   install(FILES "${pkgconfig}" DESTINATION "${FMT_PKGCONFIG_DIR}")
 endif ()
 
@@ -338,7 +357,7 @@ if (FMT_DOC)
   add_subdirectory(doc)
 endif ()
 
-if (FMT_TEST)
+if (FMT_TEST AND NOT FMT_MODULE)
   enable_testing()
   add_subdirectory(test)
 endif ()

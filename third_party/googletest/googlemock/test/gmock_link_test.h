@@ -116,7 +116,7 @@
 
 #include "gmock/gmock.h"
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 #include <errno.h>
 #endif
 
@@ -181,7 +181,7 @@ using testing::WithArg;
 using testing::WithArgs;
 using testing::WithoutArgs;
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 using testing::SetErrnoAndReturn;
 #endif
 
@@ -306,7 +306,7 @@ TEST(LinkTest, TestSetArrayArgument) {
   mock.VoidFromString(&ch);
 }
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 
 // Tests the linkage of the SetErrnoAndReturn action.
 TEST(LinkTest, TestSetErrnoAndReturn) {
@@ -423,10 +423,7 @@ TEST(LinkTest, TestThrow) {
 // the macro definition, as the warnings are generated when the macro
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 // Tests the linkage of actions created using ACTION macro.
 namespace {
@@ -459,9 +456,7 @@ ACTION_P2(ReturnEqualsEitherOf, first, second) {
 }
 }  // namespace
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 TEST(LinkTest, TestActionP2Macro) {
   Mock mock;

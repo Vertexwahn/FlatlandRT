@@ -206,28 +206,34 @@ void buffered_file::close() {
 }
 
 int buffered_file::descriptor() const {
+#ifdef fileno  // fileno is a macro on OpenBSD so we cannot use FMT_POSIX_CALL.
+  int fd = fileno(file_);
+#else
   int fd = FMT_POSIX_CALL(fileno(file_));
+#endif
   if (fd == -1)
     FMT_THROW(system_error(errno, FMT_STRING("cannot get file descriptor")));
   return fd;
 }
 
 #if FMT_USE_FCNTL
-file::file(cstring_view path, int oflag) {
 #  ifdef _WIN32
-  using mode_t = int;
+using mode_t = int;
 #  endif
-  constexpr mode_t mode =
-      S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+constexpr mode_t default_open_mode =
+    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
+file::file(cstring_view path, int oflag) {
 #  if defined(_WIN32) && !defined(__MINGW32__)
   fd_ = -1;
-  FMT_POSIX_CALL(sopen_s(&fd_, path.c_str(), oflag, _SH_DENYNO, mode));
+  auto converted = detail::utf8_to_utf16(string_view(path.c_str()));
+  *this = file::open_windows_file(converted.c_str(), oflag);
 #  else
-  FMT_RETRY(fd_, FMT_POSIX_CALL(open(path.c_str(), oflag, mode)));
-#  endif
+  FMT_RETRY(fd_, FMT_POSIX_CALL(open(path.c_str(), oflag, default_open_mode)));
   if (fd_ == -1)
     FMT_THROW(
         system_error(errno, FMT_STRING("cannot open file {}"), path.c_str()));
+#  endif
 }
 
 file::~file() noexcept {
@@ -345,28 +351,43 @@ buffered_file file::fdopen(const char* mode) {
 #  else
   FILE* f = FMT_POSIX_CALL(fdopen(fd_, mode));
 #  endif
-  if (!f)
+  if (!f) {
     FMT_THROW(system_error(
         errno, FMT_STRING("cannot associate stream with file descriptor")));
+  }
   buffered_file bf(f);
   fd_ = -1;
   return bf;
 }
 
+#  if defined(_WIN32) && !defined(__MINGW32__)
+file file::open_windows_file(wcstring_view path, int oflag) {
+  int fd = -1;
+  auto err = _wsopen_s(&fd, path.c_str(), oflag, _SH_DENYNO, default_open_mode);
+  if (fd == -1) {
+    FMT_THROW(system_error(err, FMT_STRING("cannot open file {}"),
+                           detail::utf16_to_utf8(path.c_str()).c_str()));
+  }
+  return file(fd);
+}
+#  endif
+
+#  if !defined(__MSDOS__)
 long getpagesize() {
-#  ifdef _WIN32
+#    ifdef _WIN32
   SYSTEM_INFO si;
   GetSystemInfo(&si);
   return si.dwPageSize;
-#  else
+#    else
   long size = FMT_POSIX_CALL(sysconf(_SC_PAGESIZE));
   if (size < 0)
     FMT_THROW(system_error(errno, FMT_STRING("cannot get memory page size")));
   return size;
-#  endif
+#    endif
 }
+#  endif
 
-FMT_BEGIN_DETAIL_NAMESPACE
+namespace detail {
 
 void file_buffer::grow(size_t) {
   if (this->size() == this->capacity()) flush();
@@ -389,8 +410,7 @@ file_buffer::~file_buffer() {
   flush();
   delete[] data();
 }
-
-FMT_END_DETAIL_NAMESPACE
+}  // namespace detail
 
 ostream::~ostream() = default;
 #endif  // FMT_USE_FCNTL

@@ -14,7 +14,7 @@
 #include "format.h"
 
 FMT_BEGIN_NAMESPACE
-FMT_MODULE_EXPORT_BEGIN
+FMT_BEGIN_EXPORT
 
 template <typename T> struct printf_formatter { printf_formatter() = delete; };
 
@@ -218,6 +218,14 @@ template <typename Char> class printf_width_handler {
   }
 };
 
+// Workaround for a bug with the XL compiler when initializing
+// printf_arg_formatter's base class.
+template <typename Char>
+auto make_arg_formatter(buffer_appender<Char> iter, format_specs<Char>& s)
+    -> arg_formatter<Char> {
+  return {iter, s, locale_ref()};
+}
+
 // The ``printf`` argument formatter.
 template <typename OutputIt, typename Char>
 class printf_arg_formatter : public arg_formatter<Char> {
@@ -235,7 +243,7 @@ class printf_arg_formatter : public arg_formatter<Char> {
 
  public:
   printf_arg_formatter(OutputIt iter, format_specs<Char>& s, context_type& ctx)
-      : base{iter, s, locale_ref()}, context_(ctx) {}
+      : base(make_arg_formatter(iter, s)), context_(ctx) {}
 
   OutputIt operator()(monostate value) { return base::operator()(value); }
 
@@ -665,7 +673,7 @@ inline auto printf(const S& fmt, const T&... args) -> int {
       fmt::make_format_args<basic_printf_context_t<char_t<S>>>(args...));
 }
 
-FMT_MODULE_EXPORT_END
+FMT_END_EXPORT
 FMT_END_NAMESPACE
 
 #endif  // FMT_PRINTF_H_

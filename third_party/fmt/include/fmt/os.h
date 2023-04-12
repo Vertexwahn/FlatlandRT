@@ -71,7 +71,7 @@
 #define FMT_RETRY(result, expression) FMT_RETRY_VAL(result, expression, -1)
 
 FMT_BEGIN_NAMESPACE
-FMT_MODULE_EXPORT_BEGIN
+FMT_BEGIN_EXPORT
 
 /**
   \rst
@@ -337,6 +337,12 @@ class FMT_API file {
   // Creates a buffered_file object associated with this file and detaches
   // this file object from the file.
   buffered_file fdopen(const char* mode);
+
+#  if defined(_WIN32) && !defined(__MINGW32__)
+  // Opens a file and constructs a file object representing this file by
+  // wcstring_view filename. Windows only.
+  static file open_windows_file(wcstring_view path, int oflag);
+#  endif
 };
 
 // Returns the memory page size.
@@ -459,7 +465,7 @@ inline ostream output_file(cstring_view path, T... params) {
 }
 #endif  // FMT_USE_FCNTL
 
-FMT_MODULE_EXPORT_END
+FMT_END_EXPORT
 FMT_END_NAMESPACE
 
 #endif  // FMT_OS_H_

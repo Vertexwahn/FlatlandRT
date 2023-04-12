@@ -7,6 +7,73 @@
 Changelog
 =========
 
+0.24.6
+------
+
+- Improving documentation xstrides
+  `# 2664 https://github.com/xtensor-stack/xtensor/pull/2664`
+- Parallel and more aggressive strided assigner
+  `# 2660 https://github.com/xtensor-stack/xtensor/pull/2660`
+- Removing duplicates from documentation
+  `# 2669 https://github.com/xtensor-stack/xtensor/pull/2669`
+- Adding aliases xt::xtensor_pointer and xt::xarray_pointer
+  `# 2665 https://github.com/xtensor-stack/xtensor/pull/2665`
+- Fix and refactor partition
+  `# 2652 https://github.com/xtensor-stack/xtensor/pull/2652`
+- Fix and update pre-commit
+  `# 2657 https://github.com/xtensor-stack/xtensor/pull/2657`
+
+0.24.5
+------
+
+- Add space before pragma diagnostic
+  `# 2654 https://github.com/xtensor-stack/xtensor/pull/2654`
+- Update xtl requirement in cmake
+  `# 2649 https://github.com/xtensor-stack/xtensor/pull/2649`
+- Fix a bug where .fill doesn't work for a xcontainer that is non-contiguous
+  `# 2650 https://github.com/xtensor-stack/xtensor/pull/2650`
+
+
+0.24.4
+------
+
+- Align qualifiers using clang-format
+  `# 2647 https://github.com/xtensor-stack/xtensor/pull/2647`
+- Add xt::quantile
+  `# 2614 https://github.com/xtensor-stack/xtensor/pull/2614`
+- Add swapaxes and moveaxis
+  `# 2638 https://github.com/xtensor-stack/xtensor/pull/2638`
+- Enforce { ... }
+  `# 2641 https://github.com/xtensor-stack/xtensor/pull/2641`
+- Manual style fixes
+  `# 2642 https://github.com/xtensor-stack/xtensor/pull/2642`
+- Do not step further than last element in xreducer_stepper aggregation
+  `# 2636 https://github.com/xtensor-stack/xtensor/pull/2636`
+- Upgraded to xsimd 10.0.0
+  `# 2635 https://github.com/xtensor-stack/xtensor/pull/2635`
+- Explicitly declare test_xtensor_core_lib as STATIC
+  `# 2586 https://github.com/xtensor-stack/xtensor/pull/2586`
+- fix npy_file move assignment
+  `# 2585 https://github.com/xtensor-stack/xtensor/pull/2585`
+- Install as arch-independent
+  `# 2588 https://github.com/xtensor-stack/xtensor/pull/2588`
+- Change extended tests test header
+  `# 2630 https://github.com/xtensor-stack/xtensor/pull/2630`
+- argmax crashes when compiled using Visual Studio compiler with O1/O2 optimizations
+  `# 2568 https://github.com/xtensor-stack/xtensor/pull/2568`
+- Fix xindexed_view::to_end
+  `# 2627 https://github.com/xtensor-stack/xtensor/pull/2627`
+- Change xindex_view reference type to handle const data
+  `# 2622 https://github.com/xtensor-stack/xtensor/pull/2622`
+- Fix TBB target in CMake exported interface
+  `# 2617 https://github.com/xtensor-stack/xtensor/pull/2617`
+- Document missing xsort functions
+  `# 2608 https://github.com/xtensor-stack/xtensor/pull/2608`
+- Specialize get_strides_type for xbuffer_adaptor
+  `# 2606 https://github.com/xtensor-stack/xtensor/pull/2606`
+- find external packages (threads) after defining project
+  `# 2575 https://github.com/xtensor-stack/xtensor/pull/2575`
+
 0.24.3
 ------
 
@@ -508,7 +575,7 @@ Other changes
   `#1908 <https://github.com/xtensor-stack/xtensor/pull/1908>`_
 - Added ``noexcept`` in ``svector``
   `#1919 <https://github.com/xtensor-stack/xtensor/pull/1919>`_
-- Add implementation of repeat (similar to numpy)
+- Add implementation of repeat (similar to NumPy)
   `#1896 <https://github.com/xtensor-stack/xtensor/pull/1896>`_
 - Fix initialization of out shape in ``xt::tile``
   `#1923 <https://github.com/xtensor-stack/xtensor/pull/1923>`_
@@ -701,7 +768,7 @@ Other changes
   `#1676 <https://github.com/xtensor-stack/xtensor/pull/1676>`_
 - Added missing coma
   `#1680 <https://github.com/xtensor-stack/xtensor/pull/1680>`_
-- Added Numpy-like parameter in ``load_csv``
+- Added NumPy-like parameter in ``load_csv``
   `#1682 <https://github.com/xtensor-stack/xtensor/pull/1682>`_
 - Added ``shape()`` method to ``xshape.hpp``
   `#1592 <https://github.com/xtensor-stack/xtensor/pull/1592>`_
@@ -1354,17 +1421,17 @@ Other changes
   `#1109 <https://github.com/xtensor-stack/xtensor/pull/1109>`_.
 - Added test case for ``setdiff1d``
   `#1110 <https://github.com/xtensor-stack/xtensor/pull/1110>`_.
-- Added missing reference to ``diff`` in ``From numpy to xtensor`` section
+- Added missing reference to ``diff`` in ``From NumPy to xtensor`` section
   `#1116 <https://github.com/xtensor-stack/xtensor/pull/1116>`_.
 - Add ``amax`` and ``amin`` to the documentation
   `#1121 <https://github.com/xtensor-stack/xtensor/pull/1121>`_.
 - ``histogram`` and ``histogram_bin_edges`` implementation
   `#1108 <https://github.com/xtensor-stack/xtensor/pull/1108>`_.
-- Added numpy comparison for interp
+- Added NumPy comparison for interp
   `#1111 <https://github.com/xtensor-stack/xtensor/pull/1111>`_.
 - Allow multiple return type reducer functions
   `#1113 <https://github.com/xtensor-stack/xtensor/pull/1113>`_.
-- Fixes ``average`` bug + adds Numpy based tests
+- Fixes ``average`` bug + adds NumPy based tests
   `#1118 <https://github.com/xtensor-stack/xtensor/pull/1118>`_.
 - Static ``xfunction`` cache for fixed sizes
   `#1105 <https://github.com/xtensor-stack/xtensor/pull/1105>`_.
@@ -2055,7 +2122,7 @@ Breaking changes
 
 - The API for ``xbuffer_adaptor`` has changed. The template parameter is the type of the buffer, not just the value type
   `#482 <https://github.com/xtensor-stack/xtensor/pull/482>`_.
-- Change ``edge_items`` print option to ``edgeitems`` for better numpy consistency
+- Change ``edge_items`` print option to ``edgeitems`` for better NumPy consistency
   `#489 <https://github.com/xtensor-stack/xtensor/pull/489>`_.
 - *xtensor* now depends on *xtl* version `~0.3.3`
   `#508 <https://github.com/xtensor-stack/xtensor/pull/508>`_.
@@ -2092,7 +2159,7 @@ Other changes
   `#492 <https://github.com/xtensor-stack/xtensor/pull/492>`_.
 - The ``size()`` method for containers now returns the total number of elements instead of the buffer size, which may differ when the smallest stride is greater than ``1``
   `#502 <https://github.com/xtensor-stack/xtensor/pull/502>`_.
-- The behavior of ``linspace`` with integral types has been made consistent with numpy
+- The behavior of ``linspace`` with integral types has been made consistent with NumPy
   `#510 <https://github.com/xtensor-stack/xtensor/pull/510>`_.
 
 0.12.1

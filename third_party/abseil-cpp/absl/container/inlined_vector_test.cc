@@ -15,6 +15,7 @@
 #include "absl/container/inlined_vector.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <forward_list>
 #include <iterator>
 #include <list>
@@ -51,14 +52,12 @@ using testing::ElementsAre;
 using testing::ElementsAreArray;
 using testing::Eq;
 using testing::Gt;
+using testing::Pointee;
 using testing::Pointwise;
 using testing::PrintToString;
+using testing::SizeIs;
 
 using IntVec = absl::InlinedVector<int, 8>;
-
-MATCHER_P(SizeIs, n, "") {
-  return testing::ExplainMatchResult(n, arg.size(), result_listener);
-}
 
 MATCHER_P(CapacityIs, n, "") {
   return testing::ExplainMatchResult(n, arg.capacity(), result_listener);
@@ -260,6 +259,49 @@ TEST(IntVec, Hardened) {
   EXPECT_DEATH_IF_SUPPORTED(v[static_cast<size_t>(-1)], "");
   EXPECT_DEATH_IF_SUPPORTED(v.resize(v.max_size() + 1), "");
 #endif
+}
+
+// Move construction of a container of unique pointers should work fine, with no
+// leaks, despite the fact that unique pointers are trivially relocatable but
+// not trivially destructible.
+TEST(UniquePtr, MoveConstruct) {
+  for (size_t size = 0; size < 16; ++size) {
+    SCOPED_TRACE(size);
+
+    absl::InlinedVector<std::unique_ptr<size_t>, 2> a;
+    for (size_t i = 0; i < size; ++i) {
+      a.push_back(std::make_unique<size_t>(i));
+    }
+
+    absl::InlinedVector<std::unique_ptr<size_t>, 2> b(std::move(a));
+
+    ASSERT_THAT(b, SizeIs(size));
+    for (size_t i = 0; i < size; ++i) {
+      ASSERT_THAT(b[i], Pointee(i));
+    }
+  }
+}
+
+// Move assignment of a container of unique pointers should work fine, with no
+// leaks, despite the fact that unique pointers are trivially relocatable but
+// not trivially destructible.
+TEST(UniquePtr, MoveAssign) {
+  for (size_t size = 0; size < 16; ++size) {
+    SCOPED_TRACE(size);
+
+    absl::InlinedVector<std::unique_ptr<size_t>, 2> a;
+    for (size_t i = 0; i < size; ++i) {
+      a.push_back(std::make_unique<size_t>(i));
+    }
+
+    absl::InlinedVector<std::unique_ptr<size_t>, 2> b;
+    b = std::move(a);
+
+    ASSERT_THAT(b, SizeIs(size));
+    for (size_t i = 0; i < size; ++i) {
+      ASSERT_THAT(b[i], Pointee(i));
+    }
+  }
 }
 
 // At the end of this test loop, the elements between [erase_begin, erase_end)
@@ -1208,6 +1250,8 @@ TYPED_TEST_P(InstanceTest, CountConstructorsDestructorsOnMoveAssignment) {
 }
 
 TEST(CountElemAssign, SimpleTypeWithInlineBacking) {
+  const size_t inlined_capacity = absl::InlinedVector<int, 2>().capacity();
+
   for (size_t original_size = 0; original_size <= 5; ++original_size) {
     SCOPED_TRACE(original_size);
     // Original contents are [12345, 12345, ...]
@@ -1217,9 +1261,9 @@ TEST(CountElemAssign, SimpleTypeWithInlineBacking) {
                                   original_contents.end());
     v.assign(2, 123);
     EXPECT_THAT(v, AllOf(SizeIs(2u), ElementsAre(123, 123)));
-    if (original_size <= 2) {
+    if (original_size <= inlined_capacity) {
       // If the original had inline backing, it should stay inline.
-      EXPECT_EQ(2u, v.capacity());
+      EXPECT_EQ(v.capacity(), inlined_capacity);
     }
   }
 }
@@ -1360,6 +1404,8 @@ TEST(RangedConstructor, ElementsAreConstructed) {
 }
 
 TEST(RangedAssign, SimpleType) {
+  const size_t inlined_capacity = absl::InlinedVector<int, 3>().capacity();
+
   // Test for all combinations of original sizes (empty and non-empty inline,
   // and out of line) and target sizes.
   for (size_t original_size = 0; original_size <= 5; ++original_size) {
@@ -1367,13 +1413,13 @@ TEST(RangedAssign, SimpleType) {
     // Original contents are [12345, 12345, ...]
     std::vector<int> original_contents(original_size, 12345);
 
-    for (int target_size = 0; target_size <= 5; ++target_size) {
+    for (size_t target_size = 0; target_size <= 5; ++target_size) {
       SCOPED_TRACE(target_size);
 
       // New contents are [3, 4, ...]
       std::vector<int> new_contents;
-      for (int i = 0; i < target_size; ++i) {
-        new_contents.push_back(i + 3);
+      for (size_t i = 0; i < target_size; ++i) {
+        new_contents.push_back(static_cast<int>(i + 3));
       }
 
       absl::InlinedVector<int, 3> v(original_contents.begin(),
@@ -1382,9 +1428,10 @@ TEST(RangedAssign, SimpleType) {
 
       EXPECT_EQ(new_contents.size(), v.size());
       EXPECT_LE(new_contents.size(), v.capacity());
-      if (target_size <= 3 && original_size <= 3) {
+      if (target_size <= inlined_capacity &&
+          original_size <= inlined_capacity) {
         // Storage should stay inline when target size is small.
-        EXPECT_EQ(3u, v.capacity());
+        EXPECT_EQ(v.capacity(), inlined_capacity);
       }
       EXPECT_THAT(v, ElementsAreArray(new_contents));
     }
@@ -1470,9 +1517,12 @@ TEST(InitializerListConstructor, DisparateTypesInList) {
 }
 
 TEST(InitializerListConstructor, ComplexTypeWithInlineBacking) {
-  EXPECT_THAT((absl::InlinedVector<CopyableMovableInstance, 1>{
-                  CopyableMovableInstance(0)}),
-              AllOf(SizeIs(1u), CapacityIs(1u), ElementsAre(ValueIs(0))));
+  const size_t inlined_capacity =
+      absl::InlinedVector<CopyableMovableInstance, 1>().capacity();
+  EXPECT_THAT(
+      (absl::InlinedVector<CopyableMovableInstance, 1>{
+          CopyableMovableInstance(0)}),
+      AllOf(SizeIs(1u), CapacityIs(inlined_capacity), ElementsAre(ValueIs(0))));
 }
 
 TEST(InitializerListConstructor, ComplexTypeWithReallocationRequired) {
@@ -2020,6 +2070,33 @@ TEST(NonSwappableSwapTest, SwapThis) {
   EXPECT_EQ(tracker.live_instances(), 3);
 
   EXPECT_THAT(v, Pointwise(HasValue(), {1, 2, 3}));
+}
+
+template <size_t N>
+using CharVec = absl::InlinedVector<char, N>;
+
+// Warning: This struct "simulates" the type `InlinedVector::Storage::Allocated`
+// to make reasonable expectations for inlined storage capacity optimization. If
+// implementation changes `Allocated`, then `MySpan` and tests that use it need
+// to be updated accordingly.
+template <typename T>
+struct MySpan {
+  T* data;
+  size_t size;
+};
+
+TEST(StorageTest, InlinedCapacityAutoIncrease) {
+  // The requested capacity is auto increased to `sizeof(MySpan<char>)`.
+  EXPECT_GT(CharVec<1>().capacity(), 1);
+  EXPECT_EQ(CharVec<1>().capacity(), sizeof(MySpan<char>));
+  EXPECT_EQ(CharVec<1>().capacity(), CharVec<2>().capacity());
+  EXPECT_EQ(sizeof(CharVec<1>), sizeof(CharVec<2>));
+
+  // The requested capacity is auto increased to
+  // `sizeof(MySpan<int>) / sizeof(int)`.
+  EXPECT_GT((absl::InlinedVector<int, 1>().capacity()), 1);
+  EXPECT_EQ((absl::InlinedVector<int, 1>().capacity()),
+            sizeof(MySpan<int>) / sizeof(int));
 }
 
 }  // anonymous namespace

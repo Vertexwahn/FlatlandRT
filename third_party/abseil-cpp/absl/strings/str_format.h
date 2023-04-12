@@ -36,10 +36,12 @@
 //   * `absl::StreamFormat()` to more efficiently write a format string to a
 //     stream, such as`std::cout`.
 //   * `absl::PrintF()`, `absl::FPrintF()` and `absl::SNPrintF()` as
-//     replacements for `std::printf()`, `std::fprintf()` and `std::snprintf()`.
+//     drop-in replacements for `std::printf()`, `std::fprintf()` and
+//     `std::snprintf()`.
 //
-//     Note: a version of `std::sprintf()` is not supported as it is
-//     generally unsafe due to buffer overflows.
+//     Note: An `absl::SPrintF()` drop-in replacement is not supported as it
+//     is generally unsafe due to buffer overflows. Use `absl::StrFormat` which
+//     returns the string as output instead of expecting a pre-allocated buffer.
 //
 // Additionally, you can provide a format string (and its associated arguments)
 // using one of the following abstractions:
@@ -191,9 +193,9 @@ class FormatCountCapture {
 //   absl::StrFormat(formatString, "TheVillage", 6);
 //
 // A format string generally follows the POSIX syntax as used within the POSIX
-// `printf` specification.
+// `printf` specification. (Exceptions are noted below.)
 //
-// (See http://pubs.opengroup.org/onlinepubs/9699919799/functions/fprintf.html.)
+// (See http://pubs.opengroup.org/onlinepubs/9699919799/functions/fprintf.html)
 //
 // In specific, the `FormatSpec` supports the following type specifiers:
 //   * `c` for characters
@@ -211,6 +213,10 @@ class FormatCountCapture {
 //   * `n` for the special case of writing out the number of characters
 //     written to this point. The resulting value must be captured within an
 //     `absl::FormatCountCapture` type.
+//   * `v` for values using the default format for a deduced type. These deduced
+//     types include many of the primitive types denoted here as well as
+//     user-defined types containing the proper extensions. (See below for more
+//     information.)
 //
 // Implementation-defined behavior:
 //   * A null pointer provided to "%s" or "%p" is output as "(nil)".
@@ -238,6 +244,15 @@ class FormatCountCapture {
 //     std::string s = absl::StrFormat(
 //         "%s%d%n", "hello", 123, absl::FormatCountCapture(&n));
 //     EXPECT_EQ(8, n);
+//
+// NOTE: the `v` specifier (for "value") is a type specifier not present in the
+// POSIX specification. %v will format values according to their deduced type.
+// `v` uses `d` for signed integer values, `u` for unsigned integer values, `g`
+// for floating point values, and formats boolean values as "true"/"false"
+// (instead of 1 or 0 for booleans formatted using d). `const char*` is not
+// supported; please use `std:string` and `string_view`. `char` is also not
+// supported due to ambiguity of the type. This specifier does not support
+// modifiers.
 //
 // The `FormatSpec` intrinsically supports all of these fundamental C++ types:
 //
@@ -807,17 +822,25 @@ enum class FormatConversionCharSet : uint64_t {
 
 // FormatSink
 //
-// An abstraction to which conversions write their string data.
+// A format sink is a generic abstraction to which conversions may write their
+// formatted string data. `absl::FormatConvert()` uses this sink to write its
+// formatted string.
 //
 class FormatSink {
  public:
-  // Appends `count` copies of `ch`.
+  // FormatSink::Append()
+  //
+  // Appends `count` copies of `ch` to the format sink.
   void Append(size_t count, char ch) { sink_->Append(count, ch); }
 
+  // Overload of FormatSink::Append() for appending the characters of a string
+  // view to a format sink.
   void Append(string_view v) { sink_->Append(v); }
 
-  // Appends the first `precision` bytes of `v`. If this is less than
-  // `width`, spaces will be appended first (if `left` is false), or
+  // FormatSink::PutPaddedString()
+  //
+  // Appends `precision` number of bytes of `v` to the format sink. If this is
+  // less than `width`, spaces will be appended first (if `left` is false), or
   // after (if `left` is true) to ensure the total amount appended is
   // at least `width`.
   bool PutPaddedString(string_view v, int width, int precision, bool left) {

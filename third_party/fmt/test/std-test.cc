@@ -7,6 +7,7 @@
 
 #include "fmt/std.h"
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,8 @@ TEST(std_test, path) {
 #ifdef __cpp_lib_filesystem
   EXPECT_EQ(fmt::format("{:8}", std::filesystem::path("foo")), "\"foo\"   ");
   EXPECT_EQ(fmt::format("{}", std::filesystem::path("foo\"bar.txt")),
+            "\"foo\\\"bar.txt\"");
+  EXPECT_EQ(fmt::format("{:?}", std::filesystem::path("foo\"bar.txt")),
             "\"foo\\\"bar.txt\"");
 
 #  ifdef _WIN32
@@ -46,9 +49,72 @@ TEST(ranges_std_test, format_vector_path) {
 #endif
 }
 
+TEST(ranges_std_test, format_quote_path) {
+  // Test that path is not escaped twice in the debug mode.
+#ifdef __cpp_lib_filesystem
+  auto vec =
+      std::vector<std::filesystem::path>{"path1/file1.txt", "path2/file2.txt"};
+  EXPECT_EQ(fmt::format("{}", vec),
+            "[\"path1/file1.txt\", \"path2/file2.txt\"]");
+#  ifdef __cpp_lib_optional
+  auto o = std::optional<std::filesystem::path>("path/file.txt");
+  EXPECT_EQ(fmt::format("{}", o), "optional(\"path/file.txt\")");
+  EXPECT_EQ(fmt::format("{:?}", o), "optional(\"path/file.txt\")");
+#  endif
+#endif
+}
+
 TEST(std_test, thread_id) {
   EXPECT_FALSE(fmt::format("{}", std::this_thread::get_id()).empty());
 }
+
+TEST(std_test, optional) {
+#ifdef __cpp_lib_optional
+  EXPECT_EQ(fmt::format("{}", std::optional<int>{}), "none");
+  EXPECT_EQ(fmt::format("{}", std::pair{1, "second"}), "(1, \"second\")");
+  EXPECT_EQ(fmt::format("{}", std::vector{std::optional{1}, std::optional{2},
+                                          std::optional{3}}),
+            "[optional(1), optional(2), optional(3)]");
+  EXPECT_EQ(
+      fmt::format("{}", std::optional<std::optional<const char*>>{{"nested"}}),
+      "optional(optional(\"nested\"))");
+  EXPECT_EQ(
+      fmt::format("{:<{}}", std::optional{std::string{"left aligned"}}, 30),
+      "optional(\"left aligned\"                )");
+  EXPECT_EQ(
+      fmt::format("{::d}", std::optional{std::vector{'h', 'e', 'l', 'l', 'o'}}),
+      "optional([104, 101, 108, 108, 111])");
+  EXPECT_EQ(fmt::format("{}", std::optional{std::string{"string"}}),
+            "optional(\"string\")");
+  EXPECT_EQ(fmt::format("{}", std::optional{'C'}), "optional(\'C\')");
+  EXPECT_EQ(fmt::format("{:.{}f}", std::optional{3.14}, 1), "optional(3.1)");
+
+  struct unformattable {};
+  EXPECT_FALSE((fmt::is_formattable<unformattable>::value));
+  EXPECT_FALSE((fmt::is_formattable<std::optional<unformattable>>::value));
+  EXPECT_TRUE((fmt::is_formattable<std::optional<int>>::value));
+#endif
+}
+
+struct throws_on_move {
+  throws_on_move() = default;
+
+  [[noreturn]] throws_on_move(throws_on_move&&) {
+    throw std::runtime_error("Thrown by throws_on_move");
+  }
+
+  throws_on_move(const throws_on_move&) = default;
+};
+
+namespace fmt {
+template <> struct formatter<throws_on_move> : formatter<string_view> {
+  auto format(const throws_on_move&, format_context& ctx) const
+      -> decltype(ctx.out()) {
+    string_view str("<throws_on_move>");
+    return formatter<string_view>::format(str, ctx);
+  }
+};
+}  // namespace fmt
 
 TEST(std_test, variant) {
 #ifdef __cpp_lib_variant
@@ -81,6 +147,18 @@ TEST(std_test, variant) {
 
   volatile int i = 42;  // Test compile error before GCC 11 described in #3068.
   EXPECT_EQ(fmt::format("{}", i), "42");
+
+  std::variant<std::monostate, throws_on_move> v6;
+
+  try {
+    throws_on_move thrower;
+    v6.emplace<throws_on_move>(std::move(thrower));
+  } catch (const std::runtime_error&) {
+  }
+  // v6 is now valueless by exception
+
+  EXPECT_EQ(fmt::format("{}", v6), "variant(valueless by exception)");
+
 #endif
 }
 

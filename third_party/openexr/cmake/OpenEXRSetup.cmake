@@ -224,6 +224,16 @@ if(OPENEXR_FORCE_INTERNAL_ZLIB OR NOT TARGET ZLIB::ZLIB)
     set(zlibpostfix "d")
   endif()
 
+  add_library(zlib_static STATIC IMPORTED GLOBAL)
+  add_dependencies(zlib_static zlib_external)
+  set_property(TARGET zlib_static PROPERTY
+    IMPORTED_LOCATION "${zlib_INTERNAL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlibstaticlibname}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    )
+  set_property(TARGET zlib_static PROPERTY
+    IMPORTED_LOCATION_DEBUG "${zlib_INTERNAL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlibstaticlibname}${zlibpostfix}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    )
+  target_include_directories(zlib_static INTERFACE "${zlib_INTERNAL_DIR}/include")
+
   if(NOT (APPLE OR WIN32) AND BUILD_SHARED_LIBS AND NOT OPENEXR_FORCE_INTERNAL_ZLIB)
     add_library(zlib_shared SHARED IMPORTED GLOBAL)
     add_dependencies(zlib_shared zlib_external)
@@ -235,16 +245,6 @@ if(OPENEXR_FORCE_INTERNAL_ZLIB OR NOT TARGET ZLIB::ZLIB)
       )
     target_include_directories(zlib_shared INTERFACE "${zlib_INTERNAL_DIR}/include")
   endif()
-
-  add_library(zlib_static STATIC IMPORTED GLOBAL)
-  add_dependencies(zlib_static zlib_external)
-  set_property(TARGET zlib_static PROPERTY
-    IMPORTED_LOCATION "${zlib_INTERNAL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlibstaticlibname}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-    )
-  set_property(TARGET zlib_static PROPERTY
-    IMPORTED_LOCATION_DEBUG "${zlib_INTERNAL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlibstaticlibname}${zlibpostfix}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-    )
-  target_include_directories(zlib_static INTERFACE "${zlib_INTERNAL_DIR}/include")
 
   if(NOT (APPLE OR WIN32) AND BUILD_SHARED_LIBS AND NOT OPENEXR_FORCE_INTERNAL_ZLIB)
     add_library(ZLIB::ZLIB ALIAS zlib_shared)
@@ -310,5 +310,23 @@ else()
     list(APPEND imathinc ${imathconfinc})
     set(IMATH_HEADER_ONLY_INCLUDE_DIRS ${imathinc})
     message(STATUS "Imath interface dirs ${IMATH_HEADER_ONLY_INCLUDE_DIRS}")
+  endif()
+endif()
+
+###########################################
+# Check if we need to emulate vld1q_f32_x2
+###########################################
+
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  include(CheckCSourceCompiles)
+  check_c_source_compiles("#include <arm_neon.h>
+int main() {
+  float a[] = {1.0, 1.0};
+  vld1q_f32_x2(a);
+  return 0;
+}" HAS_VLD1)
+
+  if(NOT HAS_VLD1)
+    set(OPENEXR_MISSING_ARM_VLD1 TRUE)
   endif()
 endif()

@@ -31,9 +31,10 @@ This project uses [Bazel](https://bazel.build/) as a build system. The current u
 **Prerequisites:**
 
 The following tools should be installed:
+
 - [Git](https://git-scm.com/)
 - [Bazel](https://bazel.build/install)
-- A C++ compiler (GCC, Visual Studio, Clang, etc.)
+- A C++ compiler ([GCC](https://gcc.gnu.org/), [Visual Studio](https://visualstudio.microsoft.com/), [Clang](https://clang.llvm.org/), etc.)
 
 **Checkout, build, and run:**
 

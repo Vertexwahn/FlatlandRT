@@ -16,6 +16,7 @@
 #include "fmt/color.h"
 #include "fmt/ostream.h"
 #include "fmt/ranges.h"
+#include "fmt/std.h"
 #include "gtest-extra.h"  // Contains
 #include "util.h"         // get_locale
 
@@ -29,25 +30,7 @@ using testing::Contains;
 #  define FMT_HAS_C99_STRFTIME 1
 #endif
 
-namespace test_ns {
-template <typename Char> class test_string {
- private:
-  std::basic_string<Char> s_;
-
- public:
-  test_string(const Char* s) : s_(s) {}
-  const Char* data() const { return s_.data(); }
-  size_t length() const { return s_.size(); }
-  operator const Char*() const { return s_.c_str(); }
-};
-
-template <typename Char>
-fmt::basic_string_view<Char> to_string_view(const test_string<Char>& s) {
-  return {s.data(), s.length()};
-}
-
 struct non_string {};
-}  // namespace test_ns
 
 template <typename T> class is_string_test : public testing::Test {};
 
@@ -69,8 +52,7 @@ TYPED_TEST(is_string_test, is_string) {
   using fmt_string_view = fmt::detail::std_string_view<TypeParam>;
   EXPECT_TRUE(std::is_empty<fmt_string_view>::value !=
               fmt::detail::is_string<fmt_string_view>::value);
-  EXPECT_TRUE(fmt::detail::is_string<test_ns::test_string<TypeParam>>::value);
-  EXPECT_FALSE(fmt::detail::is_string<test_ns::non_string>::value);
+  EXPECT_FALSE(fmt::detail::is_string<non_string>::value);
 }
 
 // std::is_constructible is broken in MSVC until version 2015.
@@ -210,7 +192,10 @@ TEST(xchar_test, named_arg_udl) {
 
 TEST(xchar_test, print) {
   // Check that the wide print overload compiles.
-  if (fmt::detail::const_check(false)) fmt::print(L"test");
+  if (fmt::detail::const_check(false)) {
+    fmt::print(L"test");
+    fmt::println(L"test");
+  }
 }
 
 TEST(xchar_test, join) {
@@ -382,9 +367,17 @@ TEST(xchar_test, color) {
 
 TEST(xchar_test, ostream) {
 #if !FMT_GCC_VERSION || FMT_GCC_VERSION >= 409
-  std::wostringstream wos;
-  fmt::print(wos, L"Don't {}!", L"panic");
-  EXPECT_EQ(wos.str(), L"Don't panic!");
+  {
+    std::wostringstream wos;
+    fmt::print(wos, L"Don't {}!", L"panic");
+    EXPECT_EQ(wos.str(), L"Don't panic!");
+  }
+
+  {
+    std::wostringstream wos;
+    fmt::println(wos, L"Don't {}!", L"panic");
+    EXPECT_EQ(wos.str(), L"Don't panic!\n");
+  }
 #endif
 }
 
@@ -438,6 +431,9 @@ TEST(locale_test, localized_double) {
   EXPECT_EQ(fmt::format(loc, "{:L}", 1234.5), "1~234?5");
   EXPECT_EQ(fmt::format(loc, "{:L}", 12000.0), "12~000");
   EXPECT_EQ(fmt::format(loc, "{:8L}", 1230.0), "   1~230");
+  EXPECT_EQ(fmt::format(loc, "{:15.6Lf}", 0.1), "       0?100000");
+  EXPECT_EQ(fmt::format(loc, "{:15.6Lf}", 1.0), "       1?000000");
+  EXPECT_EQ(fmt::format(loc, "{:15.6Lf}", 1e3), "   1~000?000000");
 }
 
 TEST(locale_test, format) {
@@ -572,6 +568,14 @@ TEST(locale_test, chrono_weekday) {
 
 TEST(locale_test, sign) {
   EXPECT_EQ(fmt::format(std::locale(), L"{:L}", -50), L"-50");
+}
+
+TEST(std_test_xchar, optional) {
+#  ifdef __cpp_lib_optional
+  EXPECT_EQ(fmt::format(L"{}", std::optional{L'C'}), L"optional(\'C\')");
+  EXPECT_EQ(fmt::format(L"{}", std::optional{std::wstring{L"wide string"}}),
+            L"optional(\"wide string\")");
+#  endif
 }
 
 #endif  // FMT_STATIC_THOUSANDS_SEPARATOR

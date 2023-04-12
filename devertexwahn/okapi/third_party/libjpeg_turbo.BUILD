@@ -543,7 +543,7 @@ expand_template(
     out = "jconfig_win.h",
     substitutions = {
         "@JPEG_LIB_VERSION@": "62",
-        "@VERSION@": "2.0.0",
+        "@VERSION@": "2.1.5",
         "@LIBJPEG_TURBO_VERSION_NUMBER@": "2000000",
         "@BITS_IN_JSAMPLE@": "8",
         "#cmakedefine C_ARITH_CODING_SUPPORTED": "#define C_ARITH_CODING_SUPPORTED",
@@ -555,7 +555,7 @@ expand_template(
 
 JCONFIG_NOWIN_COMMON_SUBSTITUTIONS = {
     "@JPEG_LIB_VERSION@": "62",
-    "@VERSION@": "2.1.4",
+    "@VERSION@": "2.1.5",
     "@LIBJPEG_TURBO_VERSION_NUMBER@": "2000000",
     "#cmakedefine C_ARITH_CODING_SUPPORTED 1": "#define C_ARITH_CODING_SUPPORTED 1",
     "#cmakedefine D_ARITH_CODING_SUPPORTED 1": "#define D_ARITH_CODING_SUPPORTED 1",
@@ -603,7 +603,7 @@ expand_template(
 
 JCONFIGINT_COMMON_SUBSTITUTIONS = {
     "@BUILD@": "20210424",
-    "@VERSION@": "2.1.0",
+    "@VERSION@": "2.1.5",
     "@CMAKE_PROJECT_NAME@": "libjpeg-turbo",
     "#undef inline": "",
     "#cmakedefine HAVE_INTRIN_H": "",

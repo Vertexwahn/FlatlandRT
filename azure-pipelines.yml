@@ -28,12 +28,12 @@ jobs:
   #    - template: devertexwahn/ci/ubuntu-20.04-clang14.yaml
 
   - job: Ubuntu20GCC9
-    displayName: "GCC9 on Ubuntu 20.04"
+    displayName: "GCC9 fast opt on Ubuntu 20.04"
     pool:
       #name: Default
       vmImage: 'ubuntu-20.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-20.04-gcc9.yaml
+      - template: devertexwahn/ci/ubuntu-20.04-gcc9-fast-opt.yaml
   
 
   - job: Ubuntu22GCC11

@@ -14,15 +14,30 @@ endif()
 
 add_executable(OpenEXRExamples
   drawImage.cpp
+  drawImage.h
   generalInterfaceExamples.cpp
+  generalInterfaceExamples.h
   generalInterfaceTiledExamples.cpp
+  generalInterfaceTiledExamples.h
   lowLevelIoExamples.cpp
+  lowLevelIoExamples.h
   main.cpp
+  namespaceAlias.h
   previewImageExamples.cpp
+  previewImageExamples.h
   rgbaInterfaceExamples.cpp
+  rgbaInterfaceExamples.h
   rgbaInterfaceTiledExamples.cpp
+  rgbaInterfaceTiledExamples.h
 )
+
 target_link_libraries(OpenEXRExamples OpenEXR::OpenEXR)
+set_target_properties(OpenEXRExamples PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+if(WIN32 AND BUILD_SHARED_LIBS)
+  target_compile_definitions(OpenEXRExamples PRIVATE OPENEXR_DLL)
+endif()
 
 # Examples
 install(
@@ -46,6 +61,7 @@ install(
   DESTINATION
     ${CMAKE_INSTALL_DOCDIR}/examples
   )
-if(WIN32 AND BUILD_SHARED_LIBS)
-  target_compile_definitions(OpenEXRExamples PRIVATE OPENEXR_DLL)
+
+if(BUILD_TESTING)
+  add_test(NAME OpenEXR.OpenEXRExamples COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:OpenEXRExamples>)
 endif()

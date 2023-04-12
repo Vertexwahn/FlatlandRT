@@ -66,7 +66,7 @@ Transform44f read_transform<3>(const pugi::xml_node &xmlTransform) {
         }
 
         if(transformType == "matrix") {
-            throw std::runtime_error("matrix as tranform not implemented");
+            throw std::runtime_error("matrix as transform not implemented");
         }
     }
 
@@ -249,16 +249,6 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     }
 
                     scene->set_sensor(sensor);
-
-                    auto xml_sampler = scene_elements.child("sampler");
-                    if(xml_sampler) {
-                        std::string type = xml_sampler.attribute("type").as_string();
-
-                        auto ps = read_all_properties(xml_sampler);
-                        auto sampler = std::dynamic_pointer_cast<SamplerType<float>>(
-                                object_factory.create_instance(type, ps));
-                        scene->set_sampler(sampler);
-                    }
                 }
 
                 if (std::string(scene_elements.name()) == "integrator") {

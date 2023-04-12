@@ -37,7 +37,7 @@ check_De_Vertexwahn_Flatland_scene_output() {
 }
 
 # M1 generates slightly different results for some scenes - therefore we have special handling for M1 here.
-# Runing a docker container on a M1 machine with Ubuntu 22.04 gives the x86_64 results
+# Running a docker container on a M1 machine with Ubuntu 22.04 gives the x86_64 results
 # I really fear to claim this - maybe a bug in {fmt}...?
 if [[ $(uname -m) == 'arm64' ]]; then
   check_De_Vertexwahn_Flatland_scene_output "flatland/scenes/ao.flatland.xml" "flatland/scenes/ao.svg" "flatland/scenes/reference_images/ao_ref.M1_apple_silicon.svg"

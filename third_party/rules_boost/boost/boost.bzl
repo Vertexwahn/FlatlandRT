@@ -152,15 +152,15 @@ def boost_deps():
     maybe(
         http_archive,
         name = "bazel_skylib",
-        url = "https://github.com/bazelbuild/bazel-skylib/archive/1.3.0.tar.gz",
-        sha256 = "3b620033ca48fcd6f5ef2ac85e0f6ec5639605fa2f627968490e52fc91a9932f",
-        strip_prefix = "bazel-skylib-1.3.0",
+        url = "https://github.com/bazelbuild/bazel-skylib/archive/1.4.1.tar.gz",
+        sha256 = "060426b186670beede4104095324a72bd7494d8b4e785bf0d84a612978285908",
+        strip_prefix = "bazel-skylib-1.4.1",
     )
 
     maybe(
         http_archive,
         name = "net_zlib_zlib",
-        build_file = "@com_github_nelhage_rules_boost//:BUILD.zlib",
+        build_file = "@com_github_nelhage_rules_boost//:zlib.BUILD",
         url = "https://github.com/madler/zlib/archive/v1.2.13.tar.gz",
         sha256 = "1525952a0a567581792613a9723333d7f8cc20b87a81f920fb8bc7e3f2251428",
         strip_prefix = "zlib-1.2.13",
@@ -169,7 +169,7 @@ def boost_deps():
     maybe(
         http_archive,
         name = "org_bzip_bzip2",
-        build_file = "@com_github_nelhage_rules_boost//:BUILD.bzip2",
+        build_file = "@com_github_nelhage_rules_boost//:bzip2.BUILD",
         sha256 = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
         strip_prefix = "bzip2-1.0.8",
         urls = [
@@ -178,33 +178,28 @@ def boost_deps():
         ]
     )
 
-    SOURCEFORGE_MIRRORS = ["cfhcable", "superb-sea2", "cytranet", "iweb", "gigenet", "ayera", "astuteinternet", "pilotfiber", "svwh"]
-
     maybe(
         http_archive,
         name = "org_lzma_lzma",
-        build_file = "@com_github_nelhage_rules_boost//:BUILD.lzma",
-        sha256 = "06327c2ddc81e126a6d9a78b0be5014b976a2c0832f492dcfc4755d7facf6d33",
-        strip_prefix = "xz-5.2.7",
-        urls = [
-            "https://%s.dl.sourceforge.net/project/lzmautils/xz-5.2.7.tar.gz" % m
-            for m in SOURCEFORGE_MIRRORS
-        ],
+        build_file = "@com_github_nelhage_rules_boost//:lzma.BUILD",
+        url = "https://github.com/tukaani-project/xz/releases/download/v5.4.2/xz-5.4.2.tar.gz",
+        sha256 = "87947679abcf77cc509d8d1b474218fd16b72281e2797360e909deaee1ac9d05",
+        strip_prefix = "xz-5.4.2",
     )
 
     maybe(
         http_archive,
         name = "com_github_facebook_zstd",
-        build_file = "@com_github_nelhage_rules_boost//:BUILD.zstd",
-        url = "https://github.com/facebook/zstd/archive/v1.5.2/zstd-1.5.2.tar.gz",
-        sha256 = "f7de13462f7a82c29ab865820149e778cbfe01087b3a55b5332707abf9db4a6e",
-        strip_prefix = "zstd-1.5.2",
+        build_file = "@com_github_nelhage_rules_boost//:zstd.BUILD",
+        url = "https://github.com/facebook/zstd/archive/v1.5.5/zstd-1.5.5.tar.gz",
+        sha256 = "98e9c3d949d1b924e28e01eccb7deed865eefebf25c2f21c702e5cd5b63b85e1",
+        strip_prefix = "zstd-1.5.5",
     )
 
     maybe(
         http_archive,
         name = "boost",
-        build_file = "@com_github_nelhage_rules_boost//:BUILD.boost",
+        build_file = "@com_github_nelhage_rules_boost//:boost.BUILD",
         patch_cmds = ["rm -f doc/pdf/BUILD"],
         patch_cmds_win = ["Remove-Item -Force doc/pdf/BUILD"],
         sha256 = "205666dea9f6a7cfed87c7a6dfbeb52a2c1b9de55712c9c1a87735d7181452b6",
@@ -219,7 +214,7 @@ def boost_deps():
     maybe(
         http_archive,
         name = "openssl",
-        url = "https://github.com/hedronvision/boringssl/archive/4ff24e47b2604e878b1bdfb7e3ecf762f92f9314.tar.gz",
-        sha256 = "4dad8f39b043eb8ba1c902f0657c1c47f188b6e2d0885f8ea1d329a9af6a968c",
-        strip_prefix = "boringssl-4ff24e47b2604e878b1bdfb7e3ecf762f92f9314",
+        url = "https://github.com/hedronvision/boringssl/archive/e5be53921470104efdf61db3d6b9a7415d9c763b.tar.gz",
+        sha256 = "bc15ba0cc061d2252cb4a177750ff8990a8e46e52c5299a2c7f3d0b47c0db824",
+        strip_prefix = "boringssl-e5be53921470104efdf61db3d6b9a7415d9c763b",
     )

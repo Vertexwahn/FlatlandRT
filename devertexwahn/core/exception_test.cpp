@@ -7,7 +7,7 @@
 
 #include "gmock/gmock.h"
 
-using namespace de_vertexwahn;
+using de_vertexwahn::Exception;
 
 TEST(Exception, what) {
     Exception ex{"file.flatland.xml"};

@@ -71,6 +71,7 @@
     <testCase name="convertToBits" duration="{duration}"/>
   </file>
   <file path="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp">
+    <testCase name="Filter generator throws exception for empty generator" duration="{duration}"/>
     <testCase name="Generators internals/Single value" duration="{duration}"/>
     <testCase name="Generators internals/Preset values" duration="{duration}"/>
     <testCase name="Generators internals/Generator combinator" duration="{duration}"/>
@@ -1027,6 +1028,13 @@ at Exception.tests.cpp:<line number>
   <file path="tests/<exe-name>/UsageTests/Generators.tests.cpp">
     <testCase name="#1913 - GENERATE inside a for loop should not keep recreating the generator" duration="{duration}"/>
     <testCase name="#1913 - GENERATEs can share a line" duration="{duration}"/>
+    <testCase name="#2615 - Throwing in constructor generator fails test case but does not abort" duration="{duration}">
+      <skipped message="TEST_CASE()">
+FAILED:
+failure to init
+at Generators.tests.cpp:<line number>
+      </skipped>
+    </testCase>
     <testCase name="3x3x3 ints" duration="{duration}"/>
     <testCase name="Copy and then generate a range/from var and iterators" duration="{duration}"/>
     <testCase name="Copy and then generate a range/From a temporary container" duration="{duration}"/>
@@ -1164,12 +1172,14 @@ at Matchers.tests.cpp:<line number>
     <testCase name="Floating point matchers: double/ULPs" duration="{duration}"/>
     <testCase name="Floating point matchers: double/Composed" duration="{duration}"/>
     <testCase name="Floating point matchers: double/Constructor validation" duration="{duration}"/>
+    <testCase name="Floating point matchers: double/IsNaN" duration="{duration}"/>
     <testCase name="Floating point matchers: float/Relative" duration="{duration}"/>
     <testCase name="Floating point matchers: float/Relative/Some subnormal values" duration="{duration}"/>
     <testCase name="Floating point matchers: float/Margin" duration="{duration}"/>
     <testCase name="Floating point matchers: float/ULPs" duration="{duration}"/>
     <testCase name="Floating point matchers: float/Composed" duration="{duration}"/>
     <testCase name="Floating point matchers: float/Constructor validation" duration="{duration}"/>
+    <testCase name="Floating point matchers: float/IsNaN" duration="{duration}"/>
     <testCase name="Matchers can be (AllOf) composed with the &amp;&amp; operator" duration="{duration}"/>
     <testCase name="Matchers can be (AnyOf) composed with the || operator" duration="{duration}"/>
     <testCase name="Matchers can be composed with both &amp;&amp; and ||" duration="{duration}"/>
@@ -1365,6 +1375,14 @@ at Matchers.tests.cpp:<line number>
     <testCase name="Basic use of the Empty range matcher/Simple, std-provided containers" duration="{duration}"/>
     <testCase name="Basic use of the Empty range matcher/Type with empty" duration="{duration}"/>
     <testCase name="Basic use of the Empty range matcher/Type requires ADL found empty free function" duration="{duration}"/>
+    <testCase name="Type conversions of RangeEquals and similar/Container conversions/Two equal containers of different container types" duration="{duration}"/>
+    <testCase name="Type conversions of RangeEquals and similar/Container conversions/Two equal containers of different container types (differ in array N)" duration="{duration}"/>
+    <testCase name="Type conversions of RangeEquals and similar/Container conversions/Two equal containers of different container types and value types" duration="{duration}"/>
+    <testCase name="Type conversions of RangeEquals and similar/Container conversions/Two equal containers, one random access, one not" duration="{duration}"/>
+    <testCase name="Type conversions of RangeEquals and similar/Value type/Two equal containers of different value types" duration="{duration}"/>
+    <testCase name="Type conversions of RangeEquals and similar/Value type/Two non-equal containers of different value types" duration="{duration}"/>
+    <testCase name="Type conversions of RangeEquals and similar/Ranges with begin that needs ADL" duration="{duration}"/>
+    <testCase name="Type conversions of RangeEquals and similar/Custom predicate/Two equal non-empty containers (close enough)" duration="{duration}"/>
     <testCase name="Usage of AllMatch range matcher/Basic usage" duration="{duration}"/>
     <testCase name="Usage of AllMatch range matcher/Type requires ADL found begin and end" duration="{duration}"/>
     <testCase name="Usage of AllMatch range matcher/Shortcircuiting/All are read" duration="{duration}"/>
@@ -1404,6 +1422,26 @@ at Matchers.tests.cpp:<line number>
     <testCase name="Usage of NoneTrue range matcher/Contained type is convertible to bool/All false evaluates to true" duration="{duration}"/>
     <testCase name="Usage of NoneTrue range matcher/Shortcircuiting/All are read" duration="{duration}"/>
     <testCase name="Usage of NoneTrue range matcher/Shortcircuiting/Short-circuited" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Basic usage/Empty container matches empty container" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Basic usage/Empty container does not match non-empty container" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Basic usage/Two equal 1-length non-empty containers" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Basic usage/Two equal-sized, equal, non-empty containers" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Basic usage/Two equal-sized, non-equal, non-empty containers" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Basic usage/Two non-equal-sized, non-empty containers (with same first elements)" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Custom predicate/Two equal non-empty containers (close enough)" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Custom predicate/Two non-equal non-empty containers (close enough)" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Ranges that need ADL begin/end" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Check short-circuiting behaviour/Check short-circuits on failure" duration="{duration}"/>
+    <testCase name="Usage of RangeEquals range matcher/Check short-circuiting behaviour/All elements are checked on success" duration="{duration}"/>
+    <testCase name="Usage of UnorderedRangeEquals range matcher/Basic usage/Empty container matches empty container" duration="{duration}"/>
+    <testCase name="Usage of UnorderedRangeEquals range matcher/Basic usage/Empty container does not match non-empty container" duration="{duration}"/>
+    <testCase name="Usage of UnorderedRangeEquals range matcher/Basic usage/Two equal 1-length non-empty containers" duration="{duration}"/>
+    <testCase name="Usage of UnorderedRangeEquals range matcher/Basic usage/Two equal-sized, equal, non-empty containers" duration="{duration}"/>
+    <testCase name="Usage of UnorderedRangeEquals range matcher/Basic usage/Two equal-sized, non-equal, non-empty containers" duration="{duration}"/>
+    <testCase name="Usage of UnorderedRangeEquals range matcher/Basic usage/Two non-equal-sized, non-empty containers" duration="{duration}"/>
+    <testCase name="Usage of UnorderedRangeEquals range matcher/Custom predicate/Two equal non-empty containers (close enough)" duration="{duration}"/>
+    <testCase name="Usage of UnorderedRangeEquals range matcher/Custom predicate/Two non-equal non-empty containers (close enough)" duration="{duration}"/>
+    <testCase name="Usage of UnorderedRangeEquals range matcher/Ranges that need ADL begin/end" duration="{duration}"/>
     <testCase name="Usage of the SizeIs range matcher/Some with stdlib containers" duration="{duration}"/>
     <testCase name="Usage of the SizeIs range matcher/Type requires ADL found size free function" duration="{duration}"/>
     <testCase name="Usage of the SizeIs range matcher/Type has size member" duration="{duration}"/>
@@ -1831,6 +1869,95 @@ at Misc.tests.cpp:<line number>
     <testCase name="vectors can be sized and resized/reserving smaller does not change size or capacity" duration="{duration}"/>
     <testCase name="xmlentitycheck/embedded xml: &lt;test>it should be possible to embed xml characters, such as &lt;, &quot; or &amp;, or even whole &lt;xml>documents&lt;/xml> within an attribute&lt;/test>" duration="{duration}"/>
     <testCase name="xmlentitycheck/encoded chars: these should all be encoded: &amp;&amp;&amp;&quot;&quot;&quot;&lt;&lt;&lt;&amp;&quot;&lt;&lt;&amp;&quot;" duration="{duration}"/>
+  </file>
+  <file path="tests/<exe-name>/UsageTests/Skip.tests.cpp">
+    <testCase name="a succeeding test can still be skipped" duration="{duration}">
+      <skipped message="SKIP()">
+SKIPPED
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="dynamic skipping works with generators" duration="{duration}">
+      <skipped message="SKIP()">
+SKIPPED
+skipping because answer = 41
+at Skip.tests.cpp:<line number>
+      </skipped>
+      <skipped message="SKIP()">
+SKIPPED
+skipping because answer = 43
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="failed assertions before SKIP cause test case to fail" duration="{duration}">
+      <skipped message="CHECK(3 == 4)">
+FAILED:
+	CHECK( 3 == 4 )
+at Skip.tests.cpp:<line number>
+      </skipped>
+      <skipped message="SKIP()">
+SKIPPED
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="failing for some generator values causes entire test case to fail" duration="{duration}">
+      <skipped message="FAIL()">
+FAILED:
+at Skip.tests.cpp:<line number>
+      </skipped>
+      <skipped message="SKIP()">
+SKIPPED
+at Skip.tests.cpp:<line number>
+      </skipped>
+      <skipped message="FAIL()">
+FAILED:
+at Skip.tests.cpp:<line number>
+      </skipped>
+      <skipped message="SKIP()">
+SKIPPED
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="failing in some unskipped sections causes entire test case to fail/skipped" duration="{duration}">
+      <skipped message="SKIP()">
+SKIPPED
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="failing in some unskipped sections causes entire test case to fail/not skipped" duration="{duration}">
+      <skipped message="FAIL()">
+FAILED:
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="nested sections can be skipped dynamically at runtime/B2/B" duration="{duration}">
+      <skipped message="SKIP()">
+SKIPPED
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="nested sections can be skipped dynamically at runtime/B" duration="{duration}"/>
+    <testCase name="sections can be skipped dynamically at runtime/not skipped" duration="{duration}"/>
+    <testCase name="sections can be skipped dynamically at runtime/skipped" duration="{duration}">
+      <skipped message="SKIP()">
+SKIPPED
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="sections can be skipped dynamically at runtime/also not skipped" duration="{duration}"/>
+    <testCase name="skipped tests can optionally provide a reason" duration="{duration}">
+      <skipped message="SKIP()">
+SKIPPED
+skipping because answer = 43
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="tests can be skipped dynamically at runtime" duration="{duration}">
+      <skipped message="SKIP()">
+SKIPPED
+at Skip.tests.cpp:<line number>
+      </skipped>
+    </testCase>
   </file>
   <file path="tests/<exe-name>/UsageTests/ToStringChrono.tests.cpp">
     <testCase name="Stringifying std::chrono::duration helpers" duration="{duration}"/>

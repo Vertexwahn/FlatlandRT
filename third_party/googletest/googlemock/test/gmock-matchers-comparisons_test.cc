@@ -31,17 +31,15 @@
 //
 // This file tests some commonly used argument matchers.
 
-// Silence warning C4244: 'initializing': conversion from 'int' to 'short',
-// possible loss of data and C4100, unreferenced local parameter
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4100)
-#endif
-
+#include <memory>
 #include <vector>
 
 #include "test/gmock-matchers_test.h"
+
+// Silence warning C4244: 'initializing': conversion from 'int' to 'short',
+// possible loss of data and C4100, unreferenced local parameter
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244 4100)
+
 
 namespace testing {
 namespace gmock_matchers_test {
@@ -864,7 +862,7 @@ struct Type {
 };
 
 TEST(TypedEqTest, HasSpecifiedType) {
-  // Verfies that the type of TypedEq<T>(v) is Matcher<T>.
+  // Verifies that the type of TypedEq<T>(v) is Matcher<T>.
   Type<Matcher<int>>::IsTypeOf(TypedEq<int>(5));
   Type<Matcher<double>>::IsTypeOf(TypedEq<double>(5));
 }
@@ -1530,7 +1528,7 @@ TEST(PairTest, MatchesCorrectly) {
   EXPECT_THAT(p, Pair(25, "foo"));
   EXPECT_THAT(p, Pair(Ge(20), HasSubstr("o")));
 
-  // 'first' doesnt' match, but 'second' matches.
+  // 'first' doesn't match, but 'second' matches.
   EXPECT_THAT(p, Not(Pair(42, "foo")));
   EXPECT_THAT(p, Not(Pair(Lt(25), "foo")));
 
@@ -1545,7 +1543,7 @@ TEST(PairTest, MatchesCorrectly) {
 
 TEST(PairTest, WorksWithMoveOnly) {
   pair<std::unique_ptr<int>, std::unique_ptr<int>> p;
-  p.second.reset(new int(7));
+  p.second = std::make_unique<int>(7);
   EXPECT_THAT(p, Pair(Eq(nullptr), Ne(nullptr)));
 }
 
@@ -1805,11 +1803,13 @@ TEST(WhenBase64UnescapedTest, MatchesUnescapedBase64Strings) {
   EXPECT_FALSE(m1.Matches("invalid base64"));
   EXPECT_FALSE(m1.Matches("aGVsbG8gd29ybGQ="));  // hello world
   EXPECT_TRUE(m1.Matches("aGVsbG8gd29ybGQh"));   // hello world!
+  EXPECT_TRUE(m1.Matches("+/-_IQ"));             // \xfb\xff\xbf!
 
   const Matcher<const std::string&> m2 = WhenBase64Unescaped(EndsWith("!"));
   EXPECT_FALSE(m2.Matches("invalid base64"));
   EXPECT_FALSE(m2.Matches("aGVsbG8gd29ybGQ="));  // hello world
   EXPECT_TRUE(m2.Matches("aGVsbG8gd29ybGQh"));   // hello world!
+  EXPECT_TRUE(m2.Matches("+/-_IQ"));             // \xfb\xff\xbf!
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
   const Matcher<const internal::StringView&> m3 =
@@ -1817,6 +1817,7 @@ TEST(WhenBase64UnescapedTest, MatchesUnescapedBase64Strings) {
   EXPECT_FALSE(m3.Matches("invalid base64"));
   EXPECT_FALSE(m3.Matches("aGVsbG8gd29ybGQ="));  // hello world
   EXPECT_TRUE(m3.Matches("aGVsbG8gd29ybGQh"));   // hello world!
+  EXPECT_TRUE(m3.Matches("+/-_IQ"));             // \xfb\xff\xbf!
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
@@ -2354,6 +2355,4 @@ TEST(PolymorphicMatcherTest, CanAccessImpl) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4244 4100

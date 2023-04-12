@@ -22,7 +22,7 @@ build:remote_gcc9 --cxxopt=-Werror
 build:remote_gcc9 --define compiler=remote_gcc9
 ##build:remote_gcc9 --cxxopt=-Wextra
 
-# GCC 11.2
+# GCC 11.3
 #build:gcc11 --cxxopt=-std=c++23 # blocked by emsdk
 build:gcc11 --cxxopt=-std=c++20
 build:gcc11 --cxxopt=-Wall
@@ -33,8 +33,8 @@ build:gcc11 --define compiler=gcc11
 
 build:linux --config=gcc11
 
-# macOS (e.g. Clang 12.0.0)
-build:macos --cxxopt=-std=c++2a
+# macOS (e.g. Clang 14.0.0)
+build:macos --cxxopt=-std=c++2b # see https://clang.llvm.org/cxx_status.html
 build:macos --cxxopt=-Wall
 build:macos --define compiler=macos
 #build:macos --cxxopt=-Werror # Commented out because of Embree

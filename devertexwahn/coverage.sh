@@ -18,7 +18,6 @@ additional_bazel_config=$1
 
 bazel coverage \
 --config=gcc11 \
---instrument_test_targets=true \
 --config=${additional_bazel_config} \
 --combined_report=lcov \
 -- //...

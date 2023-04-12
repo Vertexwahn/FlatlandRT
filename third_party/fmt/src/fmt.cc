@@ -1,32 +1,18 @@
 module;
-#ifndef __cpp_modules
-#  error Module not supported.
-#endif
 
-// put all implementation-provided headers into the global module fragment
-// to prevent attachment to this module
-#if !defined(_CRT_SECURE_NO_WARNINGS) && defined(_MSC_VER)
-#  define _CRT_SECURE_NO_WARNINGS
-#endif
-#if !defined(WIN32_LEAN_AND_MEAN) && defined(_WIN32)
-#  define WIN32_LEAN_AND_MEAN
-#endif
-
+// Put all implementation-provided headers into the global module fragment
+// to prevent attachment to this module.
 #include <algorithm>
-#include <cctype>
 #include <cerrno>
 #include <chrono>
 #include <climits>
-#include <clocale>
 #include <cmath>
-#include <cstdarg>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <cwchar>
 #include <exception>
 #include <functional>
 #include <iterator>
@@ -34,7 +20,6 @@ module;
 #include <locale>
 #include <memory>
 #include <ostream>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -65,22 +50,23 @@ module;
 #  endif
 #endif
 #ifdef _WIN32
+#  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>
 #endif
 
 export module fmt;
 
 #define FMT_MODULE_EXPORT export
-#define FMT_MODULE_EXPORT_BEGIN export {
-#define FMT_MODULE_EXPORT_END }
+#define FMT_BEGIN_EXPORT export {
+#define FMT_END_EXPORT }
 #define FMT_BEGIN_DETAIL_NAMESPACE \
   }                                \
   namespace detail {
 #define FMT_END_DETAIL_NAMESPACE \
   }                              \
   export {
-// all library-provided declarations and definitions
-// must be in the module purview to be exported
+// All library-provided declarations and definitions must be in the module
+// purview to be exported.
 #include "fmt/args.h"
 #include "fmt/chrono.h"
 #include "fmt/color.h"
@@ -89,6 +75,10 @@ export module fmt;
 #include "fmt/os.h"
 #include "fmt/printf.h"
 #include "fmt/xchar.h"
+
+#if !(defined(__cpp_modules) || FMT_CLANG_VERSION >= 1600)
+#  error modules not supported
+#endif
 
 // gcc doesn't yet implement private module fragments
 #if !FMT_GCC_VERSION

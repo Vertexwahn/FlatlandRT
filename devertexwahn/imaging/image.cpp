@@ -7,6 +7,52 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
+Image3f::Image3f(const int width, const int height) : width_(width), height_(height) {
+    data_ = new float[width_ * height_ * 3];
+
+    for (int x = 0; x < width_; ++x) {
+        for (int y = 0; y < height_; ++y) {
+            auto r = 0.f;
+            auto g = 0.f;
+            auto b = 0.f;
+
+            data_[(width_ * y + x) * 3] = r;
+            data_[(width_ * y + x) * 3 + 1] = g;
+            data_[(width_ * y + x) * 3 + 2] = b;
+        }
+    }
+}
+
+Image3f::Image3f(const Vector2i& size) : width_(size.x()), height_(size.y()) {
+    data_ = new float[width_ * height_ * 3];
+
+    for (int x = 0; x < width_; ++x) {
+        for (int y = 0; y < height_; ++y) {
+            auto r = 0.f;
+            auto g = 0.f;
+            auto b = 0.f;
+
+            data_[(width_ * y + x) * 3] = r;
+            data_[(width_ * y + x) * 3 + 1] = g;
+            data_[(width_ * y + x) * 3 + 2] = b;
+        }
+    }
+}
+
+Image3f::Image3f(const Image3f &src) : width_(src.width_), height_(src.height_) {
+    data_ = new float[width_ * height_ * 3];
+
+    for (int x = 0; x < width_; ++x) {
+        for (int y = 0; y < height_; ++y) {
+            data_[(width_ * y + x) * 3] = src.data_[(width_ * y + x) * 3];
+            data_[(width_ * y + x) * 3 + 1] = src.data_[(width_ * y + x) * 3 + 1];
+            data_[(width_ * y + x) * 3 + 2] = src.data_[(width_ * y + x) * 3 + 2];
+        }
+    }
+
+    //std::copy(std::begin(src.data()), std::end(src.data()[width_ * height_]), std::begin(data_));
+}
+
 Image3f::~Image3f() {
     delete[] data_;
 }
@@ -38,36 +84,6 @@ Color3f Image3f::get_pixel(int x, int y) const {
     auto b = data_[(width_ * y + x) * 3 + 2];
 
     return Color3f{r, g, b};
-}
-
-Image3f::Image3f(const int width, const int height) : width_(width), height_(height) {
-    data_ = new float[width * height * 3];
-
-    for (int x = 0; x < width; ++x) {
-        for (int y = 0; y < height; ++y) {
-            auto r = 0.f;
-            auto g = 0.f;
-            auto b = 0.f;
-
-            data_[(width * y + x) * 3] = r;
-            data_[(width * y + x) * 3 + 1] = g;
-            data_[(width * y + x) * 3 + 2] = b;
-        }
-    }
-}
-
-Image3f::Image3f(const Image3f &src) : width_(src.width_), height_(src.height_) {
-    data_ = new float[width_ * height_ * 3];
-
-    for (int x = 0; x < width_; ++x) {
-        for (int y = 0; y < height_; ++y) {
-            data_[(width_ * y + x) * 3] = src.data_[(width_ * y + x) * 3];
-            data_[(width_ * y + x) * 3 + 1] = src.data_[(width_ * y + x) * 3 + 1];
-            data_[(width_ * y + x) * 3 + 2] = src.data_[(width_ * y + x) * 3 + 2];
-        }
-    }
-
-    //std::copy(std::begin(src.data()), std::end(src.data()[width_ * height_]), std::begin(data_));
 }
 
 Image3f &Image3f::operator=(const Image3f &other) {

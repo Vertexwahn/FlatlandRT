@@ -4,6 +4,11 @@
 add_executable(IexTest
   main.cpp
   testBaseExc.cpp
+  testBaseExc.h
+  testMathExc.cpp
+  testMathExc.h
+  mathFuncs.cpp
+  mathFuncs.h
 )
 
 target_link_libraries(IexTest OpenEXR::Iex)
