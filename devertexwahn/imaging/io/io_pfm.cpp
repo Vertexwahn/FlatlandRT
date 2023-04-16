@@ -16,8 +16,6 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 enum endian {ENDIAN_BIG, ENDIAN_LITTLE};
 
-static enum endian machineEndianness;
-
 static enum endian
 thisMachineEndianness(void) {
 /*----------------------------------------------------------------------------
@@ -65,6 +63,8 @@ floatFromPfmSample(pfmSample   const sample,
 /*----------------------------------------------------------------------------
 Type converter
 -----------------------------------------------------------------------------*/
+    static enum endian machineEndianness = thisMachineEndianness();
+
     if (machineEndianness == pfmEndianness) {
         return sample.value;
     } else {
@@ -189,12 +189,14 @@ ReferenceCounted<Image3f> load_image_pfm(std::string_view filename) {
 
     ReferenceCounted<Image3f> image = make_reference_counted<Image3f>(pfmHeader.width, pfmHeader.height);
 
+    auto endian = thisMachineEndianness();
+
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
             Color3f color{
-                    pfmBuffer[(y * image->width() + x) * 3 + 0].value,
-                    pfmBuffer[(y * image->width() + x) * 3 + 1].value,
-                    pfmBuffer[(y * image->width() + x) * 3 + 2].value,
+                floatFromPfmSample(pfmBuffer[(y * image->width() + x) * 3 + 0], pfmHeader.endian),
+                floatFromPfmSample(pfmBuffer[(y * image->width() + x) * 3 + 1], pfmHeader.endian),
+                floatFromPfmSample(pfmBuffer[(y * image->width() + x) * 3 + 2], pfmHeader.endian),
             };
             image->set_pixel(x,image->height()-y-1,color);
         }

@@ -311,13 +311,13 @@ genrule(
 
 expand_template(
     name = "neon-compat_gen",
-    template = "simd/arm/neon-compat.h.in",
     out = "simd/arm/neon-compat.h",
     substitutions = {
         "#cmakedefine HAVE_VLD1_S16_X3": "#define HAVE_VLD1_S16_X3",
         "#cmakedefine HAVE_VLD1_U16_X2": "#define HAVE_VLD1_U16_X2",
         "#cmakedefine HAVE_VLD1Q_U8_X4": "#define HAVE_VLD1Q_U8_X4",
     },
+    template = "simd/arm/neon-compat.h.in",
 )
 
 genrule(
@@ -363,8 +363,8 @@ HDRS_SIMD_ARM = [
 cc_library(
     name = "simd_armv7a",
     srcs = [
-        "simd/arm/aarch32/jsimd.c",
         "simd/arm/aarch32/jchuff-neon.c",
+        "simd/arm/aarch32/jsimd.c",
     ] + SRCS_SIMD_COMMON + SRCS_SIMD_ARM,
     hdrs = [
         "simd/arm/aarch32/jccolext-neon.c",
@@ -377,8 +377,8 @@ cc_library(
 cc_library(
     name = "simd_armv8a",
     srcs = [
-        "simd/arm/aarch64/jsimd.c",
         "simd/arm/aarch64/jchuff-neon.c",
+        "simd/arm/aarch64/jsimd.c",
     ] + SRCS_SIMD_COMMON + SRCS_SIMD_ARM,
     hdrs = [
         "simd/arm/aarch64/jccolext-neon.c",
@@ -514,6 +514,7 @@ cc_library(
     srcs = [
         "jchuff.h",
         "jconfig.h",
+        "jconfigint.h",
         "jdct.h",
         "jerror.h",
         "jinclude.h",
@@ -523,23 +524,21 @@ cc_library(
         "jsimd.h",
         "jsimd_none.c",
         "jsimddct.h",
-        "jconfigint.h",
     ],
     copts = libjpegturbo_copts,
 )
 
 expand_template(
     name = "jversion",
-    template = "jversion.h.in",
     out = "jversion.h",
     substitutions = {
         "@COPYRIGHT_YEAR@": "2022",
     },
+    template = "jversion.h.in",
 )
 
 expand_template(
     name = "jconfig_win",
-    template = "win/jconfig.h.in",
     out = "jconfig_win.h",
     substitutions = {
         "@JPEG_LIB_VERSION@": "62",
@@ -551,6 +550,7 @@ expand_template(
         "#cmakedefine MEM_SRCDST_SUPPORTED": "#define MEM_SRCDST_SUPPORTED",
         "#cmakedefine WITH_SIMD": "",
     },
+    template = "win/jconfig.h.in",
 )
 
 JCONFIG_NOWIN_COMMON_SUBSTITUTIONS = {
@@ -589,16 +589,16 @@ JCONFIG_NOWIN_NOSIMD_SUBSTITUTIONS.update(JCONFIG_NOWIN_COMMON_SUBSTITUTIONS)
 
 expand_template(
     name = "jconfig_nowin_nosimd",
-    template  = "jconfig.h.in",
     out = "jconfig_nowin_nosimd.h",
     substitutions = JCONFIG_NOWIN_NOSIMD_SUBSTITUTIONS,
+    template = "jconfig.h.in",
 )
 
 expand_template(
     name = "jconfig_nowin_simd",
-    template  = "jconfig.h.in",
     out = "jconfig_nowin_simd.h",
     substitutions = JCONFIG_NOWIN_SIMD_SUBSTITUTIONS,
+    template = "jconfig.h.in",
 )
 
 JCONFIGINT_COMMON_SUBSTITUTIONS = {
@@ -641,16 +641,16 @@ JCONFIGINT_WIN_SUBSTITUTIONS.update(JCONFIGINT_COMMON_SUBSTITUTIONS)
 
 expand_template(
     name = "jconfigint_nowin",
-    template = "jconfigint.h.in",
     out = "jconfigint_nowin.h",
     substitutions = JCONFIGINT_NOWIN_SUBSTITUTIONS,
+    template = "jconfigint.h.in",
 )
 
 expand_template(
     name = "jconfigint_win",
-    template = "jconfigint.h.in",
     out = "jconfigint_win.h",
     substitutions = JCONFIGINT_WIN_SUBSTITUTIONS,
+    template = "jconfigint.h.in",
 )
 
 genrule(

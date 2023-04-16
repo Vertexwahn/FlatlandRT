@@ -38,9 +38,9 @@ cc_library(
     deps = [
         ":io_jpeg",
         ":io_openexr",
+        ":io_pfm",
         ":io_png",
         ":io_ppm",
-        ":io_pfm",
         "@boost//:algorithm",
     ],
 )
