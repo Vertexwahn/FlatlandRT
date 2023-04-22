@@ -12,7 +12,6 @@ steps:
     lfs: false
     submodules: false
 
-
   - script: |
       sw_vers
       uname

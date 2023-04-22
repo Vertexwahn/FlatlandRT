@@ -37,7 +37,7 @@ steps:
      bazel test --config=gcc11  --compilation_mode=dbg -- //...
     displayName: "Bazel test gcc11-dbg"
 
-  # Make sure that Bazel query works
+  # Make sure that Bazel query works - not part of an own dedicated build job to save some resources (restart of VM, etc.)
   - script: |
      cd devertexwahn
      bazel query //...

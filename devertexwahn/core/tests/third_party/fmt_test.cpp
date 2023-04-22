@@ -8,9 +8,16 @@
 
 #include "gmock/gmock.h"
 
+/*
+ * The intention of this test file is to make sure that the integration of the libray {fmt} works.
+ * This file tries to reflect common use case of {fmt} within this project.
+ * Furthermore, this file can be used to test features of {fmt} and to get familiar with the library.
+ * No features of this project should be tested here.
+ * Soley, the pure integration of {fmt} within this project should be tested here.
+ */
+
 TEST(fmt, TextFormatting) {
     std::string message = fmt::format("The answer is {}.", 42);
-
     EXPECT_THAT(message, "The answer is 42.");
 }
 

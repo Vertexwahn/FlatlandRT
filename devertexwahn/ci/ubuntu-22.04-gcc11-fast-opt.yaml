@@ -37,3 +37,12 @@ steps:
      bazel test --config=gcc11  -- //...
     displayName: "Bazel test gcc11-fastbuild"
 
+  - script: |
+      cd devertexwahn
+      bazel build --config=gcc11  --compilation_mode=opt -- //...    
+    displayName: "Bazel build gcc11-opt"
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=gcc11  --compilation_mode=opt -- //...    
+    displayName: "Bazel test gcc11-opt"
