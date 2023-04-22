@@ -31,7 +31,10 @@
 //
 // This file tests some commonly used argument matchers.
 
+#include <functional>
 #include <memory>
+#include <string>
+#include <tuple>
 #include <vector>
 
 #include "test/gmock-matchers_test.h"
@@ -586,8 +589,8 @@ TEST(MatcherCastTest, ValueIsNotCopied) {
 
 class Base {
  public:
-  virtual ~Base() {}
-  Base() {}
+  virtual ~Base() = default;
+  Base() = default;
 
  private:
   Base(const Base&) = delete;

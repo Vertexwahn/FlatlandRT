@@ -9,7 +9,7 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 //----------------------------------------------------------------------------
 // The following code section has been copied.
-// Copright by Bryan Henderson, San Jose, CA April 2004.
+// Copyrightt by Bryan Henderson, San Jose, CA April 2004.
 // Contributed to the public domain by its author.
 // Minor modifications by Julian Amann distributed under the same license conditions (public domain)
 //----------------------------------------------------------------------------

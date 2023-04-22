@@ -490,36 +490,26 @@ def okapi_deps():
     #    branch = "introduce-maybe",
     #)
 
+    # Switch back to this once above thing is tested:
     maybe(
-        git_repository,
-        name = "com_github_nelhage_rules_boost",
-        remote = "https://github.com/nelhage/rules_boost",
-        #branch = "github-boost",
-        commit = "c2115b0f97db85da025235e1feada15376d1d98b",
-        #commit = "daacea9f72c7b0f9bbc90a6631a29845280e9951",
-        #shallow_since = "1660385837 +0200",
+        native.new_local_repository,
+        name = "org_lzma_lzma",
+        build_file = "@com_github_nelhage_rules_boost//:lzma.BUILD",
+        path = "../third_party/xz-5.4.2",
     )
 
-    # Switch back to this once above thing is tested:
-    #maybe(
-    #    native.new_local_repository,
-    #    name = "org_lzma_lzma",
-    #    build_file = "@com_github_nelhage_rules_boost//:lzma.BUILD",
-    #   path = "../third_party/xz-5.4.1",
-    #)
+    maybe(
+        native.new_local_repository,
+        name = "org_bzip_bzip2",
+        build_file = "@com_github_nelhage_rules_boost//:bzip2.BUILD",
+        path = "../third_party/bzip2-1.0.8",
+    )
 
-    #maybe(
-    #    native.new_local_repository,
-    #    name = "org_bzip_bzip2",
-    #    build_file = "@com_github_nelhage_rules_boost//:bzip2.BUILD",
-    #    path = "../third_party/bzip2-1.0.8",
-    #)
-
-    #maybe(
-    #    native.local_repository,
-    #    name = "com_github_nelhage_rules_boost",
-    #    path = "../third_party/rules_boost",
-    #)
+    maybe(
+        native.local_repository,
+        name = "com_github_nelhage_rules_boost",
+        path = "../third_party/rules_boost",
+    )
 
     #-------------------------------------------------------------------------------------
     # bazel_clang_tidy

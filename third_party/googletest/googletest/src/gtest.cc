@@ -48,13 +48,16 @@
 #include <initializer_list>
 #include <iomanip>
 #include <ios>
+#include <iostream>
 #include <iterator>
 #include <limits>
 #include <list>
 #include <map>
 #include <ostream>  // NOLINT
+#include <set>
 #include <sstream>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest-assertion-result.h"
@@ -2238,7 +2241,7 @@ TestResult::TestResult()
     : death_test_count_(0), start_timestamp_(0), elapsed_time_(0) {}
 
 // D'tor.
-TestResult::~TestResult() {}
+TestResult::~TestResult() = default;
 
 // Returns the i-th test part result among all the results. i can
 // range from 0 to total_part_count() - 1. If i is not in that range,
@@ -2447,7 +2450,7 @@ Test::Test() : gtest_flag_saver_(new GTEST_FLAG_SAVER_) {}
 // The d'tor restores the states of all flags.  The actual work is
 // done by the d'tor of the gtest_flag_saver_ field, and thus not
 // visible here.
-Test::~Test() {}
+Test::~Test() = default;
 
 // Sets up the test fixture.
 //
@@ -3359,7 +3362,7 @@ static void PrintFullTestCommentIfPresent(const TestInfo& test_info) {
 // Class PrettyUnitTestResultPrinter is copyable.
 class PrettyUnitTestResultPrinter : public TestEventListener {
  public:
-  PrettyUnitTestResultPrinter() {}
+  PrettyUnitTestResultPrinter() = default;
   static void PrintTestName(const char* test_suite, const char* test) {
     printf("%s.%s", test_suite, test);
   }
@@ -3667,7 +3670,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
 // Class BriefUnitTestResultPrinter is copyable.
 class BriefUnitTestResultPrinter : public TestEventListener {
  public:
-  BriefUnitTestResultPrinter() {}
+  BriefUnitTestResultPrinter() = default;
   static void PrintTestName(const char* test_suite, const char* test) {
     printf("%s.%s", test_suite, test);
   }
@@ -3782,28 +3785,28 @@ class TestEventRepeater : public TestEventListener {
   bool forwarding_enabled() const { return forwarding_enabled_; }
   void set_forwarding_enabled(bool enable) { forwarding_enabled_ = enable; }
 
-  void OnTestProgramStart(const UnitTest& unit_test) override;
+  void OnTestProgramStart(const UnitTest& parameter) override;
   void OnTestIterationStart(const UnitTest& unit_test, int iteration) override;
-  void OnEnvironmentsSetUpStart(const UnitTest& unit_test) override;
-  void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) override;
+  void OnEnvironmentsSetUpStart(const UnitTest& parameter) override;
+  void OnEnvironmentsSetUpEnd(const UnitTest& parameter) override;
 //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseStart(const TestSuite& parameter) override;
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestSuiteStart(const TestSuite& parameter) override;
-  void OnTestStart(const TestInfo& test_info) override;
-  void OnTestDisabled(const TestInfo& test_info) override;
-  void OnTestPartResult(const TestPartResult& result) override;
-  void OnTestEnd(const TestInfo& test_info) override;
+  void OnTestStart(const TestInfo& parameter) override;
+  void OnTestDisabled(const TestInfo& parameter) override;
+  void OnTestPartResult(const TestPartResult& parameter) override;
+  void OnTestEnd(const TestInfo& parameter) override;
 //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseEnd(const TestCase& parameter) override;
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestSuiteEnd(const TestSuite& parameter) override;
-  void OnEnvironmentsTearDownStart(const UnitTest& unit_test) override;
-  void OnEnvironmentsTearDownEnd(const UnitTest& unit_test) override;
+  void OnEnvironmentsTearDownStart(const UnitTest& parameter) override;
+  void OnEnvironmentsTearDownEnd(const UnitTest& parameter) override;
   void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
-  void OnTestProgramEnd(const UnitTest& unit_test) override;
+  void OnTestProgramEnd(const UnitTest& parameter) override;
 
  private:
   // Controls whether events will be forwarded to listeners_. Set to false

@@ -37,8 +37,11 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <sstream>
 #include <string>
+#include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -982,7 +985,7 @@ TEST(ReturnRoundRobinTest, WorksForVector) {
 
 class MockClass {
  public:
-  MockClass() {}
+  MockClass() = default;
 
   MOCK_METHOD1(IntFunc, int(bool flag));  // NOLINT
   MOCK_METHOD0(Foo, MyNonDefaultConstructible());

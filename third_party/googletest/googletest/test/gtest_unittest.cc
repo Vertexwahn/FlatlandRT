@@ -63,6 +63,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <memory>
 #include <ostream>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <unordered_set>
@@ -4950,7 +4951,7 @@ TEST(ComparisonAssertionTest, AcceptsUnprintableArgs) {
 // both in a TEST and in a TEST_F.
 class Foo {
  public:
-  Foo() {}
+  Foo() = default;
 
  private:
   int Bar() const { return 1; }
