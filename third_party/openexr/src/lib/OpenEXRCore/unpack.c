@@ -5,17 +5,11 @@
 
 #include "internal_coding.h"
 #include "internal_xdr.h"
+#include "internal_cpuid.h"
 
 #include "openexr_attr.h"
 
-#include <stdbool.h>
 #include <string.h>
-
-#if defined(__x86_64__) || defined(_M_X64)
-#    ifndef _WIN32
-#        include <cpuid.h>
-#    endif
-#endif
 
 /**************************************/
 
@@ -37,7 +31,7 @@ half_to_float8 (float* out, const uint16_t* src)
 }
 #endif
 
-#if (defined(__x86_64__) || defined(_M_X64)) && defined(__AVX__) &&                              \
+#if (defined(__x86_64__) || defined(_M_X64)) && defined(__AVX__) &&            \
     (defined(__F16C__) || defined(__GNUC__) || defined(__clang__))
 
 #    if defined(__F16C__)
@@ -141,34 +135,15 @@ half_to_float_buffer_impl (float* out, const uint16_t* in, int w)
 static void (*half_to_float_buffer) (float*, const uint16_t*, int) =
     &half_to_float_buffer_impl;
 
-static void
-choose_half_to_float_impl ()
+static inline void
+choose_half_to_float_impl (void)
 {
-    // regs[2] in the extended block is ECX, where f16c indicator lives
-#        ifdef _WIN32
-    int regs[4];
-
-    __cpuid (regs, 0);
-    if (regs[0] >= 1) { __cpuidex (regs, 1, 0); }
-    else
-        regs[2] = 0;
-#        else
-    unsigned int regs[4];
-    __get_cpuid (0, &regs[0], &regs[1], &regs[2], &regs[3]);
-    if (regs[0] >= 1)
-    {
-        __get_cpuid (1, &regs[0], &regs[1], &regs[2], &regs[3]);
-    }
-    else
-        regs[2] = 0;
-#        endif
-    /* F16C is indicated by bit 29 */
-    if (regs[2] & (1 << 29)) half_to_float_buffer = &half_to_float_buffer_f16c;
+    if (has_native_half ()) half_to_float_buffer = &half_to_float_buffer_f16c;
 }
 #    else
 /* when we explicitly compile against f16, force it in */
-static void
-choose_half_to_float_impl ()
+static inline void
+choose_half_to_float_impl (void)
 {}
 
 #    endif /* F16C */
@@ -222,7 +197,7 @@ half_to_float_buffer (float* out, const uint16_t* in, int w)
 }
 
 static void
-choose_half_to_float_impl ()
+choose_half_to_float_impl (void)
 {}
 
 #endif
@@ -397,14 +372,10 @@ unpack_16bit_3chan_planar (exr_decode_pipeline_t* decode)
     const uint16_t *in0, *in1, *in2;
     uint8_t *       out0, *out1, *out2;
     int             w, h;
-    int             inc0, inc1, inc2;
     int             linc0, linc1, linc2;
 
     w     = decode->channels[0].width;
     h     = decode->chunk.height;
-    inc0  = decode->channels[0].user_pixel_stride;
-    inc1  = decode->channels[1].user_pixel_stride;
-    inc2  = decode->channels[2].user_pixel_stride;
     linc0 = decode->channels[0].user_line_stride;
     linc1 = decode->channels[1].user_line_stride;
     linc2 = decode->channels[2].user_line_stride;
@@ -451,14 +422,10 @@ unpack_half_to_float_3chan_planar (exr_decode_pipeline_t* decode)
     const uint16_t *in0, *in1, *in2;
     uint8_t *       out0, *out1, *out2;
     int             w, h;
-    int             inc0, inc1, inc2;
     int             linc0, linc1, linc2;
 
     w     = decode->channels[0].width;
     h     = decode->chunk.height;
-    inc0  = decode->channels[0].user_pixel_stride;
-    inc1  = decode->channels[1].user_pixel_stride;
-    inc2  = decode->channels[2].user_pixel_stride;
     linc0 = decode->channels[0].user_line_stride;
     linc1 = decode->channels[1].user_line_stride;
     linc2 = decode->channels[2].user_line_stride;

@@ -71,6 +71,8 @@ endif()
 
 configure_file(OpenEXRConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/OpenEXRConfig.h)
 configure_file(OpenEXRConfigInternal.h.in ${CMAKE_CURRENT_BINARY_DIR}/OpenEXRConfigInternal.h)
+# make a temp copy in the binary dir for OpenEXRConfig.h to include
+configure_file(../src/lib/OpenEXRCore/openexr_version.h ${CMAKE_CURRENT_BINARY_DIR}/OpenEXRCore/openexr_version.h COPYONLY)
 
 if(OPENEXR_INSTALL)
 install(
@@ -208,9 +210,6 @@ if(OPENEXR_INSTALL_PKG_CONFIG)
         set(exr_pthread_cflags "")
       endif()
       set(exr_pthread_libs ${CMAKE_THREAD_LIBS_INIT})
-    endif()
-    if(NOT zlib_INTERNAL_DIR)
-      set(zlib_link "-lz")
     endif()
     string(REPLACE ".in" "" pcout ${pcinfile})
     configure_file(${pcinfile} ${CMAKE_CURRENT_BINARY_DIR}/${pcout} @ONLY)

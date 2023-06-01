@@ -8,7 +8,7 @@
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 std::string Object::to_string() const {
-    return "A object. Implement the to_string method to improve this description.";
+    return "An object. Implement the to_string method to improve this description.";
 }
 
 DE_VERTEXWAHN_END_NAMESPACE

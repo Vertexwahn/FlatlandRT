@@ -10,7 +10,7 @@
 #include "internal_xdr.h"
 
 #include <string.h>
-#include <zlib.h>
+#include "openexr_compression.h"
 
 /**************************************/
 
@@ -22,6 +22,7 @@ float_to_float24 (float f)
         float    f;
         uint32_t i;
     } u;
+    uint32_t s, e, m, i;
 
     u.f = f;
 
@@ -30,10 +31,9 @@ float_to_float24 (float f)
     // into sign, s, exponent, e, and significand, m.
     //
 
-    uint32_t s = u.i & 0x80000000;
-    uint32_t e = u.i & 0x7f800000;
-    uint32_t m = u.i & 0x007fffff;
-    uint32_t i;
+    s = u.i & 0x80000000;
+    e = u.i & 0x7f800000;
+    m = u.i & 0x007fffff;
 
     if (e == 0x7f800000)
     {
@@ -89,10 +89,11 @@ float_to_float24 (float f)
 static exr_result_t
 apply_pxr24_impl (exr_encode_pipeline_t* encode)
 {
-    uint8_t*       out       = encode->scratch_buffer_1;
-    uint64_t       nOut      = 0;
-    const uint8_t* lastIn    = encode->packed_buffer;
-    uLong          compbufsz = (uLong) encode->compressed_alloc_size;
+    uint8_t*       out    = encode->scratch_buffer_1;
+    uint64_t       nOut   = 0;
+    const uint8_t* lastIn = encode->packed_buffer;
+    size_t         compbufsz;
+    exr_result_t   rv;
 
     for (int y = 0; y < encode->chunk.height; ++y)
     {
@@ -215,24 +216,28 @@ apply_pxr24_impl (exr_encode_pipeline_t* encode)
         }
     }
 
-    if (Z_OK != compress (
-                    (Bytef*) encode->compressed_buffer,
-                    &compbufsz,
-                    (const Bytef*) encode->scratch_buffer_1,
-                    (uLong) nOut))
+    rv = exr_compress_buffer (
+        encode->context,
+        -1,
+        encode->scratch_buffer_1,
+        nOut,
+        encode->compressed_buffer,
+        encode->compressed_alloc_size,
+        &compbufsz);
+
+    if (rv == EXR_ERR_SUCCESS)
     {
-        return EXR_ERR_CORRUPT_CHUNK;
+        if (compbufsz > encode->packed_bytes)
+        {
+            memcpy (
+                encode->compressed_buffer,
+                encode->packed_buffer,
+                encode->packed_bytes);
+            compbufsz = encode->packed_bytes;
+        }
+        encode->compressed_bytes = compbufsz;
     }
-    if (compbufsz > encode->packed_bytes)
-    {
-        memcpy (
-            encode->compressed_buffer,
-            encode->packed_buffer,
-            encode->packed_bytes);
-        compbufsz = (uLong) encode->packed_bytes;
-    }
-    encode->compressed_bytes = compbufsz;
-    return EXR_ERR_SUCCESS;
+    return rv;
 }
 
 exr_result_t
@@ -262,8 +267,8 @@ undo_pxr24_impl (
     void*                  scratch_data,
     uint64_t               scratch_size)
 {
-    uLong          outSize = (uLong) uncompressed_size;
-    int            rstat;
+    size_t         outSize;
+    exr_result_t   rstat;
     uint8_t*       out    = uncompressed_data;
     uint64_t       nOut   = 0;
     uint64_t       nDec   = 0;
@@ -271,13 +276,15 @@ undo_pxr24_impl (
 
     if (scratch_size < uncompressed_size) return EXR_ERR_INVALID_ARGUMENT;
 
-    rstat = uncompress (
-        (Bytef*) scratch_data,
-        &outSize,
-        (const Bytef*) compressed_data,
-        (uLong) comp_buf_size);
+    rstat = exr_uncompress_buffer (
+        decode->context,
+        compressed_data,
+        comp_buf_size,
+        scratch_data,
+        uncompressed_size,
+        &outSize);
 
-    if (rstat != Z_OK) return EXR_ERR_CORRUPT_CHUNK;
+    if (rstat != EXR_ERR_SUCCESS) return rstat;
 
     for (int y = 0; y < decode->chunk.height; ++y)
     {

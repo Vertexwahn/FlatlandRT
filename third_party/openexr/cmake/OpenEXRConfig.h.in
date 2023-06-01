@@ -8,6 +8,15 @@
 
 #pragma once
 
+/// @TODO get the version from the header files.
+/// due to the structure of the cmake configuration steps,
+/// it's not obvious how to structure things for this to work.
+/// so for now, just hardcode the version here.
+//#include <OpenEXRCore/openexr_version.h>
+#define OPENEXR_VERSION_MAJOR 3
+#define OPENEXR_VERSION_MINOR 2
+#define OPENEXR_VERSION_PATCH 0
+
 //
 // Options / configuration based on O.S. / compiler
 /////////////////////
@@ -45,9 +54,6 @@
 #define OPENEXR_VERSION_STRING "@OPENEXR_VERSION@"
 #define OPENEXR_PACKAGE_STRING "@OPENEXR_PACKAGE_NAME@"
 
-#define OPENEXR_VERSION_MAJOR @OpenEXR_VERSION_MAJOR@
-#define OPENEXR_VERSION_MINOR @OpenEXR_VERSION_MINOR@
-#define OPENEXR_VERSION_PATCH @OpenEXR_VERSION_PATCH@
 #define OPENEXR_VERSION_RELEASE_TYPE "@OPENEXR_VERSION_RELEASE_TYPE@"
 // Deprecated, for back compatibility:
 #define OPENEXR_VERSION_EXTRA "@OPENEXR_VERSION_RELEASE_TYPE@"

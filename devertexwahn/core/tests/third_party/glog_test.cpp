@@ -1,5 +1,13 @@
 // copied from: https://github.com/google/glog/blob/master/bazel/example/main.cc
 
+/*
+ * The intention of this test file is to make sure that the integration of the library glog works.
+ * This file tries to reflect common use case of glog within this project.
+ * Furthermore, this file can be used to test features of glog and to get familiar with the library.
+ * No features of this project should be tested here.
+ * Solely, the pure integration of {fmt} within this project should be tested here.
+ */
+
 #include "gflags/gflags.h"
 #include "glog/logging.h"
 #include "glog/stl_logging.h"

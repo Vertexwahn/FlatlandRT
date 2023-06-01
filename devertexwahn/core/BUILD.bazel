@@ -9,7 +9,10 @@ cc_library(
     name = "exception",
     srcs = ["exception.cpp"],
     hdrs = ["exception.h"],
-    deps = [":namespace"],
+    deps = [
+        ":namespace",
+        "@boost//:predef",
+    ],
 )
 
 cc_test(
@@ -59,6 +62,17 @@ cc_library(
     deps = [
         ":namespace",
         ":non_copyable",
+    ],
+)
+
+cc_test(
+    name = "object_test",
+    srcs = [
+        "object_test.cpp",
+    ],
+    deps = [
+        ":object",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

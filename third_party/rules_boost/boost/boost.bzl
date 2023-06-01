@@ -47,7 +47,7 @@ def boost_library(
         srcs = srcs_list(boost_name, exclude_src) + srcs,
         copts = default_copts + copts,
         licenses = ["notice"],
-        **kwargs,
+        **kwargs
     )
 
 # Some boost libraries are not safe to use as dynamic libraries unless a
@@ -81,7 +81,7 @@ def boost_so_library(
         copts = default_copts + copts,
         linkshared = True,
         visibility = ["//visibility:private"],
-        **kwargs,
+        **kwargs
     )
     native.filegroup(
         name = "%s_dll_interface_file" % name,
@@ -104,20 +104,20 @@ def boost_so_library(
         exclude_hdr = exclude_hdr,
         exclude_src = native.glob(["**"]),
         deps = deps + [":_imported_%s" % name],
-        **kwargs,
+        **kwargs
     )
 
 def boost_deps():
     maybe(
         http_archive,
         name = "bazel_skylib",
-        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.4.1/bazel-skylib-1.4.1.tar.gz",
-        sha256 = "b8a1527901774180afc798aeb28c4634bdccf19c4d98e7bdd1ce79d1fe9aaad7",
+        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.4.2/bazel-skylib-1.4.2.tar.gz",
+        sha256 = "66ffd9315665bfaafc96b52278f57c7e2dd09f5ede279ea6d39b2be471e7e3aa",
     )
 
     maybe(
         http_archive,
-        name = "net_zlib_zlib",
+        name = "zlib",
         build_file = "@com_github_nelhage_rules_boost//:zlib.BUILD",
         url = "https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz",
         sha256 = "b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30",
@@ -140,9 +140,9 @@ def boost_deps():
         http_archive,
         name = "org_lzma_lzma",
         build_file = "@com_github_nelhage_rules_boost//:lzma.BUILD",
-        url = "https://github.com/tukaani-project/xz/releases/download/v5.4.2/xz-5.4.2.tar.gz",
-        sha256 = "87947679abcf77cc509d8d1b474218fd16b72281e2797360e909deaee1ac9d05",
-        strip_prefix = "xz-5.4.2",
+        url = "https://github.com/tukaani-project/xz/releases/download/v5.4.3/xz-5.4.3.tar.gz",
+        sha256 = "1c382e0bc2e4e0af58398a903dd62fff7e510171d2de47a1ebe06d1528e9b7e9",
+        strip_prefix = "xz-5.4.3",
     )
 
     maybe(
@@ -169,7 +169,7 @@ def boost_deps():
     maybe(
         http_archive,
         name = "openssl",
-        url = "https://github.com/hedronvision/boringssl/archive/7ba401fef49f94476c31e6e5500bdf964bf1b4ed.tar.gz",
-        sha256 = "94d75884263b67fd1122b225d25c4d742bf50c3b0e60251b3a1443fdd90010d3",
-        strip_prefix = "boringssl-7ba401fef49f94476c31e6e5500bdf964bf1b4ed",
+        url = "https://github.com/hedronvision/boringssl/archive/64bc60554593cf0506f171b4e08378ee2308f109.tar.gz",
+        sha256 = "d2cdc22696e4c1bceb00245b90a4bc1717ef5f81229b4aaed8f91f2827a33997",
+        strip_prefix = "boringssl-64bc60554593cf0506f171b4e08378ee2308f109",
     )

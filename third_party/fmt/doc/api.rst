@@ -95,8 +95,33 @@ containers such as ``std::vector``, :ref:`fmt/chrono.h <chrono-api>` for date
 and time formatting and :ref:`fmt/std.h <std-api>` for other standard library
 types.
 
-To make a user-defined type formattable, specialize the ``formatter<T>`` struct
-template and implement ``parse`` and ``format`` methods::
+There are two ways to make a user-defined type formattable: providing a
+``format_as`` function or specializing the ``formatter`` struct template.
+
+Use ``format_as`` if you want to make your type formattable as some other type
+with the same format specifiers. The ``format_as`` function should take an
+object of your type and return an object of a formattable type. It should be
+defined in the same namespace as your type.
+
+Example (https://godbolt.org/z/r7vvGE1v7)::
+
+  #include <fmt/format.h>
+
+  namespace kevin_namespacy {
+  enum class film {
+    house_of_cards, american_beauty, se7en = 7
+  };
+  auto format_as(film f) { return fmt::underlying(f); }
+  }
+
+  int main() {
+    fmt::print("{}\n", kevin_namespacy::film::se7en); // prints "7"
+  }
+
+Using the specialization API is more complex but gives you full control over
+parsing and formatting. To use this method specialize the ``formatter`` struct
+template for your type and implement ``parse`` and ``format`` methods.
+For example::
 
   #include <fmt/core.h>
 
@@ -130,7 +155,7 @@ template and implement ``parse`` and ``format`` methods::
       if (it != end && (*it == 'f' || *it == 'e')) presentation = *it++;
 
       // Check if reached the end of the range:
-      if (it != end && *it != '}') ctx.on_error("invalid format");
+      if (it != end && *it != '}') throw format_error("invalid format");
 
       // Return an iterator past the end of the parsed range:
       return it;
@@ -224,29 +249,8 @@ You can also write a formatter for a hierarchy of classes::
     fmt::print("{}", a); // prints "B"
   }
 
-If a type provides both a ``formatter`` specialization and an implicit
-conversion to a formattable type, the specialization takes precedence over the
-conversion.
-
-For enums {fmt} also provides the ``format_as`` extension API. To format an enum
-via this API define ``format_as`` that takes this enum and converts it to the
-underlying type. ``format_as`` should be defined in the same namespace as the
-enum.
-
-Example (https://godbolt.org/z/r7vvGE1v7)::
-
-  #include <fmt/format.h>
-
-  namespace kevin_namespacy {
-  enum class film {
-    house_of_cards, american_beauty, se7en = 7
-  };
-  auto format_as(film f) { return fmt::underlying(f); }
-  }
-
-  int main() {
-    fmt::print("{}\n", kevin_namespacy::film::se7en); // prints "7"
-  }
+Providing both a ``formatter`` specialization and a ``format_as`` overload is
+disallowed.
 
 Named Arguments
 ---------------

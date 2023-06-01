@@ -647,8 +647,8 @@ BOOST_CONTAINER_INCLUDES_WITH_SRC_EXTENSION = [
 boost_library(
     name = "container",
     hdrs = BOOST_CONTAINER_INCLUDES_WITH_SRC_EXTENSION,
-    exclude_src = BOOST_CONTAINER_INCLUDES_WITH_SRC_EXTENSION,
     copts = _w_no_deprecated,
+    exclude_src = BOOST_CONTAINER_INCLUDES_WITH_SRC_EXTENSION,
     deps = [
         ":config",
         ":core",
@@ -675,9 +675,9 @@ boost_library(
 boost_library(
     name = "conversion",
     hdrs = [
-        "libs/numeric/conversion/include/boost/cast.hpp",
         "libs/lexical_cast/include/boost/lexical_cast.hpp",
         "libs/lexical_cast/include/boost/lexical_cast/bad_lexical_cast.hpp",
+        "libs/numeric/conversion/include/boost/cast.hpp",
     ],
     deps = [
         ":assert",
@@ -1095,7 +1095,7 @@ boost_library(
     ],
 )
 
-alias (
+alias(
     name = "intrusive_ptr",
     actual = ":smart_ptr",
     visibility = ["//visibility:public"],
@@ -1133,7 +1133,7 @@ boost_library(
         ":type_traits",
         ":utility",
         "@com_github_facebook_zstd//:zstd",
-        "@net_zlib_zlib//:zlib",
+        "@zlib",
         "@org_bzip_bzip2//:bz2lib",
         "@org_lzma_lzma//:lzma",
     ],
@@ -1264,7 +1264,7 @@ boost_library(
 
 boost_library(
     name = "math",
-    hdrs = [
+    srcs = [
         # See https://github.com/boostorg/math/blob/boost-1.56.0/doc/overview/roadmap.qbk#L11-L14
         "libs/math/include_private/boost/math/tools/remez.hpp",
         "libs/math/include_private/boost/math/constants/generate.hpp",
@@ -1619,6 +1619,10 @@ boost_library(
 
 boost_library(
     name = "random",
+    linkopts = select({
+        "@platforms//os:windows": ["-defaultlib:bcrypt.lib"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":assert",
         ":config",
@@ -2300,10 +2304,10 @@ boost_library(
     exclude_hdr = glob([
         "libs/test/include/boost/test/included/*.hpp",
     ]),
-    exclude_src = glob([
+    exclude_src = [
         "libs/test/src/test_main.cpp",
         "libs/test/src/cpp_main.cpp",
-    ]),
+    ],
     linkstatic = True,
     deps = _BOOST_TEST_DEPS,
 )
@@ -2317,10 +2321,10 @@ boost_so_library(
     exclude_hdr = glob([
         "libs/test/include/boost/test/included/*.hpp",
     ]),
-    exclude_src = glob([
+    exclude_src = [
         "libs/test/src/test_main.cpp",
         "libs/test/src/cpp_main.cpp",
-    ]),
+    ],
     deps = _BOOST_TEST_DEPS,
 )
 
@@ -2413,7 +2417,10 @@ BOOST_LOG_SSSE3_DEP = select({
 cc_library(
     name = "log_dump_ssse3",
     srcs = ["libs/log/src/dump_ssse3.cpp"] + hdr_list("log"),
-    copts = ["-msse4.2", "-Iexternal/%s/libs/log/include" % _repo_dir],
+    copts = [
+        "-msse4.2",
+        "-Iexternal/%s/libs/log/include" % _repo_dir,
+    ],
     licenses = ["notice"],
     local_defines = BOOST_LOG_DEFINES,
     visibility = ["//visibility:public"],

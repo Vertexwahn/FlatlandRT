@@ -26,6 +26,7 @@
 #include "general_attr.h"
 #include "read.h"
 #include "write.h"
+#include "buffer.h"
 
 #if defined(ANDROID) || defined(__ANDROID_API__)
 #    define IMF_TMP_DIR "/sdcard/"
@@ -148,7 +149,10 @@ main (int argc, char* argv[])
     TEST (testBaseErrors, "core");
     TEST (testBaseLimits, "core");
     TEST (testBaseDebug, "core");
+    TEST (testCPUIdent, "core");
+    TEST (testHalf, "core");
     TEST (testXDR, "core");
+    TEST (testBufferCompression, "core");
 
     TEST (testAttrSizes, "gen_attr");
     TEST (testAttrStrings, "gen_attr");

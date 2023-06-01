@@ -31,6 +31,14 @@ def okapi_deps():
     #    remote = "https://github.com/bazelbuild/bazel-skylib",
     #)
 
+    # Make sure to fetch a recent version of rules_python
+    http_archive(
+        name = "rules_python",
+        sha256 = "863ba0fa944319f7e3d695711427d9ad80ba92c6edd0b7c7443b84e904689539",
+        strip_prefix = "rules_python-0.22.0",
+        url = "https://github.com/bazelbuild/rules_python/releases/download/0.22.0/rules_python-0.22.0.tar.gz",
+    )
+
     #-------------------------------------------------------------------------------------
     # GoogleTest
     #-------------------------------------------------------------------------------------
@@ -154,7 +162,6 @@ def okapi_deps():
     #    branch = "master",
     #    remote = "https://github.com/fmtlib/fmt",
     #    patch_cmds = [
-    #        "mv support/bazel/.bazelrc .bazelrc",
     #        "mv support/bazel/.bazelversion .bazelversion",
     #        "mv support/bazel/BUILD.bazel BUILD.bazel",
     #        "mv support/bazel/WORKSPACE.bazel WORKSPACE.bazel",
@@ -164,7 +171,6 @@ def okapi_deps():
     #    # https://docs.bazel.build/versions/main/install-windows.html#installing-compilers-and-language-runtimes
     #    # Even if MSYS2 is installed the Windows related patch commands can still be used.
     #    patch_cmds_win = [
-    #        "Move-Item -Path support/bazel/.bazelrc -Destination .bazelrc",
     #        "Move-Item -Path support/bazel/.bazelversion -Destination .bazelversion",
     #        "Move-Item -Path support/bazel/BUILD.bazel -Destination BUILD.bazel",
     #        "Move-Item -Path support/bazel/WORKSPACE.bazel -Destination WORKSPACE.bazel",
@@ -309,11 +315,11 @@ def okapi_deps():
     # OpenEXR
     #-------------------------------------------------------------------------------------
 
-    # Use local openexr
     #git_repository(
     #    name = "openexr",
     #    branch = "bazel-bump-openexr-version",
     #    remote = "https://github.com/Vertexwahn/openexr",
+    #    remote = "https://github.com/AcademySoftwareFoundation/openexr/",
     #)
 
     maybe(
@@ -327,23 +333,16 @@ def okapi_deps():
         native.new_local_repository,
         name = "Imath",
         build_file = "@com_openexr//:bazel/third_party/Imath.BUILD",  # OpenEXR must be fetched first, since it provides the Imath build instructions
-        path = "../third_party/Imath-3.1.7",
+        path = "../third_party/Imath-3.1.9",
     )
 
-    # Use git repository from com_github_vertexwahn_openexr
-    #git_repository(
-    #    name = "openexr",
-    #    branch = "bazel-build-update-imath",
-    #    remote = "https://github.com/Vertexwahn/openexr",
-    #)
-
-    # Use git repository from com_github_academy_software_foundation_openexr
-    #git_repository(
-    #    name = "openexr",
-    #    commit = "3e7d5ac897ddb9bba6298d1c359966a416248392",
-    #    remote = "https://github.com/AcademySoftwareFoundation/openexr/",
-    #    #shallow_since = "1625794324 -0700",
-    #)
+    # Use local libdeflate
+    maybe(
+        native.new_local_repository,
+        name = "libdeflate",
+        build_file = "@com_openexr//:bazel/third_party/libdeflate.BUILD",
+        path = "../third_party/libdeflate-1.18",
+    )
 
     #-------------------------------------------------------------------------------------
     # Libpng
@@ -441,7 +440,7 @@ def okapi_deps():
     maybe(
         native.local_repository,
         name = "rules_pkg",
-        path = "../third_party/rules_pkg-0.9.0",
+        path = "../third_party/rules_pkg-0.9.1",
     )
 
     #maybe(

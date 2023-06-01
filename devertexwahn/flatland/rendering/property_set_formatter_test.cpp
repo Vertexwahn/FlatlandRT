@@ -18,7 +18,7 @@ TEST(fmtFormatter, Color3f) {
 TEST(fmtFormatter, RefCountedObject) {
     ReferenceCounted<Object> obj = make_reference_counted<Object>();
     std::string str = fmt::format("{}", obj);
-    EXPECT_THAT(str, "A object. Implement the to_string method to improve this description.");
+    EXPECT_THAT(str, "An object. Implement the to_string method to improve this description.");
 }
 
 TEST(fmtFormatter, Point2f) {

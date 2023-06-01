@@ -48,9 +48,10 @@
 
 #include "core.h"
 
-#ifndef FMT_BEGIN_DETAIL_NAMESPACE
-#  define FMT_BEGIN_DETAIL_NAMESPACE namespace detail {
-#  define FMT_END_DETAIL_NAMESPACE }
+#if defined __cpp_inline_variables && __cpp_inline_variables >= 201606L
+#  define FMT_INLINE_VARIABLE inline
+#else
+#  define FMT_INLINE_VARIABLE
 #endif
 
 #if FMT_HAS_CPP17_ATTRIBUTE(fallthrough)
@@ -78,16 +79,10 @@
 #  endif
 #endif
 
-#if FMT_GCC_VERSION
-#  define FMT_GCC_VISIBILITY_HIDDEN __attribute__((visibility("hidden")))
+#if FMT_GCC_VERSION || defined(__clang__)
+#  define FMT_VISIBILITY(value) __attribute__((visibility(value)))
 #else
-#  define FMT_GCC_VISIBILITY_HIDDEN
-#endif
-
-#ifdef __NVCC__
-#  define FMT_CUDA_VERSION (__CUDACC_VER_MAJOR__ * 100 + __CUDACC_VER_MINOR__)
-#else
-#  define FMT_CUDA_VERSION 0
+#  define FMT_VISIBILITY(value)
 #endif
 
 #ifdef __has_builtin
@@ -120,10 +115,8 @@ FMT_END_NAMESPACE
 #      define FMT_THROW(x) throw x
 #    endif
 #  else
-#    define FMT_THROW(x)               \
-      do {                             \
-        FMT_ASSERT(false, (x).what()); \
-      } while (false)
+#    define FMT_THROW(x) \
+      ::fmt::detail::assert_fail(__FILE__, __LINE__, (x).what())
 #  endif
 #endif
 
@@ -1039,10 +1032,12 @@ template <typename T, size_t SIZE, typename Allocator>
 struct is_contiguous<basic_memory_buffer<T, SIZE, Allocator>> : std::true_type {
 };
 
+FMT_END_EXPORT
 namespace detail {
 FMT_API bool write_console(std::FILE* f, string_view text);
 FMT_API void print(std::FILE*, string_view);
 }  // namespace detail
+FMT_BEGIN_EXPORT
 
 // Suppress a misleading warning in older versions of clang.
 #if FMT_CLANG_VERSION
@@ -1050,7 +1045,7 @@ FMT_API void print(std::FILE*, string_view);
 #endif
 
 /** An error reported from a formatting function. */
-class FMT_API format_error : public std::runtime_error {
+class FMT_VISIBILITY("default") format_error : public std::runtime_error {
  public:
   using std::runtime_error::runtime_error;
 };
@@ -1126,7 +1121,7 @@ template <typename Locale> class format_facet : public Locale::facet {
   }
 };
 
-FMT_BEGIN_DETAIL_NAMESPACE
+namespace detail {
 
 // Returns true if value is negative, false otherwise.
 // Same as `value < 0` but doesn't produce warnings if T is an unsigned type.
@@ -1416,6 +1411,67 @@ class utf8_to_utf16 {
   auto str() const -> std::wstring { return {&buffer_[0], size()}; }
 };
 
+// A converter from UTF-16/UTF-32 (host endian) to UTF-8.
+template <typename WChar, typename Buffer = memory_buffer> class to_utf8 {
+ private:
+  Buffer buffer_;
+
+ public:
+  to_utf8() {}
+  explicit to_utf8(basic_string_view<WChar> s) {
+    static_assert(sizeof(WChar) == 2 || sizeof(WChar) == 4,
+                  "Expect utf16 or utf32");
+
+    if (!convert(s))
+      FMT_THROW(std::runtime_error(sizeof(WChar) == 2 ? "invalid utf16"
+                                                      : "invalid utf32"));
+  }
+  operator string_view() const { return string_view(&buffer_[0], size()); }
+  size_t size() const { return buffer_.size() - 1; }
+  const char* c_str() const { return &buffer_[0]; }
+  std::string str() const { return std::string(&buffer_[0], size()); }
+
+  // Performs conversion returning a bool instead of throwing exception on
+  // conversion error. This method may still throw in case of memory allocation
+  // error.
+  bool convert(basic_string_view<WChar> s) {
+    if (!convert(buffer_, s)) return false;
+    buffer_.push_back(0);
+    return true;
+  }
+  static bool convert(Buffer& buf, basic_string_view<WChar> s) {
+    for (auto p = s.begin(); p != s.end(); ++p) {
+      uint32_t c = static_cast<uint32_t>(*p);
+      if (sizeof(WChar) == 2 && c >= 0xd800 && c <= 0xdfff) {
+        // surrogate pair
+        ++p;
+        if (p == s.end() || (c & 0xfc00) != 0xd800 || (*p & 0xfc00) != 0xdc00) {
+          return false;
+        }
+        c = (c << 10) + static_cast<uint32_t>(*p) - 0x35fdc00;
+      }
+      if (c < 0x80) {
+        buf.push_back(static_cast<char>(c));
+      } else if (c < 0x800) {
+        buf.push_back(static_cast<char>(0xc0 | (c >> 6)));
+        buf.push_back(static_cast<char>(0x80 | (c & 0x3f)));
+      } else if ((c >= 0x800 && c <= 0xd7ff) || (c >= 0xe000 && c <= 0xffff)) {
+        buf.push_back(static_cast<char>(0xe0 | (c >> 12)));
+        buf.push_back(static_cast<char>(0x80 | ((c & 0xfff) >> 6)));
+        buf.push_back(static_cast<char>(0x80 | (c & 0x3f)));
+      } else if (c >= 0x10000 && c <= 0x10ffff) {
+        buf.push_back(static_cast<char>(0xf0 | (c >> 18)));
+        buf.push_back(static_cast<char>(0x80 | ((c & 0x3ffff) >> 12)));
+        buf.push_back(static_cast<char>(0x80 | ((c & 0xfff) >> 6)));
+        buf.push_back(static_cast<char>(0x80 | (c & 0x3f)));
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+};
+
 // Computes 128-bit result of multiplication of two 64-bit unsigned integers.
 inline uint128_fallback umul128(uint64_t x, uint64_t y) noexcept {
 #if FMT_USE_INT128
@@ -1673,63 +1729,6 @@ FMT_CONSTEXPR inline fp operator*(fp x, fp y) {
 }
 
 template <typename T = void> struct basic_data {
-  // Normalized 64-bit significands of pow(10, k), for k = -348, -340, ..., 340.
-  // These are generated by support/compute-powers.py.
-  static constexpr uint64_t pow10_significands[87] = {
-      0xfa8fd5a0081c0288, 0xbaaee17fa23ebf76, 0x8b16fb203055ac76,
-      0xcf42894a5dce35ea, 0x9a6bb0aa55653b2d, 0xe61acf033d1a45df,
-      0xab70fe17c79ac6ca, 0xff77b1fcbebcdc4f, 0xbe5691ef416bd60c,
-      0x8dd01fad907ffc3c, 0xd3515c2831559a83, 0x9d71ac8fada6c9b5,
-      0xea9c227723ee8bcb, 0xaecc49914078536d, 0x823c12795db6ce57,
-      0xc21094364dfb5637, 0x9096ea6f3848984f, 0xd77485cb25823ac7,
-      0xa086cfcd97bf97f4, 0xef340a98172aace5, 0xb23867fb2a35b28e,
-      0x84c8d4dfd2c63f3b, 0xc5dd44271ad3cdba, 0x936b9fcebb25c996,
-      0xdbac6c247d62a584, 0xa3ab66580d5fdaf6, 0xf3e2f893dec3f126,
-      0xb5b5ada8aaff80b8, 0x87625f056c7c4a8b, 0xc9bcff6034c13053,
-      0x964e858c91ba2655, 0xdff9772470297ebd, 0xa6dfbd9fb8e5b88f,
-      0xf8a95fcf88747d94, 0xb94470938fa89bcf, 0x8a08f0f8bf0f156b,
-      0xcdb02555653131b6, 0x993fe2c6d07b7fac, 0xe45c10c42a2b3b06,
-      0xaa242499697392d3, 0xfd87b5f28300ca0e, 0xbce5086492111aeb,
-      0x8cbccc096f5088cc, 0xd1b71758e219652c, 0x9c40000000000000,
-      0xe8d4a51000000000, 0xad78ebc5ac620000, 0x813f3978f8940984,
-      0xc097ce7bc90715b3, 0x8f7e32ce7bea5c70, 0xd5d238a4abe98068,
-      0x9f4f2726179a2245, 0xed63a231d4c4fb27, 0xb0de65388cc8ada8,
-      0x83c7088e1aab65db, 0xc45d1df942711d9a, 0x924d692ca61be758,
-      0xda01ee641a708dea, 0xa26da3999aef774a, 0xf209787bb47d6b85,
-      0xb454e4a179dd1877, 0x865b86925b9bc5c2, 0xc83553c5c8965d3d,
-      0x952ab45cfa97a0b3, 0xde469fbd99a05fe3, 0xa59bc234db398c25,
-      0xf6c69a72a3989f5c, 0xb7dcbf5354e9bece, 0x88fcf317f22241e2,
-      0xcc20ce9bd35c78a5, 0x98165af37b2153df, 0xe2a0b5dc971f303a,
-      0xa8d9d1535ce3b396, 0xfb9b7cd9a4a7443c, 0xbb764c4ca7a44410,
-      0x8bab8eefb6409c1a, 0xd01fef10a657842c, 0x9b10a4e5e9913129,
-      0xe7109bfba19c0c9d, 0xac2820d9623bf429, 0x80444b5e7aa7cf85,
-      0xbf21e44003acdd2d, 0x8e679c2f5e44ff8f, 0xd433179d9c8cb841,
-      0x9e19db92b4e31ba9, 0xeb96bf6ebadf77d9, 0xaf87023b9bf0ee6b,
-  };
-
-#if FMT_GCC_VERSION && FMT_GCC_VERSION < 409
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wnarrowing"
-#endif
-  // Binary exponents of pow(10, k), for k = -348, -340, ..., 340, corresponding
-  // to significands above.
-  static constexpr int16_t pow10_exponents[87] = {
-      -1220, -1193, -1166, -1140, -1113, -1087, -1060, -1034, -1007, -980, -954,
-      -927,  -901,  -874,  -847,  -821,  -794,  -768,  -741,  -715,  -688, -661,
-      -635,  -608,  -582,  -555,  -529,  -502,  -475,  -449,  -422,  -396, -369,
-      -343,  -316,  -289,  -263,  -236,  -210,  -183,  -157,  -130,  -103, -77,
-      -50,   -24,   3,     30,    56,    83,    109,   136,   162,   189,  216,
-      242,   269,   295,   322,   348,   375,   402,   428,   455,   481,  508,
-      534,   561,   588,   614,   641,   667,   694,   720,   747,   774,  800,
-      827,   853,   880,   907,   933,   960,   986,   1013,  1039,  1066};
-#if FMT_GCC_VERSION && FMT_GCC_VERSION < 409
-#  pragma GCC diagnostic pop
-#endif
-
-  static constexpr uint64_t power_of_10_64[20] = {
-      1, FMT_POWERS_OF_10(1ULL), FMT_POWERS_OF_10(1000000000ULL),
-      10000000000000000000ULL};
-
   // For checking rounding thresholds.
   // The kth entry is chosen to be the smallest integer such that the
   // upper 32-bits of 10^(k+1) times it is strictly bigger than 5 * 10^k.
@@ -1744,48 +1743,17 @@ template <typename T = void> struct basic_data {
       2147483691   // ceil(2^31 + 2^32/10^8)
   };
 };
+// This is a struct rather than an alias to avoid shadowing warnings in gcc.
+struct data : basic_data<> {};
 
 #if FMT_CPLUSPLUS < 201703L
-template <typename T> constexpr uint64_t basic_data<T>::pow10_significands[];
-template <typename T> constexpr int16_t basic_data<T>::pow10_exponents[];
-template <typename T> constexpr uint64_t basic_data<T>::power_of_10_64[];
 template <typename T>
 constexpr uint32_t basic_data<T>::fractional_part_rounding_thresholds[];
 #endif
 
-// This is a struct rather than an alias to avoid shadowing warnings in gcc.
-struct data : basic_data<> {};
-
-// Returns a cached power of 10 `c_k = c_k.f * pow(2, c_k.e)` such that its
-// (binary) exponent satisfies `min_exponent <= c_k.e <= min_exponent + 28`.
-FMT_CONSTEXPR inline fp get_cached_power(int min_exponent,
-                                         int& pow10_exponent) {
-  const int shift = 32;
-  // log10(2) = 0x0.4d104d427de7fbcc...
-  const int64_t significand = 0x4d104d427de7fbcc;
-  int index = static_cast<int>(
-      ((min_exponent + fp::num_significand_bits - 1) * (significand >> shift) +
-       ((int64_t(1) << shift) - 1))  // ceil
-      >> 32                          // arithmetic shift
-  );
-  // Decimal exponent of the first (smallest) cached power of 10.
-  const int first_dec_exp = -348;
-  // Difference between 2 consecutive decimal exponents in cached powers of 10.
-  const int dec_exp_step = 8;
-  index = (index - first_dec_exp - 1) / dec_exp_step + 1;
-  pow10_exponent = first_dec_exp + index * dec_exp_step;
-  // Using *(x + index) instead of x[index] avoids an issue with some compilers
-  // using the EDG frontend (e.g. nvhpc/22.3 in C++17 mode).
-  return {*(data::pow10_significands + index),
-          *(data::pow10_exponents + index)};
-}
-
-template <typename T>
+template <typename T, bool doublish = num_bits<T>() == num_bits<double>()>
 using convert_float_result =
-    conditional_t<std::is_same<T, float>::value ||
-                      std::numeric_limits<T>::digits ==
-                          std::numeric_limits<double>::digits,
-                  double, T>;
+    conditional_t<std::is_same<T, float>::value || doublish, double, T>;
 
 template <typename T>
 constexpr auto convert_float(T value) -> convert_float_result<T> {
@@ -1906,7 +1874,7 @@ inline auto find_escape(const char* begin, const char* end)
   [] {                                                                        \
     /* Use the hidden visibility as a workaround for a GCC bug (#1973). */    \
     /* Use a macro-like name to avoid shadowing warnings. */                  \
-    struct FMT_GCC_VISIBILITY_HIDDEN FMT_COMPILE_STRING : base {              \
+    struct FMT_VISIBILITY("hidden") FMT_COMPILE_STRING : base {               \
       using char_type FMT_MAYBE_UNUSED = fmt::remove_cvref_t<decltype(s[0])>; \
       FMT_MAYBE_UNUSED FMT_CONSTEXPR explicit                                 \
       operator fmt::basic_string_view<char_type>() const {                    \
@@ -1963,16 +1931,14 @@ auto write_escaped_cp(OutputIt out, const find_escape_result<Char>& escape)
     *out++ = static_cast<Char>('\\');
     break;
   default:
-    if (is_utf8()) {
-      if (escape.cp < 0x100) {
-        return write_codepoint<2, Char>(out, 'x', escape.cp);
-      }
-      if (escape.cp < 0x10000) {
-        return write_codepoint<4, Char>(out, 'u', escape.cp);
-      }
-      if (escape.cp < 0x110000) {
-        return write_codepoint<8, Char>(out, 'U', escape.cp);
-      }
+    if (escape.cp < 0x100) {
+      return write_codepoint<2, Char>(out, 'x', escape.cp);
+    }
+    if (escape.cp < 0x10000) {
+      return write_codepoint<4, Char>(out, 'u', escape.cp);
+    }
+    if (escape.cp < 0x110000) {
+      return write_codepoint<8, Char>(out, 'U', escape.cp);
     }
     for (Char escape_char : basic_string_view<Char>(
              escape.begin, to_unsigned(escape.end - escape.begin))) {
@@ -2771,179 +2737,12 @@ FMT_INLINE FMT_CONSTEXPR bool signbit(T value) {
   return std::signbit(static_cast<double>(value));
 }
 
-enum class round_direction { unknown, up, down };
-
-// Given the divisor (normally a power of 10), the remainder = v % divisor for
-// some number v and the error, returns whether v should be rounded up, down, or
-// whether the rounding direction can't be determined due to error.
-// error should be less than divisor / 2.
-FMT_CONSTEXPR inline round_direction get_round_direction(uint64_t divisor,
-                                                         uint64_t remainder,
-                                                         uint64_t error) {
-  FMT_ASSERT(remainder < divisor, "");  // divisor - remainder won't overflow.
-  FMT_ASSERT(error < divisor, "");      // divisor - error won't overflow.
-  FMT_ASSERT(error < divisor - error, "");  // error * 2 won't overflow.
-  // Round down if (remainder + error) * 2 <= divisor.
-  if (remainder <= divisor - remainder && error * 2 <= divisor - remainder * 2)
-    return round_direction::down;
-  // Round up if (remainder - error) * 2 >= divisor.
-  if (remainder >= error &&
-      remainder - error >= divisor - (remainder - error)) {
-    return round_direction::up;
-  }
-  return round_direction::unknown;
-}
-
-namespace digits {
-enum result {
-  more,  // Generate more digits.
-  done,  // Done generating digits.
-  error  // Digit generation cancelled due to an error.
-};
-}
-
-struct gen_digits_handler {
-  char* buf;
-  int size;
-  int precision;
-  int exp10;
-  bool fixed;
-
-  FMT_CONSTEXPR digits::result on_digit(char digit, uint64_t divisor,
-                                        uint64_t remainder, uint64_t error,
-                                        bool integral) {
-    FMT_ASSERT(remainder < divisor, "");
-    buf[size++] = digit;
-    if (!integral && error >= remainder) return digits::error;
-    if (size < precision) return digits::more;
-    if (!integral) {
-      // Check if error * 2 < divisor with overflow prevention.
-      // The check is not needed for the integral part because error = 1
-      // and divisor > (1 << 32) there.
-      if (error >= divisor || error >= divisor - error) return digits::error;
-    } else {
-      FMT_ASSERT(error == 1 && divisor > 2, "");
-    }
-    auto dir = get_round_direction(divisor, remainder, error);
-    if (dir != round_direction::up)
-      return dir == round_direction::down ? digits::done : digits::error;
-    ++buf[size - 1];
-    for (int i = size - 1; i > 0 && buf[i] > '9'; --i) {
-      buf[i] = '0';
-      ++buf[i - 1];
-    }
-    if (buf[0] > '9') {
-      buf[0] = '1';
-      if (fixed)
-        buf[size++] = '0';
-      else
-        ++exp10;
-    }
-    return digits::done;
-  }
-};
-
 inline FMT_CONSTEXPR20 void adjust_precision(int& precision, int exp10) {
   // Adjust fixed precision by exponent because it is relative to decimal
   // point.
   if (exp10 > 0 && precision > max_value<int>() - exp10)
     FMT_THROW(format_error("number is too big"));
   precision += exp10;
-}
-
-// Generates output using the Grisu digit-gen algorithm.
-// error: the size of the region (lower, upper) outside of which numbers
-// definitely do not round to value (Delta in Grisu3).
-FMT_INLINE FMT_CONSTEXPR20 auto grisu_gen_digits(fp value, uint64_t error,
-                                                 int& exp,
-                                                 gen_digits_handler& handler)
-    -> digits::result {
-  const fp one(1ULL << -value.e, value.e);
-  // The integral part of scaled value (p1 in Grisu) = value / one. It cannot be
-  // zero because it contains a product of two 64-bit numbers with MSB set (due
-  // to normalization) - 1, shifted right by at most 60 bits.
-  auto integral = static_cast<uint32_t>(value.f >> -one.e);
-  FMT_ASSERT(integral != 0, "");
-  FMT_ASSERT(integral == value.f >> -one.e, "");
-  // The fractional part of scaled value (p2 in Grisu) c = value % one.
-  uint64_t fractional = value.f & (one.f - 1);
-  exp = count_digits(integral);  // kappa in Grisu.
-  // Non-fixed formats require at least one digit and no precision adjustment.
-  if (handler.fixed) {
-    adjust_precision(handler.precision, exp + handler.exp10);
-    // Check if precision is satisfied just by leading zeros, e.g.
-    // format("{:.2f}", 0.001) gives "0.00" without generating any digits.
-    if (handler.precision <= 0) {
-      if (handler.precision < 0) return digits::done;
-      // Divide by 10 to prevent overflow.
-      uint64_t divisor = data::power_of_10_64[exp - 1] << -one.e;
-      auto dir = get_round_direction(divisor, value.f / 10, error * 10);
-      if (dir == round_direction::unknown) return digits::error;
-      handler.buf[handler.size++] = dir == round_direction::up ? '1' : '0';
-      return digits::done;
-    }
-  }
-  // Generate digits for the integral part. This can produce up to 10 digits.
-  do {
-    uint32_t digit = 0;
-    auto divmod_integral = [&](uint32_t divisor) {
-      digit = integral / divisor;
-      integral %= divisor;
-    };
-    // This optimization by Milo Yip reduces the number of integer divisions by
-    // one per iteration.
-    switch (exp) {
-    case 10:
-      divmod_integral(1000000000);
-      break;
-    case 9:
-      divmod_integral(100000000);
-      break;
-    case 8:
-      divmod_integral(10000000);
-      break;
-    case 7:
-      divmod_integral(1000000);
-      break;
-    case 6:
-      divmod_integral(100000);
-      break;
-    case 5:
-      divmod_integral(10000);
-      break;
-    case 4:
-      divmod_integral(1000);
-      break;
-    case 3:
-      divmod_integral(100);
-      break;
-    case 2:
-      divmod_integral(10);
-      break;
-    case 1:
-      digit = integral;
-      integral = 0;
-      break;
-    default:
-      FMT_ASSERT(false, "invalid number of digits");
-    }
-    --exp;
-    auto remainder = (static_cast<uint64_t>(integral) << -one.e) + fractional;
-    auto result = handler.on_digit(static_cast<char>('0' + digit),
-                                   data::power_of_10_64[exp] << -one.e,
-                                   remainder, error, true);
-    if (result != digits::more) return result;
-  } while (exp > 0);
-  // Generate digits for the fractional part.
-  for (;;) {
-    fractional *= 10;
-    error *= 10;
-    char digit = static_cast<char>('0' + (fractional >> -one.e));
-    fractional &= one.f - 1;
-    --exp;
-    auto result = handler.on_digit(digit, one.f, fractional, error, false);
-    if (result != digits::more) return result;
-  }
 }
 
 class bigint {
@@ -3446,7 +3245,7 @@ FMT_CONSTEXPR20 auto format_float(Float value, int precision, float_specs specs,
   int exp = 0;
   bool use_dragon = true;
   unsigned dragon_flags = 0;
-  if (!is_fast_float<Float>()) {
+  if (!is_fast_float<Float>() || is_constant_evaluated()) {
     const auto inv_log2_10 = 0.3010299956639812;  // 1 / log2(10)
     using info = dragonbox::float_info<decltype(converted_value)>;
     const auto f = basic_fp<typename info::carrier_uint>(converted_value);
@@ -3454,10 +3253,11 @@ FMT_CONSTEXPR20 auto format_float(Float value, int precision, float_specs specs,
     //   10^(exp - 1) <= value < 10^exp or 10^exp <= value < 10^(exp + 1).
     // This is based on log10(value) == log2(value) / log2(10) and approximation
     // of log2(value) by e + num_fraction_bits idea from double-conversion.
-    exp = static_cast<int>(
-        std::ceil((f.e + count_digits<1>(f.f) - 1) * inv_log2_10 - 1e-10));
+    auto e = (f.e + count_digits<1>(f.f) - 1) * inv_log2_10 - 1e-10;
+    exp = static_cast<int>(e);
+    if (e > exp) ++exp;  // Compute ceil.
     dragon_flags = dragon::fixup;
-  } else if (!is_constant_evaluated() && precision < 0) {
+  } else if (precision < 0) {
     // Use Dragonbox for the shortest format.
     if (specs.binary32) {
       auto dec = dragonbox::to_decimal(static_cast<float>(value));
@@ -3467,25 +3267,6 @@ FMT_CONSTEXPR20 auto format_float(Float value, int precision, float_specs specs,
     auto dec = dragonbox::to_decimal(static_cast<double>(value));
     write<char>(buffer_appender<char>(buf), dec.significand);
     return dec.exponent;
-  } else if (is_constant_evaluated()) {
-    // Use Grisu + Dragon4 for the given precision:
-    // https://www.cs.tufts.edu/~nr/cs257/archive/florian-loitsch/printf.pdf.
-    const int min_exp = -60;  // alpha in Grisu.
-    int cached_exp10 = 0;     // K in Grisu.
-    fp normalized = normalize(fp(converted_value));
-    const auto cached_pow = get_cached_power(
-        min_exp - (normalized.e + fp::num_significand_bits), cached_exp10);
-    normalized = normalized * cached_pow;
-    gen_digits_handler handler{buf.data(), 0, precision, -cached_exp10, fixed};
-    if (grisu_gen_digits(normalized, 1, exp, handler) != digits::error &&
-        !is_constant_evaluated()) {
-      exp += handler.exp10;
-      buf.try_resize(to_unsigned(handler.size));
-      use_dragon = false;
-    } else {
-      exp += handler.size - cached_exp10 - 1;
-      precision = handler.precision;
-    }
   } else {
     // Extract significand bits and exponent bits.
     using info = dragonbox::float_info<double>;
@@ -4029,8 +3810,7 @@ FMT_CONSTEXPR auto get_dynamic_spec(FormatArg arg, ErrorHandler eh) -> int {
 }
 
 template <typename Context, typename ID>
-FMT_CONSTEXPR auto get_arg(Context& ctx, ID id) ->
-    typename Context::format_arg {
+FMT_CONSTEXPR auto get_arg(Context& ctx, ID id) -> decltype(ctx.arg(id)) {
   auto arg = ctx.arg(id);
   if (!arg) ctx.on_error("argument not found");
   return arg;
@@ -4055,15 +3835,6 @@ FMT_CONSTEXPR void handle_dynamic_spec(int& value,
 }
 
 #if FMT_USE_USER_DEFINED_LITERALS
-template <typename Char> struct udl_formatter {
-  basic_string_view<Char> str;
-
-  template <typename... T>
-  auto operator()(T&&... args) const -> std::basic_string<Char> {
-    return vformat(str, fmt::make_format_args<buffer_context<Char>>(args...));
-  }
-};
-
 #  if FMT_USE_NONTYPE_TEMPLATE_ARGS
 template <typename T, typename Char, size_t N,
           fmt::detail_exported::fixed_string<Char, N> Str>
@@ -4117,28 +3888,28 @@ FMT_API void format_error_code(buffer<char>& out, int error_code,
 
 FMT_API void report_error(format_func func, int error_code,
                           const char* message) noexcept;
-FMT_END_DETAIL_NAMESPACE
+}  // namespace detail
 
 FMT_API auto vsystem_error(int error_code, string_view format_str,
                            format_args args) -> std::system_error;
 
 /**
- \rst
- Constructs :class:`std::system_error` with a message formatted with
- ``fmt::format(fmt, args...)``.
+  \rst
+  Constructs :class:`std::system_error` with a message formatted with
+  ``fmt::format(fmt, args...)``.
   *error_code* is a system error code as given by ``errno``.
 
- **Example**::
+  **Example**::
 
-   // This throws std::system_error with the description
-   //   cannot open file 'madeup': No such file or directory
-   // or similar (system message may vary).
-   const char* filename = "madeup";
-   std::FILE* file = std::fopen(filename, "r");
-   if (!file)
-     throw fmt::system_error(errno, "cannot open file '{}'", filename);
- \endrst
-*/
+    // This throws std::system_error with the description
+    //   cannot open file 'madeup': No such file or directory
+    // or similar (system message may vary).
+    const char* filename = "madeup";
+    std::FILE* file = std::fopen(filename, "r");
+    if (!file)
+      throw fmt::system_error(errno, "cannot open file '{}'", filename);
+  \endrst
+ */
 template <typename... T>
 auto system_error(int error_code, format_string<T...> fmt, T&&... args)
     -> std::system_error {
@@ -4230,8 +4001,8 @@ class format_int {
 
 template <typename T, typename Char>
 struct formatter<T, Char, enable_if_t<detail::has_format_as<T>::value>>
-    : private formatter<detail::format_as_t<T>> {
-  using base = formatter<detail::format_as_t<T>>;
+    : private formatter<detail::format_as_t<T>, Char> {
+  using base = formatter<detail::format_as_t<T>, Char>;
   using base::parse;
 
   template <typename FormatContext>
@@ -4240,22 +4011,24 @@ struct formatter<T, Char, enable_if_t<detail::has_format_as<T>::value>>
   }
 };
 
-template <typename Char>
-struct formatter<void*, Char> : formatter<const void*, Char> {
-  template <typename FormatContext>
-  auto format(void* val, FormatContext& ctx) const -> decltype(ctx.out()) {
-    return formatter<const void*, Char>::format(val, ctx);
-  }
-};
+#define FMT_FORMAT_AS(Type, Base) \
+  template <typename Char>        \
+  struct formatter<Type, Char> : formatter<Base, Char> {}
+
+FMT_FORMAT_AS(signed char, int);
+FMT_FORMAT_AS(unsigned char, unsigned);
+FMT_FORMAT_AS(short, int);
+FMT_FORMAT_AS(unsigned short, unsigned);
+FMT_FORMAT_AS(long, detail::long_type);
+FMT_FORMAT_AS(unsigned long, detail::ulong_type);
+FMT_FORMAT_AS(Char*, const Char*);
+FMT_FORMAT_AS(std::basic_string<Char>, basic_string_view<Char>);
+FMT_FORMAT_AS(std::nullptr_t, const void*);
+FMT_FORMAT_AS(detail::std_string_view<Char>, basic_string_view<Char>);
+FMT_FORMAT_AS(void*, const void*);
 
 template <typename Char, size_t N>
-struct formatter<Char[N], Char> : formatter<basic_string_view<Char>, Char> {
-  template <typename FormatContext>
-  FMT_CONSTEXPR auto format(const Char* val, FormatContext& ctx) const
-      -> decltype(ctx.out()) {
-    return formatter<basic_string_view<Char>, Char>::format(val, ctx);
-  }
-};
+struct formatter<Char[N], Char> : formatter<basic_string_view<Char>, Char> {};
 
 /**
   \rst
@@ -4486,7 +4259,7 @@ FMT_NODISCARD auto to_string(const basic_memory_buffer<Char, SIZE>& buf)
   return std::basic_string<Char>(buf.data(), size);
 }
 
-FMT_BEGIN_DETAIL_NAMESPACE
+namespace detail {
 
 template <typename Char>
 void vformat_to(buffer<Char>& buf, basic_string_view<Char> fmt,
@@ -4569,7 +4342,7 @@ extern template FMT_API auto decimal_point_impl(locale_ref) -> char;
 extern template FMT_API auto decimal_point_impl(locale_ref) -> wchar_t;
 #endif  // FMT_HEADER_ONLY
 
-FMT_END_DETAIL_NAMESPACE
+}  // namespace detail
 
 #if FMT_USE_USER_DEFINED_LITERALS
 inline namespace literals {

@@ -1355,12 +1355,9 @@ TEST(format_test, format_double) {
 
   if (std::numeric_limits<long double>::digits == 64) {
     auto ld = 0xf.ffffffffffp-3l;
-    safe_sprintf(buffer, "%La", ld);
-    EXPECT_EQ(fmt::format("{:a}", ld), buffer);
-    safe_sprintf(buffer, "%.*La", 10, ld);
-    EXPECT_EQ(fmt::format("{:.10a}", ld), buffer);
-    safe_sprintf(buffer, "%.*La", 9, ld);
-    EXPECT_EQ(fmt::format("{:.9a}", ld), buffer);
+    EXPECT_EQ(fmt::format("{:a}", ld), "0xf.ffffffffffp-3");
+    EXPECT_EQ(fmt::format("{:.10a}", ld), "0xf.ffffffffffp-3");
+    EXPECT_EQ(fmt::format("{:.9a}", ld), "0x1.000000000p+1");
   }
 #endif
 
@@ -1379,12 +1376,10 @@ TEST(format_test, format_double) {
 
   if (std::numeric_limits<long double>::digits == 64) {
     auto ld = (std::numeric_limits<long double>::min)();
-    safe_sprintf(buffer, "%La", ld);
-    EXPECT_EQ(fmt::format("{:a}", ld), buffer);
+    EXPECT_EQ(fmt::format("{:a}", ld), "0x8p-16385");
 
     ld = (std::numeric_limits<long double>::max)();
-    safe_sprintf(buffer, "%La", ld);
-    EXPECT_EQ(fmt::format("{:a}", ld), buffer);
+    EXPECT_EQ(fmt::format("{:a}", ld), "0xf.fffffffffffffffp+16380");
 
     ld = std::numeric_limits<long double>::denorm_min();
     EXPECT_EQ(fmt::format("{:a}", ld), "0x0.000000000000001p-16382");
@@ -1494,9 +1489,8 @@ TEST(format_test, format_long_double) {
   if (fmt::detail::is_double_double<decltype(ld)>::value) {
     safe_sprintf(buffer, "%a", static_cast<double>(ld));
     EXPECT_EQ(buffer, fmt::format("{:a}", ld));
-  } else {
-    safe_sprintf(buffer, "%La", ld);
-    EXPECT_EQ(buffer, fmt::format("{:a}", ld));
+  } else if (std::numeric_limits<long double>::digits == 64) {
+    EXPECT_EQ(fmt::format("{:a}", ld), "0xd.3d70a3d70a3d70ap-2");
   }
 }
 
@@ -1771,20 +1765,6 @@ TEST(format_test, print) {
 
 TEST(format_test, variadic) {
   EXPECT_EQ("abc1", fmt::format("{}c{}", "ab", 1));
-}
-
-TEST(format_test, dynamic) {
-  using ctx = fmt::format_context;
-  auto args = std::vector<fmt::basic_format_arg<ctx>>();
-  args.emplace_back(fmt::detail::make_arg<ctx>(42));
-  args.emplace_back(fmt::detail::make_arg<ctx>("abc1"));
-  args.emplace_back(fmt::detail::make_arg<ctx>(1.5f));
-
-  std::string result = fmt::vformat(
-      "{} and {} and {}",
-      fmt::format_args(args.data(), static_cast<int>(args.size())));
-
-  EXPECT_EQ("42 and abc1 and 1.5", result);
 }
 
 TEST(format_test, bytes) {
@@ -2098,8 +2078,8 @@ TEST(format_test, format_to_n_output_iterator) {
 
 TEST(format_test, vformat_to) {
   using context = fmt::format_context;
-  fmt::basic_format_arg<context> arg = fmt::detail::make_arg<context>(42);
-  auto args = fmt::basic_format_args<context>(&arg, 1);
+  int n = 42;
+  auto args = fmt::make_format_args<context>(n);
   auto s = std::string();
   fmt::vformat_to(std::back_inserter(s), "{}", args);
   EXPECT_EQ("42", s);
@@ -2265,3 +2245,19 @@ TEST(format_test, format_named_arg_with_locale) {
 }
 
 #endif  // FMT_STATIC_THOUSANDS_SEPARATOR
+
+struct convertible_to_nonconst_cstring {
+    operator char*() const {
+        static char c[]="bar";
+        return c;
+    }
+};
+
+FMT_BEGIN_NAMESPACE
+template <> struct formatter<convertible_to_nonconst_cstring> : formatter<char*> {
+};
+FMT_END_NAMESPACE
+
+TEST(format_test, formatter_nonconst_char) {
+  EXPECT_EQ(fmt::format("{}", convertible_to_nonconst_cstring()), "bar");
+}

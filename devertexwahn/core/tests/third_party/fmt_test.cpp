@@ -3,11 +3,6 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "fmt/core.h"
-#include "fmt/format.h"
-
-#include "gmock/gmock.h"
-
 /*
  * The intention of this test file is to make sure that the integration of the library {fmt} works.
  * This file tries to reflect common use case of {fmt} within this project.
@@ -15,6 +10,11 @@
  * No features of this project should be tested here.
  * Solely, the pure integration of {fmt} within this project should be tested here.
  */
+
+#include "fmt/core.h"
+#include "fmt/format.h"
+
+#include "gmock/gmock.h"
 
 TEST(fmt, TextFormatting) {
     std::string message = fmt::format("The answer is {}.", 42);

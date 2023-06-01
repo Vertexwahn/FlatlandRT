@@ -3312,11 +3312,7 @@ TEST_F(SingleEvaluationTest, OtherCases) {
 
 #if GTEST_HAS_RTTI
 
-#ifdef _MSC_VER
-#define ERROR_DESC "class std::runtime_error"
-#else
 #define ERROR_DESC "std::runtime_error"
-#endif
 
 #else  // GTEST_HAS_RTTI
 
@@ -6220,6 +6216,15 @@ TEST_F(ParseFlagsTest, AbseilPositionalFlags) {
 }
 #endif
 
+TEST_F(ParseFlagsTest, UnrecognizedFlags) {
+  const char* argv[] = {"foo.exe", "--gtest_filter=abcd", "--other_flag",
+                        nullptr};
+
+  const char* argv2[] = {"foo.exe", "--other_flag", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abcd"), false);
+}
+
 #ifdef GTEST_OS_WINDOWS
 // Tests parsing wide strings.
 TEST_F(ParseFlagsTest, WideStrings) {
@@ -6670,7 +6675,7 @@ TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
   SetEnv("TERM", "linux");            // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 
-  SetEnv("TERM", "cygwin");           // TERM supports colors.
+  SetEnv("TERM", "cygwin");  // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 #endif  // GTEST_OS_WINDOWS
 }

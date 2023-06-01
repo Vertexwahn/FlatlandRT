@@ -27,6 +27,7 @@ build:remote_gcc9 --define compiler=remote_gcc9
 build:gcc11 --cxxopt=-std=c++20
 build:gcc11 --cxxopt=-Wall
 build:gcc11 --define compiler=gcc11
+build:gcc11 --cxxopt=-fpermissive # Needed for fmt
 #build:gcc11 --cxxopt=-Werror
 #build:gcc11 --cxxopt=-Wno-volatile # blocked by emsdk
 ##build:gcc11 --cxxopt=-Wextra

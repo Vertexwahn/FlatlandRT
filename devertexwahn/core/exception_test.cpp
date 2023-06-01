@@ -10,6 +10,6 @@
 using de_vertexwahn::Exception;
 
 TEST(Exception, what) {
-    Exception ex{"file.flatland.xml"};
-    EXPECT_STREQ(ex.what(), "file.flatland.xml");
+    Exception ex{"Error reading flatland.xml"};
+    EXPECT_STREQ(ex.what(), "Error reading flatland.xml");
 }

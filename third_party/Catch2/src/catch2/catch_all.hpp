@@ -54,6 +54,7 @@
 #include <catch2/internal/catch_compiler_capabilities.hpp>
 #include <catch2/internal/catch_config_android_logwrite.hpp>
 #include <catch2/internal/catch_config_counter.hpp>
+#include <catch2/internal/catch_config_static_analysis_support.hpp>
 #include <catch2/internal/catch_config_uncaught_exceptions.hpp>
 #include <catch2/internal/catch_config_wchar.hpp>
 #include <catch2/internal/catch_console_colour.hpp>
@@ -86,6 +87,7 @@
 #include <catch2/internal/catch_platform.hpp>
 #include <catch2/internal/catch_polyfills.hpp>
 #include <catch2/internal/catch_preprocessor.hpp>
+#include <catch2/internal/catch_preprocessor_internal_stringify.hpp>
 #include <catch2/internal/catch_preprocessor_remove_parens.hpp>
 #include <catch2/internal/catch_random_number_generator.hpp>
 #include <catch2/internal/catch_random_seed_generation.hpp>

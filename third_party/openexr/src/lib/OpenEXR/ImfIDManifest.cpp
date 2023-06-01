@@ -11,7 +11,7 @@
 #include "ImfXdr.h"
 #include <Iex.h>
 #include <ImfIDManifest.h>
-#include <zlib.h>
+#include <openexr_compression.h>
 
 #include <algorithm>
 #include <stdint.h>
@@ -247,7 +247,7 @@ writeStringList (char*& outPtr, const T& stringList, int entries = 0)
         //
         // variable length encoding:
         // values between 0 and 127 inclusive are stored in a single byte
-        // values betwwen 128 and 16384 are encoded with two bytes: 1LLLLLLL 0MMMMMMMM where L and M are the least and most significant bits of the value
+        // values between 128 and 16384 are encoded with two bytes: 1LLLLLLL 0MMMMMMMM where L and M are the least and most significant bits of the value
         // in general, values are stored least significant values first, with the top bit of each byte indicating more values follow
         // the top bit is clear in the last byte of the value
         // (this scheme requires two bytes to store values above 1<<7, and five bytes to store values above 1<<28)
@@ -536,14 +536,16 @@ IDManifest::IDManifest (const CompressedIDManifest& compressed)
     // decompress the compressed manifest
     //
 
-    vector<Bytef> uncomp (compressed._uncompressedDataSize);
-    uLong         outSize = static_cast<uLong> (compressed._uncompressedDataSize);
-    uLong         inSize  = static_cast<uLong> (compressed._compressedDataSize);
-    if (Z_OK != ::uncompress (
-                    uncomp.data(),
-                    &outSize,
-                    reinterpret_cast<const Bytef*> (compressed._data),
-                    inSize))
+    vector<char> uncomp (compressed._uncompressedDataSize);
+    size_t        outSize;
+    size_t        inSize  = static_cast<size_t> (compressed._compressedDataSize);
+    if (EXR_ERR_SUCCESS != exr_uncompress_buffer (
+            nullptr,
+            compressed._data,
+            inSize,
+            uncomp.data(),
+            compressed._uncompressedDataSize,
+            &outSize))
     {
         throw IEX_NAMESPACE::InputExc (
             "IDManifest decompression (zlib) failed.");
@@ -1062,16 +1064,22 @@ CompressedIDManifest::CompressedIDManifest (const IDManifest& manifest)
 
     manifest.serialize (serial);
 
-    uLong outputSize = static_cast<uLong> (serial.size ());
+    size_t outputSize = serial.size ();
 
     //
     // allocate a buffer which is guaranteed to be big enough for compression
     //
-    uLong compressedDataSize = compressBound (outputSize);
-    _data                     = (unsigned char*) malloc (compressedDataSize);
-    if (Z_OK !=
-        ::compress (
-            _data, &compressedDataSize, reinterpret_cast<Bytef*> (serial.data ()), outputSize))
+    size_t compressedBufferSize = exr_compress_max_buffer_size (outputSize);
+    size_t compressedDataSize;
+    _data                     = (unsigned char*) malloc (compressedBufferSize);
+    if (EXR_ERR_SUCCESS != exr_compress_buffer (
+            nullptr,
+            -1,
+            serial.data (),
+            outputSize,
+            _data,
+            compressedBufferSize,
+            &compressedDataSize))
     {
         throw IEX_NAMESPACE::InputExc ("ID manifest compression failed");
     }

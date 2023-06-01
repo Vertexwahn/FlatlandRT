@@ -22,9 +22,9 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 class ObjectFactoryException : public std::exception {
 public:
     [[nodiscard]]
-    const char *what() const throw() override;
+    const char *what() const noexcept override;
 
-    virtual ~ObjectFactoryException() = default;
+    ~ObjectFactoryException() override = default;
 
 protected:
     std::string error_message_;

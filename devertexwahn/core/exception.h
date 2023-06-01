@@ -9,6 +9,8 @@
 
 #include "core/namespace.h"
 
+#include "boost/predef.h"
+
 #include <exception>
 #include <string>
 #include <string_view>
@@ -19,9 +21,15 @@ class Exception : public std::exception {
 public:
     explicit Exception(std::string_view message);
 
-    const char *what() const throw() override;
+    #if BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(10,0,0) // GCC9 does not support nodiscard with
+    [[nodiscard]]
+    const char *what() const noexcept override;
+    #else
+    [[nodiscard("Returns the reason for the exception")]]
+    const char *what() const noexcept override;
+    #endif
 
-    virtual ~Exception();
+    ~Exception() override;
 
 protected:
     std::string error_message_;

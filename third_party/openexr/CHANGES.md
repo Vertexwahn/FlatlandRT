@@ -486,7 +486,7 @@ Patch release with various bug fixes, build improvements, and
 documentation updates.
 
 With this version, the OpenEXR technical documentation formerly
-distributed exclusivly as pdf's is now published online at
+distributed exclusively as pdf's is now published online at
 https://openexr.readthedocs.io, with the document source now
 maintained as .rst files in the repo's docs subfolder.
 
@@ -2832,7 +2832,7 @@ Signed-off-by: Kimball Thurston <kdt3rd@gmail.com>
 
 *  [CHANGES.md](https://github.com/AcademySoftwareFoundation/openexr/commit/471d7bd1c558c54ecc3cbbb2a65932f1e448a370) ([Cary Phillips](@cary@ilm.com), 2018-08-07) 
 
-*  [OpenEXR_Viewers/README.md formatting](https://github.com/AcademySoftwareFoundation/openexr/commit/806db743cf0bcb7710d08f56ee6f2ece10e31367) ([Cary Phillips](@cary@ilm.com), 2018-08-07) 
+*  [OpenEXR_Viewers/README.md formatting](https://github.com/AcademySoftwareFoundation/openexr/commit/806db743cf0bcb7710d08f56ee6f2ece10e31367) ([Cary Phillips](@cary@ilm.com), 2018-08-07)
 
 *  [more README fixes.](https://github.com/AcademySoftwareFoundation/openexr/commit/82bc701e605e092ae5f31d142450d921c293ded1) ([Cary Phillips](@cary@ilm.com), 2018-08-07) 
 
@@ -3377,11 +3377,11 @@ This release addresses the following security vulnerabilities:
 
 ### Detailed Changes:
 
-* Added support for targetting builds on 64bit Windows and minimising
+* Added support for targeting builds on 64bit Windows and minimising
   number of compiler warnings on Windows. Thanks to Ger Hobbelt for
   his contributions to CreateDLL.  (Ji Hun Yu)
           
-* Added new atttribute types (Florian Kainz):
+* Added new attribute types (Florian Kainz):
   * **M33dAttribute** 3x3 double-precision matrix
   * **M44dAttribute** 4x4 double-precision matrix
   * **V2d** 2D double-precision vector
@@ -3722,7 +3722,7 @@ Here's a summary of the changes since version 1.2.2:
 * Support for building universal binaries on OS X 10.4.  (Drew Hess,
 Paul Schneider)
           
-* Minor configure.ac fix to accomodate OS X's automake.  (Drew Hess)
+* Minor configure.ac fix to accommodate OS X's automake.  (Drew Hess)
           
 * Removed CPU-specific optimizations from configure.ac, autoconf's
 	  guess at the CPU type isn't very useful, anyway.  Closes
@@ -3754,7 +3754,7 @@ Hess)
   header file, which is included by any OpenEXR source files that need
   these macros.  This method of specifying **HAVE_** macros guarantees
   that projects will get the proper settings without needing to add
-  compile- time flags to accomodate OpenEXR.  Note that this isn't
+  compile- time flags to accommodate OpenEXR.  Note that this isn't
   implemented properly for Windows yet.  (Drew Hess)
 
 * Platform cleanups:
@@ -3857,7 +3857,7 @@ This is a relatively minor update to the project, with the following changes:
 	  (Drew Hess)
 
 * Some older versions of gcc don't support a full iomanip
-	  implemenation; check for this during configuration. 
+	  implementation; check for this during configuration. 
 	  (Drew Hess)
 
 * Install PDF versions of documentation, remove old/out-of-date
@@ -3901,7 +3901,7 @@ This is a relatively minor update to the project, with the following changes:
 	  horizontally and vertically (image is surrounded by black /
 	  outermost row of pixels repeats / entire image repeats /
 	  entire image repeats, every other copy is a mirror image).
-	  exrdisplay: added option to swap the top and botton half,
+	  exrdisplay: added option to swap the top and bottom half,
 	  and the left and right half of an image, so that the image's
 	  four corners end up in the center.  This is useful for checking
 	  the seams of wrap-around texture map images.
@@ -4374,7 +4374,7 @@ the source code.
 	  compile- and link-time flags.
 
 * exrdisplay uses Imath::Math<T>::pow instead of powf now.
-	  powf is not availble on all platforms.
+	  powf is not available on all platforms.
 
 * Roll OS X "hack" into the source until Apple fixes their
 	  istream implementation.

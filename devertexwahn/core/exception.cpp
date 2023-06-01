@@ -10,9 +10,9 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 Exception::Exception(std::string_view message) : error_message_(message) {
 }
 
-Exception::~Exception() {}
+Exception::~Exception() = default;
 
-const char *Exception::what() const throw() {
+const char *Exception::what() const noexcept {
     return error_message_.c_str();
 }
 

@@ -9,7 +9,7 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-const char *ObjectFactoryException::what() const throw() {
+const char *ObjectFactoryException::what() const noexcept {
     return error_message_.c_str();
 }
 

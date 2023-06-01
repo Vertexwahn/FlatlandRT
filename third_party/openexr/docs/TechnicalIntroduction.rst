@@ -730,7 +730,7 @@ regardless of what other data is stored in other chunks.
 Data Compression
 ----------------
 
-OpenEXR currently offers four different data compression methods, with
+OpenEXR currently offers several different data compression methods, with
 various speed versus compression ratio tradeoffs. Optionally, the
 pixels can be stored in uncompressed form. With fast filesystems,
 uncompressed files can be written and read significantly faster than
@@ -764,14 +764,14 @@ Supported compression schemes:
        input to the compressor is short, adding the header tends to offset any
        size reduction of the input.) 
    * - ZIPS (lossless)
-     - Uses the open source zlib library for compression. Unlike ZIP
-       compression, this operates one scan line at a time. 
+     - Uses the open source deflate library for IETF RFC 1950 compression.
+       Unlike ZIP compression, this operates one scan line at a time. 
    * - ZIP (lossless)
      - Differences between horizontally adjacent pixels are compressed using the
-       open source zlib library. ZIP decompression is faster than PIZ
-       decompression, but ZIP compression is significantly slower. Photographic
-       images tend to shrink to between 45 and 55 percent of their uncompressed
-       size. 
+       open source deflate library for IETF RFC 1950 compression. ZIP
+       decompression is faster than PIZ decompression, but ZIP may be
+       larger. Photographic images tend to shrink to between 45 and 55
+       percent of their uncompressed size.
                
        Multi-resolution files are often used as texture maps for 3D
        renderers. For this application, fast read accesses are usually more
@@ -823,6 +823,19 @@ Supported compression schemes:
        compression. 
                
        Note: This lossy compression scheme is not supported in deep files.
+
+   * - DWAA (lossy)
+
+     - Lossy compression of RGB data by quantizing discrete cosine
+       transform (DCT) components, in blocks of 32 scanlines. More
+       efficient for partial buffer access.
+
+   * - DWAB (lossy)
+
+     - Lossy compression of RGB data by quantizing discrete cosine
+       transform (DCT) components, in blocks of 256 scanlines. More
+       efficient space wise and faster to decode full frames than DWAA
+       access.
 
 Luminance/Chroma Images
 =======================
