@@ -41,6 +41,7 @@ cc_library(
         ":io_pfm",
         ":io_png",
         ":io_ppm",
+        ":io_webp",
         "@boost//:algorithm",
     ],
 )
@@ -139,6 +140,27 @@ cc_test(
     srcs = ["io_ppm_test.cpp"],
     deps = [
         ":io_ppm",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "io_webp",
+    srcs = ["io_webp.cpp"],
+    hdrs = ["io_webp.h"],
+    deps = [
+        "//core:reference_counted",
+        "//imaging:image",
+        "@libwebp",
+    ],
+)
+
+cc_test(
+    name = "io_webp_test",
+    size = "small",
+    srcs = ["io_webp_test.cpp"],
+    deps = [
+        ":io_webp",
         "@com_google_googletest//:gtest_main",
     ],
 )

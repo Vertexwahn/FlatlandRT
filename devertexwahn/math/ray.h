@@ -14,9 +14,9 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template <unsigned int Dimension, typename ScalarType>
 struct RayType {
+    using Scalar = ScalarType;
     using Point = PointType<Dimension, ScalarType>;
     using Vector = VectorType<Dimension, ScalarType>;
-    using Scalar = ScalarType;
 
     RayType(const Point &origin, const Vector &direction, const Scalar min_t, const Scalar max_t)
             : origin(origin), direction(direction), min_t(min_t), max_t(max_t) {
@@ -27,6 +27,7 @@ struct RayType {
         return origin + t * direction;
     }
 
+    [[nodiscard]]
     bool is_direction_vector_normalized() const {
         const Scalar epsilon{0.001};
         return std::abs(direction.norm() - Scalar{1.0}) < epsilon;

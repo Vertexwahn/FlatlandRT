@@ -87,10 +87,10 @@ public:
         if (hit) {
             me.p = Shape2<ScalarType>::transform_ * me.p;
             me.shape = this;
-            me.geo_frame.normal = Shape2<ScalarType>::transform_ * me.geo_frame.normal;
-            me.geo_frame.normal.normalize();
-            me.geo_frame.tangent = Shape2<ScalarType>::transform_ * me.geo_frame.tangent;
-            me.geo_frame.tangent.normalize();
+            me.geo_frame.n = Shape2<ScalarType>::transform_ * me.geo_frame.n;
+            me.geo_frame.n.normalize();
+            me.geo_frame.t = Shape2<ScalarType>::transform_ * me.geo_frame.t;
+            me.geo_frame.t.normalize();
         }
 
         return hit;
@@ -102,7 +102,7 @@ public:
         ss << "    ";
         ss << "<path";
 
-        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bxdf());
+        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bsdf());
 
         if (material) {
             ss << " ";

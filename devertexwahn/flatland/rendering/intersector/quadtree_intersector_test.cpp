@@ -520,8 +520,8 @@ TEST(QuadtreeIntersector, intersect) {
     EXPECT_THAT(me.p.x(), 100.0f);
     EXPECT_THAT(me.p.y(), 50.0f);
     EXPECT_THAT(me.t, 100.f);
-    EXPECT_THAT(me.geo_frame.normal.x(), -1.f);
-    EXPECT_THAT(me.geo_frame.normal.y(), 0.f);
+    EXPECT_THAT(me.geo_frame.n.x(), -1.f);
+    EXPECT_THAT(me.geo_frame.n.y(), 0.f);
 }
 
 TEST(QuadtreeIntersector, support_translated_meshes) {

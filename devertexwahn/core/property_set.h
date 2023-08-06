@@ -63,7 +63,7 @@ public:
 
 // The following template function was copied from an answer provided on Stack Overflow.
 // See here: https://stackoverflow.com/questions/46091671/c-template-recursive-to-check-type-in-stdtuple
-// The original author (Vittorio Romeo) was asked and gave his approval.
+// The original author (Vittorio Romeo) was asked and gave his approval ("feel free to use and modify at will.").
 template<typename VariantType, typename T, std::size_t index = 0>
 constexpr std::size_t variant_index() {
     if constexpr (index == std::variant_size_v<VariantType>) {

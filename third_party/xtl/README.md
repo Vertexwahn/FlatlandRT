@@ -1,7 +1,8 @@
 # ![xtl](docs/source/xtl.svg)
 
-[![Appveyor](https://ci.appveyor.com/api/projects/status/wikc50xlb5rbrjy7?svg=true)](https://ci.appveyor.com/project/xtensor-stack/xtl)
-[![Azure](https://dev.azure.com/xtensor-stack/xtensor-stack/_apis/build/status/xtensor-stack.xtl?branchName=master)](https://dev.azure.com/xtensor-stack/xtensor-stack/_build/latest?definitionId=2&branchName=master)
+[![Linux](https://github.com/xtensor-stack/xtl/actions/workflows/linux.yml/badge.svg)](https://github.com/xtensor-stack/xtl/actions/workflows/linux.yml)
+[![OSX](https://github.com/xtensor-stack/xtl/actions/workflows/osx.yml/badge.svg)](https://github.com/xtensor-stack/xtl/actions/workflows/osx.yml)
+[![Windows](https://github.com/xtensor-stack/xtl/actions/workflows/windows.yml/badge.svg)](https://github.com/xtensor-stack/xtl/actions/workflows/windows.yml)
 [![Documentation Status](http://readthedocs.org/projects/xtl/badge/?version=latest)](https://xtl.readthedocs.io/en/latest/?badge=latest)
 [![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 

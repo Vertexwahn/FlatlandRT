@@ -213,7 +213,7 @@ TEST(Scene, GivenAPointThatIsAlignedWithCameraSpace_WhenPointIsTransformedToCame
 TEST(Scene, TestMaterial) {
     // Arrange
     auto scene = load_scene2f("flatland/scenes/disk.flatland.xml");
-    auto material = std::static_pointer_cast<SvgMaterial>(scene->shapes()[0]->bxdf());
+    auto material = std::static_pointer_cast<SvgMaterial>(scene->shapes()[0]->bsdf());
 
     // Assert
     EXPECT_THAT(material->stroke_width(), 3);

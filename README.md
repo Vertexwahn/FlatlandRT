@@ -26,15 +26,16 @@ See the [user manual](devertexwahn/flatland/docs/user_manual.md) if you want to 
 
 ## Quick start
 
-This project uses [Bazel](https://bazel.build/) as a build system. The current used version is defined in [.bazelversion](devertexwahn/.bazelversion).
+This project uses [Bazel](https://bazel.build/) as a build system.
+The current used version is defined in [.bazelversion](devertexwahn/.bazelversion).
 
 **Prerequisites:**
 
 The following tools should be installed:
 
-- [Git](https://git-scm.com/)
-- [Bazel](https://bazel.build/install)
-- A C++ compiler ([GCC](https://gcc.gnu.org/), [Visual Studio](https://visualstudio.microsoft.com/), [Clang](https://clang.llvm.org/), etc.)
+* [Git](https://git-scm.com/)
+* [Bazel](https://bazel.build/install)
+* A C++ compiler ([GCC](https://gcc.gnu.org/), [Visual Studio](https://visualstudio.microsoft.com/), [Clang](https://clang.llvm.org/), etc.)
 
 **Checkout, build, and run:**
 
@@ -74,7 +75,7 @@ bazel run --config=gcc9 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/f
 bazel run --config=gcc11 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
-*Render a scene with macOS 11/12:*
+*Render a scene with macOS 11/12/13:*
 
 ```shell
 bazel run --config=macos //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
@@ -103,7 +104,7 @@ bazel build --config=clang14 //...
 
 #### CLion
 
-There is a Bazel plug-in for CLion. 
+There is a Bazel plug-in for CLion.
 It can be downloaded from [here](https://plugins.jetbrains.com/author/4bb31785-ad06-4671-8e26-266aadc184bd).
 
 You can use the following `.bazelproject` file:
@@ -128,7 +129,9 @@ build_flags:
 
 Make sure that lcov is installed.
 
-    sudo apt install lcov
+```shell
+sudo apt install lcov
+```
 
 Go to the directory that contains the `WORKSPACE.bazel` file and execute:
 
@@ -168,32 +171,23 @@ Use [Lavender](https://github.com/tmandry/lavender) to generate a solution and p
 python3 G:\dev\lavender\generate.py --config=vs2022  //...
 ```
 
-Lavender is far from being perfect. 
+Lavender is far from being perfect.
 It might be necessary to do some modifications to the generated solution and project files.
 
 ## Development process
 
-I made a short video where I describe how I use test driven development to implement this project: 
+I made a short video where I describe how I use test driven development to implement this project:
 [![Let's Code: Using Test-driven Development to implement a ray tracer](https://img.youtube.com/vi/vFBXNr952nU/0.jpg)](https://www.youtube.com/watch?v=vFBXNr952nU)
 
 ## Ray tracing 101
 
-I have written several blog posts about ray tracing:
-
-- [Ray tracing 101: Refraction of light](https://vertexwahn.de/2020/12/19/refraction/)
-- [Ray tracing 101: Matrices and coordinate systems](https://vertexwahn.de/2020/12/20/coordinatesystemsandmatrices/)
-- [Ray tracing 101: How does a look at transform work?](https://vertexwahn.de/2020/12/21/lookat/)
-- [Ray tracing 101: Perspective projection](https://vertexwahn.de/2020/12/27/perspectiveprojection/)
-- [Ray tracing 101: Shooting Rays](https://vertexwahn.de/2021/01/03/shootingrays/)
-- [Ray Tracing 101: Image sampling and reconstruction](https://vertexwahn.de/2021/02/28/imagereconstruction/)
-- [Ray Tracing 101: Ray Triangle Intersection](https://vertexwahn.de/2021/05/29/raytriangleintersection/)
-- [Ray Tracing 101: Octrees for faster intersection](https://vertexwahn.de/2022/03/12/octree/)
-- [Ray tracing 101: Chi-squared test applied to sampling](https://vertexwahn.de/2022/04/04/chisquaredtest/)
+I have written some blog post about ray tracing that can be found here: [Ray Tracing 101](https://book.vertexwahn.de/)
 
 ## License
 
 The source code of FlatlandRT itself is under the Apache License 2.0 (see [LICENSE](LICENSE)).
-The license of its third-party dependencies or some third-party code fragments can and is under different license terms. See copyright notes in the next section.
+The license of its third-party dependencies or some third-party code fragments can and is under different license terms.
+See copyright notes in the next section.
 
 ## Copyright notes
 
@@ -228,13 +222,13 @@ If you find any copyright or license violations or issues please let me know.
 * Google Test (https://github.com/google/googletest) (see `third_party` folder)
 * hypothesis (https://github.com/wjakob/hypothesis) (see `third_party` folder)
 * Imath (see `third_party` folder)
-* libpng-1.6.37 (https://github.com/wjakob/hypothesis) (see `third_party` folder)
+* [libpng](/third_party/libpng-1.6.40) (http://www.libpng.org/pub/png/libpng.html) ([License](/third_party/libpng-1.6.40/LICENSE))
 * LLVM toolchain for Bazel (see `third_party` folder)
-* OpenEXR (see `third_party` folder)
-* pcg-cpp (https://github.com/imneme/pcg-cpp/)  (see `third_party` folder)
-* pugixml (https://pugixml.org/, https://github.com/zeux/pugixml) (third party dependency) (see `third_party` folder)
-* rules_boost (see `third_party` folder)
-* rules_pkg (see `third_party` folder)
+* [OpenEXR](/third_party/openexr) (https://github.com/AcademySoftwareFoundation/openexr) ([License](/third_party/openexr/LICENSE.md))
+* [pcg-cpp](/third_party/pcg-cpp) (https://github.com/imneme/pcg-cpp/)
+* [pugixml](/third_party/pugixml-1.13) (https://pugixml.org/, https://github.com/zeux/pugixml)
+* [rules_boost](/third_party/rules_boost) (https://github.com/nelhage/rules_boost) ([License](/third_party/rules_boost/LICENSE))
+* [rules_pkg-0.9.1](/third_party/rules_pkg)
 * yaml-cpp (https://github.com/jbeder/yaml-cpp) (third party dependency) ([License](devertexwahn/flatland/LICENSES/yaml-cpp/LICENSE))
 * zlib (https://zlib.net/) ([License](devertexwahn/flatland/LICENSES/third_party/zlib-1.2.11/README))
 
@@ -242,8 +236,8 @@ If you find any copyright or license violations or issues please let me know.
 
 The Stanford Bunny was derived from the Stanford Bunny provided from the Stanford 3D Scanning Repository (see [here](http://graphics.stanford.edu/data/3Dscanrep/#bunny)).
 
-The data for the Donut, Armadillo and Stanford Bunny for the 2D triangle data was derived from https://github.com/mmacklin/sandbox. 
+The data for the Donut, Armadillo and Stanford Bunny for the 2D triangle data was derived from https://github.com/mmacklin/sandbox.
 
 ### Credits
 
-A big thank goes to all the providers, developers and maintainers of the aforementioned Open Source projects and artifacts.
+A big thank goes to all the providers, developers, and maintainers of the aforementioned open source projects and artifacts.

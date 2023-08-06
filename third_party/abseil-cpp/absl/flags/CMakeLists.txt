@@ -87,6 +87,7 @@ absl_cc_library(
     absl::config
     absl::core_headers
     absl::log_severity
+    absl::int128
     absl::optional
     absl::strings
     absl::str_format
@@ -345,6 +346,7 @@ absl_cc_test(
     absl::flags_internal
     absl::flags_marshalling
     absl::flags_reflection
+    absl::int128
     absl::strings
     absl::time
     GTest::gtest_main

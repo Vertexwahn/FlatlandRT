@@ -9,7 +9,7 @@
 
 #include "core/namespace.h"
 #include "flatland/rendering/integrator/integrator.h"
-#include "math/warping.h"
+#include "math/sampling.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
@@ -52,8 +52,9 @@ public:
             auto b = static_cast<Scalar>(sample_count_ + 1);
             Vector d = uniform_sample_half_circle(a / b);
 
-            if(use_random_sampling_)
+            if(use_random_sampling_) {
                 d = uniform_sample_half_circle(sampler->next_1d());
+            }
 
             d = me.geo_frame.to_world(d);
             d.normalize();

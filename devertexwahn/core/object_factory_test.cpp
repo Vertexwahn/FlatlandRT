@@ -23,7 +23,7 @@ TEST(ObjectFactoryClassAlreadyRegisteredException, what) {
 
 class MockIntegrator : public IntegratorType<2, float> {
 public:
-    MockIntegrator(const PropertySet &ps) : IntegratorType<2, float>(ps) {}
+    explicit MockIntegrator(const PropertySet &ps) : IntegratorType<2, float>(ps) {}
 
     MOCK_METHOD(Color3f, trace, (const Scene *scene, Sampler *sampler, Ray &ray, const int depth), (const, override));
 };

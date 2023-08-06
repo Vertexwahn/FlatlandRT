@@ -16,10 +16,27 @@ cc_test(
 cc_test(
     name = "libpng_test",
     size = "small",
-    srcs = ["libpng_test.cpp"],
+    srcs = [
+        "libpng_test.cpp",
+    ],
+    data = [
+        "//okapi/tests/images:filtered_images",
+    ],
     deps = [
         "@com_google_googletest//:gtest_main",
         "@libpng",
+    ],
+)
+
+cc_test(
+    name = "libwebp_test",
+    size = "small",
+    srcs = [
+        "libwebp_test.cpp",
+    ],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+        "@libwebp",
     ],
 )
 
@@ -33,21 +50,6 @@ cc_test(
         "//imaging:image",
         "@com_google_googletest//:gtest_main",
         "@com_openexr//:OpenEXR",
-    ],
-)
-
-cc_test(
-    name = "png_test",
-    size = "small",
-    srcs = [
-        "png_test.cpp",
-    ],
-    data = [
-        "//okapi/tests/images:filtered_images",
-    ],
-    deps = [
-        "@com_google_googletest//:gtest_main",
-        "@libpng",
     ],
 )
 

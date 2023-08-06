@@ -13,6 +13,7 @@ steps:
     submodules: false
 
   - script: |
+      cd devertexwahn
       bazel version
     displayName: "Show Bazel version"
 

@@ -116,7 +116,7 @@ TEST(SvgCanvas, GivenRectangle_WhenAssigningMaterial_ExpectSpecificFillAndBoderC
     ps_mat.add_property("stroke_width", 3.f);
     ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
     ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
-    rect.set_bxdf(blue_material);
+    rect.set_bsdf(blue_material);
 
     sc.add(&rect);
 
@@ -141,7 +141,7 @@ TEST(SvgCanvas, When_DiskWithRedMaterial_Then_ExpectCicleWithRedFillAndBoderColo
     ps.add_property("transform", translate(Vector2f{200.f, 200.f}));
 
     Disk2f c{ps};
-    c.set_bxdf(blue_material);
+    c.set_bsdf(blue_material);
     sc.add(&c);
 
     // Act
@@ -181,7 +181,7 @@ TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor) {
     ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
     ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
 
-    rect.set_bxdf(blue_material);
+    rect.set_bsdf(blue_material);
     sc.add(&rect);
 
     // todo: Materials seem not to work for spheres - add unit test
@@ -205,7 +205,7 @@ TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor) {
     Vector2f refracted_direction;
     Vector2f incident_vector = Vector2f(-1.f, 1.f);
     incident_vector.normalize();
-    bool result = refract(incident_vector, its.geo_frame.normal, 1.f / 1.6f, refracted_direction);
+    bool result = refract(incident_vector, its.geo_frame.n, 1.f / 1.6f, refracted_direction);
     EXPECT_THAT(result, true);
 
     Ray2f refracted_ray(its.p + refracted_direction * 0.01f, refracted_direction, 0.f, 200.f);
@@ -245,7 +245,7 @@ TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor2) {
     Vector2f incidentVector = Vector2f(-1.f, 1.f);
     incidentVector.normalize();
 
-    bool result = refract(incidentVector, its.geo_frame.normal, 1.f / 1.6f, refracted_direction);
+    bool result = refract(incidentVector, its.geo_frame.n, 1.f / 1.6f, refracted_direction);
     EXPECT_TRUE(result);
 
     Ray2f refracted_ray(its.p + refracted_direction * 0.01f, refracted_direction, 0.f, 200.f);

@@ -22,6 +22,9 @@ struct VectorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     VectorType(const ScalarType x, const ScalarType y) : Base(x,y) {}
     VectorType(const ScalarType x, const ScalarType y, const ScalarType z) : Base(x,y,z) {}
     VectorType(const ScalarType x, const ScalarType y, const ScalarType z, const ScalarType w) : Base(x,y,z,w) {}
+    explicit VectorType(const ScalarType value) {
+        *this = Base::Constant(value);
+    }
 
     template <typename Derived>
     VectorType(const Eigen::MatrixBase<Derived>& src) : Base(src) {

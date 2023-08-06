@@ -54,7 +54,7 @@ public:
             wi.normalize();
 
             // inside or outside?
-            Vector2<ScalarType> reflectedDirection = reflect<ScalarType>(wi, me.geo_frame.normal.normalized());
+            Vector2<ScalarType> reflectedDirection = reflect<ScalarType>(wi, me.geo_frame.n.normalized());
 
             Ray2f reflectedRay(me.p + reflectedDirection * ScalarType{0.01}, reflectedDirection, ScalarType{0.0}, ScalarType{20000.0});
 

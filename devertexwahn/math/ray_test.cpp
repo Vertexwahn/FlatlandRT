@@ -10,8 +10,8 @@
 using namespace de_vertexwahn;
 
 TEST(Ray2f, GivenDirectionOriginMaxMinT_WhenRayIsInitialized_ThenInitzalizedRayValues) {
-    Point2f origin(0.f, 0.f);
-    Vector2f direction(1.f, 0.f);
+    Point2f origin{0.f, 0.f};
+    Vector2f direction{1.f, 0.f};
 
     Ray2f r(origin, direction, 1.f, 10.f);
 
@@ -24,34 +24,34 @@ TEST(Ray2f, GivenDirectionOriginMaxMinT_WhenRayIsInitialized_ThenInitzalizedRayV
 }
 
 TEST(Ray2f, GivenNormalizedRay_WhenCheckingIfRayIsNormalized_ThenNormalizedIsTrue) {
-    Point2f origin(0.f, 0.f);
-    Vector2f direction(1.f, 0.f);
+    Point2f origin{0.f, 0.f};
+    Vector2f direction{1.f, 0.f};
 
-    Ray2f r(origin, direction, 1.f, 10.f);
+    Ray2f r{origin, direction, 1.f, 10.f};
 
     EXPECT_TRUE(r.is_direction_vector_normalized());
 }
 
 TEST(Ray2f, GivenNonNormalizedRay_WhenCheckingIfRayIsNormalized_ThenNormalizedIsFalse) {
-    Point2f origin(0.f, 0.f);
-    Vector2f direction(2.f, 0.f);
+    Point2f origin{0.f, 0.f};
+    Vector2f direction{2.f, 0.f};
 
-    Ray2f r(origin, direction, 1.f, 10.f);
+    Ray2f r{origin, direction, 1.f, 10.f};
 
     EXPECT_FALSE(r.is_direction_vector_normalized());
 }
 
 TEST(Ray2f, GivenToShortNonNormalizedRay_WhenCheckingIfRayIsNormalized_ThenNormalizedIsFalse) {
-    Point2f origin(0.f, 0.f);
-    Vector2f direction(.1f, 0.f);
-    Ray2f r(origin, direction, 1.f, 10.f);
+    Point2f origin{0.f, 0.f};
+    Vector2f direction{.1f, 0.f};
+    Ray2f r{origin, direction, 1.f, 10.f};
 
     EXPECT_FALSE(r.is_direction_vector_normalized());
 }
 
 TEST(Ray2f, GivenANormalizedRay_WhenDeterminPointAtMinAndMaxT_ThenExpectStartAndEndPoint) {
-    Point2f origin(0.f, 0.f);
-    Vector2f direction(1.f, 0.f);
+    Point2f origin{0.f, 0.f};
+    Vector2f direction{1.f, 0.f};
 
     Ray2f r(origin, direction, 1.f, 10.f);
 
@@ -65,10 +65,10 @@ TEST(Ray2f, GivenANormalizedRay_WhenDeterminPointAtMinAndMaxT_ThenExpectStartAnd
 }
 
 TEST(Ray2f, GivenARay_WhenPrintedToStdOutput_ExpectRayAsStringRepresentation) {
-    Point2f origin(0.f, 0.f);
-    Vector2f direction(1.f, 0.f);
+    Point2f origin{0.f, 0.f};
+    Vector2f direction{1.f, 0.f};
 
-    Ray2f r(origin, direction, 1.f, 10.f);
+    Ray2f r{origin, direction, 1.f, 10.f};
 
     std::ostringstream ss;
     ss << r;
@@ -83,9 +83,9 @@ TEST(Ray2f, GivenARay_WhenPrintedToStdOutput_ExpectRayAsStringRepresentation) {
 }
 
 TEST(Ray2d, GivenARay2d_WhenPrintedToStdOutput_ExpectRayTypeRay2d) {
-    Point2d origin(.0, 0.0);
-    Vector2d direction(1.0, 0.0);
-    Ray2d r(origin, direction, 1.0, 10.0);
+    Point2d origin{.0, 0.0};
+    Vector2d direction{1.0, 0.0};
+    Ray2d r{origin, direction, 1.0, 10.0};
 
     std::ostringstream ss;
     ss << r;
@@ -100,9 +100,9 @@ TEST(Ray2d, GivenARay2d_WhenPrintedToStdOutput_ExpectRayTypeRay2d) {
 }
 
 TEST(Ray3f, GivenARay3f_WhenPrintedToStdOutput_ExpectRayTypeRay3f) {
-    Point3f origin(0.f, 0.f, 0.f);
-    Vector3f direction(1.f, 0.f, 0.f);
-    Ray3f r(origin, direction, 1.f, 10.f);
+    Point3f origin{0.f, 0.f, 0.f};
+    Vector3f direction{1.f, 0.f, 0.f};
+    Ray3f r{origin, direction, 1.f, 10.f};
 
     std::ostringstream ss;
     ss << r;

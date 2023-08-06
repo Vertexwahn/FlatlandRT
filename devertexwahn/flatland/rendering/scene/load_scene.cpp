@@ -303,9 +303,9 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     }
                     if (xml_bxdf) {
                         auto bsdf_ps = read_all_properties(xml_bxdf);
-                        auto bsdf = std::dynamic_pointer_cast<BxDF<2, float>>(
+                        auto bsdf = std::dynamic_pointer_cast<BSDFType<2, float>>(
                                 object_factory.create_instance(str_bsdf_type, bsdf_ps));
-                        shape->set_bxdf(bsdf);
+                        shape->set_bsdf(bsdf);
                     }
 
                     scene->add_shape(shape);

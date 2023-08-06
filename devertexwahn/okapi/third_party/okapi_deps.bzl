@@ -34,9 +34,9 @@ def okapi_deps():
     # Make sure to fetch a recent version of rules_python
     http_archive(
         name = "rules_python",
-        sha256 = "863ba0fa944319f7e3d695711427d9ad80ba92c6edd0b7c7443b84e904689539",
-        strip_prefix = "rules_python-0.22.0",
-        url = "https://github.com/bazelbuild/rules_python/releases/download/0.22.0/rules_python-0.22.0.tar.gz",
+        sha256 = "84aec9e21cc56fbc7f1335035a71c850d1b9b5cc6ff497306f84cced9a769841",
+        strip_prefix = "rules_python-0.23.1",
+        url = "https://github.com/bazelbuild/rules_python/releases/download/0.23.1/rules_python-0.23.1.tar.gz",
     )
 
     #-------------------------------------------------------------------------------------
@@ -227,7 +227,8 @@ def okapi_deps():
         native.new_local_repository,
         name = "pugixml",
         build_file = "//okapi/third_party:pugixml.BUILD",
-        path = "../third_party/pugixml-1.13",
+        #path = "../third_party/pugixml-1.13",
+        path = "../third_party/pugixml",
     )
 
     #-------------------------------------------------------------------------------------
@@ -352,7 +353,7 @@ def okapi_deps():
         native.new_local_repository,
         name = "libpng",
         build_file = "//okapi/third_party:libpng.BUILD",
-        path = "../third_party/libpng-1.6.39",
+        path = "../third_party/libpng-1.6.40",
     )
 
     # libpng
@@ -366,6 +367,18 @@ def okapi_deps():
     #        "https://sourceforge.net/projects/libpng/files/latest/download
     #    ],
     #)
+
+    #-------------------------------------------------------------------------------------
+    # Libwebp
+    #-------------------------------------------------------------------------------------
+
+    git_repository(
+        name = "libwebp",
+        build_file = "//okapi/third_party:libwebp.BUILD",
+        commit = "fd7bb21c0cb56e8a82e9bfa376164b842f433f3b",
+        #commit = "29b9eb1517cd21ed56af218d850d61b0ee384fdf",
+        remote = "https://chromium.googlesource.com/webm/libwebp.git",
+    )
 
     #-------------------------------------------------------------------------------------
     # libjpeg-turbo
@@ -488,6 +501,14 @@ def okapi_deps():
     #    remote = "https://github.com/Vertexwahn/rules_boost",
     #    branch = "introduce-maybe",
     #)
+
+    # Work around this: https://bugs.chromium.org/p/boringssl/issues/detail?id=623
+    #
+    maybe(
+        native.local_repository,
+        name = "openssl",
+        path = "../third_party/boringssl",
+    )
 
     # Switch back to this once above thing is tested:
     maybe(

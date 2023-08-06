@@ -22,7 +22,7 @@ TEST(Image, storeLoadOpenEXR) {
     }
 
     // Act
-    store_image_ppm("test.ppm", image);
+    store_ppm("test.ppm", image);
 
     // Assert
     std::ifstream ppm_file{"test.ppm"};

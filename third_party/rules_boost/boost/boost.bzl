@@ -1,11 +1,10 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
-# Building boost results in many warnings for unused values. Downstream users
-# won't be interested, so just disable the warning.
+# Building boost results in many warnings. Downstream users won't be interested, so just disable them.
 default_copts = select({
-    "@platforms//os:windows": [],
-    "//conditions:default": ["-Wno-unused"],
+    "@platforms//os:windows": ["/W0"],
+    "//conditions:default": ["-w"],
 })
 
 default_defines = select({
@@ -140,9 +139,9 @@ def boost_deps():
         http_archive,
         name = "org_lzma_lzma",
         build_file = "@com_github_nelhage_rules_boost//:lzma.BUILD",
-        url = "https://github.com/tukaani-project/xz/releases/download/v5.4.3/xz-5.4.3.tar.gz",
-        sha256 = "1c382e0bc2e4e0af58398a903dd62fff7e510171d2de47a1ebe06d1528e9b7e9",
-        strip_prefix = "xz-5.4.3",
+        url = "https://github.com/tukaani-project/xz/releases/download/v5.4.4/xz-5.4.4.tar.gz",
+        sha256 = "aae39544e254cfd27e942d35a048d592959bd7a79f9a624afb0498bb5613bdf8",
+        strip_prefix = "xz-5.4.4",
     )
 
     maybe(
@@ -169,7 +168,7 @@ def boost_deps():
     maybe(
         http_archive,
         name = "openssl",
-        url = "https://github.com/hedronvision/boringssl/archive/64bc60554593cf0506f171b4e08378ee2308f109.tar.gz",
-        sha256 = "d2cdc22696e4c1bceb00245b90a4bc1717ef5f81229b4aaed8f91f2827a33997",
-        strip_prefix = "boringssl-64bc60554593cf0506f171b4e08378ee2308f109",
+        url = "https://github.com/hedronvision/boringssl/archive/4a0d0444b8255caf62b2dffa14f3cd89b84f0474.tar.gz",
+        sha256 = "0a2b4dea2b2f212104b8c422941646e6b942b898d8933ff08c6d7fa7ad68ab58",
+        strip_prefix = "boringssl-4a0d0444b8255caf62b2dffa14f3cd89b84f0474",
     )

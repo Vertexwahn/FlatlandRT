@@ -12,8 +12,8 @@ using namespace de_vertexwahn;
 TEST(Vector2i, Vector2i_ctor) {
     Vector2f v{1.f, 2.f};
 
-    EXPECT_THAT(v.x(), 1);
-    EXPECT_THAT(v.y(), 2);
+    EXPECT_THAT(v.x(), 1.f);
+    EXPECT_THAT(v.y(), 2.f);
 }
 
 TEST(Vector2f, Vector2f_ctor) {
@@ -21,6 +21,16 @@ TEST(Vector2f, Vector2f_ctor) {
 
     EXPECT_THAT(v.x(), 1.f);
     EXPECT_THAT(v.y(), 2.f);
+}
+
+TEST(Vector2f, Vector2f_CtorWithSingleArgument) {
+    Vector2f v1{0.f};
+    EXPECT_THAT(v1.x(), 0.f);
+    EXPECT_THAT(v1.y(), 0.f);
+
+    Vector2f v2{2.f};
+    EXPECT_THAT(v2.x(), 2.f);
+    EXPECT_THAT(v2.y(), 2.f);
 }
 
 TEST(Vector3f, Vector3f_ctor) {

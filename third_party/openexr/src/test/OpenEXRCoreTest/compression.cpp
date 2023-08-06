@@ -82,7 +82,7 @@ static int compare_files (const char *fn, const char *fn2)
                 {
                     if (memcmp (buf1, buf2, nr1) != 0)
                     {
-                        for ( size_t b = 0; b < nr1; ++b )
+                        for ( ssize_t b = 0; b < nr1; ++b )
                         {
                             if (buf1[b] != buf2[b])
                             {
@@ -159,7 +159,7 @@ inline bool
 withinDWAErrorBounds (const uint16_t a, const uint16_t b)
 {
     float a1 = imath_half_to_float (a);
-    if (!isnan (a1))
+    if (!std::isnan (a1))
     {
         float a2 = imath_half_to_float (b);
         float denominator =

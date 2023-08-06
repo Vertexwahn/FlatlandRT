@@ -9,7 +9,7 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-void store_image_ppm(std::string_view filename, const Image4b &image) {
+void store_ppm(std::string_view filename, const Image4b &image) {
     std::ofstream out(filename.data(), std::ios::out);
 
     out << "P3" << std::endl

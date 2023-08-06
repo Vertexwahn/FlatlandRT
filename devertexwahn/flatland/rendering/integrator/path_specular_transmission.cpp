@@ -40,10 +40,10 @@ Color3f PathSpecularTransmission::trace(
         bool valid = false;
 
         // inside or outside?
-        if (me.geo_frame.normal.normalized().dot(wi) < 0) {
-            valid = refract(wi, -me.geo_frame.normal.normalized(), 1.6f / 1.f, refracted_direction);
+        if (me.geo_frame.n.normalized().dot(wi) < 0) {
+            valid = refract(wi, -me.geo_frame.n.normalized(), 1.6f / 1.f, refracted_direction);
         } else {
-            valid = refract(wi, me.geo_frame.normal.normalized(), 1.f / 1.6f, refracted_direction);
+            valid = refract(wi, me.geo_frame.n.normalized(), 1.f / 1.6f, refracted_direction);
         }
 
         std::cout << "Valid refraction: " << valid << std::endl;

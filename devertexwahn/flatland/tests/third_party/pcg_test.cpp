@@ -9,7 +9,7 @@
 
 #include "gmock/gmock.h"
 
-TEST(pcg, generte_random_number) {
+TEST(pcg, generate_random_number) {
     //pcg_extras::seed_seq_from<std::random_device> seed_source;
     //pcg32 rng(seed_source);
     pcg32 rng(42u);

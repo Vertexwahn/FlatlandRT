@@ -24,6 +24,9 @@ struct PointType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     PointType(const ScalarType x, const ScalarType y) : Base(x, y) {}
     PointType(const ScalarType x, const ScalarType y, const ScalarType z) : Base(x, y, z) {}
     PointType(const ScalarType x, const ScalarType y, const ScalarType z, const ScalarType w) : Base(x, y, z, w) {}
+    explicit PointType(const ScalarType value) {
+        *this = Base::Constant(value);
+    }
 
     template <typename Derived>
     PointType(const Eigen::MatrixBase<Derived>& src) : Base(src) {

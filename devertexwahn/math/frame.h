@@ -12,6 +12,53 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
+/*
+ * The reflection coordinate system looks like this:
+ *
+ *    A n+ (z+)
+ *    |
+ *    |
+ *    |
+ *    |
+ *    |
+ *    |
+ *    |----------------------> s+ (x+)
+ *   /
+ *  /
+ * / t+ (y+)
+ *
+ * The z vector is aligned with the normal vector
+ */
+
+// This functions expects that w is a normalized vector on the unit sphere
+// that is given in the reflectance coordinate system
+template<typename ScalarType>
+ScalarType cos_theta(const Vector3<ScalarType> &w) {
+    return w.z();
+}
+
+// This functions expects that w is a normalized vector on the unit sphere
+// that is given in the reflectance coordinate system
+template<typename ScalarType>
+ScalarType sin_theta2(const Vector3<ScalarType> &w) {
+    return ScalarType{1.0} - w.z() * w.z();
+}
+
+// This functions expects that w is a normalized vector on the unit sphere
+// that is given in the reflectance coordinate system
+template<typename ScalarType>
+ScalarType sin_theta(const Vector3<ScalarType> &w) {
+    float s = sin_theta2(w);
+    if (s <= 0.0f)
+        return 0.0f;
+    return std::sqrt(s);
+}
+
+template<typename ScalarType>
+ScalarType abs_cos_theta(const Vector3<ScalarType> &w) {
+    return std::abs(w.z());
+}
+
 // https://graphics.pixar.com/library/OrthonormalB/paper.pdf
 template<typename Scalar>
 void branchless_onb(const NormalType<3, Scalar> &n, VectorType<3, Scalar> &b1, VectorType<3, Scalar> &b2) {
@@ -47,17 +94,16 @@ struct FrameType {
     using Vector = VectorType<Dimension, ScalarType>;
     using Normal = NormalType<Dimension, ScalarType>;
 
-    Normal normal;
-    Vector tangent;
+    Normal n;
+    Vector t;
 
-    FrameType() {
-    }
+    FrameType() = default;
 
-    explicit FrameType(const Normal &n, const Vector &t) : normal(n), tangent(t) {
+    explicit FrameType(const Normal &n, const Vector &t) : n(n), t(t) {
     }
 
     Vector to_world(const Vector &v) const {
-        return v.x() * tangent + v.y() * normal;
+        return v.x() * t + v.y() * n;
     }
 };
 
@@ -70,14 +116,18 @@ struct FrameType<3, ScalarType> {
     Vector t; // bitangent; y
     Normal n; // normal; z
 
-    FrameType() {
-    }
+    FrameType() = default;
 
     FrameType(const Normal3f &n) : n(n) {
         branchless_onb(n, s, t);
     }
 
     explicit FrameType(const Vector &x, const Vector &y, const Normal &n) : s(x), t(y), n(n) {
+    }
+
+    // Convert from world coordinates to local coordinates
+    Vector to_local(const Vector &v) const {
+        return Vector{v.dot(s), v.dot(t), v.dot(n)};
     }
 
     Vector to_world(const Vector &v) const {

@@ -7,9 +7,11 @@
 #ifndef De_Vertexwahn_Flatland_Rendering_Sampler_e951b5eb_3019_4678_be3e_764686c28239_h
 #define De_Vertexwahn_Flatland_Rendering_Sampler_e951b5eb_3019_4678_be3e_764686c28239_h
 
-#include "core/object.h"
-#include "math/point.h"
 #include "flatland/rendering/property_set.h"
+
+#include "math/point.h"
+
+#include "core/object.h"
 
 #include "pcg_random.hpp"
 
@@ -30,6 +32,7 @@ public:
 
     virtual Point2 <ScalarType> next_2d() = 0;
 
+    [[nodiscard]]
     int sample_count() const {
         return sample_count_;
     };
@@ -65,7 +68,7 @@ public:
         return std::make_unique<StaticDebugSamplerType>(ps);
     }
 
-    virtual std::string to_string() const override {
+    std::string to_string() const override {
         return "PixelCenterSampler";
     }
 };
@@ -95,7 +98,8 @@ public:
         return Point2<ScalarType>(x, y);
     }
 
-    virtual std::string to_string() const override {
+    [[nodiscard]]
+    std::string to_string() const override {
         return "IndependentSampler";
     }
 

@@ -273,7 +273,7 @@ struct custom_context {
   bool called = false;
 
   template <typename T> struct formatter_type {
-    auto parse(fmt::format_parse_context& ctx) -> decltype(ctx.begin()) {
+    FMT_CONSTEXPR auto parse(fmt::format_parse_context& ctx) -> decltype(ctx.begin()) {
       return ctx.begin();
     }
 
@@ -290,7 +290,7 @@ struct test_struct {};
 
 FMT_BEGIN_NAMESPACE
 template <typename Char> struct formatter<test_struct, Char> {
-  auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
@@ -573,7 +573,7 @@ struct disabled_formatter_convertible {
 
 FMT_BEGIN_NAMESPACE
 template <> struct formatter<enabled_formatter> {
-  auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
   auto format(enabled_formatter, format_context& ctx) const
@@ -583,7 +583,7 @@ template <> struct formatter<enabled_formatter> {
 };
 
 template <> struct formatter<enabled_ptr_formatter*> {
-  auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
   auto format(enabled_ptr_formatter*, format_context& ctx) const
@@ -607,7 +607,7 @@ struct nonconst_formattable {};
 
 FMT_BEGIN_NAMESPACE
 template <> struct formatter<const_formattable> {
-  auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
@@ -619,7 +619,7 @@ template <> struct formatter<const_formattable> {
 };
 
 template <> struct formatter<nonconst_formattable> {
-  auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
@@ -641,7 +641,7 @@ struct convertible_to_pointer_formattable {
 
 FMT_BEGIN_NAMESPACE
 template <> struct formatter<convertible_to_pointer_formattable> {
-  auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
@@ -721,7 +721,7 @@ struct convertible_to_cstring {
 
 FMT_BEGIN_NAMESPACE
 template <> struct formatter<convertible_to_int> {
-  auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
   auto format(convertible_to_int, format_context& ctx) const
@@ -830,4 +830,29 @@ TEST(core_test, has_const_formatter) {
 
 TEST(core_test, format_nonconst) {
   EXPECT_EQ(fmt::format("{}", nonconst_formattable()), "test");
+}
+
+struct its_a_trap {
+  template <typename T> operator T() const {
+    auto v = T();
+    v.x = 42;
+    return v;
+  }
+};
+
+FMT_BEGIN_NAMESPACE
+template <> struct formatter<its_a_trap> {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+    return ctx.begin();
+  }
+
+  auto format(its_a_trap, format_context& ctx) const -> decltype(ctx.out()) {
+    auto s = string_view("42");
+    return std::copy(s.begin(), s.end(), ctx.out());
+  }
+};
+FMT_END_NAMESPACE
+
+TEST(core_test, trappy_conversion) {
+  EXPECT_EQ(fmt::format("{}", its_a_trap()), "42");
 }

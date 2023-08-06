@@ -7,10 +7,12 @@
 #ifndef De_Vertexwahn_Imaging_Color_0cb9a6fe_978e_4062_95e9_07dfabe40508_h
 #define De_Vertexwahn_Imaging_Color_0cb9a6fe_978e_4062_95e9_07dfabe40508_h
 
-#include "core/namespace.h"
 #include "math/util.h"
 
+#include "core/namespace.h"
+
 #include "fmt/core.h"
+
 #include "Eigen/Core"
 #include "Eigen/Dense"
 
@@ -76,6 +78,7 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
         return *this;
     }
 
+    [[nodiscard]]
     bool has_nans() const {
         for (size_t i = 0; i < Dimension; ++i) {
             if (std::isnan(this->coeff(i))) {
@@ -85,6 +88,7 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
         return false;
     }
 
+    [[nodiscard]]
     std::string to_string() const {
         return fmt::format("{}, {}, {}", red(), green(), blue());
     }
@@ -97,6 +101,17 @@ inline ColorType<Dimension, ScalarType> operator*(const ColorType<Dimension, Sca
 
     for (size_t i = 0; i < Dimension; ++i)
         result[i] = lhs[i] * rhs[i];
+
+    return result;
+}
+
+template<unsigned int Dimension, typename ScalarType>
+inline ColorType<Dimension, ScalarType> operator*(const ColorType<Dimension, ScalarType>& lhs, const ScalarType rhs)
+{
+    ColorType<Dimension, ScalarType> result;
+
+    for (size_t i = 0; i < Dimension; ++i)
+        result[i] = lhs[i] * rhs;
 
     return result;
 }
@@ -124,7 +139,7 @@ using Color4f = Color4<float>;
 using Color4d = Color4<double>;
 using Color4b = Color4<std::uint8_t>;
 
-Color3f hot_to_cold_color_ramp(float v, float vmin, float vmax);
+Color3f hot_to_cold_color_ramp(float v, float vmin, float vmax); // Todo: Move this to color_ramp.h
 
 DE_VERTEXWAHN_END_NAMESPACE
 

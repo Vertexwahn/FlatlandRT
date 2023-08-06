@@ -13,6 +13,124 @@ News
 .. toctree::
    :caption: News
 
+August 1, 2023 - 2023 ASWF OpenEXR Virtual Town Hall
+====================================================
+
+Slides from the 2023 ASWF OpenEXR Virtual Town Hall are here:
+https://wiki.aswf.io/display/OEXR/2023+ASWF+OpenEXR+Virtual+Town+Hall
+
+Agenda:
+
+- OpenEXR v3.1 Review
+
+  - OpenEXRCore, now with DWAA/B compression support
+
+  - Performance optimizations (zip, neon, huf decoder, SSE4)
+
+  - Bug/build fixes
+
+  - New https://openexr.com website, with test images
+
+  - Other developments:
+
+    - MacPorts is now up to date (v3.1.9)
+
+    - PyPI python bindings (a.k.a. “pip install openexr”)
+
+    - OpenEXR & USDZ
+
+    - Coalition for Content Provenance and Authenticity (C2PA)
+
+- OpenEXR v3.2 Preview
+
+  - Lossless compression via libdeflate (replaces zlib)
+
+  - ABI compatibility
+
+  - New Optional Standard Attributes:
+
+    - Support automated editorial workflow
+
+      ``reelName``, ``imageCounter``, ``ascFramingDecisionList``
+
+    - Support forensics (“which other shots used that camera and lens
+      before the camera firmware was updated?”)
+
+      ``cameraMake``, ``cameraModel``, ``cameraSerialNumber``,
+      ``cameraFirmware``, ``cameraUuid``, ``cameraLabel``,
+      ``lensMake``, ``lensModel``, ``lensSerialNumber``,
+      ``lensFirmware``, ``cameraColorBalance``
+
+    - Support pickup shots (reproduce critical camera settings)
+
+      ``shutterAngle``, ``cameraCCTSetting``, ``cameraTintSetting``
+
+    - Support metadata-driven match move
+
+      ``sensorCenterOffset``, ``sensorOverallDimensions``,
+      ``sensorPhotositePitch``, ``sensorAcquisitionRectangle``
+      ``nominalFocalLength``, ``effectiveFocalLength``,
+      ``pinholeFocalLength``, ``entrancePupilOffset``, ``tStop
+      (complementing existing 'aperture')``
+
+    - https://www.smpte.org/blog/update-on-smptes-rapid-industry-solutions-ris-on-set-virtual-production-osvp-initiative    
+
+    - https://cookeoptics.com/wp-content/uploads/2023/07/Cooke-Camera-Lens-Definitions-for-VFX-210723.pdf
+
+- Discussion topics: Experiments in GPU Decompression & Real-time Streaming
+
+July 31, 2023 - OpenEXR v2.5.9 Released
+=======================================
+
+Patch release for v2.5 that fixes a compile failure with gcc-13 gcc 13
+and a problem with PyIlmBase's pkgconfig.
+
+June 25, 2023 - OpenEXR v3.1.9 Released
+=======================================
+
+Patch release that addresses miscelleneous build, doc, test issues, in
+particular:
+
+- Build fix for older macOS versions
+
+Also:
+
+* OSS-fuzz `59382 <https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=59382>`_
+  Heap-buffer-overflow in ``internal_huf_decompress``
+
+June 2, 2023 - OpenEXR v3.1.8 Released
+======================================
+
+Patch release that addresses miscellaneous build issues, for macOS in
+particular, but also includes:
+ 
+* Support for DWA compression in OpenEXRCore
+* Fix for threadpool deadlocks during shutdown on Windows  
+
+This release also addresses:
+
+* OSS-fuzz `59070 <https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=59070>`_ Stack-buffer-overflow in ``DwaCompressor_readChannelRules``
+
+May 31, 2023 - Imath Version 3.1.9 Released
+===========================================
+
+Patch release that fixes an correct .so version number introduced in
+v3.1.8. All Imath library functionality is compatible with v3.1.8.
+
+This release also reverts
+`#305 <https://github.com/AcademySoftwareFoundation/Imath/pull/305>`_,
+which inadvertently introduced additional python bindings in v3.1.8
+that altered the ABI of ``libPyImath``. ``libPyImath`` is now
+ABI-compatible with v3.1.7 and previous releases.
+
+May 22, 2023 - Imath Version 3.1.8 Released
+===========================================
+
+**NOTE: this version has an incorrect .so number and should not be used. Use v3.1.9 instead.**
+
+Patch release that addresses miscellaneous minor compiler/build/doc
+issues and extends test coverage.
+
 March 28, 2023 - OpenEXR v3.1.7 Released
 ========================================
 

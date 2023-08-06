@@ -54,10 +54,10 @@ TEST(Disk2f, GivenADiskAndRay_WhenRayIntersectsDisk_ThenIntersectionOnDisk) {
     // Assert
     EXPECT_TRUE(hit);
 
-    EXPECT_THAT(its.geo_frame.normal.x(), testing::FloatEq(-1.f));
-    EXPECT_THAT(its.geo_frame.normal.y(), testing::FloatEq(0.f));
-    EXPECT_THAT(its.geo_frame.tangent.x(), testing::FloatEq(0.f));
-    EXPECT_THAT(its.geo_frame.tangent.y(), testing::FloatEq(1.f));
+    EXPECT_THAT(its.geo_frame.n.x(), testing::FloatEq(-1.f));
+    EXPECT_THAT(its.geo_frame.n.y(), testing::FloatEq(0.f));
+    EXPECT_THAT(its.geo_frame.t.x(), testing::FloatEq(0.f));
+    EXPECT_THAT(its.geo_frame.t.y(), testing::FloatEq(1.f));
 }
 
 // Trivial miss
@@ -162,7 +162,7 @@ TEST(Disk2f, GivenADiskAndRay_WhenRayRefracts_ThenInnerIntersection) {
 
     // compute refraction
     Vector2f refracted_direction;
-    auto result = refract(ray.direction, its.geo_frame.normal, 1.f / 1.60f, refracted_direction);
+    auto result = refract(ray.direction, its.geo_frame.n, 1.f / 1.60f, refracted_direction);
 
     // Assert
     EXPECT_TRUE(result);
@@ -201,18 +201,18 @@ TEST(Disk2f, GivenADiskAndARay_WhenRayIntersectsSphere_ThenValidNormal) {
     }
 
     // Assert
-    EXPECT_THAT(its[0].geo_frame.normal.x(), -1.f);
-    EXPECT_THAT(its[0].geo_frame.normal.y(), 0.f);
-    EXPECT_THAT(its[1].geo_frame.normal.x(), 1.f);
-    EXPECT_THAT(its[1].geo_frame.normal.y(), 0.f);
-    EXPECT_THAT(its[2].geo_frame.normal.x(), 0.f);
-    EXPECT_THAT(its[2].geo_frame.normal.y(), 1.f);
-    EXPECT_THAT(its[3].geo_frame.normal.x(), 0.f);
-    EXPECT_THAT(its[3].geo_frame.normal.y(), -1.f);
-    EXPECT_THAT(its[4].geo_frame.normal.x(), testing::FloatNear(-std::sqrt(.5f), 0.001f));
-    EXPECT_THAT(its[4].geo_frame.normal.y(), testing::FloatNear(-std::sqrt(.5f), 0.001f));
-    EXPECT_THAT(its[5].geo_frame.normal.x(), testing::FloatNear(-std::sqrt(.5f), 0.001f));
-    EXPECT_THAT(its[5].geo_frame.normal.y(), testing::FloatNear(std::sqrt(.5f), 0.001f));
+    EXPECT_THAT(its[0].geo_frame.n.x(), -1.f);
+    EXPECT_THAT(its[0].geo_frame.n.y(), 0.f);
+    EXPECT_THAT(its[1].geo_frame.n.x(), 1.f);
+    EXPECT_THAT(its[1].geo_frame.n.y(), 0.f);
+    EXPECT_THAT(its[2].geo_frame.n.x(), 0.f);
+    EXPECT_THAT(its[2].geo_frame.n.y(), 1.f);
+    EXPECT_THAT(its[3].geo_frame.n.x(), 0.f);
+    EXPECT_THAT(its[3].geo_frame.n.y(), -1.f);
+    EXPECT_THAT(its[4].geo_frame.n.x(), testing::FloatNear(-std::sqrt(.5f), 0.001f));
+    EXPECT_THAT(its[4].geo_frame.n.y(), testing::FloatNear(-std::sqrt(.5f), 0.001f));
+    EXPECT_THAT(its[5].geo_frame.n.x(), testing::FloatNear(-std::sqrt(.5f), 0.001f));
+    EXPECT_THAT(its[5].geo_frame.n.y(), testing::FloatNear(std::sqrt(.5f), 0.001f));
 }
 
 TEST(Intersection2f, Ray2CircleIntersection) {
@@ -252,7 +252,7 @@ TEST(RefractionRayHitsSphere, When_RayHitsSphereStraight_Then_ExpectStraightRefr
     Vector2f wo = -r.direction;
 
     // Act
-    bool result = refract(wo, its.geo_frame.normal, 1.f / 1.60f, refracted_direction);
+    bool result = refract(wo, its.geo_frame.n, 1.f / 1.60f, refracted_direction);
 
     // Assert
     ASSERT_TRUE(result);
@@ -276,7 +276,7 @@ TEST(RefractionRayHitsSphere, When_RayHitsSphereStraightFromInside_Then_ExpectSt
     Vector2f wo = -r.direction;
 
     // Act
-    bool result = refract(wo, faceforward(its.geo_frame.normal, wo), 1.f / 1.6f, refracted_direction);
+    bool result = refract(wo, faceforward(its.geo_frame.n, wo), 1.f / 1.6f, refracted_direction);
 
     // Assert
     ASSERT_TRUE(result);
@@ -314,7 +314,7 @@ TEST(RefractionRayHitsAndExitsSphere, When_RayFromTopAt45Degrees_HitsSphere) {
     Vector2f refracted_direction;
 
     Vector2f wo1 = -r.direction;
-    refract(wo1, its.geo_frame.normal, 1.f / 1.6f, refracted_direction);
+    refract(wo1, its.geo_frame.n, 1.f / 1.6f, refracted_direction);
 
     Ray2f refractedRay{its.p + refracted_direction * 0.01f, refracted_direction, 0.f, 200};
 
@@ -330,7 +330,7 @@ TEST(RefractionRayHitsAndExitsSphere, When_RayFromTopAt45Degrees_HitsSphere) {
 
     Vector2f refracted_direction2;
     Vector2f wo = -refractedRay.direction;
-    refract(wo, faceforward(its.geo_frame.normal, wo), 1.6f / 1.f, refracted_direction2);
+    refract(wo, faceforward(its.geo_frame.n, wo), 1.6f / 1.f, refracted_direction2);
 
     Ray2f refractedRay2{its.p, refracted_direction2, 0.f, 50.f};
     //sc.add(refractedRay2);

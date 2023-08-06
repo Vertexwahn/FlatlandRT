@@ -38,10 +38,10 @@ TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayIntesectsPolygon_ThenIntersecti
     // Assert
     EXPECT_TRUE(hit);
 
-    EXPECT_THAT(me.geo_frame.normal.x(), testing::FloatEq(-1.f));
-    EXPECT_THAT(me.geo_frame.normal.y(), testing::FloatEq(0.f));
-    EXPECT_THAT(me.geo_frame.tangent.x(), testing::FloatEq(0.f));
-    EXPECT_THAT(me.geo_frame.tangent.y(), testing::FloatEq(1.f));
+    EXPECT_THAT(me.geo_frame.n.x(), testing::FloatEq(-1.f));
+    EXPECT_THAT(me.geo_frame.n.y(), testing::FloatEq(0.f));
+    EXPECT_THAT(me.geo_frame.t.x(), testing::FloatEq(0.f));
+    EXPECT_THAT(me.geo_frame.t.y(), testing::FloatEq(1.f));
 }
 
 TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayMissesPolygon_ThenNoIntersectionOnPolygon) {
@@ -110,8 +110,8 @@ TEST(Polygon2f, AssumePlausibleNormal) {
     // Assert
     EXPECT_TRUE(hit);
     EXPECT_GE(its.p.x(), 100.f);
-    EXPECT_LE(its.geo_frame.normal.x(), 0.f);
-    EXPECT_GE(its.geo_frame.normal.y(), 0.f);
+    EXPECT_LE(its.geo_frame.n.x(), 0.f);
+    EXPECT_GE(its.geo_frame.n.y(), 0.f);
 }
 
 TEST(Polygon2f, GivenARotateCube_WhenComputingIntersection_ThenAssumePlausibeNormals) {
@@ -133,8 +133,8 @@ TEST(Polygon2f, GivenARotateCube_WhenComputingIntersection_ThenAssumePlausibeNor
 
     // Assert
     EXPECT_TRUE(hit);
-    EXPECT_THAT(its.geo_frame.normal.x(), testing::FloatEq(-sqrt(.5f)));
-    EXPECT_THAT(its.geo_frame.normal.y(), testing::FloatEq(sqrt(.5f)));
+    EXPECT_THAT(its.geo_frame.n.x(), testing::FloatEq(-sqrt(.5f)));
+    EXPECT_THAT(its.geo_frame.n.y(), testing::FloatEq(sqrt(.5f)));
 }
 
 TEST(Polygon2f, GivenScaledPolygonCube_WhenRayIntersectsPolygon_AssumeProperDistance) {

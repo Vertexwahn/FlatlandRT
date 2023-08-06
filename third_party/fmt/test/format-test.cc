@@ -1413,9 +1413,6 @@ TEST(format_test, precision_rounding) {
   EXPECT_EQ("1.9156918820264798e-56",
             fmt::format("{}", 1.9156918820264798e-56));
   EXPECT_EQ("0.0000", fmt::format("{:.4f}", 7.2809479766055470e-15));
-
-  // Trigger a rounding error in Grisu by a specially chosen number.
-  EXPECT_EQ("3788512123356.985352", fmt::format("{:f}", 3788512123356.985352));
 }
 
 TEST(format_test, prettify_float) {
@@ -1430,7 +1427,6 @@ TEST(format_test, prettify_float) {
   EXPECT_EQ("12.34", fmt::format("{}", 1234e-2));
   EXPECT_EQ("0.001234", fmt::format("{}", 1234e-6));
   EXPECT_EQ("0.1", fmt::format("{}", 0.1f));
-  EXPECT_EQ("0.10000000149011612", fmt::format("{}", double(0.1f)));
   EXPECT_EQ("1.3563156e-19", fmt::format("{}", 1.35631564e-19f));
 }
 
@@ -1475,6 +1471,7 @@ TEST(format_test, format_infinity) {
 TEST(format_test, format_long_double) {
   EXPECT_EQ("0", fmt::format("{0:}", 0.0l));
   EXPECT_EQ("0.000000", fmt::format("{0:f}", 0.0l));
+  EXPECT_EQ("0.0", fmt::format("{:.1f}", 0.000000001l));
   EXPECT_EQ("392.65", fmt::format("{0:}", 392.65l));
   EXPECT_EQ("392.65", fmt::format("{0:g}", 392.65l));
   EXPECT_EQ("392.65", fmt::format("{0:G}", 392.65l));
@@ -1677,8 +1674,7 @@ TEST(format_test, format_custom) {
 
 TEST(format_test, format_to_custom) {
   char buf[10] = {};
-  auto end =
-      &*fmt::format_to(fmt::detail::make_checked(buf, 10), "{}", Answer());
+  auto end = fmt::format_to(buf, "{}", Answer());
   EXPECT_EQ(end, buf + 2);
   EXPECT_STREQ(buf, "42");
 }
@@ -2104,7 +2100,7 @@ struct check_back_appender {};
 
 FMT_BEGIN_NAMESPACE
 template <> struct formatter<check_back_appender> {
-  auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+  FMT_CONSTEXPR auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.begin();
   }
 
@@ -2247,15 +2243,15 @@ TEST(format_test, format_named_arg_with_locale) {
 #endif  // FMT_STATIC_THOUSANDS_SEPARATOR
 
 struct convertible_to_nonconst_cstring {
-    operator char*() const {
-        static char c[]="bar";
-        return c;
-    }
+  operator char*() const {
+    static char c[] = "bar";
+    return c;
+  }
 };
 
 FMT_BEGIN_NAMESPACE
-template <> struct formatter<convertible_to_nonconst_cstring> : formatter<char*> {
-};
+template <>
+struct formatter<convertible_to_nonconst_cstring> : formatter<char*> {};
 FMT_END_NAMESPACE
 
 TEST(format_test, formatter_nonconst_char) {

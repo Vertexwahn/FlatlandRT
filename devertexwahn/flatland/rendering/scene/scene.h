@@ -87,10 +87,12 @@ public:
         sampler_ = sampler;
     }
 
+    [[nodiscard]]
     ReferenceCounted<Sampler> sampler() const {
         return sampler_;
     }
 
+    [[nodiscard]]
     ReferenceCounted<Sampler> sampler() {
         return sampler_;
     }
@@ -99,11 +101,13 @@ public:
         intersector_ = intersector;
     }
 
+    [[nodiscard]]
     bool has_intersector() const {
         return intersector_ != nullptr;
     }
 
-    ReferenceCounted<Intersector> intersector() {
+    [[nodiscard]]
+    ReferenceCounted<Intersector> intersector() const {
         return intersector_;
     }
 

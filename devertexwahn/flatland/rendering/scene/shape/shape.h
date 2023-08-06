@@ -10,7 +10,7 @@
 #include "core/object.h"
 #include "math/axis_aligned_bounding_box.h"
 #include "math/frame.h"
-#include "flatland/rendering/bxdf/svg_material.h"
+#include "flatland/rendering/bsdf/svg_material.h"
 #include "flatland/rendering/scene/shape/emitter.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
@@ -66,10 +66,10 @@ public:
         return transform_;
     };
 
-    void set_bxdf(ReferenceCounted<BxDF<Dimension,ScalarType>> bxdf) {
+    void set_bsdf(ReferenceCounted<BSDFType<Dimension,ScalarType>> bxdf) {
         bxdf_ = bxdf;
     }
-    ReferenceCounted<BxDF<Dimension,ScalarType>> bxdf() const {
+    ReferenceCounted<BSDFType<Dimension,ScalarType>> bsdf() const {
         return bxdf_;
     }
 
@@ -83,7 +83,7 @@ public:
 
 protected:
     Transform44Type<ScalarType> transform_; // transform from object space to world space
-    ReferenceCounted<BxDF<Dimension,ScalarType>> bxdf_{nullptr};
+    ReferenceCounted<BSDFType<Dimension,ScalarType>> bxdf_{nullptr};
     ReferenceCounted<Emitter<Dimension,ScalarType>> emitter_{nullptr};
 };
 
@@ -112,6 +112,7 @@ public:
 
     virtual std::string convert_to_svg(const int svgCanvasWidth, const int svgCanvasHeight) const = 0;
 
+    [[nodiscard]]
     std::string convert_color3f_to_svg_color3b(const Color3f &color) const {
         std::stringstream ss;
         ss << color.red() * 255.f << "," << color.green() * 255.f << "," << color.blue() * 255.f;

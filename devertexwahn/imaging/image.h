@@ -51,12 +51,22 @@ private:
     float *data_;
 };
 
+// Todo: Change this to a template - also Image3b and Image4f make sense..
+// template<typename ScalarType/ColorChannelType, typename ColorType, int Dimensions>
+// add [["nondiscard"]] size_t stride() const;
 class Image4b {
 public:
     Image4b(const int width, const int height) : width_(width), height_(height) {
         data_ = new uint8_t[width * height * 4];
         for (int i = 0; i < width * height * 4; ++i) {
             data_[i] = 0;
+        }
+    }
+
+    Image4b(const int width, const int height, const uint8_t* data) : width_(width), height_(height) {
+        data_ = new uint8_t[width * height * 4];
+        for (int i = 0; i < width * height * 4; ++i) {
+            data_[i] = data[i];
         }
     }
 
@@ -68,14 +78,17 @@ public:
         return data_;
     }
 
+    [[nodiscard]]
     int width() const {
         return width_;
     }
 
+    [[nodiscard]]
     int height() const {
         return height_;
     }
 
+    [[nodiscard]]
     Vector2i size() const {
         return Vector2i{width_, height_};
     };

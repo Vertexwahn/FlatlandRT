@@ -79,8 +79,8 @@ TEST(Rectangle2f, Given_RayHitsRectangle_When_ComputingIntersection_ExpectInters
     EXPECT_TRUE(result);
     EXPECT_THAT(its.p.x(), 200.f);
     EXPECT_THAT(its.p.y(), 250.f);
-    EXPECT_THAT(its.geo_frame.normal.x(), -1.f);
-    EXPECT_THAT(its.geo_frame.normal.y(), 0.f);
+    EXPECT_THAT(its.geo_frame.n.x(), -1.f);
+    EXPECT_THAT(its.geo_frame.n.y(), 0.f);
 }
 
 TEST(Rectangl2f, GivenATranslatedRectangle_WhenConvertToSvg_ThenExpectSvgTags) {

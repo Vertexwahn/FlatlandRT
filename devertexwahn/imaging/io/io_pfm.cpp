@@ -9,7 +9,7 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 //----------------------------------------------------------------------------
 // The following code section has been copied.
-// Copyrightt by Bryan Henderson, San Jose, CA April 2004.
+// Copyright by Bryan Henderson, San Jose, CA April 2004.
 // Contributed to the public domain by its author.
 // Minor modifications by Julian Amann distributed under the same license conditions (public domain)
 //----------------------------------------------------------------------------
@@ -180,12 +180,12 @@ ReferenceCounted<Image3f> load_image_pfm(std::string_view filename) {
     struct pfmHeader pfmHeader;
     readPfmHeader(ifP, &pfmHeader);
 
-    pfmSample * pfmBuffer = new pfmSample[pfmHeader.width * pfmHeader.height * 3];
+    std::unique_ptr<pfmSample[]> pfmBuffer(new pfmSample[pfmHeader.width * pfmHeader.height * 3]);
+    unsigned int rc = fread(pfmBuffer.get(), sizeof(pfmSample), pfmHeader.width * pfmHeader.height * 3, ifP);
 
-    int rc = fread(pfmBuffer, sizeof(pfmSample), pfmHeader.width * pfmHeader.height * 3, ifP);
-
-    if (rc != pfmHeader.width * pfmHeader.height * 3)
+    if (rc != pfmHeader.width * pfmHeader.height * 3) {
         throw std::runtime_error("Invalid pfm read");
+    }
 
     ReferenceCounted<Image3f> image = make_reference_counted<Image3f>(pfmHeader.width, pfmHeader.height);
 
@@ -204,8 +204,6 @@ ReferenceCounted<Image3f> load_image_pfm(std::string_view filename) {
 
     fflush(ifP);
     fclose(ifP);
-
-    delete [] pfmBuffer;
 
     return image;
 }

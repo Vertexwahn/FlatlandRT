@@ -19,6 +19,7 @@ steps:
     displayName: "Show OS version"
 
   - script: |
+      cd devertexwahn
       bazel version
     displayName: "Show Bazel version"
 

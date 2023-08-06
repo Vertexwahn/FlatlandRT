@@ -17,6 +17,7 @@ The {fmt} library API consists of the following parts:
 * :ref:`fmt/color.h <color-api>`: terminal color and text style
 * :ref:`fmt/os.h <os-api>`: system APIs
 * :ref:`fmt/ostream.h <ostream-api>`: ``std::ostream`` support
+* :ref:`fmt/args.h <args-api>`: dynamic argument lists
 * :ref:`fmt/printf.h <printf-api>`: ``printf`` formatting
 * :ref:`fmt/xchar.h <xchar-api>`: optional ``wchar_t`` support 
 
@@ -155,7 +156,7 @@ For example::
       if (it != end && (*it == 'f' || *it == 'e')) presentation = *it++;
 
       // Check if reached the end of the range:
-      if (it != end && *it != '}') throw format_error("invalid format");
+      if (it != end && *it != '}') throw_format_error("invalid format");
 
       // Return an iterator past the end of the parsed range:
       return it;
@@ -292,9 +293,6 @@ times and reduces binary code size compared to a fully parameterized version.
 .. doxygenclass:: fmt::format_arg_store
    :members:
 
-.. doxygenclass:: fmt::dynamic_format_arg_store
-   :members:
-
 .. doxygenclass:: fmt::basic_format_args
    :members:
 
@@ -310,6 +308,17 @@ times and reduces binary code size compared to a fully parameterized version.
    :members:
 
 .. doxygentypedef:: fmt::format_context
+
+.. _args-api:
+
+Dynamic Argument Lists
+----------------------
+
+The header ``fmt/args.h`` provides ``dynamic_format_arg_store``, a builder-like
+API that can be used to construct format argument lists dynamically.
+
+.. doxygenclass:: fmt::dynamic_format_arg_store
+   :members:
 
 Compatibility
 -------------
@@ -540,10 +549,20 @@ Format String Compilation
 ``FMT_COMPILE`` macro or the ``_cf`` user-defined literal. Format strings
 marked with ``FMT_COMPILE`` or ``_cf`` are parsed, checked and converted into
 efficient formatting code at compile-time. This supports arguments of built-in
-and string types as well as user-defined types with ``constexpr`` ``parse``
-functions in their ``formatter`` specializations. Format string compilation can
-generate more binary code compared to the default API and is only recommended in
-places where formatting is a performance bottleneck.
+and string types as well as user-defined types with ``format`` functions taking
+the format context type as a template parameter in their ``formatter``
+specializations. For example::
+
+  template <> struct fmt::formatter<point> {
+    constexpr auto parse(format_parse_context& ctx);
+
+    template <typename FormatContext>
+    auto format(const point& p, FormatContext& ctx) const;
+  };
+
+Format string compilation can generate more binary code compared to the default
+API and is only recommended in places where formatting is a performance
+bottleneck.
 
 .. doxygendefine:: FMT_COMPILE
 
@@ -616,7 +635,7 @@ the POSIX extension for positional arguments. Unlike their standard
 counterparts, the ``fmt`` functions are type-safe and throw an exception if an
 argument type doesn't match its format specification.
 
-.. doxygenfunction:: printf(const S &format_str, const T&... args)
+.. doxygenfunction:: printf(string_view fmt, const T&... args)
 
 .. doxygenfunction:: fprintf(std::FILE *f, const S &fmt, const T&... args) -> int
 

@@ -72,7 +72,7 @@ public:
            << radius()
            << "\"";
 
-        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bxdf());
+        ReferenceCounted<SvgMaterial> material = std::static_pointer_cast<SvgMaterial>(Shape2<ScalarType>::bsdf());
 
         if (material) {
             ss << " ";

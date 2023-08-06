@@ -210,6 +210,31 @@ cc_test(
 )
 
 cc_library(
+    name = "sampling",
+    hdrs = ["sampling.h"],
+    deps = [
+        "//core:namespace",
+        "//math:normal",
+        "//math:point",
+        "//math:vector",
+    ],
+)
+
+cc_test(
+    name = "sampling_test",
+    size = "small",
+    srcs = [
+        "sampling_test.cpp",
+    ],
+    deps = [
+        ":sampling",
+        "//flatland/rendering:sampler",
+        "@com_google_googletest//:gtest_main",
+        "@hypothesis",
+    ],
+)
+
+cc_library(
     name = "tensor",
     hdrs = ["tensor.h"],
     deps = [
@@ -258,6 +283,7 @@ cc_library(
     hdrs = ["util.h"],
     deps = [
         "//core:namespace",
+        "@boost//:predef",
         "@eigen",
     ],
 )
@@ -292,30 +318,5 @@ cc_test(
     deps = [
         ":vector",
         "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "warping",
-    hdrs = ["warping.h"],
-    deps = [
-        "//core:namespace",
-        "//math:normal",
-        "//math:point",
-        "//math:vector",
-    ],
-)
-
-cc_test(
-    name = "warping_test",
-    size = "small",
-    srcs = [
-        "warping_test.cpp",
-    ],
-    deps = [
-        ":warping",
-        "//flatland/rendering:sampler",
-        "@com_google_googletest//:gtest_main",
-        "@hypothesis",
     ],
 )

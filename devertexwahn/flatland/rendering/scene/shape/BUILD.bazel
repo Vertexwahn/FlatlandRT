@@ -111,7 +111,7 @@ cc_library(
     deps = [
         ":emitter",
         "//core:object",
-        "//flatland/rendering/bxdf:svg_material",
+        "//flatland/rendering/bsdf:svg_material",
         "//math:axis_aligned_bounding_box",
         "//math:frame",
     ],

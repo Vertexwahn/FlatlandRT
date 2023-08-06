@@ -78,8 +78,8 @@ TEST(MediumEvent2, GivenFrameWithRectangle_WhenRayIntersectsScene_ExpectCorrectF
     scene->intersect(ray, me);
 
     // Assert
-    EXPECT_THAT(me.geo_frame.normal.x(), testing::FloatEq(me.geo_frame.normal.x()));
-    EXPECT_THAT(me.geo_frame.normal.y(), testing::FloatEq(me.geo_frame.normal.y()));
+    EXPECT_THAT(me.geo_frame.n.x(), testing::FloatEq(me.geo_frame.n.x()));
+    EXPECT_THAT(me.geo_frame.n.y(), testing::FloatEq(me.geo_frame.n.y()));
 }
 
 TEST(AmbientOcclusion2, GivenASceneWithARectangle_WhenHitingRectangle_ThenExpectNoOcclusion) {

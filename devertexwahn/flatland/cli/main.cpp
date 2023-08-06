@@ -105,12 +105,12 @@ int main(int argc, char **argv) {
         // determine out path
         std::filesystem::path out_path = fmt::format("{}/{}", filename.parent_path().string(), sensor->film()->filename());
 
-        LOG(INFO) << "Store SVG to " << out_path << ".";
+        LOG(INFO) << "Store SVG to " << out_path;
 
         canvas->store(out_path.string());
 
-        LOG(INFO) << "Done.";
-        LOG(INFO) << "Shutting down now.";
+        LOG(INFO) << "Done";
+        LOG(INFO) << "Shutting down now";
     }
     catch (Exception &ex) {
         LOG(ERROR) << ex.what();

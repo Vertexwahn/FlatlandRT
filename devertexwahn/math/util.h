@@ -9,29 +9,42 @@
 
 #include "core/namespace.h"
 
+#include "boost/predef.h"
+
+#include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <algorithm>
 
-#if !defined(M_PI)
-#define M_PI 3.14159265358979323846264338327950288
+#if BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(10,0,0) // GCC9 does not support #include <numbers>
+// do nothing...
+#else
+#include <numbers>
 #endif
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template<class Scalar> inline constexpr Scalar pi_v = M_PI;
-template<class Scalar> inline constexpr Scalar inv_pi = Scalar{1.0 / M_PI};
+#if BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(10,0,0) // GCC9 does not support std::numbers::pi with
+template<typename T>
+constexpr T pi_v = static_cast<T>(3.141592653589793238462643383279502884L);
+template<typename T>
+constexpr T inv_pi_v = static_cast<T>(0.318309886183790671537767526745028724L);
+#else
+template<typename ScalarType>
+constexpr ScalarType pi_v = std::numbers::pi_v<ScalarType>;
+template<typename ScalarType>
+constexpr ScalarType inv_pi_v = std::numbers::inv_pi_v<ScalarType>;
+#endif
 
 inline constexpr float pif = pi_v<float>;
 inline constexpr float pi_over_2f = pi_v<float> / 2.f;
 inline constexpr float pi_over_4f = pi_v<float> / 4.f;
-inline constexpr float inv_pif = inv_pi<float>;
+inline constexpr float inv_pif = inv_pi_v<float>;
 inline constexpr float inv_2_pif = 1.f / (2.f * pi_v<float>);
 
 inline constexpr double pi = pi_v<double>;
 inline constexpr double pi_over_2 = pi_v<double> / 2.0;
 inline constexpr double pi_over_4 = pi_v<double> / 4.0;
-inline constexpr double inv_pid = inv_pi<double>;
+inline constexpr double inv_pid = inv_pi_v<double>;
 inline constexpr double inv_2_pid = 1.0 / 2.0 * pi_v<double>;
 
 template <typename ScalarType>

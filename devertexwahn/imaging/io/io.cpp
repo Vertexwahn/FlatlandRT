@@ -8,6 +8,8 @@
 #include "imaging/io/io_openexr.h"
 #include "imaging/io/io_png.h"
 #include "imaging/io/io_ppm.h"
+#include "imaging/io/io_webp.h"
+
 #include "math/util.h"
 
 #include "boost/algorithm/string.hpp"
@@ -30,11 +32,13 @@ void store_image(std::string_view filename, const Image3f &image) {
 
 void store_image(std::string_view filename, const Image4b &image) {
     if (boost::ends_with(filename, ".ppm")) {
-        store_image_ppm(filename.data(), image);
+        store_ppm(filename.data(), image);
     } else if (boost::ends_with(filename, ".png")) {
         store_png(filename.data(), image);
     } else if (boost::ends_with(filename, ".jpg")) {
         store_jpeg(filename.data(), image);
+    } else if (boost::ends_with(filename, ".webp")) {
+        store_webp(filename.data(), image);
     } else {
         throw std::runtime_error("Invalid file extension");
     }
