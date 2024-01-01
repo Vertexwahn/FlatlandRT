@@ -1,0 +1,56 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# GCC9 on Ubuntu 20.04
+# Make sure we can build with GCC 9 in all different compilation modes
+
+steps:
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+  - script: |
+      lsb_release -a
+    displayName: 'Show OS version'
+
+  - script: |
+      df -H
+    displayName: 'Show disk space'
+
+  - script: |
+      cd devertexwahn
+      bazel version
+    displayName: 'Show Bazel version'
+
+  - script: |
+      gcc --version
+    displayName: 'Show GCC version'
+
+
+  - script: |
+      df -H
+    displayName: 'Show disk space'
+
+  # Qt compilation does not work: "You must build your code with position independent code if Qt was built with -reduce-relocations. " "Compile your code with -fPIC (and not with -fPIE)."
+  - script: |
+      cd devertexwahn
+      bazel build --config=gcc9  --compilation_mode=opt -- //...    
+    displayName: 'Bazel build gcc9-opt'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=gcc9  --compilation_mode=opt -- //...    
+    displayName: 'Bazel test gcc9-opt'
+
+  - script: |
+      df
+    displayName: 'Show disk space'
