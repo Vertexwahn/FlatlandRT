@@ -48,7 +48,7 @@ bazel_dep(
 
 bazel_dep(
     name = "gazelle",
-    version = "0.34.0",
+    version = "0.35.0",
 )
 
 bazel_dep(
@@ -111,7 +111,7 @@ bazel_dep(
 
 bazel_dep(
     name = "rules_go",
-    version = "0.43.0",
+    version = "0.44.0",
 )
 
 bazel_dep(
@@ -121,7 +121,7 @@ bazel_dep(
 
 bazel_dep(
     name = "rules_oci",
-    version = "1.4.3",
+    version = "1.5.1",
 )
 
 bazel_dep(
