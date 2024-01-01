@@ -14,7 +14,7 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 struct VectorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     using Base = Eigen::Matrix<ScalarType, Dimension, 1>;
 
@@ -43,11 +43,11 @@ struct VectorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
 };
 
 template <typename ScalarType>
-using Vector2 = VectorType<2, ScalarType>;
+using Vector2 = VectorType<ScalarType, 2>;
 template <typename ScalarType>
-using Vector3 = VectorType<3, ScalarType>;
+using Vector3 = VectorType<ScalarType, 3>;
 template <typename ScalarType>
-using Vector4 = VectorType<4, ScalarType>;
+using Vector4 = VectorType<ScalarType, 4>;
 
 using Vector2i = Vector2<int>;
 using Vector2f = Vector2<float>;

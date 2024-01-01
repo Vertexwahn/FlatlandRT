@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 ## Description
 
 FlatlandRT is a 2D ray tracer visualization tool.
-The following pictures were created using Flatland:
+The following pictures were created using FlatlandRT:
 
 From left to right: Refraction, ambient occlusion and reflection:
 
@@ -122,7 +122,7 @@ additional_languages:
   python
 
 build_flags:
-  --config=gcc9
+  --config=gcc11
 ```
 
 #### Code coverage
@@ -142,7 +142,7 @@ xdg-open coverage_report/index.html
 
 #### Address Sanitizer
 
-There is a build config called `asan` that can be used for detection memory errors.
+There is a build config called `asan` that can be used for detecting memory errors.
 
 ```shell
 bazel run --config=asan --compilation_mode=opt //flatland/cli:flatland.cli --  $(pwd)/flatland/scenes/sphere.flatland.xml

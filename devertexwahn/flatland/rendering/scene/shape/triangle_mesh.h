@@ -81,7 +81,7 @@ public:
         return ss.str();
     }
 
-    bool intersect(const RayType<2, ScalarType> &ray, MediumEventType<2, ScalarType> &me) const override {
+    bool intersect(const RayType<ScalarType, 2> &ray, MediumEventType<ScalarType, 2> &me) const override {
         //throw std::runtime_error("Triangle mesh intersection not implemented");
         //LOG(ERROR) << "Triangle mesh intersection not implemented";
         std::cout << "Triangle mesh intersection not implemented" << std::endl;

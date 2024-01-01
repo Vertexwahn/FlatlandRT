@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 typedef xt::xarray<float> TensorXf;
 

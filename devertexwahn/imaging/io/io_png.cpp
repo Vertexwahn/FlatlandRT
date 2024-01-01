@@ -4,6 +4,7 @@
  */
 
 #include "imaging/io/io_png.h"
+#include "imaging/color_converter.h"
 #include "core/logging.h"
 
 #include "png.h"
@@ -20,94 +21,177 @@
 #define int_p_NULL (int*)nullptr
 #endif
 
+#include <filesystem>
+
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-ReferenceCounted<Image3f> load_image_png(std::string_view filename) {
-    png_structp png_ptr;
-    png_infop info_ptr;
+/*
+ * The following function contains code that is copied and modified from
+ * https://gist.github.com/niw/5963798
+ *
+ * Here it the original copyright and licence note (all changes are copyright by Julian Amann
+ * and fall under X11 license.)
+ *
+ * A simple libpng example program
+ * http://zarb.org/~gc/html/libpng.html
+ *
+ * Modified by Yoshimasa Niwa to make it much simpler
+ * and support all defined color_type.
+ *
+ * To build, use the next instruction on OS X.
+ * $ brew install libpng
+ * $ clang -lz -lpng16 libpng_test.c
+ *
+ * Copyright 2002-2010 Guillaume Cottenceau.
+ *
+ * This software may be freely redistributed under the terms
+ * of the X11 license.
+ *
+ */
+ReferenceCounted<Image4b> load_image_png_as_Image4b(std::string_view filename) {
+    int width, height;
+    png_byte color_type;
+    png_byte bit_depth;
+    png_bytep *row_pointers = nullptr;
 
-    unsigned int sig_read = 0;
-    FILE *fp = nullptr;
-    if ((fp = fopen(filename.data(), "rb")) == nullptr)
-        return nullptr;
+    FILE *fp = fopen(filename.data(), "rb");
 
-    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if(!png) abort();
 
-    if (png_ptr == nullptr) {
-        fclose(fp);
-        return nullptr;
+    png_infop info = png_create_info_struct(png);
+    if(!info) abort();
+
+    if(setjmp(png_jmpbuf(png))) {
+        throw std::runtime_error("Invalid file format");
+        abort();
     }
 
-    info_ptr = png_create_info_struct(png_ptr);
-    if (info_ptr == nullptr) {
-        fclose(fp);
-        png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
-        return nullptr;
+    png_init_io(png, fp);
+
+    png_read_info(png, info);
+
+    width      = png_get_image_width(png, info);
+    height     = png_get_image_height(png, info);
+    color_type = png_get_color_type(png, info);
+    bit_depth  = png_get_bit_depth(png, info);
+
+    // Read any color_type into 8bit depth, RGBA format.
+    // See http://www.libpng.org/pub/png/libpng-manual.txt
+
+    if(bit_depth == 16)
+        png_set_strip_16(png);
+
+    if(color_type == PNG_COLOR_TYPE_PALETTE)
+        png_set_palette_to_rgb(png);
+
+    // PNG_COLOR_TYPE_GRAY_ALPHA is always 8 or 16bit depth.
+    if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+        png_set_expand_gray_1_2_4_to_8(png);
+
+    if(png_get_valid(png, info, PNG_INFO_tRNS))
+        png_set_tRNS_to_alpha(png);
+
+    // These color_type don't have an alpha channel then fill it with 0xff.
+    if(color_type == PNG_COLOR_TYPE_RGB ||
+       color_type == PNG_COLOR_TYPE_GRAY ||
+       color_type == PNG_COLOR_TYPE_PALETTE)
+        png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
+
+    if(color_type == PNG_COLOR_TYPE_GRAY ||
+       color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+        png_set_gray_to_rgb(png);
+
+    png_read_update_info(png, info);
+
+    if (row_pointers) abort();
+
+    row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * height);
+    for(int y = 0; y < height; y++) {
+        row_pointers[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
     }
 
-    if (setjmp(png_jmpbuf(png_ptr))) {
-        png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
-        fclose(fp);
+    png_read_image(png, row_pointers);
 
-        return nullptr;
-    }
+    fclose(fp);
 
-    png_init_io(png_ptr, fp);
+    png_destroy_read_struct(&png, &info, nullptr);
 
-    png_set_sig_bytes(png_ptr, sig_read);
-
-    png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND,
-                 png_voidp_NULL);
-
-    int width = png_get_image_width(png_ptr, info_ptr);
-    int height = png_get_image_height(png_ptr, info_ptr);
-
-    auto color_type = png_get_color_type(png_ptr, info_ptr);
-
-    int color_count = 1;
-
-    switch (color_type) {
-        case PNG_COLOR_TYPE_RGBA:
-            color_count = 4;
-            break;
-        case PNG_COLOR_TYPE_RGB:
-            color_count = 3;
-            break;
-        case PNG_COLOR_TYPE_GRAY:
-            color_count = 1;
-            break;
-        default:
-            std::runtime_error("Color type not supported");
-            png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-            fclose(fp);
-            return nullptr;
-    }
-
-    typedef unsigned char byte;
-    std::vector<byte> data;
-
-    data.resize(width * height * color_count);
-
-    ReferenceCounted<Image3f> image = make_reference_counted<Image3f>(width, height);
-
-    size_t row_bytes = png_get_rowbytes(png_ptr, info_ptr);
-
-    png_bytepp row_pointers = png_get_rows(png_ptr, info_ptr);
-
-    for (int y = 0; y < height; y++) {
-        memcpy(&data[(row_bytes * (y))], row_pointers[y], row_bytes);
-
-        for (int x = 0; x < width; x++) {
-            float red = data[(height * color_count) * y + (x * color_count) + 0] / 255.0f;
-            float green = data[(height * color_count) * y + (x * color_count) + 1] / 255.0f;
-            float blue = data[(height * color_count) * y + (x * color_count) + 2] / 255.0f;
-
-            image->set_pixel(x, y, Color3f(red, green, blue));
+    // copy image
+    auto image = make_reference_counted<Image4b>(width, height);
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
+                Color4b color{
+                    row_pointers[y][x * 4 + 0],
+                    row_pointers[y][x * 4 + 1],
+                    row_pointers[y][x * 4 + 2],
+                    row_pointers[y][x * 4 + 3]
+                };
+                image->set_pixel(x, y, color);
         }
-
     }
+
+    // free memory
+    for(int y = 0; y < height; y++) {
+        free(row_pointers[y]);
+    }
+    free(row_pointers);
 
     return image;
+}
+
+ReferenceCounted<Image3f> convert_to_Image3f(const Image4b* image) {
+    auto converted_image = make_reference_counted<Image3f>(image->width(), image->height());
+
+    for (int y = 0; y < image->height(); ++y) {
+        for (int x = 0; x < image->width(); ++x) {
+            Color4b c = image->get_pixel(x, y);
+            Color3f converted_color = ColorConverter::convertTo<Color3f>(c);
+            converted_image->set_pixel(x,y,converted_color);
+        }
+    }
+
+    return converted_image;
+}
+
+ReferenceCounted<Image4f> convert_to_Image4f(const Image4b* image) {
+    auto converted_image = make_reference_counted<Image4f>(image->width(), image->height());
+
+    for (int y = 0; y < image->height(); ++y) {
+        for (int x = 0; x < image->width(); ++x) {
+            Color4b c = image->get_pixel(x, y);
+            Color4f converted_color = ColorConverter::convertTo<Color4f>(c);
+            converted_image->set_pixel(x,y,converted_color);
+        }
+    }
+
+    return converted_image;
+}
+
+ReferenceCounted<Image3f> load_image_png(std::string_view filename) {
+    if(!std::filesystem::exists(filename.data())) {
+        return nullptr;
+    }
+    try {
+        auto image_4b = load_image_png_as_Image4b(filename);
+        return convert_to_Image3f(image_4b.get());
+    }
+    catch(...) {
+        return nullptr;
+    }
+}
+
+ReferenceCounted<Image4f> load_image_png_as_Image4f(std::string_view filename) {
+    if(!std::filesystem::exists(filename.data())) {
+        return nullptr;
+    }
+    try {
+        auto image_4b = load_image_png_as_Image4b(filename);
+        return convert_to_Image4f(image_4b.get());
+    }
+    catch(...) {
+        return nullptr;
+    }
 }
 
 bool store_png(const char *filename, const Image4b &image) {

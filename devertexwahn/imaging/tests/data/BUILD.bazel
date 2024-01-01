@@ -11,5 +11,7 @@ filegroup(
     name = "reference_images",
     srcs = [
         "red_square_quality100.jpg",
+        "RGBA.png",
+		"bay.png",
     ],
 )

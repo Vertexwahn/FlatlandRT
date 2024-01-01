@@ -33,37 +33,36 @@
 
 #include "symbolize.h"
 
-#include <glog/logging.h>
-
 #include <csignal>
 #include <iostream>
 
 #include "config.h"
+#include "glog/logging.h"
 #include "googletest.h"
 #include "utilities.h"
 
-#ifdef HAVE_LIB_GFLAGS
-#include <gflags/gflags.h>
+#ifdef GLOG_USE_GFLAGS
+#  include <gflags/gflags.h>
 using namespace GFLAGS_NAMESPACE;
 #endif
 
 using namespace std;
-using namespace GOOGLE_NAMESPACE;
+using namespace google;
 
 // Avoid compile error due to "cast between pointer-to-function and
 // pointer-to-object is an extension" warnings.
 #if defined(__GNUG__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
 #if defined(HAVE_STACKTRACE)
 
-#define always_inline
+#  define always_inline
 
-#if defined(__ELF__) || defined(GLOG_OS_WINDOWS) || defined(GLOG_OS_CYGWIN)
+#  if defined(__ELF__) || defined(GLOG_OS_WINDOWS) || defined(GLOG_OS_CYGWIN)
 // A wrapper function for Symbolize() to make the unit test simple.
-static const char *TrySymbolize(void *pc) {
+static const char* TrySymbolize(void* pc) {
   static char symbol[4096];
   if (Symbolize(pc, symbol, sizeof(symbol))) {
     return symbol;
@@ -71,26 +70,25 @@ static const char *TrySymbolize(void *pc) {
     return nullptr;
   }
 }
-#endif
+#  endif
 
-# if defined(__ELF__)
+#  if defined(__ELF__)
 
 // This unit tests make sense only with GCC.
 // Uses lots of GCC specific features.
-#if defined(__GNUC__) && !defined(__OPENCC__)
-#  if __GNUC__ >= 4
-#    define TEST_WITH_MODERN_GCC
-#    if defined(__i386__) && __i386__  // always_inline isn't supported for x86_64 with GCC 4.1.0.
-#      undef always_inline
-#      define always_inline __attribute__((always_inline))
-#      define HAVE_ALWAYS_INLINE
-#    endif  // __i386__
-#  else
-#  endif  // __GNUC__ >= 4
-#  if defined(__i386__) || defined(__x86_64__)
-#    define TEST_X86_32_AND_64 1
-#  endif  // defined(__i386__) || defined(__x86_64__)
-#endif
+#    if defined(__GNUC__) && !defined(__OPENCC__)
+#      if __GNUC__ >= 4
+#        define TEST_WITH_MODERN_GCC
+#        if defined(__i386__) && __i386__  // always_inline isn't supported for
+                                           // x86_64 with GCC 4.1.0.
+#          undef always_inline
+#          define always_inline __attribute__((always_inline))
+#          define HAVE_ALWAYS_INLINE
+#        endif  // __i386__
+#      else
+#      endif  // __GNUC__ >= 4
+#      define TEST_WITH_LABEL_ADDRESSES
+#    endif
 
 // Make them C linkage to avoid mangled names.
 extern "C" {
@@ -115,18 +113,18 @@ TEST(Symbolize, Symbolize) {
   // reinterpret_cast<void *>(&func).
 
   // Compilers should give us pointers to them.
-  EXPECT_STREQ("nonstatic_func", TrySymbolize((void *)(&nonstatic_func)));
+  EXPECT_STREQ("nonstatic_func", TrySymbolize((void*)(&nonstatic_func)));
 
   // The name of an internal linkage symbol is not specified; allow either a
   // mangled or an unmangled name here.
-  const char *static_func_symbol =
-      TrySymbolize(reinterpret_cast<void *>(&static_func));
+  const char* static_func_symbol =
+      TrySymbolize(reinterpret_cast<void*>(&static_func));
 
-#if !defined(_MSC_VER) || !defined(NDEBUG)
+#    if !defined(_MSC_VER) || !defined(NDEBUG)
   CHECK(nullptr != static_func_symbol);
   EXPECT_TRUE(strcmp("static_func", static_func_symbol) == 0 ||
               strcmp("static_func()", static_func_symbol) == 0);
-#endif
+#    endif
 
   EXPECT_TRUE(nullptr == TrySymbolize(nullptr));
 }
@@ -144,14 +142,14 @@ void ATTRIBUTE_NOINLINE Foo::func(int x) {
 
 // With a modern GCC, Symbolize() should return demangled symbol
 // names.  Function parameters should be omitted.
-#ifdef TEST_WITH_MODERN_GCC
+#    ifdef TEST_WITH_MODERN_GCC
 TEST(Symbolize, SymbolizeWithDemangling) {
   Foo::func(100);
-#if !defined(_MSC_VER) || !defined(NDEBUG)
-  EXPECT_STREQ("Foo::func()", TrySymbolize((void *)(&Foo::func)));
-#endif
+#      if !defined(_MSC_VER) || !defined(NDEBUG)
+  EXPECT_STREQ("Foo::func()", TrySymbolize((void*)(&Foo::func)));
+#      endif
 }
-#endif
+#    endif
 
 // Tests that verify that Symbolize footprint is within some limit.
 
@@ -170,9 +168,9 @@ TEST(Symbolize, SymbolizeWithDemangling) {
 // calls Symbolize. The difference between the stack consumption of these
 // two signals handlers should give us the Symbolize stack foorprint.
 
-static void *g_pc_to_symbolize;
+static void* g_pc_to_symbolize;
 static char g_symbolize_buffer[4096];
-static char *g_symbolize_result;
+static char* g_symbolize_result;
 
 static void EmptySignalHandler(int /*signo*/) {}
 
@@ -191,7 +189,7 @@ const char kAlternateStackFillValue = 0x55;
 // These helper functions look at the alternate stack buffer, and figure
 // out what portion of this buffer has been touched - this is the stack
 // consumption of the signal handler running on this alternate stack.
-static ATTRIBUTE_NOINLINE bool StackGrowsDown(int *x) {
+static ATTRIBUTE_NOINLINE bool StackGrowsDown(int* x) {
   int y;
   return &y < x;
 }
@@ -213,11 +211,10 @@ static int GetStackConsumption(const char* alt_stack) {
   return -1;
 }
 
-#ifdef HAVE_SIGALTSTACK
+#    ifdef HAVE_SIGALTSTACK
 
 // Call Symbolize and figure out the stack footprint of this call.
-static const char *SymbolizeStackConsumption(void *pc, int *stack_consumed) {
-
+static const char* SymbolizeStackConsumption(void* pc, int* stack_consumed) {
   g_pc_to_symbolize = pc;
 
   // The alt-signal-stack cannot be heap allocated because there is a
@@ -285,19 +282,19 @@ static const char *SymbolizeStackConsumption(void *pc, int *stack_consumed) {
   return g_symbolize_result;
 }
 
-#ifdef __ppc64__
+#      ifdef __ppc64__
 // Symbolize stack consumption should be within 4kB.
 const int kStackConsumptionUpperLimit = 4096;
-#else
+#      else
 // Symbolize stack consumption should be within 2kB.
 const int kStackConsumptionUpperLimit = 2048;
-#endif
+#      endif
 
 TEST(Symbolize, SymbolizeStackConsumption) {
   int stack_consumed;
   const char* symbol;
 
-  symbol = SymbolizeStackConsumption(reinterpret_cast<void *>(&nonstatic_func),
+  symbol = SymbolizeStackConsumption(reinterpret_cast<void*>(&nonstatic_func),
                                      &stack_consumed);
   EXPECT_STREQ("nonstatic_func", symbol);
   EXPECT_GT(stack_consumed, 0);
@@ -305,7 +302,7 @@ TEST(Symbolize, SymbolizeStackConsumption) {
 
   // The name of an internal linkage symbol is not specified; allow either a
   // mangled or an unmangled name here.
-  symbol = SymbolizeStackConsumption(reinterpret_cast<void *>(&static_func),
+  symbol = SymbolizeStackConsumption(reinterpret_cast<void*>(&static_func),
                                      &stack_consumed);
   CHECK(nullptr != symbol);
   EXPECT_TRUE(strcmp("static_func", symbol) == 0 ||
@@ -314,89 +311,91 @@ TEST(Symbolize, SymbolizeStackConsumption) {
   EXPECT_LT(stack_consumed, kStackConsumptionUpperLimit);
 }
 
-#ifdef TEST_WITH_MODERN_GCC
+#      ifdef TEST_WITH_MODERN_GCC
 TEST(Symbolize, SymbolizeWithDemanglingStackConsumption) {
   Foo::func(100);
   int stack_consumed;
   const char* symbol;
 
-  symbol = SymbolizeStackConsumption(reinterpret_cast<void *>(&Foo::func),
+  symbol = SymbolizeStackConsumption(reinterpret_cast<void*>(&Foo::func),
                                      &stack_consumed);
 
   EXPECT_STREQ("Foo::func()", symbol);
   EXPECT_GT(stack_consumed, 0);
   EXPECT_LT(stack_consumed, kStackConsumptionUpperLimit);
 }
-#endif
+#      endif
 
-#endif  // HAVE_SIGALTSTACK
+#    endif  // HAVE_SIGALTSTACK
 
 // x86 specific tests.  Uses some inline assembler.
 extern "C" {
 inline void* always_inline inline_func() {
-  void *pc = nullptr;
-#ifdef TEST_X86_32_AND_64
-  __asm__ __volatile__("call 1f; 1: pop %0" : "=r"(pc));
-#endif
+  void* pc = nullptr;
+#    ifdef TEST_WITH_LABEL_ADDRESSES
+  pc = &&curr_pc;
+curr_pc:
+#    endif
   return pc;
 }
 
 void* ATTRIBUTE_NOINLINE non_inline_func();
 void* ATTRIBUTE_NOINLINE non_inline_func() {
-  void *pc = nullptr;
-#ifdef TEST_X86_32_AND_64
-  __asm__ __volatile__("call 1f; 1: pop %0" : "=r"(pc));
-#endif
+  void* pc = nullptr;
+#    ifdef TEST_WITH_LABEL_ADDRESSES
+  pc = &&curr_pc;
+curr_pc:
+#    endif
   return pc;
 }
 
 static void ATTRIBUTE_NOINLINE TestWithPCInsideNonInlineFunction() {
-#if defined(TEST_X86_32_AND_64) && defined(HAVE_ATTRIBUTE_NOINLINE)
-  void *pc = non_inline_func();
-  const char *symbol = TrySymbolize(pc);
+#    if defined(TEST_WITH_LABEL_ADDRESSES) && defined(HAVE_ATTRIBUTE_NOINLINE)
+  void* pc = non_inline_func();
+  const char* symbol = TrySymbolize(pc);
 
-#if !defined(_MSC_VER) || !defined(NDEBUG)
+#      if !defined(_MSC_VER) || !defined(NDEBUG)
   CHECK(symbol != nullptr);
   CHECK_STREQ(symbol, "non_inline_func");
-#endif
+#      endif
   cout << "Test case TestWithPCInsideNonInlineFunction passed." << endl;
-#endif
+#    endif
 }
 
 static void ATTRIBUTE_NOINLINE TestWithPCInsideInlineFunction() {
-#if defined(TEST_X86_32_AND_64) && defined(HAVE_ALWAYS_INLINE)
-  void *pc = inline_func();  // Must be inlined.
-  const char *symbol = TrySymbolize(pc);
+#    if defined(TEST_WITH_LABEL_ADDRESSES) && defined(HAVE_ALWAYS_INLINE)
+  void* pc = inline_func();  // Must be inlined.
+  const char* symbol = TrySymbolize(pc);
 
-#if !defined(_MSC_VER) || !defined(NDEBUG)
+#      if !defined(_MSC_VER) || !defined(NDEBUG)
   CHECK(symbol != nullptr);
   CHECK_STREQ(symbol, __FUNCTION__);
-#endif
+#      endif
   cout << "Test case TestWithPCInsideInlineFunction passed." << endl;
-#endif
+#    endif
 }
 }
 
 // Test with a return address.
 static void ATTRIBUTE_NOINLINE TestWithReturnAddress() {
-#if defined(HAVE_ATTRIBUTE_NOINLINE)
-  void *return_address = __builtin_return_address(0);
-  const char *symbol = TrySymbolize(return_address);
+#    if defined(HAVE_ATTRIBUTE_NOINLINE)
+  void* return_address = __builtin_return_address(0);
+  const char* symbol = TrySymbolize(return_address);
 
-#if !defined(_MSC_VER) || !defined(NDEBUG)
+#      if !defined(_MSC_VER) || !defined(NDEBUG)
   CHECK(symbol != nullptr);
   CHECK_STREQ(symbol, "main");
-#endif
+#      endif
   cout << "Test case TestWithReturnAddress passed." << endl;
-#endif
+#    endif
 }
 
-# elif defined(GLOG_OS_WINDOWS) || defined(GLOG_OS_CYGWIN)
+#  elif defined(GLOG_OS_WINDOWS) || defined(GLOG_OS_CYGWIN)
 
-#ifdef _MSC_VER
-#include <intrin.h>
-#pragma intrinsic(_ReturnAddress)
-#endif
+#    ifdef _MSC_VER
+#      include <intrin.h>
+#      pragma intrinsic(_ReturnAddress)
+#    endif
 
 struct Foo {
   static void func(int x);
@@ -411,37 +410,37 @@ __declspec(noinline) void Foo::func(int x) {
 
 TEST(Symbolize, SymbolizeWithDemangling) {
   Foo::func(100);
-  const char* ret = TrySymbolize((void *)(&Foo::func));
+  const char* ret = TrySymbolize((void*)(&Foo::func));
 
-#if defined(HAVE_DBGHELP) && !defined(NDEBUG)
+#    if defined(HAVE_DBGHELP) && !defined(NDEBUG)
   EXPECT_STREQ("public: static void __cdecl Foo::func(int)", ret);
-#endif
+#    endif
 }
 
 __declspec(noinline) void TestWithReturnAddress() {
-  void *return_address =
-#ifdef __GNUC__ // Cygwin and MinGW support
-	  __builtin_return_address(0)
-#else
-	  _ReturnAddress()
-#endif
-	  ;
-  const char *symbol = TrySymbolize(return_address);
-#if !defined(_MSC_VER) || !defined(NDEBUG)
+  void* return_address =
+#    ifdef __GNUC__  // Cygwin and MinGW support
+      __builtin_return_address(0)
+#    else
+      _ReturnAddress()
+#    endif
+      ;
+  const char* symbol = TrySymbolize(return_address);
+#    if !defined(_MSC_VER) || !defined(NDEBUG)
   CHECK(symbol != nullptr);
   CHECK_STREQ(symbol, "main");
-#endif
+#    endif
   cout << "Test case TestWithReturnAddress passed." << endl;
 }
-# endif  // __ELF__
-#endif  // HAVE_STACKTRACE
+#  endif  // __ELF__
+#endif    // HAVE_STACKTRACE
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   FLAGS_logtostderr = true;
   InitGoogleLogging(argv[0]);
   InitGoogleTest(&argc, argv);
 #if defined(HAVE_SYMBOLIZE) && defined(HAVE_STACKTRACE)
-# if defined(__ELF__)
+#  if defined(__ELF__)
   // We don't want to get affected by the callback interface, that may be
   // used to install some callback function at InitGoogle() time.
   InstallSymbolizeCallback(nullptr);
@@ -450,13 +449,13 @@ int main(int argc, char **argv) {
   TestWithPCInsideNonInlineFunction();
   TestWithReturnAddress();
   return RUN_ALL_TESTS();
-# elif defined(GLOG_OS_WINDOWS) || defined(GLOG_OS_CYGWIN)
+#  elif defined(GLOG_OS_WINDOWS) || defined(GLOG_OS_CYGWIN)
   TestWithReturnAddress();
   return RUN_ALL_TESTS();
-# else  // GLOG_OS_WINDOWS
+#  else   // GLOG_OS_WINDOWS
   printf("PASS (no symbolize_unittest support)\n");
   return 0;
-# endif  // __ELF__
+#  endif  // __ELF__
 #else
   printf("PASS (no symbolize support)\n");
   return 0;
@@ -464,5 +463,5 @@ int main(int argc, char **argv) {
 }
 
 #if defined(__GNUG__)
-#pragma GCC diagnostic pop
+#  pragma GCC diagnostic pop
 #endif

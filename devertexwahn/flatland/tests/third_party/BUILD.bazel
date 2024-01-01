@@ -11,7 +11,7 @@ cc_test(
     ],
     deps = [
         "@boost//:algorithm",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -23,7 +23,7 @@ cc_test(
     ],
     deps = [
         "@boost//:predef",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -49,8 +49,8 @@ cc_test(
         "-Iexternal/eigen",
     ],
     deps = [
-        "@com_google_googletest//:gtest_main",
         "@eigen",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -61,7 +61,7 @@ cc_test(
         "pcg_test.cpp",
     ],
     deps = [
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
         "@pcg",
     ],
 )
@@ -74,7 +74,7 @@ cc_test(
     ],
     data = ["//flatland/scenes"],
     deps = [
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
         "@pugixml",
     ],
 )
@@ -86,6 +86,6 @@ cc_test(
         "stl_test.cpp",
     ],
     deps = [
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

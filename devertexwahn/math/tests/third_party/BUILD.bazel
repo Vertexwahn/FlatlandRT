@@ -4,13 +4,25 @@
 """
 
 cc_test(
+    name = "eigen_test",
+    size = "small",
+    srcs = [
+        "eigen_test.cpp",
+    ],
+    deps = [
+        "@eigen",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "xtensor_test",
     size = "small",
     srcs = [
         "xtensor_test.cpp",
     ],
     deps = [
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
         "@xtensor",
     ],
 )

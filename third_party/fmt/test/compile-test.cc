@@ -199,6 +199,21 @@ TEST(compile_test, format_to_n) {
 TEST(compile_test, constexpr_formatted_size) {
   FMT_CONSTEXPR20 size_t size = fmt::formatted_size(FMT_COMPILE("{}"), 42);
   EXPECT_EQ(size, 2);
+  FMT_CONSTEXPR20 size_t hex_size =
+      fmt::formatted_size(FMT_COMPILE("{:x}"), 15);
+  EXPECT_EQ(hex_size, 1);
+  FMT_CONSTEXPR20 size_t binary_size =
+      fmt::formatted_size(FMT_COMPILE("{:b}"), 15);
+  EXPECT_EQ(binary_size, 4);
+  FMT_CONSTEXPR20 size_t padded_size =
+      fmt::formatted_size(FMT_COMPILE("{:*^6}"), 42);
+  EXPECT_EQ(padded_size, 6);
+  FMT_CONSTEXPR20 size_t float_size =
+      fmt::formatted_size(FMT_COMPILE("{:.3}"), 12.345);
+  EXPECT_EQ(float_size, 4);
+  FMT_CONSTEXPR20 size_t str_size =
+      fmt::formatted_size(FMT_COMPILE("{:s}"), "abc");
+  EXPECT_EQ(str_size, 3);
 }
 #  endif
 
@@ -265,15 +280,18 @@ TEST(compile_test, compile_format_string_literal) {
 #endif
 
 // MSVS 2019 19.29.30145.0 - Support C++20 and OK.
-// MSVS 2022 19.32.31332.0 - compile-test.cc(362,3): fatal error C1001: Internal
-// compiler error.
+// MSVS 2022 19.32.31332.0, 19.37.32826.1 - compile-test.cc(362,3): fatal error
+// C1001: Internal compiler error.
 //  (compiler file
 //  'D:\a\_work\1\s\src\vctools\Compiler\CxxFE\sl\p1\c\constexpr\constexpr.cpp',
 //  line 8635)
-#if ((FMT_CPLUSPLUS >= 202002L) &&                           \
-     (!defined(_GLIBCXX_RELEASE) || _GLIBCXX_RELEASE > 9) && \
-     (!FMT_MSC_VERSION || FMT_MSC_VERSION < 1930)) ||        \
-    (FMT_CPLUSPLUS >= 201709L && FMT_GCC_VERSION >= 1002)
+#if (FMT_CPLUSPLUS >= 202002L ||                                \
+     (FMT_CPLUSPLUS >= 201709L && FMT_GCC_VERSION >= 1002)) &&  \
+    ((!defined(_GLIBCXX_RELEASE) || _GLIBCXX_RELEASE >= 10) &&  \
+     (!defined(_LIBCPP_VERSION) || _LIBCPP_VERSION >= 10000) && \
+     (!FMT_MSC_VERSION ||                                       \
+      (FMT_MSC_VERSION >= 1928 && FMT_MSC_VERSION < 1930))) &&  \
+    defined(__cpp_lib_is_constant_evaluated)
 template <size_t max_string_length, typename Char = char> struct test_string {
   template <typename T> constexpr bool operator==(const T& rhs) const noexcept {
     return fmt::basic_string_view<Char>(rhs).compare(buffer) == 0;

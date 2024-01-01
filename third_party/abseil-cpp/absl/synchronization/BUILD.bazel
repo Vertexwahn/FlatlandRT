@@ -21,7 +21,14 @@ load(
     "ABSL_TEST_COPTS",
 )
 
-package(default_visibility = ["//visibility:private"])
+package(
+    default_visibility = ["//visibility:private"],
+    features = [
+        "header_modules",
+        "layering_check",
+        "parse_headers",
+    ],
+)
 
 licenses(["notice"])
 
@@ -76,6 +83,7 @@ cc_test(
         "//absl/base:config",
         "//absl/random",
         "//absl/time",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -151,6 +159,7 @@ cc_test(
     deps = [
         ":synchronization",
         "//absl/time",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -167,6 +176,7 @@ cc_test(
     deps = [
         ":synchronization",
         "//absl/time",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -181,6 +191,7 @@ cc_binary(
     deps = [
         ":synchronization",
         ":thread_pool",
+        "//absl/base:no_destructor",
         "@com_github_google_benchmark//:benchmark_main",
     ],
 )
@@ -196,6 +207,7 @@ cc_test(
         "//absl/base:core_headers",
         "//absl/log",
         "//absl/log:check",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -212,6 +224,7 @@ cc_test(
         ":graphcycles_internal",
         "//absl/base:raw_logging_internal",
         "@com_github_google_benchmark//:benchmark_main",
+        "@com_google_googletest//:gtest",
     ],
 )
 
@@ -248,6 +261,7 @@ cc_test(
         "//absl/log:check",
         "//absl/memory",
         "//absl/time",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -260,6 +274,7 @@ cc_test(
     deps = [
         ":synchronization",
         "//absl/base:config",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -277,6 +292,7 @@ cc_library(
         ":thread_pool",
         "//absl/base",
         "//absl/base:config",
+        "//absl/base:no_destructor",
         "@com_github_google_benchmark//:benchmark_main",
     ],
     alwayslink = 1,
@@ -303,6 +319,7 @@ cc_test(
     deps = [
         ":synchronization",
         "//absl/time",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -356,6 +373,7 @@ cc_test(
         "//absl/base:config",
         "//absl/random",
         "//absl/time",
+        "@com_google_googletest//:gtest",
         "@com_google_googletest//:gtest_main",
     ],
 )

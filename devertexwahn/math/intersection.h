@@ -14,16 +14,16 @@
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 // https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 bool intersect_ray_n_sphere(
-        const PointType<Dimension, ScalarType>& ray_origin,
-        const VectorType<Dimension, ScalarType>& ray_direction,
-        const PointType<Dimension, ScalarType>& circle_center,
+        const PointType<ScalarType, Dimension>& ray_origin,
+        const VectorType<ScalarType, Dimension>& ray_direction,
+        const PointType<ScalarType, Dimension>& circle_center,
         ScalarType circle_radius,
-        PointType<Dimension, ScalarType>& intersection_point,
+        PointType<ScalarType, Dimension>& intersection_point,
         ScalarType& t,
-        NormalType<Dimension, ScalarType>& normal /* world space normal */) {
-    VectorType<Dimension, ScalarType> tmp = ray_origin - circle_center;
+        NormalType<ScalarType, Dimension>& normal /* world space normal */) {
+    VectorType<ScalarType, Dimension> tmp = ray_origin - circle_center;
     ScalarType a = ray_direction.dot(ray_direction);
     ScalarType b = 2 * tmp.dot(ray_direction);
     ScalarType c = tmp.dot(tmp) - circle_radius * circle_radius;

@@ -9,15 +9,24 @@ jobs:
         shell: bash
     name: GCC-C++${{matrix.std}}-${{matrix.build_type}}-${{matrix.lib}}
     runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     strategy:
       fail-fast: true
       matrix:
         build_type: [Release, Debug]
         lib: [shared, static]
-        std: [14, 17, 20]
+        std: [14, 17, 20, 23]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: cpp
 
       - name: Setup Dependencies
         run: |
@@ -25,7 +34,7 @@ jobs:
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
             build-essential \
             cmake \
-            lcov \
+            gcovr \
             libgflags-dev \
             libunwind-dev \
             ninja-build
@@ -117,27 +126,18 @@ jobs:
       - name: Generate Coverage
         if: matrix.build_type == 'Debug'
         run: |
-          lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info \
-            '${{github.workspace}}/gtest/*' \
-            '*/src/*_unittest.cc' \
-            '*/src/googletest.h' \
-            '*/src/mock-log.h' \
-            '/usr/*' \
-            --output-file coverage.info
-
-          for file in src/glog/*.h.in; do
-            name=$(basename ${file})
-            name_we=${name%.h.in}
-            sed -i "s|build_${{matrix.build_type}}/glog/${name_we}.h\$|${file}|g" coverage.info
-          done
-
-          lcov --list coverage.info
+          cd build_${{matrix.build_type}}
+          gcovr -r .. . -s --xml coverage.xml
+          cd ..
 
       - name: Upload Coverage to Codecov
         if: matrix.build_type == 'Debug'
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: build_${{matrix.build_type}}/coverage.xml
           fail_ci_if_error: true
           verbose: true
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

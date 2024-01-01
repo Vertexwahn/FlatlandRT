@@ -21,11 +21,11 @@ template <typename ScalarType>
 class Transform44Type {
 public:
     using Matrix = Matrix44<ScalarType>;
-    using Vector = VectorType<2, ScalarType>;
-    using Point = PointType<2, ScalarType>;
-    using Normal = NormalType<2, ScalarType>;
+    using Vector = VectorType<ScalarType, 2>;
+    using Point = PointType<ScalarType, 2>;
+    using Normal = NormalType<ScalarType, 2>;
     using Scalar = ScalarType;
-    using Ray = RayType<2, ScalarType>;
+    using Ray = RayType<ScalarType, 2>;
 
 	Transform44Type() {
         transform_ = inverse_ = Matrix::Identity();
@@ -43,35 +43,35 @@ public:
         assert(inverse_.isApprox(matrix.inverse()));
     }
 
-    VectorType<2, ScalarType> operator*(const VectorType<2, ScalarType>& v) const {
+    VectorType<ScalarType, 2> operator*(const VectorType<ScalarType, 2>& v) const {
         Vector4<ScalarType> v4{v.x(), v.y(), Scalar{0.0}, Scalar{0.0}};
         Vector4<ScalarType> vt = transform_ * v4;
-        return VectorType<2, ScalarType>{vt.x(), vt.y()};
+        return VectorType<ScalarType, 2>{vt.x(), vt.y()};
     }
 
-    VectorType<3, ScalarType> operator*(const VectorType<3, ScalarType>& v) const {
+    VectorType<ScalarType, 3> operator*(const VectorType<ScalarType, 3>& v) const {
         Vector4<ScalarType> v4{v.x(), v.y(), v.z(), Scalar{0.0}};
         Vector4<ScalarType> vt = transform_ * v4;
-        return VectorType<3, ScalarType>{vt.x(), vt.y(), vt.z()};
+        return VectorType<ScalarType, 3>{vt.x(), vt.y(), vt.z()};
     }
 
-	PointType<2, ScalarType> operator*(const PointType<2, ScalarType>& p) const {
+	PointType<ScalarType, 2> operator*(const PointType<ScalarType, 2>& p) const {
         Point4<ScalarType> p4{p.x(), p.y(), Scalar{0.0}, Scalar{1.0}};
         Point4<ScalarType> pt = transform_ * p4;
-		return PointType<2, ScalarType>{pt.x(), pt.y()};
+		return PointType<ScalarType, 2>{pt.x(), pt.y()};
 	}
 
-    PointType<3, ScalarType> operator*(const PointType<3, ScalarType>& p) const {
+    PointType<ScalarType, 3> operator*(const PointType<ScalarType, 3>& p) const {
         Point4<ScalarType> p4{p.x(), p.y(), p.z(), Scalar{1.0}};
         Point4<ScalarType> pt = transform_ * p4;
-        return PointType<3, ScalarType>{pt.x()/pt.w(), pt.y()/pt.w(), pt.z()/pt.w()};
+        return PointType<ScalarType, 3>{pt.x()/pt.w(), pt.y()/pt.w(), pt.z()/pt.w()};
     }
 
-    PointType<4, ScalarType> operator*(const PointType<4, ScalarType>& p) const {
+    PointType<ScalarType, 4> operator*(const PointType<ScalarType, 4>& p) const {
         return transform_ * p;
     }
 
-    VectorType<4, ScalarType> operator*(const VectorType<4, ScalarType>& p) const {
+    VectorType<ScalarType, 4> operator*(const VectorType<ScalarType, 4>& p) const {
         return transform_ * p;
     }
 
@@ -81,10 +81,10 @@ public:
         return Normal{vt.x(), vt.y()};
     }
 
-    NormalType<3, ScalarType> operator*(const NormalType<3, ScalarType>& normal) const {
+    NormalType<ScalarType, 3> operator*(const NormalType<ScalarType, 3>& normal) const {
         Vector4<ScalarType> v{normal.x(), normal.y(), normal.z(), Scalar{0.0}};
         auto vt = transform_.inverse().transpose() * v;
-        NormalType<3, ScalarType> n{vt.x(), vt.y(), vt.z()};
+        NormalType<ScalarType, 3> n{vt.x(), vt.y(), vt.z()};
         return n.normalized();
     }
 
@@ -101,12 +101,12 @@ public:
 	    };
     }
 
-    RayType<3, ScalarType> operator*(const  RayType<3, ScalarType>& ray_) const {
+    RayType<ScalarType, 3> operator*(const  RayType<ScalarType, 3>& ray_) const {
         Vector4<ScalarType> o{ray_.origin.x(), ray_.origin.y(), ray_.origin.z(), ScalarType{1.0}};
         o = transform_ * o;
         Vector3<ScalarType> d{ray_.direction.x(), ray_.direction.y(), ray_.direction.z()};
         d = transform_.template topLeftCorner<3,3>() * d;
-	    return RayType<3, ScalarType>{
+	    return RayType<ScalarType, 3>{
             Point3f{o.x(), o.y(), o.z()},
             Vector3f{d.x(), d.y(), d.z()},
             ray_.min_t,
@@ -150,7 +150,6 @@ Transform44Type<ScalarType> identity() {
     return Transform44Type<ScalarType>(Eigen::Matrix<ScalarType, 4, 4>::Identity());
 }
 
-
 template <typename ScalarType>
 Transform44Type<ScalarType> translate(const ScalarType x, const ScalarType y, const ScalarType z) {
     Eigen::Transform<ScalarType,3,Eigen::Affine> translation(Eigen::Translation<ScalarType, 3>(x, y, z));
@@ -161,11 +160,11 @@ Transform44Type<ScalarType> translate(const ScalarType x, const ScalarType y) {
     return translate(x, y, ScalarType{0.0});
 }
 template <typename ScalarType>
-Transform44Type<ScalarType> translate(const VectorType<2, ScalarType>& v) {
+Transform44Type<ScalarType> translate(const VectorType<ScalarType, 2>& v) {
     return translate(v.x(), v.y(), ScalarType{0.0});
 }
 template <typename ScalarType>
-Transform44Type<ScalarType> translate(const VectorType<3, ScalarType>& v) {
+Transform44Type<ScalarType> translate(const VectorType<ScalarType, 3>& v) {
     return translate(v.x(), v.y(), v.z());
 }
 
@@ -256,12 +255,12 @@ Transform44Type<ScalarType> look_at(const Point3<ScalarType> &origin,
 
     Vector3f right = up.normalized().cross(forward).normalized();
 
-    Vector3f correctedUp = forward.cross(right);
+    Vector3f corrected_up = forward.cross(right);
 
     Matrix44<ScalarType> transform;
-    transform << right.x(), correctedUp.x(), forward.x(), origin.x(),
-                 right.y(), correctedUp.y(), forward.y(), origin.y(),
-                 right.z(), correctedUp.z(), forward.z(), origin.z(),
+    transform << right.x(), corrected_up.x(), forward.x(), origin.x(),
+                 right.y(), corrected_up.y(), forward.y(), origin.y(),
+                 right.z(), corrected_up.z(), forward.z(), origin.z(),
                  ScalarType{0.0}, ScalarType{0.0}, ScalarType{0.0}, ScalarType{1.0};
 
     return Transform44Type<ScalarType>{(transform).inverse()};
@@ -278,17 +277,17 @@ std::ostream &operator<<(std::ostream &os, const Transform44Type<ScalarType> &tr
 
 template <typename ScalarType>
 Transform44Type<ScalarType> perspective(
-        const ScalarType verticalFov,
-        const ScalarType nearClippingPlaneDistance,
-        const ScalarType farClippingPlaneDistance) {
+        const ScalarType vertical_fov,
+        const ScalarType near_clip_plane_distance,
+        const ScalarType far_clip_plane_distance) {
 
     Matrix44<ScalarType> P;
     P << 1, 0, 0, 0,
          0, 1, 0, 0,
-         0, 0, farClippingPlaneDistance/(farClippingPlaneDistance-nearClippingPlaneDistance), -(farClippingPlaneDistance*nearClippingPlaneDistance)/(farClippingPlaneDistance-nearClippingPlaneDistance),
+         0, 0, far_clip_plane_distance / (far_clip_plane_distance - near_clip_plane_distance), -(far_clip_plane_distance * near_clip_plane_distance) / (far_clip_plane_distance - near_clip_plane_distance),
          0, 0, 1, 0;
 
-    auto s = ScalarType{1}/tan(verticalFov/ScalarType{2});
+    auto s = ScalarType{1}/tan(vertical_fov / ScalarType{2});
 
     Matrix44<ScalarType> S;
     S <<  s, 0, 0, 0,
@@ -301,13 +300,13 @@ Transform44Type<ScalarType> perspective(
 
 template <typename ScalarType>
 Transform44Type<ScalarType> raster_space_to_ndc(const Vector2<ScalarType>& film_size_f) {
-    auto rasterSpaceToNDC = translate(-1.f,-1.f,0.f) *
-                            scale(2.f, 2.f, 1.f) *
-                            translate(0.f, 1.f, 0.f) *
-                            scale(1.f, -1.f, 1.f) *
-                            scale(1.f/film_size_f.x(), 1.f/film_size_f.y(), 1.0f);
+    auto raster_space_to_ndc = translate(-1.f, -1.f, 0.f) *
+                               scale(2.f, 2.f, 1.f) *
+                               translate(0.f, 1.f, 0.f) *
+                               scale(1.f, -1.f, 1.f) *
+                               scale(1.f/film_size_f.x(), 1.f/film_size_f.y(), 1.0f);
 
-    return rasterSpaceToNDC;
+    return raster_space_to_ndc;
 }
 
 using Transform44f = Transform44Type<float>;

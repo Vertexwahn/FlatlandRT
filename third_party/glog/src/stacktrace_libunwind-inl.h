@@ -37,10 +37,10 @@ extern "C" {
 #define UNW_LOCAL_ONLY
 #include <libunwind.h>
 }
-#include <glog/raw_logging.h>
+#include "glog/raw_logging.h"
 #include "stacktrace.h"
 
-_START_GOOGLE_NAMESPACE_
+namespace google {
 
 // Sometimes, we can try to get a stack trace from within a stack
 // trace, because libunwind can call mmap (maybe indirectly via an
@@ -51,11 +51,11 @@ _START_GOOGLE_NAMESPACE_
 // cases, we return 0 to indicate the situation.
 // We can use the GCC __thread syntax here since libunwind is not supported on
 // Windows.
-static __thread bool g_tl_entered; // Initialized to false.
+static __thread bool g_tl_entered;  // Initialized to false.
 
 // If you change this function, also change GetStackFrames below.
 int GetStackTrace(void** result, int max_depth, int skip_count) {
-  void *ip;
+  void* ip;
   int n = 0;
   unw_cursor_t cursor;
   unw_context_t uc;
@@ -67,11 +67,11 @@ int GetStackTrace(void** result, int max_depth, int skip_count) {
 
   unw_getcontext(&uc);
   RAW_CHECK(unw_init_local(&cursor, &uc) >= 0, "unw_init_local failed");
-  skip_count++;         // Do not include the "GetStackTrace" frame
+  skip_count++;  // Do not include the "GetStackTrace" frame
 
   while (n < max_depth) {
     int ret =
-        unw_get_reg(&cursor, UNW_REG_IP, reinterpret_cast<unw_word_t *>(&ip));
+        unw_get_reg(&cursor, UNW_REG_IP, reinterpret_cast<unw_word_t*>(&ip));
     if (ret < 0) {
       break;
     }
@@ -90,4 +90,4 @@ int GetStackTrace(void** result, int max_depth, int skip_count) {
   return n;
 }
 
-_END_GOOGLE_NAMESPACE_
+}  // namespace google

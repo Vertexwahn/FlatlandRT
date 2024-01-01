@@ -10,8 +10,8 @@ cc_test(
         "fmt_test.cpp",
     ],
     deps = [
-        "@com_google_googletest//:gtest_main",
         "@fmt",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -22,7 +22,7 @@ cc_test(
         "glog_test.cpp",
     ],
     deps = [
-        "@com_google_googletest//:gtest_main",
         "@glog",
+        "@googletest//:gtest_main",
     ],
 )

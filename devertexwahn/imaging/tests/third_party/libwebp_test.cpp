@@ -6,7 +6,7 @@
 #include "webp/encode.h"
 #include "webp/decode.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 TEST(libwebp, write_webp_test) {
     uint8_t rgb[3] = {255, 128, 0};

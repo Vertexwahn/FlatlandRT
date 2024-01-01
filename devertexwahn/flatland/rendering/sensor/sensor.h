@@ -14,12 +14,12 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 class SensorTypeBase : public Object {
 public:
-    using Point = PointType<Dimension, ScalarType>;
-    using Vector = VectorType<Dimension, ScalarType>;
-    using Ray = RayType<Dimension, ScalarType>;
+    using Point = PointType<ScalarType, Dimension>;
+    using Vector = VectorType<ScalarType, Dimension>;
+    using Ray = RayType<ScalarType, Dimension>;
     using Scalar = ScalarType;
     using Transform = Transform44Type<ScalarType>;
 
@@ -45,8 +45,8 @@ protected:
     Transform world_to_sensor_;
 };
 
-template <unsigned int Dimension, typename ScalarType>
-class SensorType : public SensorTypeBase<Dimension, ScalarType> {};
+template <typename ScalarType, unsigned int Dimension>
+class SensorType : public SensorTypeBase<ScalarType, Dimension> {};
 
 class Film_ : public Object {
 public:
@@ -82,15 +82,15 @@ private:
 };
 
 template <typename ScalarType>
-class SensorType<2, ScalarType> : public SensorTypeBase<2, ScalarType> {
+class SensorType<ScalarType, 2> : public SensorTypeBase<ScalarType, 2> {
 public:
-    using Point = PointType<2, ScalarType>;
-    using Vector = VectorType<2, ScalarType>;
-    using Ray = RayType<2, ScalarType>;
+    using Point = PointType<ScalarType, 2>;
+    using Vector = VectorType<ScalarType, 2>;
+    using Ray = RayType<ScalarType, 2>;
     using Scalar = ScalarType;
     using Transform = Transform44Type<ScalarType>;
 
-    SensorType(const PropertySet& ps) : SensorTypeBase<2,ScalarType>(ps) {
+    SensorType(const PropertySet& ps) : SensorTypeBase<ScalarType, 2>(ps) {
         film_ = std::dynamic_pointer_cast<Film_>(ps.get_property<ReferenceCounted<Object>>("film"));
         assert(film_);
     }
@@ -102,7 +102,7 @@ public:
         auto direction = Vector{Scalar{1.0}, Scalar{0.0}};
         auto min_t = Scalar{0.001};
         auto max_t = Scalar{1000.0};
-        return SensorType<2, ScalarType>::world_to_sensor_.inverse() * Ray{origin, direction, min_t, max_t};
+        return SensorType<ScalarType, 2>::world_to_sensor_.inverse() * Ray{origin, direction, min_t, max_t};
     }
 
     ReferenceCounted<Film_> film() {
@@ -113,8 +113,8 @@ protected:
     ReferenceCounted<Film_> film_;
 };
 
-using Sensor2f = SensorType<2, float>;
-using Sensor2d = SensorType<2, double>;
+using Sensor2f = SensorType<float, 2>;
+using Sensor2d = SensorType<double, 2>;
 
 DE_VERTEXWAHN_END_NAMESPACE
 

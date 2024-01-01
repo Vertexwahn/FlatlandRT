@@ -30,21 +30,21 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
  * The z vector is aligned with the normal vector
  */
 
-// This functions expects that w is a normalized vector on the unit sphere
+// This function expects that w is a normalized vector on the unit sphere
 // that is given in the reflectance coordinate system
 template<typename ScalarType>
 ScalarType cos_theta(const Vector3<ScalarType> &w) {
     return w.z();
 }
 
-// This functions expects that w is a normalized vector on the unit sphere
+// This function expects that w is a normalized vector on the unit sphere
 // that is given in the reflectance coordinate system
 template<typename ScalarType>
 ScalarType sin_theta2(const Vector3<ScalarType> &w) {
     return ScalarType{1.0} - w.z() * w.z();
 }
 
-// This functions expects that w is a normalized vector on the unit sphere
+// This function expects that w is a normalized vector on the unit sphere
 // that is given in the reflectance coordinate system
 template<typename ScalarType>
 ScalarType sin_theta(const Vector3<ScalarType> &w) {
@@ -54,6 +54,8 @@ ScalarType sin_theta(const Vector3<ScalarType> &w) {
     return std::sqrt(s);
 }
 
+// This function expects that w is a normalized vector on the unit sphere
+// that is given in the reflectance coordinate system
 template<typename ScalarType>
 ScalarType abs_cos_theta(const Vector3<ScalarType> &w) {
     return std::abs(w.z());
@@ -61,8 +63,8 @@ ScalarType abs_cos_theta(const Vector3<ScalarType> &w) {
 
 // https://graphics.pixar.com/library/OrthonormalB/paper.pdf
 template<typename Scalar>
-void branchless_onb(const NormalType<3, Scalar> &n, VectorType<3, Scalar> &b1, VectorType<3, Scalar> &b2) {
-    using Vector = VectorType<3, Scalar>;
+void branchless_onb(const NormalType<Scalar, 3> &n, VectorType<Scalar, 3> &b1, VectorType<Scalar, 3> &b2) {
+    using Vector = VectorType<Scalar, 3>;
 
     Scalar sign = copysignf(Scalar{1.0}, n.z());
     const Scalar a = -Scalar{1.0} / (sign + n.z());
@@ -73,8 +75,8 @@ void branchless_onb(const NormalType<3, Scalar> &n, VectorType<3, Scalar> &b1, V
 
 // https://graphics.pixar.com/library/OrthonormalB/paper.pdf
 template<typename Scalar>
-void revised_onb(const NormalType<3, Scalar> &n, VectorType<3, Scalar> &b1, VectorType<3, Scalar> &b2) {
-    using Vector = VectorType<3, Scalar>;
+void revised_onb(const NormalType<Scalar, 3> &n, VectorType<Scalar, 3> &b1, VectorType<Scalar, 3> &b2) {
+    using Vector = VectorType<Scalar, 3>;
 
     if (n.z() < Scalar{0.}) {
         const Scalar a = Scalar{1.0} / (Scalar{1.0} - n.z());
@@ -89,10 +91,10 @@ void revised_onb(const NormalType<3, Scalar> &n, VectorType<3, Scalar> &b1, Vect
     }
 }
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 struct FrameType {
-    using Vector = VectorType<Dimension, ScalarType>;
-    using Normal = NormalType<Dimension, ScalarType>;
+    using Vector = VectorType<ScalarType, Dimension>;
+    using Normal = NormalType<ScalarType, Dimension>;
 
     Normal n;
     Vector t;
@@ -108,9 +110,9 @@ struct FrameType {
 };
 
 template<typename ScalarType>
-struct FrameType<3, ScalarType> {
-    using Vector = VectorType<3, ScalarType>;
-    using Normal = NormalType<3, ScalarType>;
+struct FrameType<ScalarType, 3> {
+    using Vector = VectorType<ScalarType, 3>;
+    using Normal = NormalType<ScalarType, 3>;
 
     Vector s; // tangent; x
     Vector t; // bitangent; y
@@ -136,15 +138,15 @@ struct FrameType<3, ScalarType> {
 };
 
 template<typename ScalarType>
-std::ostream &operator<<(std::ostream &stream, const FrameType<3, ScalarType> &frame) {
+std::ostream &operator<<(std::ostream &stream, const FrameType<ScalarType, 3> &frame) {
     stream << "Frame3 {" << frame.s << ",\n" << frame.t << ",\n" << frame.n << "}";
     return stream;
 }
 
 template<typename ScalarType>
-using Frame2 = FrameType<2, ScalarType>;
+using Frame2 = FrameType<ScalarType, 2>;
 template<typename ScalarType>
-using Frame3 = FrameType<3, ScalarType>;
+using Frame3 = FrameType<ScalarType, 3>;
 
 using Frame2f = Frame2<float>;
 using Frame2d = Frame2<double>;

@@ -8,14 +8,19 @@
 
 #pragma once
 
-/// @TODO get the version from the header files.
-/// due to the structure of the cmake configuration steps,
-/// it's not obvious how to structure things for this to work.
-/// so for now, just hardcode the version here.
-//#include <OpenEXRCore/openexr_version.h>
-#define OPENEXR_VERSION_MAJOR 3
-#define OPENEXR_VERSION_MINOR 2
-#define OPENEXR_VERSION_PATCH 0
+//
+// The OpenEXR release version is defined officially in
+// src/lib/OpenEXRCore/openexr_version.h, but CMake doesn't readily allow
+// that to be included here, so duplicate the settings for
+// backwards-compatibility with applications that may expect to get the
+// defines from this include.
+//
+
+#ifndef INCLUDED_OPENEXR_VERSION_H
+#define OPENEXR_VERSION_MAJOR @OpenEXR_VERSION_MAJOR@
+#define OPENEXR_VERSION_MINOR @OpenEXR_VERSION_MINOR@
+#define OPENEXR_VERSION_PATCH @OpenEXR_VERSION_PATCH@
+#endif
 
 //
 // Options / configuration based on O.S. / compiler
@@ -63,10 +68,10 @@
 // clang-format on
 
 // Version as a single hex number, e.g. 0x01000300 == 1.0.3
-#define OPENEXR_VERSION_HEX                                                    \
-    ((uint32_t (OPENEXR_VERSION_MAJOR) << 24) |                                \
-     (uint32_t (OPENEXR_VERSION_MINOR) << 16) |                                \
-     (uint32_t (OPENEXR_VERSION_PATCH) << 8))
+#define OPENEXR_VERSION_HEX                                           \
+    (((OPENEXR_VERSION_MAJOR) << 24) |                                \
+     ((OPENEXR_VERSION_MINOR) << 16) |                                \
+     ((OPENEXR_VERSION_PATCH) << 8))
 
 // On modern versions of gcc & clang, __has_attribute can test support for
 // __attribute__((attr)).  Make sure it's safe for other compilers.
@@ -80,7 +85,7 @@
 
 /// \defgroup ExportMacros Macros to manage symbol visibility
 ///
-/// See docs/SymbolVisibility.md for more discussion about the
+/// See website/SymbolVisibility.rst for more discussion about the
 /// motivation for these macros
 ///
 /// If we are compiling a DLL for Windows, there needs to be custom

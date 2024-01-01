@@ -11,42 +11,13 @@ def okapi_deps():
     """Fetch external dependencies for Okapi."""
 
     #-------------------------------------------------------------------------------------
-    # Skylib
-    #-------------------------------------------------------------------------------------
-
-    # Use local repository
-    maybe(
-        native.local_repository,
-        name = "bazel_skylib",
-        path = "../third_party/bazel-skylib",
-    )
-
-    # Use github.com
-    #maybe(
-    #    git_repository,
-    #    name = "bazel_skylib",
-    #    #branch = "main",
-    #    commit = "6abad3de5fd9c001f67b17fe8c7242b3cc3b8851",
-    #    shallow_since = "1649192995 -0400",
-    #    remote = "https://github.com/bazelbuild/bazel-skylib",
-    #)
-
-    # Make sure to fetch a recent version of rules_python
-    http_archive(
-        name = "rules_python",
-        sha256 = "84aec9e21cc56fbc7f1335035a71c850d1b9b5cc6ff497306f84cced9a769841",
-        strip_prefix = "rules_python-0.23.1",
-        url = "https://github.com/bazelbuild/rules_python/releases/download/0.23.1/rules_python-0.23.1.tar.gz",
-    )
-
-    #-------------------------------------------------------------------------------------
     # GoogleTest
     #-------------------------------------------------------------------------------------
 
     # Use local repository
     maybe(
         native.local_repository,
-        name = "com_google_googletest",
+        name = "googletest",
         path = "../third_party/googletest",
     )
 
@@ -57,28 +28,6 @@ def okapi_deps():
     #    sha256 = "cf8e496a802e6cb2fd02b09b84984f133eb2e79046265c2c6382c3c6df603d97",
     #    strip_prefix = "googletest-3e0e32ba300ce8afe695ad3ba7e81b21b7cf237a",
     #    urls = ["https://github.com/google/googletest/archive/8306020a3e9eceafec65508868d7ab5c63bb41f7.zip"],
-    #)
-
-    #-------------------------------------------------------------------------------------
-    # Eigen
-    #-------------------------------------------------------------------------------------
-
-    # Use local repository
-    maybe(
-        native.new_local_repository,
-        name = "eigen",
-        path = "../third_party/eigen-3.4.0",
-        build_file = "//okapi/third_party:eigen.BUILD",
-    )
-
-    # Use gitlab.com
-    #maybe(
-    #    http_archive,
-    #    name = "eigen",
-    #    build_file = "//okapi/third_party:eigen.BUILD",
-    #    sha256 = "7985975b787340124786f092b3a07d594b2e9cd53bbfe5f3d9b1daee7d55f56f",
-    #    strip_prefix = "eigen-3.3.9",
-    #    url = "https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz",
     #)
 
     #-------------------------------------------------------------------------------------
@@ -232,28 +181,6 @@ def okapi_deps():
     )
 
     #-------------------------------------------------------------------------------------
-    # zlib
-    #-------------------------------------------------------------------------------------
-
-    # Use local repository
-    maybe(
-        native.new_local_repository,
-        name = "zlib",
-        build_file = "//okapi/third_party:zlib.BUILD",
-        path = "../third_party/zlib-1.2.13",
-    )
-
-    # Use https://zlib.net
-    #maybe(
-    #    http_archive,
-    #    name = "zlib",
-    #    build_file = "//okapi/third_party:zlib.BUILD",
-    #    sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
-    #   strip_prefix = "zlib-1.2.11",
-    #    urls = ["https://zlib.net/zlib-1.2.11.tar.gz"],
-    #)
-
-    #-------------------------------------------------------------------------------------
     # pcg
     #-------------------------------------------------------------------------------------
 
@@ -285,102 +212,6 @@ def okapi_deps():
     #)
 
     #-------------------------------------------------------------------------------------
-    # yaml-cpp
-    #-------------------------------------------------------------------------------------
-
-    maybe(
-        native.local_repository,
-        name = "com_github_jbeder_yaml_cpp",
-        path = "../third_party/yaml-cpp",
-    )
-
-    # yaml-cpp-0.6.3
-    # Latest release does not support Bazel. Therefore, we use HEAD from master
-    #http_archive(
-    #    name = "com_github_jbeder_yaml_cpp",
-    #    sha256 = "77ea1b90b3718aa0c324207cb29418f5bced2354c2e483a9523d98c3460af1ed",
-    #    strip_prefix = "yaml-cpp-yaml-cpp-0.6.3",
-    #    urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.tar.gz"],
-    #)
-
-    #maybe(
-    #    git_repository,
-    #    name = "com_github_jbeder_yaml_cpp",
-    #    #branch = "master",
-    #    commit = "9ee3928754693565fa561e2b6fda4058948d1d56",  # Emit the correct Alias on the key (#908) (#929)
-    #   remote = "https://github.com/jbeder/yaml-cpp",
-    #    shallow_since = "1625455804 -0500",
-    #)
-
-    #-------------------------------------------------------------------------------------
-    # OpenEXR
-    #-------------------------------------------------------------------------------------
-
-    #git_repository(
-    #    name = "openexr",
-    #    branch = "bazel-bump-openexr-version",
-    #    remote = "https://github.com/Vertexwahn/openexr",
-    #    remote = "https://github.com/AcademySoftwareFoundation/openexr/",
-    #)
-
-    maybe(
-        native.local_repository,
-        name = "com_openexr",
-        path = "../third_party/openexr",
-    )
-
-    # Use local Imath
-    maybe(
-        native.new_local_repository,
-        name = "Imath",
-        build_file = "@com_openexr//:bazel/third_party/Imath.BUILD",  # OpenEXR must be fetched first, since it provides the Imath build instructions
-        path = "../third_party/Imath-3.1.9",
-    )
-
-    # Use local libdeflate
-    maybe(
-        native.new_local_repository,
-        name = "libdeflate",
-        build_file = "@com_openexr//:bazel/third_party/libdeflate.BUILD",
-        path = "../third_party/libdeflate-1.18",
-    )
-
-    #-------------------------------------------------------------------------------------
-    # Libpng
-    #-------------------------------------------------------------------------------------
-
-    maybe(
-        native.new_local_repository,
-        name = "libpng",
-        build_file = "//okapi/third_party:libpng.BUILD",
-        path = "../third_party/libpng-1.6.40",
-    )
-
-    # libpng
-    #maybe(
-    #    http_archive,
-    #    name = "libpng",
-    #    build_file = "//okapi/third_party:libpng.BUILD",
-    #    sha256 = "7f415186d38ca71c23058386d7cf5135c8beda821ee1beecdc2a7a26c0356615",
-    #    strip_prefix = "libpng-1.2.57",
-    #    urls = [
-    #        "https://sourceforge.net/projects/libpng/files/latest/download
-    #    ],
-    #)
-
-    #-------------------------------------------------------------------------------------
-    # Libwebp
-    #-------------------------------------------------------------------------------------
-
-    git_repository(
-        name = "libwebp",
-        build_file = "//okapi/third_party:libwebp.BUILD",
-        commit = "fd7bb21c0cb56e8a82e9bfa376164b842f433f3b",
-        #commit = "29b9eb1517cd21ed56af218d850d61b0ee384fdf",
-        remote = "https://chromium.googlesource.com/webm/libwebp.git",
-    )
-
-    #-------------------------------------------------------------------------------------
     # libjpeg-turbo
     #-------------------------------------------------------------------------------------
 
@@ -397,19 +228,19 @@ def okapi_deps():
     #    build_file = "//okapi/third_party:nasm.BUILD",
     #)
 
-    maybe(
-        native.new_local_repository,
-        name = "nasm",
-        build_file = "//okapi/third_party:nasm.BUILD",
-        path = "../third_party/nasm-2.14.02",
-    )
+    #maybe(
+    #    native.new_local_repository,
+    #    name = "nasm",
+    #    build_file = "//okapi/third_party:nasm.BUILD",
+    #    path = "../third_party/nasm-2.14.02",
+    #)
 
-    maybe(
-        native.new_local_repository,
-        name = "libjpeg_turbo",
-        build_file = "//okapi/third_party:libjpeg_turbo.BUILD",
-        path = "../third_party/libjpeg-turbo-2.1.4",
-    )
+    #maybe(
+    #    native.new_local_repository,
+    #    name = "libjpeg_turbo",
+    #    build_file = "//okapi/third_party:libjpeg_turbo.BUILD",
+    #    path = "../third_party/libjpeg-turbo-2.1.4",
+    #)
 
     #-------------------------------------------------------------------------------------
     # oneTBB
@@ -444,26 +275,6 @@ def okapi_deps():
     #    commit = "6e737b879a9406681e48c0fc88d8771221a00d8d",
     #    remote = "https://github.com/Vertexwahn/oneTBB",
     #    shallow_since = "1642798690 +0100",
-    #)
-
-    #-------------------------------------------------------------------------------------
-    # rules_pkg
-    #-------------------------------------------------------------------------------------
-
-    maybe(
-        native.local_repository,
-        name = "rules_pkg",
-        path = "../third_party/rules_pkg-0.9.1",
-    )
-
-    #maybe(
-    #    http_archive,
-    #    name = "rules_pkg",
-    #    sha256 = "353b20e8b093d42dd16889c7f918750fb8701c485ac6cceb69a5236500507c27",
-    #    urls = [
-    #        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.5.0/rules_pkg-0.5.0.tar.gz",
-    #        "https://github.com/bazelbuild/rules_pkg/releases/download/0.5.0/rules_pkg-0.5.0.tar.gz",
-    #    ],
     #)
 
     #-------------------------------------------------------------------------------------
@@ -502,8 +313,6 @@ def okapi_deps():
     #    branch = "introduce-maybe",
     #)
 
-    # Work around this: https://bugs.chromium.org/p/boringssl/issues/detail?id=623
-    #
     maybe(
         native.local_repository,
         name = "openssl",
@@ -613,6 +422,27 @@ def okapi_deps():
     #    urls = ["https://github.com/xtensor-stack/xtensor/archive/275a4efb0faaa78b3b2132ea001d9167d4382109.zip"],
     #    strip_prefix = "xtensor-275a4efb0faaa78b3b2132ea001d9167d4382109",
     #    build_file = "//okapi/third_party:xtensor.BUILD",
+    #)
+
+
+    #-------------------------------------------------------------------------------------
+    # tinyobjloader
+    #-------------------------------------------------------------------------------------
+
+    maybe(
+        native.new_local_repository,
+        name = "tinyobjloader",
+        build_file = "//okapi/third_party:tinyobjloader.BUILD",
+        path = "../third_party/tinyobjloader",
+    )
+
+    # From GitHub
+    #http_archive(
+    #    name = "tinyobjloader",
+    #    build_file = "//third_party:tinyobjloader.BUILD",
+    #    sha256 = "4040bcd3029bfb37042a2bfe20248c369ab5a9c803e18a31476fee1e303ad579",
+    #    strip_prefix = "tinyobjloader-ee45fb41db95bf9563f2a41bc63adfa18475c2ee",
+    #    urls = ["https://github.com/tinyobjloader/tinyobjloader/archive/ee45fb41db95bf9563f2a41bc63adfa18475c2ee.zip"],
     #)
 
 

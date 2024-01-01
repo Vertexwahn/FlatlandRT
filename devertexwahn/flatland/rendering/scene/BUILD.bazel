@@ -49,6 +49,6 @@ cc_test(
     ],
     deps = [
         ":load_scene",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

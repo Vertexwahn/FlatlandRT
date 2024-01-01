@@ -6,33 +6,43 @@
 
 name: Bazel
 
+# Skip the run on *.md changes and on changes to the website, *except*
+# for "website/src", since that code needs validation.  There's a
+# separate workflow for with website.
+
 on:
   push:
-    # Versioned branches and tags are ignored for OpenEXR <= 1.x.x
     branches-ignore:
       - RB-2.*
     tags-ignore:
       - v1.*
       - v2.*
-    # Jobs are skipped when ONLY Markdown (*.md) files are changed
-    paths-ignore:
-      - '**.md'
+    paths:
+      - '**'
+      - '!**.md'
+      - '!website/**'
+      - 'website/src/**'
+      - '!src/wrappers/**'
   pull_request:
     branches-ignore:
       - RB-2.*
     tags-ignore:
       - v1.*
       - v2.*
-    paths-ignore:
-      - '**.md'
+    paths:
+      - '**'
+      - '!**.md'
+      - '!website/**'
+      - 'website/src/**'
+      - '!src/wrappers/**'
 
 permissions:
   contents: read
 
 jobs:
   build_and_test_ubuntu:
-    name: Linux Ubuntu 20.04 Bazel build <GCC 9.3.0>
-    runs-on: ubuntu-20.04
+    name: Linux Ubuntu 22.04 Bazel build <GCC 11.4.0>
+    runs-on: ubuntu-22.04
     
     steps:
     - uses: actions/checkout@v3
@@ -41,11 +51,15 @@ jobs:
       uses: actions/cache@v3
       with:
         path: "/home/runner/.cache/bazel"
-        key: bazel-ubuntu
+        key: bazel-ubuntu-22
 
     - name: Build
       run: |
         bazelisk build //...
+        bazelisk test //...
+        # Test without bzlmod
+        bazelisk build --noenable_bzlmod -- //...
+        bazelisk test --noenable_bzlmod -- //...
 
   build_and_test_windows:
     name: Windows Server 2022 build <Visual Studio 2022>
@@ -58,11 +72,15 @@ jobs:
       uses: actions/cache@v3
       with:
         path: "/home/runner/.cache/bazel"
-        key: bazel-windows
+        key: bazel-windows-2022
 
     - name: Build
       run: |
         bazelisk build //...
+        bazelisk test //...
+        # Test without bzlmod
+        bazelisk build --noenable_bzlmod -- //...
+        bazelisk test --noenable_bzlmod -- //...
 
   build_and_test_macos:
     name: macOS 13 Bazel build <Apple Clang14>
@@ -75,8 +93,12 @@ jobs:
       uses: actions/cache@v3
       with:
         path: "/home/runner/.cache/bazel"
-        key: bazel-macos
+        key: bazel-macos-13
 
     - name: Build
       run: |
         bazelisk build //...
+        bazelisk test //...
+        # Test without bzlmod
+        bazelisk build --noenable_bzlmod -- //...
+        bazelisk test --noenable_bzlmod -- //...

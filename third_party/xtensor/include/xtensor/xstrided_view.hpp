@@ -155,6 +155,8 @@ namespace xt
         using storage_type = typename base_type::storage_type;
         using linear_iterator = typename storage_type::iterator;
         using const_linear_iterator = typename storage_type::const_iterator;
+        using reverse_linear_iterator = std::reverse_iterator<linear_iterator>;
+        using const_reverse_linear_iterator = std::reverse_iterator<const_linear_iterator>;
 
         using iterable_base = select_iterable_base_t<L, xexpression_type::static_layout, self_type>;
         using inner_shape_type = typename base_type::inner_shape_type;
@@ -217,8 +219,17 @@ namespace xt
 
         linear_iterator linear_begin();
         linear_iterator linear_end();
+        const_linear_iterator linear_begin() const;
+        const_linear_iterator linear_end() const;
         const_linear_iterator linear_cbegin() const;
         const_linear_iterator linear_cend() const;
+
+        reverse_linear_iterator linear_rbegin();
+        reverse_linear_iterator linear_rend();
+        const_reverse_linear_iterator linear_rbegin() const;
+        const_reverse_linear_iterator linear_rend() const;
+        const_reverse_linear_iterator linear_crbegin() const;
+        const_reverse_linear_iterator linear_crend() const;
 
         template <class ST, class STEP = stepper>
         disable_indexed_stepper_t<STEP> stepper_begin(const ST& shape);
@@ -486,6 +497,18 @@ namespace xt
     }
 
     template <class CT, class S, layout_type L, class FST>
+    inline auto xstrided_view<CT, S, L, FST>::linear_begin() const -> const_linear_iterator
+    {
+        return this->linear_cbegin();
+    }
+
+    template <class CT, class S, layout_type L, class FST>
+    inline auto xstrided_view<CT, S, L, FST>::linear_end() const -> const_linear_iterator
+    {
+        return this->linear_cend();
+    }
+
+    template <class CT, class S, layout_type L, class FST>
     inline auto xstrided_view<CT, S, L, FST>::linear_cbegin() const -> const_linear_iterator
     {
         return this->storage().cbegin() + static_cast<std::ptrdiff_t>(data_offset());
@@ -495,6 +518,42 @@ namespace xt
     inline auto xstrided_view<CT, S, L, FST>::linear_cend() const -> const_linear_iterator
     {
         return this->storage().cbegin() + static_cast<std::ptrdiff_t>(data_offset() + size());
+    }
+
+    template <class CT, class S, layout_type L, class FST>
+    inline auto xstrided_view<CT, S, L, FST>::linear_rbegin() -> reverse_linear_iterator
+    {
+        return reverse_linear_iterator(this->linear_begin());
+    }
+
+    template <class CT, class S, layout_type L, class FST>
+    inline auto xstrided_view<CT, S, L, FST>::linear_rend() -> reverse_linear_iterator
+    {
+        return reverse_linear_iterator(this->linear_end());
+    }
+
+    template <class CT, class S, layout_type L, class FST>
+    inline auto xstrided_view<CT, S, L, FST>::linear_rbegin() const -> const_reverse_linear_iterator
+    {
+        return this->linear_crbegin();
+    }
+
+    template <class CT, class S, layout_type L, class FST>
+    inline auto xstrided_view<CT, S, L, FST>::linear_rend() const -> const_reverse_linear_iterator
+    {
+        return this->linear_crend();
+    }
+
+    template <class CT, class S, layout_type L, class FST>
+    inline auto xstrided_view<CT, S, L, FST>::linear_crbegin() const -> const_reverse_linear_iterator
+    {
+        return const_reverse_linear_iterator(this->linear_cbegin());
+    }
+
+    template <class CT, class S, layout_type L, class FST>
+    inline auto xstrided_view<CT, S, L, FST>::linear_crend() const -> const_reverse_linear_iterator
+    {
+        return const_reverse_linear_iterator(this->linear_cend());
     }
 
     /***************
@@ -711,21 +770,21 @@ namespace xt
      *
      * @return initialized strided_view according to slices
      *
-     * \code{.cpp}
+     * @code{.cpp}
      * xt::xarray<double> a = {{1, 2, 3}, {4, 5, 6}};
      * xt::xstrided_slice_vector sv({xt::range(0, 1)});
      * sv.push_back(xt::range(0, 3, 2));
      * auto v = xt::strided_view(a, sv);
      * // ==> {{1, 3}}
-     * \endcode
+     * @endcode
      *
      * You can also achieve the same with the following short-hand syntax:
      *
-     * \code{.cpp}
+     * @code{.cpp}
      * xt::xarray<double> a = {{1, 2, 3}, {4, 5, 6}};
      * auto v = xt::strided_view(a, {xt::range(0, 1), xt::range(0, 3, 2)});
      * // ==> {{1, 3}}
-     * \endcode
+     * @endcode
      */
     template <class E>
     inline auto strided_view(E&& e, const xstrided_slice_vector& slices)
@@ -748,6 +807,53 @@ namespace xt
         );
     }
 
+    namespace detail
+    {
+        template <typename S>
+        struct rebind_shape;
+
+        template <std::size_t... X>
+        struct rebind_shape<xt::fixed_shape<X...>>
+        {
+            using type = xt::fixed_shape<X...>;
+        };
+
+        template <class S>
+        struct rebind_shape
+        {
+            using type = rebind_container_t<size_t, S>;
+        };
+
+        template <
+            class S,
+            std::enable_if_t<std::is_signed<get_value_type_t<typename std::decay<S>::type>>::value, bool> = true>
+        inline void recalculate_shape_impl(S& shape, size_t size)
+        {
+            using value_type = get_value_type_t<typename std::decay_t<S>>;
+            XTENSOR_ASSERT(std::count(shape.cbegin(), shape.cend(), -1) <= 1);
+            auto iter = std::find(shape.begin(), shape.end(), -1);
+            if (iter != std::end(shape))
+            {
+                const auto total = std::accumulate(shape.cbegin(), shape.cend(), -1, std::multiplies<int>{});
+                const auto missing_dimension = size / total;
+                (*iter) = static_cast<value_type>(missing_dimension);
+            }
+        }
+
+        template <
+            class S,
+            std::enable_if_t<!std::is_signed<get_value_type_t<typename std::decay<S>::type>>::value, bool> = true>
+        inline void recalculate_shape_impl(S&, size_t)
+        {
+        }
+
+        template <class S>
+        inline auto recalculate_shape(S&& shape, size_t size)
+        {
+            return recalculate_shape_impl(shape, size);
+        }
+    }
+
     template <layout_type L = XTENSOR_DEFAULT_TRAVERSAL, class E, class S>
     inline auto reshape_view(E&& e, S&& shape)
     {
@@ -756,18 +862,26 @@ namespace xt
             "traversal has to be row or column major"
         );
 
-        using shape_type = std::decay_t<S>;
-        get_strides_t<shape_type> strides;
+        using shape_type = std::decay_t<decltype(shape)>;
+        using unsigned_shape_type = typename detail::rebind_shape<shape_type>::type;
+        get_strides_t<unsigned_shape_type> strides;
 
+        detail::recalculate_shape(shape, e.size());
         xt::resize_container(strides, shape.size());
         compute_strides(shape, L, strides);
         constexpr auto computed_layout = std::decay_t<E>::static_layout == L ? L : layout_type::dynamic;
         using view_type = xstrided_view<
             xclosure_t<E>,
-            shape_type,
+            unsigned_shape_type,
             computed_layout,
             detail::flat_adaptor_getter<xclosure_t<E>, L>>;
-        return view_type(std::forward<E>(e), std::forward<S>(shape), std::move(strides), 0, e.layout());
+        return view_type(
+            std::forward<E>(e),
+            xtl::forward_sequence<unsigned_shape_type, S>(shape),
+            std::move(strides),
+            0,
+            e.layout()
+        );
     }
 
     /**
@@ -799,7 +913,7 @@ namespace xt
     template <layout_type L = XTENSOR_DEFAULT_TRAVERSAL, class E, class I, std::size_t N>
     inline auto reshape_view(E&& e, const I (&shape)[N])
     {
-        using shape_type = std::array<std::size_t, N>;
+        using shape_type = std::array<I, N>;
         return reshape_view<L>(std::forward<E>(e), xtl::forward_sequence<shape_type, decltype(shape)>(shape));
     }
 }

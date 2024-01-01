@@ -16,18 +16,18 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 class SceneType;
 
 template <typename ScalarType>
-using Scene2 = SceneType<2, ScalarType>;
+using Scene2 = SceneType<ScalarType, 2>;
 
 using Scene2f = Scene2<float>;
 
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 class DebugReverseLightPathType {
 public:
-    using MediumEvent = MediumEventType<Dimension, ScalarType>;
+    using MediumEvent = MediumEventType<ScalarType, Dimension>;
 
     void clear() {
         std::scoped_lock lock{mutex};
@@ -39,18 +39,18 @@ public:
     }
 
     std::mutex mutex;
-    using Point = PointType<Dimension, ScalarType>;
+    using Point = PointType<ScalarType, Dimension>;
     std::vector<MediumEvent> medium_events;
 };
 
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 class IntegratorType : public Object {
 public:
-    using Ray = RayType<Dimension, ScalarType>;
-    using Scene = SceneType<Dimension, ScalarType>;
+    using Ray = RayType<ScalarType, Dimension>;
+    using Scene = SceneType<ScalarType, Dimension>;
     using SvgCanvas = SvgCanvasType<ScalarType>;
     using Sampler = SamplerType<ScalarType>;
-    using DebugReverseLightPath = DebugReverseLightPathType<Dimension, ScalarType>;
+    using DebugReverseLightPath = DebugReverseLightPathType<ScalarType, Dimension>;
 
     IntegratorType(const PropertySet& ps) {
     }
@@ -72,10 +72,10 @@ public:
 };
 
 template <typename ScalarType>
-class IntegratorType<2, ScalarType> : public Object {
+class IntegratorType<ScalarType, 2> : public Object {
 public:
-    using Ray = RayType<2, ScalarType>;
-    using Scene = SceneType<2, ScalarType>;
+    using Ray = RayType<ScalarType, 2>;
+    using Scene = SceneType<ScalarType, 2>;
     using SvgCanvas = SvgCanvasType<ScalarType>;
     using Sampler = SamplerType<ScalarType>;
 
@@ -98,10 +98,10 @@ protected:
     ReferenceCounted<SvgCanvas> canvas_ = nullptr;
 };
 
-using Integrator2f = IntegratorType<2, float>;
-using Integrator2d = IntegratorType<2, double>;
-using Integrator3f = IntegratorType<3, float>;
-using Integrator3d = IntegratorType<3, double>;
+using Integrator2f = IntegratorType<float, 2>;
+using Integrator2d = IntegratorType<double, 2>;
+using Integrator3f = IntegratorType<float, 3>;
+using Integrator3d = IntegratorType<double, 3>;
 
 DE_VERTEXWAHN_END_NAMESPACE
 

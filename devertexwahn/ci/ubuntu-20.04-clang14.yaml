@@ -6,15 +6,24 @@
 # Clang 14 on Ubunutu 20.04
 # Make sure we can build with Clang 14 in all different compilation modes
 steps:
+  - script: |
+      df
+    displayName: 'Show disk space'
+
   - checkout: self
     clean: true
     fetchDepth: 1
     lfs: false
     submodules: false
 
+
   - script: |
       lsb_release -a
-    displayName: "Show OS version"
+    displayName: 'Show OS version'
+
+  - script: |
+      df
+    displayName: 'Show disk space'
 
   - script: |
       cd devertexwahn
@@ -25,21 +34,25 @@ steps:
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=clang14  -- //...      
+      bazel build --config=clang14  -- //...     
     displayName: 'Bazel build clang14-fastbuild'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14   -- //...      
+      bazel test --config=clang14   -- //...     
     displayName: 'Bazel test clang14-fastbuild'
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=clang14  --compilation_mode=dbg -- //...      
+      bazel build --config=clang14  --compilation_mode=dbg -- //...     
     displayName: 'Bazel build clang14-dbg'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14  --compilation_mode=dbg -- //...      
+      bazel test --config=clang14  --compilation_mode=dbg -- //...     
     displayName: 'Bazel test clang14-dbg'
+
+  - script: |
+      df
+    displayName: 'Show disk space'

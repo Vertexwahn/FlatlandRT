@@ -786,12 +786,12 @@ namespace xt
      * it is possible.
      * @warning This method is NOT compatible with broadcasting, meaning the following
      * code has undefined behavior:
-     * \code{.cpp}
+     * @code{.cpp}
      * xt::xarray<double> a = {{0, 1}, {2, 3}};
      * xt::xarray<double> b = {0, 1};
      * auto fd = a + b;
      * double res = fd.unchecked(0, 1);
-     * \endcode
+     * @endcode
      */
     template <class D>
     template <class... Args>
@@ -842,12 +842,12 @@ namespace xt
      * it is possible.
      * @warning This method is NOT compatible with broadcasting, meaning the following
      * code has undefined behavior:
-     * \code{.cpp}
+     * @code{.cpp}
      * xt::xarray<double> a = {{0, 1}, {2, 3}};
      * xt::xarray<double> b = {0, 1};
      * auto fd = a + b;
      * double res = fd.uncheked(0, 1);
-     * \endcode
+     * @endcode
      */
     template <class D>
     template <class... Args>
@@ -1163,8 +1163,8 @@ namespace xt
     template <layout_type L>
     inline auto xfunctor_applier_base<D>::crbegin() const noexcept
     {
-        return xfunctor_iterator<const functor_type, decltype(m_e.template rbegin<L>())>(
-            m_e.template rbegin<L>(),
+        return xfunctor_iterator<const functor_type, decltype(m_e.template crbegin<L>())>(
+            m_e.template crbegin<L>(),
             &m_functor
         );
     }
@@ -1178,8 +1178,8 @@ namespace xt
     template <layout_type L>
     inline auto xfunctor_applier_base<D>::crend() const noexcept
     {
-        return xfunctor_iterator<const functor_type, decltype(m_e.template rend<L>())>(
-            m_e.template rend<L>(),
+        return xfunctor_iterator<const functor_type, decltype(m_e.template crend<L>())>(
+            m_e.template crend<L>(),
             &m_functor
         );
     }

@@ -27,7 +27,7 @@ cc_test(
     ],
     deps = [
         ":io_jpeg",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -42,7 +42,9 @@ cc_library(
         ":io_png",
         ":io_ppm",
         ":io_webp",
-        "@boost//:algorithm",
+        "//imaging:color_converter",
+        #"@boost//:algorithm",
+        "@boost.algorithm",
     ],
 )
 
@@ -54,7 +56,7 @@ cc_test(
     ],
     deps = [
         ":io",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -65,7 +67,7 @@ cc_library(
     deps = [
         "//core:reference_counted",
         "//imaging:image",
-        "@com_openexr//:OpenEXR",
+        "@openexr//:OpenEXR",
     ],
 )
 
@@ -77,7 +79,7 @@ cc_test(
     ],
     deps = [
         ":io_openexr",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -98,7 +100,7 @@ cc_test(
     srcs = ["io_pfm_test.cpp"],
     deps = [
         ":io_pfm",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -109,6 +111,7 @@ cc_library(
     deps = [
         "//core:logging",
         "//core:reference_counted",
+        "//imaging:color_converter",
         "//imaging:image",
         "@libpng",
     ],
@@ -118,9 +121,12 @@ cc_test(
     name = "io_png_test",
     size = "small",
     srcs = ["io_png_test.cpp"],
+    data = [
+        "//imaging/tests/data:reference_images",
+    ],
     deps = [
         ":io_png",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -140,7 +146,7 @@ cc_test(
     srcs = ["io_ppm_test.cpp"],
     deps = [
         ":io_ppm",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -161,6 +167,6 @@ cc_test(
     srcs = ["io_webp_test.cpp"],
     deps = [
         ":io_webp",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

@@ -14,6 +14,9 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
+// todo: clean this up - make this more generic!
+ReferenceCounted<Image4b> load_image_png_as_Image4b(std::string_view filename);
+ReferenceCounted<Image4f> load_image_png_as_Image4f(std::string_view filename);
 ReferenceCounted<Image3f> load_image_png(std::string_view filename);
 
 bool store_png(const char *filename, const Image4b &image);

@@ -5,8 +5,8 @@
 
 #include "zlib.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 TEST(zlib, version_check) {
-    EXPECT_THAT(ZLIB_VERSION, testing::StrCaseEq("1.2.13"));
+    EXPECT_THAT(ZLIB_VERSION, testing::StrCaseEq("1.3"));
 }

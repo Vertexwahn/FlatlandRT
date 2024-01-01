@@ -99,6 +99,7 @@ public:
     }
 
     template<typename ValueType>
+    [[nodiscard]]
     const ValueType &get_property(const std::string &name) const {
         if (has_property(name)) {
             const VariantType &vt = property_name_to_value_.at(name);
@@ -114,7 +115,9 @@ public:
     }
 
     // A default value can be provided in the case a property does not exist
+
     template<typename ValueType>
+    [[nodiscard]]
     const ValueType &get_property(const std::string &name, const ValueType &default_value) const {
         if (has_property(name)) {
             return get_property<ValueType>(name);

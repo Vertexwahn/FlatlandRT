@@ -9,6 +9,15 @@
 
 using namespace de_vertexwahn;
 
+TEST(Image, try_to_load_non_existing_webp) {
+
+    EXPECT_THROW(load_image_webp("non_existing.webp"), std::runtime_error);
+    // Assert
+    //auto loaded_image = load_image_webp("non_existing.webp");
+
+   
+}
+
 TEST(Image, roundtrip_store_load_webp) {
     // Arrange
     Image4b image{2, 2};

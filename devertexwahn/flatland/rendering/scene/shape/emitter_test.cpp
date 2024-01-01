@@ -9,12 +9,12 @@
 
 using namespace de_vertexwahn;
 
-class DummyEmitter : public Emitter<2, float> {
+class DummyEmitter : public Emitter<float, 2> {
 public:
-    DummyEmitter() : Emitter<2, float>() {}
+    DummyEmitter() : Emitter<float, 2>() {}
 
-    virtual ColorType<3, float> evaluate() const {
-        return ColorType<3, float>(1.f);
+    virtual ColorType<float, 3> evaluate() const {
+        return ColorType<float, 3>(1.f);
     }
 };
 

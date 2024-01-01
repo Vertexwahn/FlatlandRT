@@ -4,4 +4,5 @@ channels:
   - conda-forge
 
 dependencies:
-  - breathe==4.16.0
+  - breathe
+  - sphinx_rtd_theme

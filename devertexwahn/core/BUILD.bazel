@@ -11,7 +11,8 @@ cc_library(
     hdrs = ["exception.h"],
     deps = [
         ":namespace",
-        "@boost//:predef",
+        "@boost.predef",
+        #"@boost//:predef",
     ],
 )
 
@@ -21,7 +22,7 @@ cc_test(
     srcs = ["exception_test.cpp"],
     deps = [
         ":exception",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -47,7 +48,8 @@ cc_library(
     ],
     deps = [
         ":namespace",
-        "@boost//:core",
+        "@boost.core",
+        #"@boost//:core",
     ],
 )
 
@@ -72,7 +74,7 @@ cc_test(
     ],
     deps = [
         ":object",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -101,7 +103,7 @@ cc_test(
         ":object_factory",
         "//flatland/rendering/integrator",
         "//flatland/rendering/scene/shape:disk",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -127,7 +129,7 @@ cc_test(
     ],
     deps = [
         "//core:property_set",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -148,7 +150,7 @@ cc_test(
     ],
     deps = [
         "//core:reference_counted",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -172,6 +174,6 @@ cc_test(
     ],
     deps = [
         "//core:timer",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

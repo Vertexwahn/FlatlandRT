@@ -12,11 +12,11 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 struct RayType {
     using Scalar = ScalarType;
-    using Point = PointType<Dimension, ScalarType>;
-    using Vector = VectorType<Dimension, ScalarType>;
+    using Point = PointType<ScalarType, Dimension>;
+    using Vector = VectorType<ScalarType, Dimension>;
 
     RayType(const Point &origin, const Vector &direction, const Scalar min_t, const Scalar max_t)
             : origin(origin), direction(direction), min_t(min_t), max_t(max_t) {
@@ -42,10 +42,10 @@ struct RayType {
 };
 
 template <typename ScalarType>
-using Ray2 = RayType<2, ScalarType>;
+using Ray2 = RayType<ScalarType, 2>;
 
 template <typename ScalarType>
-using Ray3 = RayType<3, ScalarType>;
+using Ray3 = RayType<ScalarType, 3>;
 
 using Ray2f = Ray2<float>;
 using Ray2d = Ray2<double>;
@@ -86,7 +86,7 @@ namespace internal {
 }
 
 template <typename  ScalarType, unsigned int Dimension>
-std::ostream &operator<<(std::ostream &os, const RayType<Dimension, ScalarType> &r) {
+std::ostream &operator<<(std::ostream &os, const RayType<ScalarType, Dimension> &r) {
     os << "Ray"
        << internal::dimension_as_string<Dimension>::value
        << internal::convert_type_to_string<ScalarType>::value

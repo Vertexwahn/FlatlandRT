@@ -1,0 +1,1 @@
+common --enable_bzlmod # default in Bazel 7.0

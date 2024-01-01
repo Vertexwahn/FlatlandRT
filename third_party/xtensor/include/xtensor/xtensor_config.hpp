@@ -12,7 +12,7 @@
 
 #define XTENSOR_VERSION_MAJOR 0
 #define XTENSOR_VERSION_MINOR 24
-#define XTENSOR_VERSION_PATCH 6
+#define XTENSOR_VERSION_PATCH 7
 
 
 // Define if the library is going to be using exceptions.
@@ -79,7 +79,7 @@
 #else
 #ifdef XTENSOR_USE_XSIMD
 
-#define XTENSOR_DEFAULT_ALLOCATOR(T) xsimd::aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>
+#define XTENSOR_DEFAULT_ALLOCATOR(T) xsimd::aligned_allocator<T, XTENSOR_DEFAULT_ALIGNMENT>
 #else
 #define XTENSOR_DEFAULT_ALLOCATOR(T) std::allocator<T>
 #endif

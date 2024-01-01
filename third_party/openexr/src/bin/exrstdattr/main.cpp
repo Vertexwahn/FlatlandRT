@@ -97,11 +97,11 @@ usageMessage (ostream& stream, const char* program_name, bool verbose = false)
             "\n"
             "  -renderingTransform s\n"
             "        name of the CTL rendering transform for this\n"
-            "        image (string)\n"
+            "        image (string). This attribute is deprecated.\n"
             "\n"
             "  -lookModTransform s\n"
             "        name of the CTL look modification transform for\n"
-            "        this image (string)\n"
+            "        this image (string). This attribute is deprecated.\n"
             "\n"
             "  -xDensity f\n"
             "        horizontal output density, in pixels per inch\n"
@@ -485,7 +485,7 @@ getChromaticities (
     if (i > argc - 9)
         throw invalid_argument("Expected 8 chromaticity values");
 
-    ChromaticitiesAttribute* a = new ChromaticitiesAttribute;
+    ChromaticitiesAttribute* a = new ChromaticitiesAttribute(Chromaticities());
     attrs.push_back (SetAttr (attrName, part, a));
 
     a->value ().red.x   = static_cast<float> (strtod (argv[i + 1], 0));

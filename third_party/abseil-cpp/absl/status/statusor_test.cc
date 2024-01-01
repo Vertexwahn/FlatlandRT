@@ -15,31 +15,41 @@
 #include "absl/status/statusor.h"
 
 #include <array>
+#include <cstddef>
 #include <initializer_list>
+#include <map>
 #include <memory>
+#include <ostream>
+#include <sstream>
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/base/casts.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/any.h"
+#include "absl/types/variant.h"
 #include "absl/utility/utility.h"
 
 namespace {
 
 using ::testing::AllOf;
+using ::testing::AnyOf;
 using ::testing::AnyWith;
 using ::testing::ElementsAre;
+using ::testing::EndsWith;
 using ::testing::Field;
 using ::testing::HasSubstr;
 using ::testing::Ne;
 using ::testing::Not;
 using ::testing::Pointee;
+using ::testing::StartsWith;
 using ::testing::VariantWith;
 
 #ifdef GTEST_HAS_STATUS_MATCHERS
@@ -1875,6 +1885,37 @@ TEST(StatusOr, StatusAssignmentFromTypeConvertibleToStatus) {
 
   EXPECT_FALSE(statusor.ok());
   EXPECT_EQ(statusor.status(), static_cast<absl::Status>(v));
+}
+
+struct PrintTestStruct {
+  friend std::ostream& operator<<(std::ostream& os, const PrintTestStruct&) {
+    return os << "ostream";
+  }
+
+  template <typename Sink>
+  friend void AbslStringify(Sink& sink, const PrintTestStruct&) {
+    sink.Append("stringify");
+  }
+};
+
+TEST(StatusOr, OkPrinting) {
+  absl::StatusOr<PrintTestStruct> print_me = PrintTestStruct{};
+  std::stringstream stream;
+  stream << print_me;
+  EXPECT_EQ(stream.str(), "ostream");
+  EXPECT_EQ(absl::StrCat(print_me), "stringify");
+}
+
+TEST(StatusOr, ErrorPrinting) {
+  absl::StatusOr<PrintTestStruct> print_me = absl::UnknownError("error");
+  std::stringstream stream;
+  stream << print_me;
+  const auto error_matcher =
+      AllOf(HasSubstr("UNKNOWN"), HasSubstr("error"),
+            AnyOf(AllOf(StartsWith("("), EndsWith(")")),
+                  AllOf(StartsWith("["), EndsWith("]"))));
+  EXPECT_THAT(stream.str(), error_matcher);
+  EXPECT_THAT(absl::StrCat(print_me), error_matcher);
 }
 
 }  // namespace

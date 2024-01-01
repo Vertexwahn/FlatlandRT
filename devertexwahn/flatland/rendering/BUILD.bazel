@@ -6,6 +6,28 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "fresnel",
+    srcs = ["fresnel.h"],
+    deps = [
+        "//core:namespace",
+        "//math:vector",
+    ],
+)
+
+cc_test(
+    name = "fresnel_test",
+    size = "small",
+    srcs = [
+        "fresnel_test.cpp",
+    ],
+    deps = [
+        ":fresnel",
+        "//math:normal",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "property_set",
     hdrs = [
         "property_set.h",
@@ -29,7 +51,7 @@ cc_test(
     ],
     deps = [
         ":property_set",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -41,7 +63,7 @@ cc_test(
     ],
     deps = [
         ":property_set",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -77,7 +99,7 @@ cc_test(
     ],
     deps = [
         ":sampler",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
         "@hypothesis",
     ],
 )

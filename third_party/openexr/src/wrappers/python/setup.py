@@ -1,13 +1,10 @@
-# SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) Contributors to the OpenEXR Project.
-
 from setuptools import setup, Extension
 import os
 import platform
 import re
 
 
-DESC = """Python bindings for ILM's OpenEXR image file format.
+DESC = """Python bindings for the OpenEXR image file format.
 
 This is a script to autobuild the wheels using github actions. Please, do not
 use it manually
@@ -15,34 +12,33 @@ use it manually
 If you detect any problem, please feel free to report the issue on the GitHub
 page:
 
-https://github.com/sanguinariojoe/pip-openexr/issues
+https://github.com/AcademySoftwareFoundation/openexr/issues
 """
 
+# Get the version and library suffix for both OpenEXR and Imath from
+# the .pc pkg-config file. 
 
-version = []
-with open('src/lib/OpenEXRCore/openexr_version.h', 'r') as f:
-    txt = f.read()
-    for name in ('MAJOR', 'MINOR', 'PATCH'):
-        version.append(re.search(
-            f'VERSION_{name} ([0-9]*)', txt).group(0).split(' ')[-1])
-version_major, version_minor, version_patch = version
-version = f"{version_major}.{version_minor}.{version_patch}"
+def pkg_config(var, pkg):
+    with open(f'./openexr.install/lib/pkgconfig/{pkg}.pc', 'r') as f:
+        return re.search(f'{var}([^ \n]+)', f.read()).group(1)
+
+imath_libsuffix = pkg_config("libsuffix=", "Imath")
+openexr_libsuffix = pkg_config("libsuffix=", "OpenEXR")
+openexr_version = pkg_config("Version: ", "OpenEXR")
+openexr_version_major, openexr_version_minor, openexr_version_patch = openexr_version.split('.')
 
 libs=[]
-libs_static=['z',
-             f'OpenEXR-{version_major}_{version_minor}',
-             f'IlmThread-{version_major}_{version_minor}',
-             f'Iex-{version_major}_{version_minor}',
-             f'Imath-3_1',
-             f'OpenEXRCore-{version_major}_{version_minor}',
-             f'deflate']
-definitions = [('PYOPENEXR_VERSION_MAJOR', f'{version_major}'),
-               ('PYOPENEXR_VERSION_MINOR', f'{version_minor}'),
-               ('PYOPENEXR_VERSION_PATCH', f'{version_patch}'),]
+libs_static=[f'OpenEXR{openexr_libsuffix}',
+             f'IlmThread{openexr_libsuffix}',
+             f'Iex{openexr_libsuffix}',
+             f'Imath{imath_libsuffix}',
+             f'OpenEXRCore{openexr_libsuffix}',
+             ]
+definitions = [('PYOPENEXR_VERSION_MAJOR', f'{openexr_version_major}'),
+               ('PYOPENEXR_VERSION_MINOR', f'{openexr_version_minor}'),
+               ('PYOPENEXR_VERSION_PATCH', f'{openexr_version_patch}'),]
 if platform.system() == "Windows":
-    libs_static[0] = 'zlibstatic'
-    libs_static[-1] = 'deflatestatic'
-    definitions = [('PYOPENEXR_VERSION', f'\\"{version}\\"')]
+    definitions = [('PYOPENEXR_VERSION', f'\\"{openexr_version}\\"')]
 extra_compile_args = []
 if platform.system() == 'Darwin':
     extra_compile_args += ['-std=c++11',
@@ -65,12 +61,12 @@ else:
 
 
 setup(name='OpenEXR',
-    author = 'James Bowman',
-    author_email = 'jamesb@excamera.com',
-    url = 'https://github.com/sanguinariojoe/pip-openexr',
-    description = "Python bindings for ILM's OpenEXR image file format",
+    author = 'Contributors to the OpenEXR Project',
+    author_email = 'info@openexr.com',
+    url = 'https://github.com/AcademySoftwareFoundation/openexr',
+    description = "Python bindings for the OpenEXR image file format",
     long_description = DESC,
-    version=version,
+    version=openexr_version,
     ext_modules=[ 
         Extension('OpenEXR',
                   ['OpenEXR.cpp'],

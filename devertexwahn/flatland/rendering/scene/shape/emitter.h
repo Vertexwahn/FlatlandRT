@@ -14,7 +14,7 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 class Emitter : public Object {
 public:
     Emitter() {}
@@ -22,7 +22,7 @@ public:
     virtual ~Emitter() {
     }
 
-    virtual ColorType<3, ScalarType> evaluate() const = 0;
+    virtual ColorType<ScalarType, 3> evaluate() const = 0;
 
     [[nodiscard]]
     virtual std::string to_string() const override {

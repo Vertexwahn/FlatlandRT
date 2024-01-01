@@ -1,4 +1,4 @@
-/* Copyright (c) 2008, Google Inc.
+/* Copyright (c) 2023, Google Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,43 +33,24 @@
  */
 
 #ifndef _WIN32
-# error You should only be including windows/port.cc in a windows environment!
+#  error You should only be including windows/port.cc in a windows environment!
 #endif
 
 #include "port.h"
 
-#include <cstdarg>  // for va_list, va_start, va_end
 #include <ctime>
 
 #include "config.h"
-
-// These call the windows _vsnprintf, but always NUL-terminate.
-int safe_vsnprintf(char* str, std::size_t size, const char* format,
-                   va_list ap) {
-  if (size == 0)        // not even room for a \0?
-    return -1;          // not what C99 says to do, but what windows does
-  str[size-1] = '\0';
-  return _vsnprintf(str, size-1, format, ap);
-}
 
 #ifndef HAVE_LOCALTIME_R
 struct tm* localtime_r(const std::time_t* timep, std::tm* result) {
   localtime_s(result, timep);
   return result;
 }
-#endif // not HAVE_LOCALTIME_R
+#endif  // not HAVE_LOCALTIME_R
 #ifndef HAVE_GMTIME_R
 struct tm* gmtime_r(const std::time_t* timep, std::tm* result) {
   gmtime_s(result, timep);
   return result;
 }
-#endif // not HAVE_GMTIME_R
-#ifndef HAVE_SNPRINTF
-int snprintf(char *str, size_t size, const char *format, ...) {
-  va_list ap;
-  va_start(ap, format);
-  const int r = vsnprintf(str, size, format, ap);
-  va_end(ap);
-  return r;
-}
-#endif
+#endif  // not HAVE_GMTIME_R

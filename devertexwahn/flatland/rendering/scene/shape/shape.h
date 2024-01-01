@@ -15,35 +15,35 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 class ShapeType;
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 struct MediumEventType {
     using Scalar = ScalarType;
-    using Point = PointType<Dimension, ScalarType>;
-    using Normal = NormalType<Dimension, ScalarType>;
-    using Frame = FrameType<Dimension, ScalarType>;
+    using Point = PointType<ScalarType, Dimension>;
+    using Normal = NormalType<ScalarType, Dimension>;
+    using Frame = FrameType<ScalarType, Dimension>;
 
     Point p; // intersection point
     Scalar t; // distance to intersection point
     Frame geo_frame; // geo_frame regarding to world space
     Frame sh_frame; // shading frame
 
-    const ShapeType<Dimension, ScalarType> *shape = nullptr;
+    const ShapeType<ScalarType, Dimension> *shape = nullptr;
 };
 
 template <typename ScalarType>
-using MediumEvent2 = MediumEventType<2, ScalarType>;
+using MediumEvent2 = MediumEventType<ScalarType, 2>;
 template <typename ScalarType>
-using MediumEvent3 = MediumEventType<3, ScalarType>;
+using MediumEvent3 = MediumEventType<ScalarType, 3>;
 
 using MediumEvent2f = MediumEvent2<float>;
 using MediumEvent2d = MediumEvent2<double>;
 using MediumEvent3f = MediumEvent3<float>;
 using MediumEvent3d = MediumEvent3<double>;
 
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 class ShapeTypeBase : public Object {
 public:
     ShapeTypeBase() : transform_(identity<ScalarType>()) {}
@@ -58,42 +58,42 @@ public:
     virtual ~ShapeTypeBase() {}
 
     [[nodiscard]]
-    virtual AxisAlignedBoundingBoxType<Dimension, ScalarType> bounds() const = 0; // minimal AABB of shape
+    virtual AxisAlignedBoundingBoxType<ScalarType, Dimension> bounds() const = 0; // minimal AABB of shape
 
-    virtual bool intersect(const RayType<Dimension, ScalarType> &ray, MediumEventType<Dimension, ScalarType> &me) const = 0;
+    virtual bool intersect(const RayType<ScalarType, Dimension> &ray, MediumEventType<ScalarType, Dimension> &me) const = 0;
 
     const Transform44Type<ScalarType>& transform() const {
         return transform_;
     };
 
-    void set_bsdf(ReferenceCounted<BSDFType<Dimension,ScalarType>> bxdf) {
-        bxdf_ = bxdf;
+    void set_bsdf(ReferenceCounted<BSDFType<ScalarType, Dimension>> bxdf) {
+        bsdf_ = bxdf;
     }
-    ReferenceCounted<BSDFType<Dimension,ScalarType>> bsdf() const {
-        return bxdf_;
+    ReferenceCounted<BSDFType<ScalarType, Dimension>> bsdf() const {
+        return bsdf_;
     }
 
-    void set_emitter(ReferenceCounted<Emitter<Dimension,ScalarType>> emitter) {
+    void set_emitter(ReferenceCounted<Emitter<ScalarType, Dimension>> emitter) {
         emitter_ = emitter;
     }
-    ReferenceCounted<Emitter<Dimension,ScalarType>> emitter() const {
+    ReferenceCounted<Emitter<ScalarType, Dimension>> emitter() const {
         return emitter_;
     }
     virtual bool is_emitter() const { return emitter_ != nullptr; }
 
 protected:
     Transform44Type<ScalarType> transform_; // transform from object space to world space
-    ReferenceCounted<BSDFType<Dimension,ScalarType>> bxdf_{nullptr};
-    ReferenceCounted<Emitter<Dimension,ScalarType>> emitter_{nullptr};
+    ReferenceCounted<BSDFType<ScalarType, Dimension>> bsdf_{nullptr};
+    ReferenceCounted<Emitter<ScalarType, Dimension>> emitter_{nullptr};
 };
 
-template <unsigned int Dimension, typename ScalarType>
-class ShapeType : public ShapeTypeBase<Dimension,ScalarType> {
+template <typename ScalarType, unsigned int Dimension>
+class ShapeType : public ShapeTypeBase<ScalarType, Dimension> {
 public:
     ShapeType() {}
-	ShapeType(const Transform44f& transform)  : ShapeTypeBase<Dimension,ScalarType>(transform) {
+	ShapeType(const Transform44f& transform)  : ShapeTypeBase<ScalarType, Dimension>(transform) {
     };
-    ShapeType(const PropertySet& ps) : ShapeTypeBase<Dimension,ScalarType>(ps) {
+    ShapeType(const PropertySet& ps) : ShapeTypeBase<ScalarType, Dimension>(ps) {
 
     }
 
@@ -101,12 +101,12 @@ public:
 };
 
 template <typename ScalarType>
-class ShapeType<2, ScalarType> : public ShapeTypeBase<2,ScalarType> {
+class ShapeType<ScalarType, 2> : public ShapeTypeBase<ScalarType, 2> {
 public:
     ShapeType() {}
-    ShapeType(const Transform44f& transform)  : ShapeTypeBase<2,ScalarType>(transform) {
+    ShapeType(const Transform44f& transform)  : ShapeTypeBase<ScalarType, 2>(transform) {
     };
-    ShapeType(const PropertySet& ps) : ShapeTypeBase<2,ScalarType>(ps) {
+    ShapeType(const PropertySet& ps) : ShapeTypeBase<ScalarType, 2>(ps) {
 
     }
 
@@ -135,9 +135,9 @@ protected:
 };
 
 template <typename ScalarType>
-using Shape2 = ShapeType<2, ScalarType>;
+using Shape2 = ShapeType<ScalarType, 2>;
 template <typename ScalarType>
-using Shape3 = ShapeType<3, ScalarType>;
+using Shape3 = ShapeType<ScalarType, 3>;
 
 using Shape2f = Shape2<float>;
 using Shape2d = Shape2<double>;

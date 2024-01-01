@@ -31,18 +31,19 @@
 //
 // Unit tests for functions in demangle.c.
 
+#include "demangle.h"
+
+#include <fstream>
+#include <iostream>
+#include <string>
+
+#include "config.h"
+#include "glog/logging.h"
+#include "googletest.h"
 #include "utilities.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <glog/logging.h>
-#include "demangle.h"
-#include "googletest.h"
-#include "config.h"
-
-#ifdef HAVE_LIB_GFLAGS
-#include <gflags/gflags.h>
+#ifdef GLOG_USE_GFLAGS
+#  include <gflags/gflags.h>
 using namespace GFLAGS_NAMESPACE;
 #endif
 
@@ -50,10 +51,10 @@ GLOG_DEFINE_bool(demangle_filter, false,
                  "Run demangle_unittest in filter mode");
 
 using namespace std;
-using namespace GOOGLE_NAMESPACE;
+using namespace google;
 
 // A wrapper function for Demangle() to make the unit test simple.
-static const char *DemangleIt(const char * const mangled) {
+static const char* DemangleIt(const char* const mangled) {
   static char demangled[4096];
   if (Demangle(mangled, demangled, sizeof(demangled))) {
     return demangled;
@@ -64,28 +65,25 @@ static const char *DemangleIt(const char * const mangled) {
 
 #if defined(GLOG_OS_WINDOWS)
 
-#if defined(HAVE_DBGHELP) && !defined(NDEBUG)
+#  if defined(HAVE_DBGHELP) && !defined(NDEBUG)
 TEST(Demangle, Windows) {
-  EXPECT_STREQ(
-    "public: static void __cdecl Foo::func(int)",
-    DemangleIt("?func@Foo@@SAXH@Z"));
-  EXPECT_STREQ(
-    "public: static void __cdecl Foo::func(int)",
-    DemangleIt("@ILT+1105(?func@Foo@@SAXH@Z)"));
-  EXPECT_STREQ(
-    "int __cdecl foobarArray(int * const)",
-    DemangleIt("?foobarArray@@YAHQAH@Z"));
+  EXPECT_STREQ("public: static void __cdecl Foo::func(int)",
+               DemangleIt("?func@Foo@@SAXH@Z"));
+  EXPECT_STREQ("public: static void __cdecl Foo::func(int)",
+               DemangleIt("@ILT+1105(?func@Foo@@SAXH@Z)"));
+  EXPECT_STREQ("int __cdecl foobarArray(int * const)",
+               DemangleIt("?foobarArray@@YAHQAH@Z"));
 }
-#endif
+#  endif
 
 #else
 
 // Test corner cases of boundary conditions.
 TEST(Demangle, CornerCases) {
   const size_t size = 10;
-  char tmp[size] = { 0 };
-  const char *demangled = "foobar()";
-  const char *mangled = "_Z6foobarv";
+  char tmp[size] = {0};
+  const char* demangled = "foobar()";
+  const char* mangled = "_Z6foobarv";
   EXPECT_TRUE(Demangle(mangled, tmp, sizeof(tmp)));
   // sizeof("foobar()") == size - 1
   EXPECT_STREQ(demangled, tmp);
@@ -146,8 +144,8 @@ TEST(Demangle, FromFile) {
 
 #endif
 
-int main(int argc, char **argv) {
-#ifdef HAVE_LIB_GFLAGS
+int main(int argc, char** argv) {
+#ifdef GLOG_USE_GFLAGS
   ParseCommandLineFlags(&argc, &argv, true);
 #endif
   InitGoogleTest(&argc, argv);

@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 #include "jpeglib.h"
 #include <setjmp.h>

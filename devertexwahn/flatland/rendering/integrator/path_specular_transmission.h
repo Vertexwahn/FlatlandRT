@@ -13,7 +13,7 @@
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 // This integrator follows a sensor ray and only expects at each surface interaction a specular transmission
-class PathSpecularTransmission : public Integrator2f {
+class PathSpecularTransmission final : public Integrator2f {
 public:
     PathSpecularTransmission(const PropertySet &ps);
 
@@ -22,7 +22,7 @@ public:
     Color3f trace(const Scene2f *scene, Sampler *sampler, Ray2f &ray, const int depth) const override;
 
 private:
-    int max_depth = 0;
+    int max_depth{};
 };
 
 DE_VERTEXWAHN_END_NAMESPACE

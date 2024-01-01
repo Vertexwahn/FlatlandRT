@@ -26,7 +26,7 @@ cc_test(
         "//flatland/rendering",
         "//flatland/rendering/integrator:ambient_occlusion",
         "//flatland/rendering/scene:load_scene",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -62,7 +62,7 @@ cc_test(
         ":path_mirror_reflection",
         "//flatland/rendering",
         "//flatland/rendering/scene:load_scene",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -90,6 +90,6 @@ cc_test(
         ":path_specular_transmission",
         "//flatland/rendering",
         "//flatland/rendering/scene:load_scene",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

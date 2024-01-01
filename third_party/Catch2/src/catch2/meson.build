@@ -18,6 +18,8 @@ configure_file(
   configuration: conf_data,
 )
 
+fs = import('fs')
+
 benchmark_headers = [
   'benchmark/catch_benchmark.hpp',
   'benchmark/catch_benchmark_all.hpp',
@@ -45,6 +47,7 @@ benchmark_headers = [
 
 benchmark_sources = files(
   'benchmark/catch_chronometer.cpp',
+  'benchmark/detail/catch_analyse.cpp',
   'benchmark/detail/catch_benchmark_function.cpp',
   'benchmark/detail/catch_run_for_at_least.cpp',
   'benchmark/detail/catch_stats.cpp',
@@ -97,6 +100,7 @@ internal_headers = [
   'internal/catch_getenv.hpp',
   'internal/catch_istream.hpp',
   'internal/catch_is_permutation.hpp',
+  'internal/catch_jsonwriter.hpp',
   'internal/catch_lazy_expr.hpp',
   'internal/catch_leak_detector.hpp',
   'internal/catch_list.hpp',
@@ -113,6 +117,8 @@ internal_headers = [
   'internal/catch_preprocessor.hpp',
   'internal/catch_preprocessor_internal_stringify.hpp',
   'internal/catch_preprocessor_remove_parens.hpp',
+  'internal/catch_random_floating_point_helpers.hpp',
+  'internal/catch_random_integer_helpers.hpp',
   'internal/catch_random_number_generator.hpp',
   'internal/catch_random_seed_generation.hpp',
   'internal/catch_reporter_registry.hpp',
@@ -142,6 +148,8 @@ internal_headers = [
   'internal/catch_textflow.hpp',
   'internal/catch_to_string.hpp',
   'internal/catch_uncaught_exceptions.hpp',
+  'internal/catch_uniform_floating_point_distribution.hpp',
+  'internal/catch_uniform_integer_distribution.hpp',
   'internal/catch_unique_name.hpp',
   'internal/catch_unique_ptr.hpp',
   'internal/catch_void_type.hpp',
@@ -156,6 +164,7 @@ internal_headers = [
   'matchers/catch_matchers_floating_point.hpp',
   'matchers/catch_matchers_predicate.hpp',
   'matchers/catch_matchers_quantifiers.hpp',
+  'matchers/catch_matchers_range_equals.hpp',
   'matchers/catch_matchers_string.hpp',
   'matchers/catch_matchers_templated.hpp',
   'matchers/catch_matchers_vector.hpp',
@@ -212,6 +221,7 @@ internal_sources = files(
   'internal/catch_floating_point_helpers.cpp',
   'internal/catch_getenv.cpp',
   'internal/catch_istream.cpp',
+  'internal/catch_jsonwriter.cpp',
   'internal/catch_lazy_expr.cpp',
   'internal/catch_leak_detector.cpp',
   'internal/catch_list.cpp',
@@ -278,6 +288,7 @@ reporter_headers = [
   'reporters/catch_reporter_cumulative_base.hpp',
   'reporters/catch_reporter_event_listener.hpp',
   'reporters/catch_reporter_helpers.hpp',
+  'reporters/catch_reporter_json.hpp',
   'reporters/catch_reporter_junit.hpp',
   'reporters/catch_reporter_multi.hpp',
   'reporters/catch_reporter_registrars.hpp',
@@ -297,6 +308,7 @@ reporter_sources = files(
   'reporters/catch_reporter_cumulative_base.cpp',
   'reporters/catch_reporter_event_listener.cpp',
   'reporters/catch_reporter_helpers.cpp',
+  'reporters/catch_reporter_json.cpp',
   'reporters/catch_reporter_junit.cpp',
   'reporters/catch_reporter_multi.cpp',
   'reporters/catch_reporter_registrars.cpp',
@@ -330,9 +342,19 @@ foreach file : headers
   install_headers(file, subdir: join_paths(include_subdir, folder))
 endforeach
 
+catch2_dependencies = []
+# Check if this is an Android NDK build.
+if ((host_machine.system() == 'android') or
+  # Check if this is an Android Termux build.
+  (host_machine.system() == 'linux' and fs.is_dir('/data/data/com.termux')))
+  log_dep = meson.get_compiler('cpp').find_library('log')
+  catch2_dependencies += log_dep
+endif
+
 catch2 = static_library(
   'Catch2',
   sources,
+  dependencies: catch2_dependencies,
   include_directories: '..',
   install: true,
 )

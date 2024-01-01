@@ -13,19 +13,19 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template<unsigned int Dimension, typename ScalarType>
-class AmbientOcclusion : public IntegratorType<Dimension, ScalarType> {
+template<typename ScalarType, unsigned int Dimension>
+class AmbientOcclusion : public IntegratorType<ScalarType, Dimension> {
 public:
-    using Base = IntegratorType<Dimension, ScalarType>;
-    using Color = ColorType<3, ScalarType>;
+    using Base = IntegratorType<ScalarType, Dimension>;
+    using Color = ColorType<ScalarType, 3>;
     using Scalar = ScalarType;
-    using Vector = VectorType<Dimension, ScalarType>;
-    using Point = PointType<Dimension, ScalarType>;
-    using Ray = RayType<Dimension, ScalarType>;
-    using MediumEvent = MediumEventType<Dimension, ScalarType>;
+    using Vector = VectorType<ScalarType, Dimension>;
+    using Point = PointType<ScalarType, Dimension>;
+    using Ray = RayType<ScalarType, Dimension>;
+    using MediumEvent = MediumEventType<ScalarType, Dimension>;
     using Sampler = SamplerType<ScalarType>;
 
-    AmbientOcclusion(const PropertySet& ps) : IntegratorType<Dimension, ScalarType>(ps) {
+    AmbientOcclusion(const PropertySet& ps) : IntegratorType<ScalarType, Dimension>(ps) {
         background_color_ = ps.get_property<Color3f>("background_color", Color3f{Scalar{0.0}, Scalar{0.0}, Scalar{0.0}});
         use_random_sampling_ = ps.get_property<bool>("random_sampling", false);
         sample_count_ = ps.get_property<int>("sample_count", 10);
@@ -34,7 +34,7 @@ public:
     }
 
     Color trace(
-            const SceneType<Dimension, ScalarType> *scene,
+            const SceneType<ScalarType, Dimension> *scene,
             Sampler *sampler,
             Ray &ray,
             const int depth) const override {
@@ -78,12 +78,12 @@ public:
 
 private:
     Color background_color_{Scalar{0.0}, Scalar{0.0}, Scalar{0.0}};
-    bool use_random_sampling_ = false;
-    int sample_count_ = 10;
+    bool use_random_sampling_{false};
+    int sample_count_{10};
 };
 
-using AmbientOcclusion2f = AmbientOcclusion<2, float>;
-using AmbientOcclusion2d = AmbientOcclusion<2, double>;
+using AmbientOcclusion2f = AmbientOcclusion<float, 2>;
+using AmbientOcclusion2d = AmbientOcclusion<double, 2>;
 
 DE_VERTEXWAHN_END_NAMESPACE
 

@@ -22,7 +22,7 @@ class SvgCanvasType {
 public:
     using Ray = Ray2<ScalarType>;
     using Label = LabelType2<ScalarType>;
-    using Point = PointType<2, ScalarType>;
+    using Point = PointType<ScalarType, 2>;
     using Scalar = ScalarType;
     using Shape = Shape2<ScalarType>;
     using AxisAlignedBoundingBox = AxisAlignedBoundingBox2<ScalarType>;

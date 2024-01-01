@@ -18,18 +18,18 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 class SceneType {
 public:
-    using Shape = ShapeType<Dimension, ScalarType>;
-    using Ray = RayType<Dimension, ScalarType>;
-    using MediumEvent = MediumEventType<Dimension, ScalarType>;
-    using Sensor = SensorType<Dimension, ScalarType>;
-    using Integrator = IntegratorType<Dimension, ScalarType>;
+    using Shape = ShapeType<ScalarType, Dimension>;
+    using Ray = RayType<ScalarType, Dimension>;
+    using MediumEvent = MediumEventType<ScalarType, Dimension>;
+    using Sensor = SensorType<ScalarType, Dimension>;
+    using Integrator = IntegratorType<ScalarType, Dimension>;
     using Sampler = SamplerType<ScalarType>;
     using Label = LabelType2<ScalarType>;
     using Scalar = ScalarType;
-    using Intersector = IntersectorType<Dimension, ScalarType>;
+    using Intersector = IntersectorType<ScalarType, Dimension>;
 
     SceneType() = default;
 
@@ -67,6 +67,7 @@ public:
         integrator_ = integrator;
     }
 
+    [[nodiscard]]
     ReferenceCounted<Integrator> integrator() const {
         return integrator_;
     }
@@ -75,10 +76,12 @@ public:
         annotations_.push_back(text);
     }
 
+    [[nodiscard]]
     std::vector<Label> annotations() {
         return annotations_;
     }
 
+    [[nodiscard]]
     size_t annotation_count() {
         return annotations_.size();
     }
@@ -121,9 +124,9 @@ private:
 };
 
 template<typename ScalarType>
-using Scene2 = SceneType<2, ScalarType>;
+using Scene2 = SceneType<ScalarType, 2>;
 template<typename ScalarType>
-using Scene3 = SceneType<3, ScalarType>;
+using Scene3 = SceneType<ScalarType, 3>;
 
 using Scene2f = Scene2<float>;
 using Scene2d = Scene2<double>;

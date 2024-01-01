@@ -1,7 +1,6 @@
 # ![xtensor](docs/source/xtensor.svg)
 
 [![GithubActions](https://github.com/xtensor-stack/xtensor/actions/workflows/ci.yml/badge.svg)](https://github.com/xtensor-stack/xtensor/actions/workflows/ci.yml)
-[![GithubActions](https://github.com/xtensor-stack/xtensor/actions/workflows/ci_extended.yaml/badge.svg)](https://github.com/xtensor-stack/xtensor/actions/workflows/ci_extended.yaml)
 [![Documentation](http://readthedocs.org/projects/xtensor/badge/?version=latest)](https://xtensor.readthedocs.io/en/latest/?badge=latest)
 [![Doxygen -> gh-pages](https://github.com/xtensor-stack/xtensor/workflows/gh-pages/badge.svg)](https://xtensor-stack.github.io/xtensor)
 [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/xtensor-stack/xtensor/stable?filepath=notebooks%2Fxtensor.ipynb)
@@ -96,8 +95,15 @@ library:
 
 | `xtensor` | `xtl`   |`xsimd` (optional) |
 |-----------|---------|-------------------|
-|  master   | ^0.7.5  |       ^10.0.0      |
-|  0.24.x   | ^0.7.0  |       ^8.0.3      |
+|  master   | ^0.7.5  |       ^10.0.0     |
+|  0.24.7   | ^0.7.0  |       ^10.0.0     |
+|  0.24.6   | ^0.7.0  |       ^10.0.0     |
+|  0.24.5   | ^0.7.0  |       ^10.0.0     |
+|  0.24.4   | ^0.7.0  |       ^10.0.0     |
+|  0.24.3   | ^0.7.0  |       ^8.0.3      |
+|  0.24.2   | ^0.7.0  |       ^8.0.3      |
+|  0.24.1   | ^0.7.0  |       ^8.0.3      |
+|  0.24.0   | ^0.7.0  |       ^8.0.3      |
 |  0.23.x   | ^0.7.0  |       ^7.4.8      |
 |  0.22.0   | ^0.6.23 |       ^7.4.8      |
 

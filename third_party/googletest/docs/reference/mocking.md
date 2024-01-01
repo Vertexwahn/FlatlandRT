@@ -1,8 +1,7 @@
 # Mocking Reference
 
 This page lists the facilities provided by GoogleTest for creating and working
-with mock objects. To use them, include the header
-`gmock/gmock.h`.
+with mock objects. To use them, add `#include <gmock/gmock.h>`.
 
 ## Macros {#macros}
 
@@ -82,8 +81,8 @@ EXPECT_CALL(mock_object, method_name(matchers...))
     .Times(cardinality)            // Can be used at most once
     .InSequence(sequences...)      // Can be used any number of times
     .After(expectations...)        // Can be used any number of times
-    .WillOnce(action)              // Can be used any number of times
-    .WillRepeatedly(action)        // Can be used at most once
+    .WillRepeatedly(action)        // Can be used any number of times
+    .WillOnce(action)              // Can be used at most once
     .RetiresOnSaturation();        // Can be used at most once
 ```
 

@@ -3,6 +3,7 @@
 
 [![License](https://img.shields.io/github/license/AcademySoftwareFoundation/openexr)](LICENSE.md)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2799/badge)](https://bestpractices.coreinfrastructure.org/projects/2799)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/AcademySoftwareFoundation/openexr/badge)](https://securityscorecards.dev/viewer/?uri=github.com/AcademySoftwareFoundation/openexr)
 [![Build Status](https://github.com/AcademySoftwareFoundation/openexr/workflows/CI/badge.svg)](https://github.com/AcademySoftwareFoundation/openexr/actions?query=workflow%3ACI)
 [![Analysis Status](https://github.com/AcademySoftwareFoundation/openexr/workflows/Analysis/badge.svg)](https://github.com/AcademySoftwareFoundation/openexr/actions?query=workflow%3AAnalysis)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AcademySoftwareFoundation_openexr&metric=alert_status)](https://sonarcloud.io/dashboard?id=AcademySoftwareFoundation_openexr)
@@ -97,9 +98,8 @@ The `CMakeLists.txt` to build:
 
 To build:
 
-    $ mkdir _build
     $ cmake -S . -B _build
-    $ make --build _build
+    $ cmake --build _build
 
 For more details, see [The OpenEXR
 API](https://openexr.readthedocs.io/en/latest/API.html#the-openexr-api).

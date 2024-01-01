@@ -15,19 +15,19 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 // from pbrt v3 with modifications
 template<typename ScalarType>
 Vector2<ScalarType> reflect(const Vector2<ScalarType> &wo, const Normal2<ScalarType> &normal) {
-    return -wo + 2 * wo.dot(normal) * normal;
+    return -wo + ScalarType{2} * wo.dot(normal) * normal;
 }
 
 // This integrator follows a sensor ray and only expects at each surface interaction a mirror reflection
 template<typename ScalarType>
-class PathMirrorReflection2 : public IntegratorType<2, ScalarType> {
+class PathMirrorReflection2 final : public IntegratorType<ScalarType, 2> {
 public:
-    using Base = IntegratorType<2, ScalarType>;
-    using Color = ColorType<3, ScalarType>;
+    using Base = IntegratorType<ScalarType, 2>;
+    using Color = ColorType<ScalarType, 3>;
     using Scalar = ScalarType;
     using Sampler = SamplerType<ScalarType>;
 
-    PathMirrorReflection2(const PropertySet &ps) : IntegratorType<2, ScalarType>(ps) {
+    PathMirrorReflection2(const PropertySet &ps) : IntegratorType<ScalarType, 2>(ps) {
         max_depth = ps.get_property("max_depth", 5);
     }
 
@@ -49,14 +49,13 @@ public:
             ray.max_t = me.t;
 
             // compute reflection
-
             Vector2<ScalarType> wi = -ray.direction;
             wi.normalize();
 
             // inside or outside?
-            Vector2<ScalarType> reflectedDirection = reflect<ScalarType>(wi, me.geo_frame.n.normalized());
+            Vector2<ScalarType> reflected_direction = reflect<ScalarType>(wi, me.geo_frame.n.normalized());
 
-            Ray2f reflectedRay(me.p + reflectedDirection * ScalarType{0.01}, reflectedDirection, ScalarType{0.0}, ScalarType{20000.0});
+            Ray2f reflectedRay(me.p + reflected_direction * ScalarType{0.01}, reflected_direction, ScalarType{0.0}, ScalarType{20000.0});
 
             trace(scene, sampler, reflectedRay, depth+1);
         }
@@ -70,7 +69,7 @@ public:
     }
 
 private:
-    int max_depth = 0;
+    int max_depth{};
 };
 
 using PathMirrorReflection2f = PathMirrorReflection2<float>;

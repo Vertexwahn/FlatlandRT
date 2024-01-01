@@ -13,9 +13,9 @@
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 bool are_equal(const Image3f &a, const Image3f &b);
+bool are_equal(const Image3b &a, const Image3b &b);
 
 double mean_squared_error(const Image3f &a, const Image3f &b);
-
 double mean_squared_error(ReferenceCounted<Image3f> a, ReferenceCounted<Image3f> b);
 
 DE_VERTEXWAHN_END_NAMESPACE

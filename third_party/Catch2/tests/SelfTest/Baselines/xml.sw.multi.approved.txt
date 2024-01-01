@@ -667,7 +667,7 @@ Nor would this
     </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
-  <TestCase name="#2615 - Throwing in constructor generator fails test case but does not abort" tags="[!shouldfail]" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+  <TestCase name="#2615 - Throwing in constructor generator fails test case but does not abort" tags="[!shouldfail][generators][regression]" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
     <Exception filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
       failure to init
     </Exception>
@@ -2911,13 +2911,13 @@ Nor would this
   </TestCase>
   <TestCase name="CAPTURE can deal with complex expressions involving commas" tags="[capture][messages]" filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
     <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
-      std::vector&lt;int>{1, 2, 3}[0, 1, 2] := 3
+      custom_index_op&lt;int>{1, 2, 3}[0, 1, 2] := 0
     </Info>
     <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
-      std::vector&lt;int>{1, 2, 3}[(0, 1)] := 2
+      custom_index_op&lt;int>{1, 2, 3}[(0, 1)] := 0
     </Info>
     <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
-      std::vector&lt;int>{1, 2, 3}[0] := 1
+      custom_index_op&lt;int>{1, 2, 3}[0] := 0
     </Info>
     <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
       (helper_1436&lt;int, int>{12, -12}) := { 12, -12 }
@@ -5581,6 +5581,41 @@ C
       </Expression>
       <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
     </Section>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="GENERATE can combine literals and generators" tags="[generators]" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Original>
+        i % 2 == 0
+      </Original>
+      <Expanded>
+        0 == 0
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Original>
+        i % 2 == 0
+      </Original>
+      <Expanded>
+        0 == 0
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Original>
+        i % 2 == 0
+      </Original>
+      <Expanded>
+        0 == 0
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Original>
+        i % 2 == 0
+      </Original>
+      <Expanded>
+        0 == 0
+      </Expanded>
+    </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
   <TestCase name="Generators -- adapters" tags="[generators][generic]" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
@@ -8371,6 +8406,18 @@ C
     </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
+  <TestCase name="INFO and UNSCOPED_INFO can stream multiple arguments" tags="[.][failing][info][messages]" filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+    <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+      This info has multiple parts.
+    </Info>
+    <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+      This unscoped info has multiple parts.
+    </Info>
+    <Failure filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+      Show infos!
+    </Failure>
+    <OverallResult success="false" skips="0"/>
+  </TestCase>
   <TestCase name="INFO and WARN do not abort tests" tags="[.][messages]" filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
     <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
       this is a message
@@ -8619,6 +8666,20 @@ C
     </Expression>
     <OverallResult success="false" skips="0"/>
   </TestCase>
+  <TestCase name="Incomplete AssertionHandler" tags="[!shouldfail][assertion-handler]" filename="tests/<exe-name>/IntrospectiveTests/AssertionHandler.tests.cpp" >
+    <Expression success="false" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/AssertionHandler.tests.cpp" >
+      <Original>
+        Dummy
+      </Original>
+      <Expanded>
+        Dummy
+      </Expanded>
+      <Exception filename="tests/<exe-name>/IntrospectiveTests/AssertionHandler.tests.cpp" >
+        Exception translation was disabled by CATCH_CONFIG_FAST_COMPILE
+      </Exception>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
   <TestCase name="Inequality checks that should fail" tags="[!shouldfail][.][failing]" filename="tests/<exe-name>/UsageTests/Condition.tests.cpp" >
     <Expression success="false" type="CHECK" filename="tests/<exe-name>/UsageTests/Condition.tests.cpp" >
       <Original>
@@ -8751,6 +8812,277 @@ C
         5 != 6
       </Expanded>
     </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="JsonWriter" tags="[JSON][JsonWriter]" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+    <Section name="Newly constructed JsonWriter does nothing" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          stream.str() == ""
+        </Original>
+        <Expanded>
+          "" == ""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Calling writeObject will create an empty pair of braces" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          stream.str() == "{\n}"
+        </Original>
+        <Expanded>
+          "{
+}"
+==
+"{
+}"
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Calling writeObject with key will create an object to write the value" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE_THAT" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          stream.str(), ContainsSubstring( "\"int\": 1," ) &amp;&amp; ContainsSubstring( "\"double\": 1.5," ) &amp;&amp; ContainsSubstring( "\"true\": true," ) &amp;&amp; ContainsSubstring( "\"false\": false," ) &amp;&amp; ContainsSubstring( "\"string\": \"this is a string\"," ) &amp;&amp; ContainsSubstring( "\"array\": [\n    1,\n    2\n  ]\n}" )
+        </Original>
+        <Expanded>
+          "{
+  "int": 1,
+  "double": 1.5,
+  "true": true,
+  "false": false,
+  "string": "this is a string",
+  "array": [
+    1,
+    2
+  ]
+}" ( contains: ""int": 1," and contains: ""double": 1.5," and contains: ""true": true," and contains: ""false": false," and contains: ""string": "this is a string"," and contains: ""array": [
+    1,
+    2
+  ]
+}" )
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="nesting objects" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE_THAT" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          stream.str(), ContainsSubstring( "\"empty_object\": {\n  }," ) &amp;&amp; ContainsSubstring( "\"fully_object\": {\n    \"key\": 1\n  }" )
+        </Original>
+        <Expanded>
+          "{
+  "empty_object": {
+  },
+  "fully_object": {
+    "key": 1
+  }
+}" ( contains: ""empty_object": {
+  }," and contains: ""fully_object": {
+    "key": 1
+  }" )
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Calling writeArray will create an empty pair of braces" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          stream.str() == "[\n]"
+        </Original>
+        <Expanded>
+          "[
+]"
+==
+"[
+]"
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Calling writeArray creates array to write the values to" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          stream.str() == "[\n  1,\n  1.5,\n  true,\n  false,\n  \"this is a string\",\n  {\n    \"object\": 42\n  },\n  [\n    \"array\",\n    42.5\n  ]\n]"
+        </Original>
+        <Expanded>
+          "[
+  1,
+  1.5,
+  true,
+  false,
+  "this is a string",
+  {
+    "object": 42
+  },
+  [
+    "array",
+    42.5
+  ]
+]"
+==
+"[
+  1,
+  1.5,
+  true,
+  false,
+  "this is a string",
+  {
+    "object": 42
+  },
+  [
+    "array",
+    42.5
+  ]
+]"
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Moved from JsonObjectWriter shall not insert superfluous brace" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          stream.str() == "{\n}"
+        </Original>
+        <Expanded>
+          "{
+}"
+==
+"{
+}"
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Moved from JsonArrayWriter shall not insert superfluous bracket" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          stream.str() == "[\n]"
+        </Original>
+        <Expanded>
+          "[
+]"
+==
+"[
+]"
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Custom class shall be quoted" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          stream.str() == "\"custom\""
+        </Original>
+        <Expanded>
+          ""custom"" == ""custom""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="JsonWriter escapes charaters in strings properly" tags="[JsonWriter]" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+    <Section name="Quote in a string is escaped" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          sstream.str() == "\"\\\"\""
+        </Original>
+        <Expanded>
+          ""\""" == ""\"""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Backslash in a string is escaped" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          sstream.str() == "\"\\\\\""
+        </Original>
+        <Expanded>
+          ""\\"" == ""\\""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Forward slash in a string is **not** escaped" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          sstream.str() == "\"/\""
+        </Original>
+        <Expanded>
+          ""/"" == ""/""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Backspace in a string is escaped" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          sstream.str() == "\"\\b\""
+        </Original>
+        <Expanded>
+          ""\b"" == ""\b""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Formfeed in a string is escaped" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          sstream.str() == "\"\\f\""
+        </Original>
+        <Expanded>
+          ""\f"" == ""\f""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="linefeed in a string is escaped" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          sstream.str() == "\"\\n\""
+        </Original>
+        <Expanded>
+          ""\n"" == ""\n""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="carriage return in a string is escaped" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          sstream.str() == "\"\\r\""
+        </Original>
+        <Expanded>
+          ""\r"" == ""\r""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="tab in a string is escaped" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          sstream.str() == "\"\\t\""
+        </Original>
+        <Expanded>
+          ""\t"" == ""\t""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="combination of characters is escaped" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/Json.tests.cpp" >
+        <Original>
+          sstream.str() == "\"\\\\/\\t\\r\\n\""
+        </Original>
+        <Expanded>
+          ""\\/\t\r\n"" == ""\\/\t\r\n""
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
     <OverallResult success="true" skips="0"/>
   </TestCase>
   <TestCase name="Lambdas in assertions" filename="tests/<exe-name>/UsageTests/Compilation.tests.cpp" >
@@ -11669,6 +12001,120 @@ C
         !false
       </Expanded>
     </Expression>
+    <Section name="JSON reporter lists tags" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+      <Info filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+        Tested reporter: JSON
+      </Info>
+      <Expression success="true" type="REQUIRE_THAT" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+        <Original>
+          listingString, ContainsSubstring("fakeTag"s)
+        </Original>
+        <Expanded>
+          "{
+  "version": 1,
+  "metadata": {
+    "name": "",
+    "rng-seed": 1234,
+    "catch2-version": "<version>"
+  },
+  "listings": {
+    "tags": [
+      {
+        "aliases": [
+          "fakeTag"
+        ],
+        "count": 1
+      }
+    ]" contains: "fakeTag"
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+      <Original>
+        !(factories.empty())
+      </Original>
+      <Expanded>
+        !false
+      </Expanded>
+    </Expression>
+    <Section name="JSON reporter lists reporters" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+      <Info filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+        Tested reporter: JSON
+      </Info>
+      <Expression success="true" type="REQUIRE_THAT" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+        <Original>
+          listingString, ContainsSubstring("fake reporter"s)
+        </Original>
+        <Expanded>
+          "{
+  "version": 1,
+  "metadata": {
+    "name": "",
+    "rng-seed": 1234,
+    "catch2-version": "<version>"
+  },
+  "listings": {
+    "reporters": [
+      {
+        "name": "fake reporter",
+        "description": "fake description"
+      }
+    ]" contains: "fake reporter"
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+      <Original>
+        !(factories.empty())
+      </Original>
+      <Expanded>
+        !false
+      </Expanded>
+    </Expression>
+    <Section name="JSON reporter lists tests" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+      <Info filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+        Tested reporter: JSON
+      </Info>
+      <Expression success="true" type="REQUIRE_THAT" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+        <Original>
+          listingString, ContainsSubstring( "fake test name"s ) &amp;&amp; ContainsSubstring( "fakeTestTag"s )
+        </Original>
+        <Expanded>
+          "{
+  "version": 1,
+  "metadata": {
+    "name": "",
+    "rng-seed": 1234,
+    "catch2-version": "<version>"
+  },
+  "listings": {
+    "tests": [
+      {
+        "name": "fake test name",
+        "class-name": "",
+        "tags": [
+          "fakeTestTag"
+        ],
+        "source-location": {
+          "filename": "fake-file.cpp",
+          "line": 123456789
+        }
+      }
+    ]" ( contains: "fake test name" and contains: "fakeTestTag" )
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
+      <Original>
+        !(factories.empty())
+      </Original>
+      <Expanded>
+        !false
+      </Expanded>
+    </Expression>
     <Section name="JUnit reporter lists tags" filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
       <Info filename="tests/<exe-name>/IntrospectiveTests/Reporters.tests.cpp" >
         Tested reporter: JUnit
@@ -14545,6 +14991,50 @@ Message from section two
       </Expanded>
     </Expression>
     <Failure filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" />
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="Testing checked-if 4" tags="[!shouldfail][checked-if]" filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
+    <Expression success="true" type="CHECKED_ELSE" filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
+      <Original>
+        true
+      </Original>
+      <Expanded>
+        true
+      </Expanded>
+    </Expression>
+    <Expression success="false" filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
+      <Original>
+        {Unknown expression after the reported line}
+      </Original>
+      <Expanded>
+        {Unknown expression after the reported line}
+      </Expanded>
+      <Exception filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
+        Uncaught exception should fail!
+      </Exception>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="Testing checked-if 5" tags="[!shouldfail][checked-if]" filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
+    <Expression success="false" type="CHECKED_ELSE" filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
+      <Original>
+        false
+      </Original>
+      <Expanded>
+        false
+      </Expanded>
+    </Expression>
+    <Expression success="false" filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
+      <Original>
+        {Unknown expression after the reported line}
+      </Original>
+      <Expanded>
+        {Unknown expression after the reported line}
+      </Expanded>
+      <Exception filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
+        Uncaught exception should fail!
+      </Exception>
+    </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
   <TestCase name="The NO_FAIL macro reports a failure but does not fail the test" tags="[messages]" filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
@@ -20643,6 +21133,25 @@ b1!
     </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
+  <TestCase name="uniform_integer_distribution can return the bounds" tags="[distribution][rng]" filename="tests/<exe-name>/IntrospectiveTests/RandomNumberGeneration.tests.cpp" >
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/RandomNumberGeneration.tests.cpp" >
+      <Original>
+        dist.a() == -10
+      </Original>
+      <Expanded>
+        -10 == -10
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/RandomNumberGeneration.tests.cpp" >
+      <Original>
+        dist.b() == 10
+      </Original>
+      <Expanded>
+        10 == 10
+      </Expanded>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
   <TestCase name="unique_ptr reimplementation: basic functionality" tags="[internals][unique-ptr]" filename="tests/<exe-name>/IntrospectiveTests/UniquePtr.tests.cpp" >
     <Section name="Default constructed unique_ptr is empty" filename="tests/<exe-name>/IntrospectiveTests/UniquePtr.tests.cpp" >
       <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/UniquePtr.tests.cpp" >
@@ -21197,6 +21706,6 @@ b1!
     </Section>
     <OverallResult success="true" skips="0"/>
   </TestCase>
-  <OverallResults successes="2048" failures="145" expectedFailures="32" skips="12"/>
-  <OverallResultsCases successes="308" failures="84" expectedFailures="11" skips="6"/>
+  <OverallResults successes="2079" failures="146" expectedFailures="35" skips="12"/>
+  <OverallResultsCases successes="312" failures="85" expectedFailures="14" skips="6"/>
 </Catch2TestRun>

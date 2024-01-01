@@ -132,8 +132,8 @@ namespace xt
     {
         view_shape_type shape = {2, 3, 4};
         xarray<double> a(shape);
-        std::vector<double> data{
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
+        std::vector<double> data{1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
         std::copy(data.cbegin(), data.cend(), a.template begin<layout_type::row_major>());
 
         auto view1 = strided_view(a, xstrided_slice_vector({range(0, 2), 1, range(1, 4)}));
@@ -175,11 +175,11 @@ namespace xt
     {
         view_shape_type shape = {2, 3, 4};
         xarray<double> a(shape), res(shape);
-        std::vector<double> data{
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
+        std::vector<double> data{1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
         std::copy(data.cbegin(), data.cend(), a.template begin<layout_type::row_major>());
-        std::vector<double> data_res = {
-            1, 2, 3, 4, 5, 4, 4, 4, 9, 10, 11, 12, 13, 14, 15, 16, 17, 4, 4, 4, 21, 22, 23, 24};
+        std::vector<double> data_res = {1,  2,  3,  4,  5,  4, 4, 4, 9,  10, 11, 12,
+                                        13, 14, 15, 16, 17, 4, 4, 4, 21, 22, 23, 24};
         std::copy(data_res.cbegin(), data_res.cend(), res.template begin<layout_type::row_major>());
         auto view1 = strided_view(a, xstrided_slice_vector({range(0, 2), 1, range(1, 4)}));
         view1.fill(4);
@@ -635,8 +635,8 @@ namespace xt
     {
         view_shape_type shape = {2, 3, 4};
         xarray<double, layout_type::row_major> a(shape);
-        std::vector<double> data = {
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
+        std::vector<double> data = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                    13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
         std::copy(data.cbegin(), data.cend(), a.template begin<layout_type::row_major>());
 
         auto view1 = strided_view(a, {range(0, 2), 1, range(1, 4)});
@@ -696,17 +696,20 @@ namespace xt
         EXPECT_EQ(av, e);
         EXPECT_EQ(av, a);
 
-        bool truthy;
-        truthy = std::is_same<
-            typename decltype(xv)::temporary_type,
-            xtensor_fixed<double, xshape<3, 3>, XTENSOR_DEFAULT_LAYOUT>>();
-        EXPECT_TRUE(truthy);
-
-        truthy = std::is_same<typename decltype(av)::temporary_type, xtensor<double, 2, XTENSOR_DEFAULT_LAYOUT>>(
+        static_assert(
+            std::is_same<
+                typename decltype(xv)::temporary_type,
+                xtensor_fixed<double, xshape<3, 3>, XTENSOR_DEFAULT_LAYOUT>>::value,
+            "Container types do not match"
         );
-        EXPECT_TRUE(truthy);
-        truthy = std::is_same<typename decltype(av)::shape_type, typename decltype(e)::shape_type>::value;
-        EXPECT_TRUE(truthy);
+        static_assert(
+            std::is_same<typename decltype(av)::temporary_type, xtensor<double, 2, XTENSOR_DEFAULT_LAYOUT>>::value,
+            "Container types do not match"
+        );
+        static_assert(
+            std::is_same<typename decltype(av)::shape_type, typename decltype(e)::shape_type>::value,
+            "Shape types do not match"
+        );
 
         xarray<int> xa = {{1, 2, 3}, {4, 5, 6}};
         std::vector<std::size_t> new_shape = {3, 2};
@@ -714,6 +717,10 @@ namespace xt
 
         xarray<int> xres = {{1, 2}, {3, 4}, {5, 6}};
         EXPECT_EQ(xrv, xres);
+
+        auto nv = xt::reshape_view<XTENSOR_DEFAULT_LAYOUT>(a, {-1, 3});
+        std::vector<size_t> expected_shape({3, 3});
+        EXPECT_TRUE(std::equal(nv.shape().begin(), nv.shape().end(), expected_shape.begin()));
     }
 
     TEST(xstrided_view, reshape_view_assign)

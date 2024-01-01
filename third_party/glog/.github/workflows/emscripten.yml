@@ -8,21 +8,30 @@ jobs:
       run:
         shell: bash
     name: Emscripten-C++${{matrix.std}}-${{matrix.build_type}}-${{matrix.lib}}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     container: emscripten/emsdk
     strategy:
       fail-fast: true
       matrix:
         build_type: [Release, Debug]
         lib: [static]
-        std: [14, 17, 20]
+        std: [14, 17, 20, 23]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: cpp
 
       - name: Setup Dependencies
         run: |
-          apt-get update
+          sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
             cmake \
             ninja-build
@@ -31,18 +40,11 @@ jobs:
         env:
           CXXFLAGS: -Wall -Wextra -Wsign-conversion -Wtautological-compare -Wformat-nonliteral -Wundef -Werror -Wno-error=wasm-exception-spec ${{env.CXXFLAGS}}
         run: |
-          cmake -S . -B build_${{matrix.build_type}} \
+          emcmake cmake -S . -B build_${{matrix.build_type}} \
             -DBUILD_SHARED_LIBS=${{matrix.lib == 'shared'}} \
-            -DCMAKE_AR=$(which emar) \
-            -DCMAKE_CXX_COMPILER=$(which em++) \
             -DCMAKE_CXX_STANDARD=${{matrix.std}} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
-            -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
             -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install \
-            -DCMAKE_RANLIB=$(which emranlib) \
             -G Ninja \
             -Werror
 
@@ -50,3 +52,6 @@ jobs:
         run: |
           cmake --build build_${{matrix.build_type}} \
                 --config ${{matrix.build_type}}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

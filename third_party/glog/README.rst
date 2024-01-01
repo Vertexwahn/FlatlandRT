@@ -202,7 +202,7 @@ You can download and install glog using the `conan
 .. code:: bash
 
    pip install conan
-   conan install -r conancenter glob/<glob-version>@
+   conan install -r conancenter glog/<glog-version>@
 
 The glog recipe in conan center is kept up to date by conan center index community
 contributors. If the version is out of date, please create an
@@ -388,6 +388,8 @@ excessive logging.
    DLOG(INFO) << "Found cookies";
    DLOG_IF(INFO, num_cookies > 10) << "Got lots of cookies";
    DLOG_EVERY_N(INFO, 10) << "Got the " << google::COUNTER << "th cookie";
+   DLOG_FIRST_N(INFO, 10) << "Got the " << google::COUNTER << "th cookie";
+   DLOG_EVERY_T(INFO, 0.01) << "Got a cookie";
 
 
 ``CHECK`` Macros

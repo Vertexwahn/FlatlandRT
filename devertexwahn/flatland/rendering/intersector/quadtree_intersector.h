@@ -23,10 +23,10 @@ struct SubShapeIdentifier {
     SubShapeId sub_shape_index;
 };
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 class IShapesSubBoundsProvider {
 public:
-    using AxisAlignedBoundingBox = AxisAlignedBoundingBoxType<Dimension, ScalarType>;
+    using AxisAlignedBoundingBox = AxisAlignedBoundingBoxType<ScalarType, Dimension>;
 
     [[nodiscard]]
     virtual std::vector<SubShapeIdentifier> sub_shape_ids() const = 0;
@@ -39,7 +39,7 @@ public:
     bounds(const SubShapeIdentifier &id) const = 0; // Minimal AABB of a specific sub shape
 };
 
-using IShapesSubBoundsProvider2f = IShapesSubBoundsProvider<2, float>;
+using IShapesSubBoundsProvider2f = IShapesSubBoundsProvider<float, 2>;
 
 class TriangleMeshesBoundsProvider2f : public IShapesSubBoundsProvider2f {
 public:
@@ -151,7 +151,7 @@ struct QuadtreeBuildDescription {
 
 QuadtreeNode *build_quadtree(const QuadtreeBuildDescription &qtbd);
 
-class QuadtreeIntersector : public IntersectorType<2, float> {
+class QuadtreeIntersector : public IntersectorType<float, 2> {
 public:
     explicit QuadtreeIntersector(const PropertySet &ps) {
         auto str_strategy = ps.get_property<std::string>("strategy", "StopSplitIfOneChildHasAsManySubShapesAsParent");

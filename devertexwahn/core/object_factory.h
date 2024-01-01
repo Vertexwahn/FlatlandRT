@@ -47,6 +47,7 @@ public:
 
     virtual ~ObjectFactory() = default;
 
+    [[nodiscard]]
     ReferenceCounted<Object> create_instance(std::string_view name, const PropertySetType &ps) const {
         if (creation_function_.find(std::string(name)) == creation_function_.end()) {
             throw ObjectFactoryClassDoesNotExist(name);

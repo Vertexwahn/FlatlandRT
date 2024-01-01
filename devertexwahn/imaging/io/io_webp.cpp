@@ -8,6 +8,7 @@
 #include "webp/encode.h"
 #include "webp/decode.h"
 
+#include <filesystem>
 #include <fstream>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
@@ -40,15 +41,15 @@ std::vector<uint8_t> read_file(const char* filename)
     file.unsetf(std::ios::skipws);
 
     // get its size:
-    std::streampos fileSize;
+    std::streampos file_size;
 
     file.seekg(0, std::ios::end);
-    fileSize = file.tellg();
+    file_size = file.tellg();
     file.seekg(0, std::ios::beg);
 
     // reserve capacity
     std::vector<uint8_t> vec;
-    vec.reserve(fileSize);
+    vec.reserve(file_size);
 
     // read the data:
     vec.insert(vec.begin(),
@@ -59,6 +60,10 @@ std::vector<uint8_t> read_file(const char* filename)
 }
 
 ReferenceCounted<Image4b> load_image_webp(std::string_view filename) {
+    if(!std::filesystem::exists(filename)) {
+        throw std::runtime_error("File does not exist.");
+    }
+
     std::vector<uint8_t> encoded_webp = read_file(filename.data());
     int width = 0;
     int height = 0;

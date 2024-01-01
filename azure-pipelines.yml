@@ -5,13 +5,6 @@
 
 
 jobs:
-  - job: MacOSClang13BigSur
-    displayName: "Apple Clang13 on macOS 11 (Big Sur)"
-    pool:
-      vmImage: 'macOS-11'
-    steps:
-      - template: devertexwahn/ci/macOS-11-apple-clang13.yaml
-
   - job: MacOSAppleClang14Monterey
     displayName: "Apple Clang14 on macOS 12 (Monterey)"
     pool:
@@ -35,14 +28,30 @@ jobs:
   #  steps:
   #    - template: devertexwahn/ci/ubuntu-20.04-clang14.yaml
 
-  - job: Ubuntu20GCC9
-    displayName: "GCC9 fast opt on Ubuntu 20.04"
+  - job: Ubuntu20GCC9Fast
+    displayName: "GCC9 fast on Ubuntu 20.04"
     pool:
       #name: Default
       vmImage: 'ubuntu-20.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-20.04-gcc9-fast-opt.yaml
+      - template: devertexwahn/ci/ubuntu-20.04-gcc9-fast.yaml
   
+  - job: Ubuntu20GCC9Opt
+    displayName: "GCC9 opt on Ubuntu 20.04"
+    pool:
+      #name: Default
+      vmImage: 'ubuntu-20.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-20.04-gcc9-opt.yaml
+
+  - job: Ubuntu20GCC9Debug
+    displayName: "GCC9 debug on Ubuntu 20.04"
+    pool:
+      #name: Default
+      vmImage: 'ubuntu-20.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-20.04-gcc9-dbg.yaml
+
 
   - job: Ubuntu22GCC11
     displayName: "GCC11 fast opt on Ubuntu 22.04"

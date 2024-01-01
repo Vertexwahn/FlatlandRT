@@ -8,7 +8,7 @@ cc_test(
     size = "small",
     srcs = ["libjpeg_turbo_test.cpp"],
     deps = [
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
         "@libjpeg_turbo//:jpeg",
     ],
 )
@@ -23,7 +23,7 @@ cc_test(
         "//okapi/tests/images:filtered_images",
     ],
     deps = [
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
         "@libpng",
     ],
 )
@@ -35,7 +35,7 @@ cc_test(
         "libwebp_test.cpp",
     ],
     deps = [
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
         "@libwebp",
     ],
 )
@@ -48,8 +48,8 @@ cc_test(
     ],
     deps = [
         "//imaging:image",
-        "@com_google_googletest//:gtest_main",
-        "@com_openexr//:OpenEXR",
+        "@googletest//:gtest_main",
+        "@openexr//:OpenEXR",
     ],
 )
 
@@ -60,7 +60,7 @@ cc_test(
         "zlib_test.cpp",
     ],
     deps = [
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
         "@zlib",
     ],
 )

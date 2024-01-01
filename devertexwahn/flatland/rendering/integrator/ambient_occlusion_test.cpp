@@ -14,7 +14,7 @@ using namespace de_vertexwahn;
 TEST(AmbientOcclusion2, TestBackgroundColor) {
     // Arrange
     Scene2f scene;
-    class NullIntersector : public IntersectorType<2, float> {
+    class NullIntersector : public IntersectorType<float, 2> {
     public:
         NullIntersector() = default;
 

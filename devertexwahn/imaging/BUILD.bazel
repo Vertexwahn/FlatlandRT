@@ -24,7 +24,26 @@ cc_test(
     ],
     deps = [
         "//imaging:color",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "color_converter",
+    hdrs = ["color_converter.h"],
+    deps = [
+        ":color",
+        "//core:namespace",
+        "//math:vector",
+    ],
+)
+
+cc_test(
+    name = "color_converter_test",
+    srcs = ["color_converter_test.cpp"],
+    deps = [
+        ":color_converter",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -47,7 +66,7 @@ cc_test(
     ],
     deps = [
         "//imaging/io",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -69,6 +88,6 @@ cc_test(
     ],
     deps = [
         ":iqa",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

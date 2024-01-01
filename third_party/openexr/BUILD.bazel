@@ -54,6 +54,9 @@ expand_template(
         "@OPENEXR_PACKAGE_NAME@": "OpenEXR 3.2.0",
         "@OPENEXR_VERSION_EXTRA@": "",
         "@OPENEXR_VERSION@": "3.2.0",
+        "@OPENEXR_VERSION_MAJOR@": "3",
+        "@OPENEXR_VERSION_MINOR@": "2",
+        "@OPENEXR_VERSION_PATCH@": "0",
         "#cmakedefine OPENEXR_ENABLE_API_VISIBILITY": "#define OPENEXR_ENABLE_API_VISIBILITY",
         "#cmakedefine OPENEXR_HAVE_LARGE_STACK 1": "/* #undef OPENEXR_HAVE_LARGE_STACK */",
     },
@@ -221,7 +224,7 @@ cc_library(
         "src/lib/OpenEXRCore/openexr_chunkio.h",
         "src/lib/OpenEXRCore/openexr_coding.h",
         "src/lib/OpenEXRCore/openexr_compression.h",
-        "src/lib/OpenEXRCore/openexr_conf.h",
+        "src/lib/OpenEXRCore/openexr_config.h",
         "src/lib/OpenEXRCore/openexr_context.h",
         "src/lib/OpenEXRCore/openexr_debug.h",
         "src/lib/OpenEXRCore/openexr_decode.h",
@@ -255,7 +258,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "@Imath",
-        "@libdeflate",
+        "@libdeflate//:deflate",
     ],
 )
 

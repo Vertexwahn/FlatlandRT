@@ -6,7 +6,6 @@
 #include "imaging/io/io_jpeg.h"
 
 #include "jpeglib.h"
-//#include <setjmp.h>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
@@ -81,10 +80,10 @@ bool store_jpeg(const char *filename, const Image3f &image) {
         }
     }
 
-    int row_stride = sizeof(char8_t) * image_width * 3;
+    //int row_stride = sizeof(char8_t) * image_width * 3;
 
-    struct jpeg_compress_struct cinfo;
-    struct jpeg_error_mgr jerr;
+    jpeg_compress_struct cinfo;
+    jpeg_error_mgr jerr;
 
     FILE * outfile;
     JSAMPROW row_pointer[1];
@@ -107,7 +106,7 @@ bool store_jpeg(const char *filename, const Image3f &image) {
     jpeg_set_quality(&cinfo, quality, TRUE);
     jpeg_start_compress(&cinfo, TRUE);
 
-    row_stride = image_width * 3;
+    int row_stride = image_width * 3;
 
     while (cinfo.next_scanline < cinfo.image_height) {
         row_pointer[0] = & image_buffer[cinfo.next_scanline * row_stride];

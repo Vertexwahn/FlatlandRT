@@ -1062,12 +1062,12 @@ namespace xt
      * it is possible.
      * @warning This method is NOT compatible with broadcasting, meaning the following
      * code has undefined behavior:
-     * \code{.cpp}
+     * @code{.cpp}
      * xt::xarray<double> a = {{0, 1}, {2, 3}};
      * xt::xarray<double> b = {0, 1};
      * auto fd = a + b;
      * double res = fd.unchecked(0, 1);
-     * \endcode
+     * @endcode
      */
     template <class CT, class... S>
     template <class... Args>
@@ -1115,12 +1115,12 @@ namespace xt
      * it is possible.
      * @warning This method is NOT compatible with broadcasting, meaning the following
      * code has undefined behavior:
-     * \code{.cpp}
+     * @code{.cpp}
      * xt::xarray<double> a = {{0, 1}, {2, 3}};
      * xt::xarray<double> b = {0, 1};
      * auto fd = a + b;
      * double res = fd.unchecked(0, 1);
-     * \endcode
+     * @endcode
      */
     template <class CT, class... S>
     template <class... Args>
@@ -1680,8 +1680,9 @@ namespace xt
     inline auto xview<CT, S...>::sliced_access(const xslice<T>& slice, Arg arg, Args... args) const -> size_type
     {
         using ST = typename T::size_type;
-        return static_cast<size_type>(slice.derived_cast(
-        )(argument<I>(static_cast<ST>(arg), static_cast<ST>(args)...)));
+        return static_cast<size_type>(
+            slice.derived_cast()(argument<I>(static_cast<ST>(arg), static_cast<ST>(args)...))
+        );
     }
 
     template <class CT, class... S>
@@ -1707,8 +1708,9 @@ namespace xt
             return xt::value(s, 0);
         };
 
-        auto s = static_cast<diff_type>((std::min
-        )(static_cast<size_type>(std::distance(first, last)), this->dimension()));
+        auto s = static_cast<diff_type>(
+            (std::min)(static_cast<size_type>(std::distance(first, last)), this->dimension())
+        );
         auto first_copy = last - s;
         for (size_type i = 0; i != m_e.dimension(); ++i)
         {

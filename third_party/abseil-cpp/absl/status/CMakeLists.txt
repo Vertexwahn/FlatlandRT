@@ -20,6 +20,7 @@ absl_cc_library(
     "status.h"
   SRCS
     "internal/status_internal.h"
+    "internal/status_internal.cc"
     "status.cc"
     "status_payload_printer.h"
     "status_payload_printer.cc"
@@ -34,11 +35,15 @@ absl_cc_library(
     absl::core_headers
     absl::function_ref
     absl::inlined_vector
+    absl::memory
+    absl::no_destructor
+    absl::nullability
     absl::optional
     absl::raw_logging_internal
+    absl::span
     absl::stacktrace
-    absl::str_format
     absl::strerror
+    absl::str_format
     absl::strings
     absl::symbolize
   PUBLIC
@@ -53,6 +58,7 @@ absl_cc_test(
     ${ABSL_TEST_COPTS}
   DEPS
     absl::status
+    absl::str_format
     absl::strings
     GTest::gmock_main
 )
@@ -69,11 +75,15 @@ absl_cc_library(
     ${ABSL_DEFAULT_COPTS}
   DEPS
     absl::base
-    absl::status
+    absl::config
     absl::core_headers
+    absl::has_ostream_operator
+    absl::nullability
     absl::raw_logging_internal
-    absl::type_traits
+    absl::status
+    absl::str_format
     absl::strings
+    absl::type_traits
     absl::utility
     absl::variant
   PUBLIC
@@ -89,5 +99,6 @@ absl_cc_test(
   DEPS
     absl::status
     absl::statusor
+    absl::strings
     GTest::gmock_main
 )

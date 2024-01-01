@@ -5,7 +5,7 @@
 
 #include "png.h"
 
-#include "include/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 #ifndef png_voidp_NULL
 #define png_voidp_NULL (png_voidp)nullptr

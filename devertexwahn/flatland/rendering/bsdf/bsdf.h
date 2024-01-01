@@ -16,80 +16,51 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-enum class InterfaceInteraction {
-    SpecularTransmission,
-    MirrorReflection
-};
-
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 struct BSDFSampleType {
     using Scalar = ScalarType;
-    using Vector = VectorType<Dimension, ScalarType>;
+    using Vector = VectorType<ScalarType, Dimension>;
 
     Vector wi;
     Vector wo;
 };
 
-using BSDFSample2f = BSDFSampleType<2, float>;
-using BSDFSample3f = BSDFSampleType<3, float>;
+using BSDFSample2f = BSDFSampleType<float, 2>;
+using BSDFSample3f = BSDFSampleType<float, 3>;
 
 template <typename ScalarType>
-using BSDFSample2 = BSDFSampleType<2, ScalarType>;
+using BSDFSample2 = BSDFSampleType<ScalarType, 2>;
 template <typename ScalarType>
-using BSDFSample3 = BSDFSampleType<3, ScalarType>;
+using BSDFSample3 = BSDFSampleType<ScalarType, 3>;
 
 // This interface expects that wi and wo are a normalized vectors on the unit sphere
 // that are given in the reflectance coordinate system.
 // The BSDF is not aware of any world space coordinate system.
 // If you want to talk to this interface you have first to transform from world space to
 // reflection space
-template <unsigned int Dimension, typename ScalarType>
+template <typename ScalarType, unsigned int Dimension>
 class BSDFType : public Object {
 public:
     using Scalar = ScalarType;
-    using Point2 = PointType<2, ScalarType>;
-    using Vector = VectorType<Dimension, ScalarType>;
-    using Color = ColorType<3, ScalarType>;
-    using BSDFSample = BSDFSampleType<Dimension, ScalarType>;
+    using Point2 = PointType<ScalarType, 2>;
+    using Vector = VectorType<ScalarType, Dimension>;
+    using Color = ColorType<ScalarType, 3>;
+    using BSDFSample = BSDFSampleType<ScalarType, Dimension>;
 
-    BSDFType(const PropertySet &ps) {
-        refraction_index_ = ps.get_property<float>("refraction_index", 1.f);
-
-        std::string interface_interaction = ps.get_property<std::string>("interface_interaction",
-                                                                         "specular_transmission");
-
-        if (interface_interaction == "specular_transmission") {
-            interface_interaction_ = InterfaceInteraction::SpecularTransmission;
-        } else if (interface_interaction == "mirror_reflection") {
-            interface_interaction_ = InterfaceInteraction::MirrorReflection;
-        } else {
-            interface_interaction_ = InterfaceInteraction::SpecularTransmission;
-        }
-    }
-
-    // todo: move this to a dielectric material class
-    Scalar refraction_index() const {
-        return refraction_index_;
-    }
+    BSDFType(const PropertySet &ps) {}
 
     [[nodiscard]]
-    InterfaceInteraction interface_interaction_type() const {
-        return interface_interaction_;
-    }
-
-    [[nodiscard]] virtual Color sample(BSDFSample& sample, const Point2& sample_point) const = 0;
-    [[nodiscard]] virtual Scalar pdf(const BSDFSample& sample) const = 0;
-    [[nodiscard]] virtual Color evaluate(const BSDFSample& sample) const = 0;
-
-private:
-    Scalar refraction_index_ = Scalar{0};
-    InterfaceInteraction interface_interaction_ = InterfaceInteraction::SpecularTransmission;
+    virtual Color sample(BSDFSample& sample, const Point2& sample_point) const = 0;
+    [[nodiscard]]
+    virtual Scalar pdf(const BSDFSample& sample) const = 0;
+    [[nodiscard]]
+    virtual Color evaluate(const BSDFSample& sample) const = 0;
 };
 
-using BSDF2f = BSDFType<2, float>;
-using BSDF2d = BSDFType<2, double>;
-using BSDF3f = BSDFType<3, float>;
-using BSDF3d = BSDFType<3, double>;
+using BSDF2f = BSDFType<float, 2>;
+using BSDF2d = BSDFType<double, 2>;
+using BSDF3f = BSDFType<float, 3>;
+using BSDF3d = BSDFType<double, 3>;
 
 DE_VERTEXWAHN_END_NAMESPACE
 

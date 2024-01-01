@@ -3,6 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
+#include "imaging/color_converter.h"
 #include "imaging/io/io.h"
 #include "imaging/io/io_jpeg.h"
 #include "imaging/io/io_openexr.h"
@@ -16,7 +17,7 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-void store_image(std::string_view filename, ReferenceCounted<de_vertexwahn::Image3f> image) {
+void store_image(std::string_view filename, ReferenceCounted<Image3f> image) {
     store_image(filename, *image.get());
 }
 
@@ -28,6 +29,26 @@ void store_image(std::string_view filename, const Image3f &image) {
     } else {
         throw std::runtime_error("Invalid file extension");
     }
+}
+
+// TODO: refactor this - make this available as "central service"
+ReferenceCounted<Image4b> convert_to_Image4b(const Image3b* image) {
+    auto converted_image = make_reference_counted<Image4b>(image->width(), image->height());
+
+    for (int y = 0; y < image->height(); ++y) {
+        for (int x = 0; x < image->width(); ++x) {
+            Color3b c = image->get_pixel(x, y);
+            Color4b converted_color = ColorConverter::convertTo<Color4b>(c);
+            converted_image->set_pixel(x,y,converted_color);
+        }
+    }
+
+    return converted_image;
+}
+
+void store_image(std::string_view filename, ReferenceCounted<Image3b> image) {
+    auto image4b = convert_to_Image4b(image.get());
+    store_image(filename, image4b);
 }
 
 void store_image(std::string_view filename, const Image4b &image) {
@@ -58,6 +79,33 @@ Image3f load_image(std::string_view filename) {
         ReferenceCounted<Image3f> tmp_image = load_image_png(filename);
 
         Image3f image = *tmp_image.get();
+
+        return image;
+    }
+
+    throw std::runtime_error("Invalid file extension");
+}
+
+// TODO: refactor this - make this available as "central service"
+ReferenceCounted<Image3b> convert_to_Image3b(const Image4b* image) {
+    auto converted_image = make_reference_counted<Image3b>(image->width(), image->height());
+
+    for (int y = 0; y < image->height(); ++y) {
+        for (int x = 0; x < image->width(); ++x) {
+            Color4b c = image->get_pixel(x, y);
+            auto converted_color = ColorConverter::convertTo<Color3b>(c);
+            converted_image->set_pixel(x,y,converted_color);
+        }
+    }
+
+    return converted_image;
+}
+
+Image3b load_image_asImage3b(std::string_view filename) {
+    if (boost::ends_with(filename, ".png")) {
+        ReferenceCounted<Image4b> tmp_image = load_image_png_as_Image4b(filename);
+
+        Image3b image = *convert_to_Image3b(tmp_image.get()).get();
 
         return image;
     }

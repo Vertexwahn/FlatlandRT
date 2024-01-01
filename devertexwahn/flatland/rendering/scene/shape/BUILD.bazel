@@ -24,7 +24,7 @@ cc_test(
     deps = [
         ":disk",
         "//math:refract",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -43,7 +43,7 @@ cc_test(
     srcs = ["emitter_test.cpp"],
     deps = [
         ":emitter",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -65,7 +65,7 @@ cc_test(
     ],
     deps = [
         ":polygon",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -87,7 +87,7 @@ cc_test(
     ],
     deps = [
         ":rectangle",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -125,7 +125,7 @@ cc_test(
     ],
     deps = [
         "//flatland/rendering/scene/shape",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -149,6 +149,6 @@ cc_test(
     data = ["//flatland/scenes/terrain:scenes"],
     deps = [
         ":triangle_mesh",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

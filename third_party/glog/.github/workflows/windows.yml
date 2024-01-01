@@ -6,6 +6,10 @@ jobs:
   build-msvc:
     name: ${{matrix.msvc}}-${{matrix.arch}}-C++${{matrix.std}}-${{matrix.build_type}}-${{matrix.lib}}
     runs-on: ${{matrix.os}}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     defaults:
       run:
         shell: powershell
@@ -19,7 +23,7 @@ jobs:
         build_type: [Debug, Release]
         lib: [shared, static]
         msvc: [VS-16-2019, VS-17-2022]
-        std: [14, 17, 20]
+        std: [14, 17, 20, 23]
         include:
           - msvc: VS-16-2019
             os: windows-2019
@@ -29,7 +33,12 @@ jobs:
             generator: 'Visual Studio 17 2022'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: cpp
 
       - name: Cache GTest
         id: cache-gtest
@@ -125,9 +134,18 @@ jobs:
                 --config ${{matrix.build_type}} `
                 --target install
 
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: language:cpp
+
   build-mingw:
     name: ${{matrix.sys}}-${{matrix.env}}-C++${{matrix.std}}-${{matrix.build_type}}-${{matrix.lib}}
     runs-on: windows-2022
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     env:
       BUILDDIR: 'build_${{matrix.sys}}-${{matrix.env}}-C++${{matrix.std}}-${{matrix.build_type}}-${{matrix.lib}}'
     defaults:
@@ -138,7 +156,7 @@ jobs:
       matrix:
         build_type: [Debug]
         lib: [shared, static]
-        std: [14, 17, 20]
+        std: [14, 17, 20, 23]
         sys: [mingw32, mingw64]
         include:
          - sys: mingw32
@@ -147,16 +165,30 @@ jobs:
            env: x86_64
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: cpp
+
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{matrix.sys}}
           install: >-
-            lcov
             mingw-w64-${{matrix.env}}-cmake
             mingw-w64-${{matrix.env}}-gcc
             mingw-w64-${{matrix.env}}-gflags
             mingw-w64-${{matrix.env}}-ninja
+            mingw-w64-${{matrix.env}}-python-jinja
+            mingw-w64-${{matrix.env}}-python-lxml
+            mingw-w64-${{matrix.env}}-python-pip
+            mingw-w64-${{matrix.env}}-python-pygments
+
+      - name: Setup Coverage Dependencies
+        if: matrix.build_type == 'Debug'
+        run: |
+          pip install 'gcovr==6.0'
 
       - name: Setup Environment
         if: matrix.build_type == 'Debug'
@@ -197,28 +229,18 @@ jobs:
       - name: Generate Coverage
         if: matrix.build_type == 'Debug'
         run: |
-          lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info \
-            '*/install/include/*' \
-            '*/msys64/mingw32/*' \
-            '*/msys64/mingw64/*' \
-            '*/src/*_unittest.cc' \
-            '*/src/googletest.h' \
-            '*/src/mock-log.h' \
-            --output-file coverage.info
-
-          for file in src/glog/*.h.in; do
-            name=$(basename ${file})
-            name_we=${name%.h.in}
-            sed -i "s|build_${{matrix.build_type}}/glog/${name_we}.h\$|${file}|g" coverage.info
-          done
-
-          lcov --list coverage.info
+          cd build_${{matrix.build_type}}
+          gcovr -r .. . -s --cobertura coverage.xml
+          cd ..
 
       - name: Upload Coverage to Codecov
         if: matrix.build_type == 'Debug'
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: build_${{matrix.build_type}}/coverage.xml
           fail_ci_if_error: true
           verbose: true
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

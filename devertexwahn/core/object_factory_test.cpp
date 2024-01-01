@@ -21,9 +21,9 @@ TEST(ObjectFactoryClassAlreadyRegisteredException, what) {
     EXPECT_STREQ(ofe.what(), "Class with name 'houston we have a problem' was already registered");
 }
 
-class MockIntegrator : public IntegratorType<2, float> {
+class MockIntegrator : public IntegratorType<float, 2> {
 public:
-    explicit MockIntegrator(const PropertySet &ps) : IntegratorType<2, float>(ps) {}
+    explicit MockIntegrator(const PropertySet &ps) : IntegratorType<float, 2>(ps) {}
 
     MOCK_METHOD(Color3f, trace, (const Scene *scene, Sampler *sampler, Ray &ray, const int depth), (const, override));
 };

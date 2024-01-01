@@ -38,3 +38,8 @@ TEST(Frame, GivenFrameIdenticalWithWorld_WhenTransformToWorld_ExpectSameCoordina
     // Assert
     EXPECT_THAT(result, v);
 }
+
+TEST(Frame, abs_cos_theta) {
+    EXPECT_THAT(abs_cos_theta(Vector3f{0.f, 1.f, 0.f}), 0.f);
+    EXPECT_THAT(abs_cos_theta(Vector3f{0.f, 0.f, 1.f}), 1.f);
+}

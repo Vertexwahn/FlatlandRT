@@ -1,6 +1,10 @@
 /*
  *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  This file also contains code from Mitsuba 3 - the corresponding sections are marked in the code
+ *  SPDX-FileCopyrightText:  2017 Wenzel Jakob <wenzel.jakob@epfl.ch>
+ *  SPDX-License-Identifier: BSD-3-Clause-LBNL
  */
 
 #include "flatland/rendering/scene/load_scene.h"
@@ -17,6 +21,30 @@
 #include "flatland/rendering/integrator/ambient_occlusion.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
+
+// Copied from https://github.com/mitsuba-renderer/mitsuba3/blob/16261c1bd1f4805b8799300f93c91ba3af8174f0/src/core/string.cpp#L75
+// Mitsuba3
+// TODO: Move to core - string class
+// or replace by boost::split(tokens, csv, boost::is_any_of(","));?
+std::vector<std::string> tokenize(const std::string &string,
+                                  const std::string &delim = ", ",
+                                  bool include_empty = false) {
+    std::string::size_type last_pos = 0, pos = string.find_first_of(delim, last_pos);
+    std::vector<std::string> tokens;
+
+    while (last_pos != std::string::npos) {
+        std::string substr = string.substr(last_pos, pos - last_pos);
+        if (!substr.empty() || include_empty)
+            tokens.push_back(std::move(substr));
+        last_pos = pos;
+        if (last_pos != std::string::npos) {
+            last_pos += 1;
+            pos = string.find_first_of(delim, last_pos);
+        }
+    }
+
+    return tokens;
+}
 
 template <>
 Transform44f read_transform<3>(const pugi::xml_node &xmlTransform) {
@@ -66,7 +94,28 @@ Transform44f read_transform<3>(const pugi::xml_node &xmlTransform) {
         }
 
         if(transformType == "matrix") {
-            throw std::runtime_error("matrix as transform not implemented");
+            // copied from Mitsuba 3 with some minor changes
+            std::vector<std::string> tokens = tokenize(node.attribute("value").value());
+            if (tokens.size() != 16 /*&& tokens.size() != 9*/) {
+                throw std::runtime_error("matrix: expected 16 values");
+            }
+            Matrix44f matrix;
+            if (tokens.size() == 16) {
+                for (int i = 0; i < 4; ++i) {
+                    for (int j = 0; j < 4; ++j) {
+                        try {
+                            matrix(i,j) = std::stof(tokens[i * 4 + j]);
+                            //matrix(i, j) = string::stof<Float>(tokens[i * 4 + j]);
+                        } catch (...) {
+                            //src.throw_error(node, "could not parse floating point value \"%s\"",
+                            //                tokens[i * 4 + j]);
+                            throw std::runtime_error("could not parse floating point value");
+                        }
+                    }
+                }
+            }
+
+            transform = Transform44f(matrix);
         }
     }
 
@@ -219,7 +268,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
     if (!result)
         return nullptr;
 
-    auto scene = make_reference_counted<SceneType<2, float>>();
+    auto scene = make_reference_counted<SceneType<float, 2>>();
 
     std::filesystem::path p(filename);
     bool integrator_tag_found = false;
@@ -240,7 +289,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     // Construct sensor
                     PropertySet sensor_ps = read_all_properties(scene_elements);
                     sensor_ps.add_property("film", film);
-                    auto sensor = make_reference_counted<SensorType<2, float>>(sensor_ps);
+                    auto sensor = make_reference_counted<SensorType<float, 2>>(sensor_ps);
 
                     auto xml_transform = scene_elements.child("transform");
                     if (xml_transform) {
@@ -257,7 +306,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     auto ps = read_all_properties(scene_elements);
 
                     try {
-                        auto integrator = std::dynamic_pointer_cast<IntegratorType<2, float>>(
+                        auto integrator = std::dynamic_pointer_cast<IntegratorType<float, 2>>(
                                 object_factory.create_instance(type, ps));
                         scene->set_integrator(integrator);
                     } catch (...) {
@@ -293,7 +342,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
 
                     ps.add_property("transform", transform);
 
-                    auto shape = std::dynamic_pointer_cast<ShapeType<2, float>>(
+                    auto shape = std::dynamic_pointer_cast<ShapeType<float, 2>>(
                             object_factory.create_instance(type, ps));
 
                     auto xml_bxdf = scene_elements.child("bsdf");
@@ -303,7 +352,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
                     }
                     if (xml_bxdf) {
                         auto bsdf_ps = read_all_properties(xml_bxdf);
-                        auto bsdf = std::dynamic_pointer_cast<BSDFType<2, float>>(
+                        auto bsdf = std::dynamic_pointer_cast<BSDFType<float, 2>>(
                                 object_factory.create_instance(str_bsdf_type, bsdf_ps));
                         shape->set_bsdf(bsdf);
                     }
@@ -316,7 +365,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
 
                     auto ps = read_all_properties(scene_elements);
 
-                    auto intersector = std::dynamic_pointer_cast<IntersectorType<2, float>>(
+                    auto intersector = std::dynamic_pointer_cast<IntersectorType<float, 2>>(
                             object_factory.create_instance(type, ps));
                     scene->set_intersector(intersector);
                 }
@@ -331,7 +380,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
     }
 
     if (!scene->has_intersector()) {
-        auto intersector = std::dynamic_pointer_cast<IntersectorType<2, float>>(
+        auto intersector = std::dynamic_pointer_cast<IntersectorType<float, 2>>(
                 object_factory.create_instance("brute_force", PropertySet{}));
         scene->set_intersector(intersector);
     }

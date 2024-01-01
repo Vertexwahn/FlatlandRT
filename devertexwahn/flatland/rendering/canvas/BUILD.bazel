@@ -34,6 +34,6 @@ cc_test(
     deps = [
         ":svg_canvas",
         "//flatland/rendering/scene:load_scene",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

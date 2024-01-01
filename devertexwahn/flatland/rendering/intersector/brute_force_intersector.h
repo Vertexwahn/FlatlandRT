@@ -13,12 +13,12 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template<unsigned int Dimension, typename ScalarType>
-class BruteForceIntersector : public IntersectorType<Dimension, ScalarType> {
+template<typename ScalarType, unsigned int Dimension>
+class BruteForceIntersector : public IntersectorType<ScalarType, Dimension> {
 public:
-    using Shape = ShapeType<Dimension, ScalarType>;
-    using Ray = RayType<Dimension, ScalarType>;
-    using MediumEvent = MediumEventType<Dimension, ScalarType>;
+    using Shape = ShapeType<ScalarType, Dimension>;
+    using Ray = RayType<ScalarType, Dimension>;
+    using MediumEvent = MediumEventType<ScalarType, Dimension>;
     using Scalar = ScalarType;
 
     BruteForceIntersector(const PropertySet &ps) {
@@ -53,11 +53,11 @@ private:
     std::vector<ReferenceCounted<Shape>> shapes_;
 };
 
-using BruteForceIntersector2f = BruteForceIntersector<2, float>;
-using BruteForceIntersector2d = BruteForceIntersector<2, double>;
+using BruteForceIntersector2f = BruteForceIntersector<float, 2>;
+using BruteForceIntersector2d = BruteForceIntersector<double, 2>;
 
-using BruteForceIntersector3f = BruteForceIntersector<3, float>;
-using BruteForceIntersector3d = BruteForceIntersector<3, double>;
+using BruteForceIntersector3f = BruteForceIntersector<float, 3>;
+using BruteForceIntersector3d = BruteForceIntersector<double, 3>;
 
 DE_VERTEXWAHN_END_NAMESPACE
 

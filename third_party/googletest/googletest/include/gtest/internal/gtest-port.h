@@ -208,6 +208,8 @@
 //   or
 //                                 UniversalPrinter<absl::optional>
 //                                 specializations. Always defined to 0 or 1.
+//   GTEST_INTERNAL_HAS_STD_SPAN - for enabling UniversalPrinter<std::span>
+//                                 specializations. Always defined to 0 or 1
 //   GTEST_INTERNAL_HAS_STRING_VIEW - for enabling Matcher<std::string_view> or
 //                                    Matcher<absl::string_view>
 //                                    specializations. Always defined to 0 or 1.
@@ -277,6 +279,22 @@
 #if !defined(GTEST_INTERNAL_CPLUSPLUS_LANG) || \
     GTEST_INTERNAL_CPLUSPLUS_LANG < 201402L
 #error C++ versions less than C++14 are not supported.
+#endif
+
+// MSVC >= 19.11 (VS 2017 Update 3) supports __has_include.
+#ifdef __has_include
+#define GTEST_INTERNAL_HAS_INCLUDE __has_include
+#else
+#define GTEST_INTERNAL_HAS_INCLUDE(...) 0
+#endif
+
+// Detect C++ feature test macros as gracefully as possible.
+// MSVC >= 19.15, Clang >= 3.4.1, and GCC >= 4.1.2 support feature test macros.
+#if GTEST_INTERNAL_CPLUSPLUS_LANG >= 202002L && \
+    (!defined(__has_include) || GTEST_INTERNAL_HAS_INCLUDE(<version>))
+#include <version>  // C++20 and later
+#elif (!defined(__has_include) || GTEST_INTERNAL_HAS_INCLUDE(<ciso646>))
+#include <ciso646>  // Pre-C++20
 #endif
 
 #include <ctype.h>   // for isspace, etc
@@ -609,7 +627,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Determines whether clone(2) is supported.
 // Usually it will only be available on Linux, excluding
 // Linux on the Itanium architecture.
-// Also see http://linux.die.net/man/2/clone.
+// Also see https://linux.die.net/man/2/clone.
 #ifndef GTEST_HAS_CLONE
 // The user didn't tell us, so we need to figure it out.
 
@@ -827,9 +845,9 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #ifndef GTEST_API_
 
 #ifdef _MSC_VER
-#if GTEST_LINKED_AS_SHARED_LIBRARY
+#if defined(GTEST_LINKED_AS_SHARED_LIBRARY) && GTEST_LINKED_AS_SHARED_LIBRARY
 #define GTEST_API_ __declspec(dllimport)
-#elif GTEST_CREATE_SHARED_LIBRARY
+#elif defined(GTEST_CREATE_SHARED_LIBRARY) && GTEST_CREATE_SHARED_LIBRARY
 #define GTEST_API_ __declspec(dllexport)
 #endif
 #elif GTEST_HAVE_ATTRIBUTE_(visibility)
@@ -2349,9 +2367,9 @@ using Any = ::absl::any;
 }  // namespace internal
 }  // namespace testing
 #else
-#ifdef __has_include
-#if __has_include(<any>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L && \
-    (!defined(_MSC_VER) || GTEST_HAS_RTTI)
+#if defined(__cpp_lib_any) || (GTEST_INTERNAL_HAS_INCLUDE(<any>) &&        \
+                               GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L && \
+                               (!defined(_MSC_VER) || GTEST_HAS_RTTI))
 // Otherwise for C++17 and higher use std::any for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_ANY 1
@@ -2363,8 +2381,7 @@ using Any = ::std::any;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::any is not
 // supported.
-#endif  // __has_include(<any>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
-#endif  // __has_include
+#endif  // __cpp_lib_any
 #endif  // GTEST_HAS_ABSL
 
 #ifndef GTEST_INTERNAL_HAS_ANY
@@ -2384,8 +2401,8 @@ inline ::absl::nullopt_t Nullopt() { return ::absl::nullopt; }
 }  // namespace internal
 }  // namespace testing
 #else
-#ifdef __has_include
-#if __has_include(<optional>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
+#if defined(__cpp_lib_optional) || (GTEST_INTERNAL_HAS_INCLUDE(<optional>) && \
+                                    GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L)
 // Otherwise for C++17 and higher use std::optional for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_OPTIONAL 1
@@ -2399,12 +2416,20 @@ inline ::std::nullopt_t Nullopt() { return ::std::nullopt; }
 }  // namespace testing
 // The case where absl is configured NOT to alias std::optional is not
 // supported.
-#endif  // __has_include(<optional>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
-#endif  // __has_include
+#endif  // __cpp_lib_optional
 #endif  // GTEST_HAS_ABSL
 
 #ifndef GTEST_INTERNAL_HAS_OPTIONAL
 #define GTEST_INTERNAL_HAS_OPTIONAL 0
+#endif
+
+#if defined(__cpp_lib_span) || (GTEST_INTERNAL_HAS_INCLUDE(<span>) && \
+                                GTEST_INTERNAL_CPLUSPLUS_LANG >= 202002L)
+#define GTEST_INTERNAL_HAS_STD_SPAN 1
+#endif  // __cpp_lib_span
+
+#ifndef GTEST_INTERNAL_HAS_STD_SPAN
+#define GTEST_INTERNAL_HAS_STD_SPAN 0
 #endif
 
 #ifdef GTEST_HAS_ABSL
@@ -2418,8 +2443,9 @@ using StringView = ::absl::string_view;
 }  // namespace internal
 }  // namespace testing
 #else
-#ifdef __has_include
-#if __has_include(<string_view>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
+#if defined(__cpp_lib_string_view) ||             \
+    (GTEST_INTERNAL_HAS_INCLUDE(<string_view>) && \
+     GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L)
 // Otherwise for C++17 and higher use std::string_view for Matcher<>
 // specializations.
 #define GTEST_INTERNAL_HAS_STRING_VIEW 1
@@ -2431,9 +2457,7 @@ using StringView = ::std::string_view;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::string_view is not
 // supported.
-#endif  // __has_include(<string_view>) && GTEST_INTERNAL_CPLUSPLUS_LANG >=
-        // 201703L
-#endif  // __has_include
+#endif  // __cpp_lib_string_view
 #endif  // GTEST_HAS_ABSL
 
 #ifndef GTEST_INTERNAL_HAS_STRING_VIEW
@@ -2452,8 +2476,8 @@ using Variant = ::absl::variant<T...>;
 }  // namespace internal
 }  // namespace testing
 #else
-#ifdef __has_include
-#if __has_include(<variant>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
+#if defined(__cpp_lib_variant) || (GTEST_INTERNAL_HAS_INCLUDE(<variant>) && \
+                                   GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L)
 // Otherwise for C++17 and higher use std::variant for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_VARIANT 1
@@ -2465,16 +2489,16 @@ using Variant = ::std::variant<T...>;
 }  // namespace internal
 }  // namespace testing
 // The case where absl is configured NOT to alias std::variant is not supported.
-#endif  // __has_include(<variant>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
-#endif  // __has_include
+#endif  // __cpp_lib_variant
 #endif  // GTEST_HAS_ABSL
 
 #ifndef GTEST_INTERNAL_HAS_VARIANT
 #define GTEST_INTERNAL_HAS_VARIANT 0
 #endif
 
-#if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
-    GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L
+#if (defined(__cpp_constexpr) && !defined(__cpp_inline_variables)) || \
+    (defined(GTEST_INTERNAL_CPLUSPLUS_LANG) &&                        \
+     GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L)
 #define GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL 1
 #endif
 

@@ -33,6 +33,7 @@ set(BENCHMARK_HEADERS
 )
 set(BENCHMARK_SOURCES
   ${SOURCES_DIR}/benchmark/catch_chronometer.cpp
+  ${SOURCES_DIR}/benchmark/detail/catch_analyse.cpp
   ${SOURCES_DIR}/benchmark/detail/catch_benchmark_function.cpp
   ${SOURCES_DIR}/benchmark/detail/catch_run_for_at_least.cpp
   ${SOURCES_DIR}/benchmark/detail/catch_stats.cpp
@@ -92,6 +93,7 @@ set(IMPL_HEADERS
   ${SOURCES_DIR}/internal/catch_getenv.hpp
   ${SOURCES_DIR}/internal/catch_istream.hpp
   ${SOURCES_DIR}/internal/catch_is_permutation.hpp
+  ${SOURCES_DIR}/internal/catch_jsonwriter.hpp
   ${SOURCES_DIR}/internal/catch_lazy_expr.hpp
   ${SOURCES_DIR}/internal/catch_leak_detector.hpp
   ${SOURCES_DIR}/internal/catch_list.hpp
@@ -107,6 +109,8 @@ set(IMPL_HEADERS
   ${SOURCES_DIR}/internal/catch_polyfills.hpp
   ${SOURCES_DIR}/internal/catch_preprocessor.hpp
   ${SOURCES_DIR}/internal/catch_preprocessor_remove_parens.hpp
+  ${SOURCES_DIR}/internal/catch_random_floating_point_helpers.hpp
+  ${SOURCES_DIR}/internal/catch_random_integer_helpers.hpp
   ${SOURCES_DIR}/internal/catch_random_number_generator.hpp
   ${SOURCES_DIR}/internal/catch_random_seed_generation.hpp
   ${SOURCES_DIR}/internal/catch_reporter_registry.hpp
@@ -136,6 +140,8 @@ set(IMPL_HEADERS
   ${SOURCES_DIR}/internal/catch_textflow.hpp
   ${SOURCES_DIR}/internal/catch_to_string.hpp
   ${SOURCES_DIR}/internal/catch_uncaught_exceptions.hpp
+  ${SOURCES_DIR}/internal/catch_uniform_floating_point_distribution.hpp
+  ${SOURCES_DIR}/internal/catch_uniform_integer_distribution.hpp
   ${SOURCES_DIR}/internal/catch_unique_name.hpp
   ${SOURCES_DIR}/internal/catch_unique_ptr.hpp
   ${SOURCES_DIR}/internal/catch_void_type.hpp
@@ -176,6 +182,7 @@ set(IMPL_SOURCES
   ${SOURCES_DIR}/internal/catch_floating_point_helpers.cpp
   ${SOURCES_DIR}/internal/catch_getenv.cpp
   ${SOURCES_DIR}/internal/catch_istream.cpp
+  ${SOURCES_DIR}/internal/catch_jsonwriter.cpp
   ${SOURCES_DIR}/internal/catch_lazy_expr.cpp
   ${SOURCES_DIR}/internal/catch_leak_detector.cpp
   ${SOURCES_DIR}/internal/catch_list.cpp
@@ -288,6 +295,7 @@ set(REPORTER_HEADERS
   ${SOURCES_DIR}/reporters/catch_reporter_cumulative_base.hpp
   ${SOURCES_DIR}/reporters/catch_reporter_event_listener.hpp
   ${SOURCES_DIR}/reporters/catch_reporter_helpers.hpp
+  ${SOURCES_DIR}/reporters/catch_reporter_json.hpp
   ${SOURCES_DIR}/reporters/catch_reporter_junit.hpp
   ${SOURCES_DIR}/reporters/catch_reporter_multi.hpp
   ${SOURCES_DIR}/reporters/catch_reporter_registrars.hpp
@@ -306,6 +314,7 @@ set(REPORTER_SOURCES
   ${SOURCES_DIR}/reporters/catch_reporter_cumulative_base.cpp
   ${SOURCES_DIR}/reporters/catch_reporter_event_listener.cpp
   ${SOURCES_DIR}/reporters/catch_reporter_helpers.cpp
+  ${SOURCES_DIR}/reporters/catch_reporter_json.cpp
   ${SOURCES_DIR}/reporters/catch_reporter_junit.cpp
   ${SOURCES_DIR}/reporters/catch_reporter_multi.cpp
   ${SOURCES_DIR}/reporters/catch_reporter_registrars.cpp
@@ -339,7 +348,9 @@ source_group("generated headers"
 )
 
 add_library(Catch2 ${ALL_FILES})
-add_build_reproducibility_settings(Catch2)
+if (CATCH_ENABLE_REPRODUCIBLE_BUILD)
+    add_build_reproducibility_settings(Catch2)
+endif()
 add_library(Catch2::Catch2 ALIAS Catch2)
 
 if (ANDROID)
@@ -392,7 +403,9 @@ target_include_directories(Catch2
 add_library(Catch2WithMain
     ${SOURCES_DIR}/internal/catch_main.cpp
 )
-add_build_reproducibility_settings(Catch2WithMain)
+if (CATCH_ENABLE_REPRODUCIBLE_BUILD)
+    add_build_reproducibility_settings(Catch2WithMain)
+endif()
 add_library(Catch2::Catch2WithMain ALIAS Catch2WithMain)
 target_link_libraries(Catch2WithMain PUBLIC Catch2)
 set_target_properties(Catch2WithMain

@@ -8,31 +8,9 @@
 #include "gmock/gmock.h"
 
 #include <fstream>
+#include <filesystem>
 
 using namespace de_vertexwahn;
-
-TEST(Image, WriteAndReadFile) {
-    std::string filename = "file.txt";
-
-    // Write file
-    {
-        std::ofstream file;
-        file.open(filename);
-        file << "Writing this to a file.";
-        file.close();
-    }
-
-    std::string text = "test";
-
-    // Read file
-    {
-        std::ifstream file(filename);
-        std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-        text = content;
-    }
-
-    EXPECT_THAT(text, "Writing this to a file.");
-}
 
 TEST(io, WhenTryToLoadANonExistingImage_ThenThrowException) {
     EXPECT_THROW(load_image("muh.unknown_extension"), std::runtime_error);
@@ -70,4 +48,67 @@ TEST(Image, GivenTestImage3f_WhenStoreImageAsPng_ExpectCorectColorValues) {
             EXPECT_THAT(ref_c, c);
         }
     }
+}
+
+TEST(Image3b, GivenTestImage3f_WhenStoreImageAsPng_ExpectCorectColorValues) {
+    // Arrange
+    auto image = make_reference_counted<Image3b>(100, 100);
+
+    for (int y = 0; y < image->height(); ++y) {
+        for (int x = 0; x < image->width(); ++x) {
+            image->set_pixel(x, y, Color3b{255, 128, 0});
+        }
+    }
+
+    // Act
+    store_image("test.png", image);
+
+    // Assert
+    Image3b ref_image = load_image_asImage3b("test.png");
+
+    EXPECT_THAT(image->width(), ref_image.width());
+    EXPECT_THAT(image->height(), ref_image.height());
+
+    for (int y = 0; y < image->height(); ++y) {
+        for (int x = 0; x < image->width(); ++x) {
+            Color3b c = image->get_pixel(x, y);
+            Color3b ref_c = ref_image.get_pixel(x, y);
+            EXPECT_THAT(ref_c, (Color3b{255, 128, 0}));
+            EXPECT_THAT(ref_c, c);
+        }
+    }
+}
+
+TEST(Image, store_image_png) {
+    ReferenceCounted<Image4b> img = make_reference_counted<Image4b>(2,2);
+    store_image("test.png", img);
+    EXPECT_TRUE(std::filesystem::exists("test.png"));
+}
+
+TEST(Image, store_image_ppm) {
+    ReferenceCounted<Image4b> img = make_reference_counted<Image4b>(2,2);
+    store_image("test.ppm", img);
+    EXPECT_TRUE(std::filesystem::exists("test.ppm"));
+}
+
+TEST(Image, store_image_jpeg) {
+    ReferenceCounted<Image4b> img = make_reference_counted<Image4b>(2,2);
+    store_image("test.jpg", img);
+    EXPECT_TRUE(std::filesystem::exists("test.jpg"));
+}
+
+TEST(Image, store_image_webp) {
+    ReferenceCounted<Image4b> img = make_reference_counted<Image4b>(2,2);
+    store_image("test.webp", img);
+    EXPECT_TRUE(std::filesystem::exists("test.webp"));
+}
+
+TEST(Image, try_to_store_image4b_with_invalid_extension) {
+    ReferenceCounted<Image4b> img = make_reference_counted<Image4b>(2,2);
+    EXPECT_THROW(store_image("test.invalid_extension", img), std::runtime_error);
+}
+
+TEST(Image, try_to_store_image4f_with_invalid_extension) {
+    Image3f img{2,2};
+    EXPECT_THROW(store_image("test.invalid_extension", img), std::runtime_error);
 }

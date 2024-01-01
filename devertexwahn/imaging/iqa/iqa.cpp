@@ -24,6 +24,22 @@ bool are_equal(const Image3f &a, const Image3f &b) {
     return true;
 }
 
+// todo: handle this via operator==
+bool are_equal(const Image3b &a, const Image3b &b) {
+    for (int y = 0; y < a.height(); ++y) {
+        for (int x = 0; x < a.width(); ++x) {
+            Color3b c = a.get_pixel(x, y);
+            Color3b ref_c = b.get_pixel(x, y);
+
+            if (c != ref_c) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 double mean_squared_error(const Image3f &a, const Image3f &b) {
     assert(a.width() == b.width() && "Size does not match.");
     assert(a.height() == b.height() && "Size does not match.");

@@ -183,3 +183,20 @@ TEST(Polygon2f, GivenInvalidPoints_WhenConstructionPolygon_ThenRuntimeException)
     EXPECT_THROW((Polygon2f{transform, &points[0], 3}),
                  std::runtime_error);
 }
+
+TEST(DiskPolygon2f2f, bounds) {
+    // Arrange
+    std::vector<Point2f> points = {
+            {0.f, 0.f},
+            {1.f, 0.f},
+            {1.f, 1.f}
+    };
+
+    auto transform = identity<float>();
+
+    // Act
+    Polygon2f polygon{transform, &points[0], 3};
+
+    // Act & Assert
+    EXPECT_THROW(polygon.bounds(), std::runtime_error);
+}

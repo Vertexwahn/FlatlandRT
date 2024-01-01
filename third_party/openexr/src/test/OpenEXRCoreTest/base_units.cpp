@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include <ImfSystemSpecific.h>
+#include <ImfNamespace.h>
 #include "../../lib/OpenEXRCore/internal_cpuid.h"
 #include "../../lib/OpenEXRCore/internal_coding.h"
 
@@ -32,26 +33,38 @@ testBase (const std::string& tempdir)
 
     exr_get_library_version (&major, &minor, &patch, &extra);
     if (major != COMP_MAJ || minor != COMP_MIN || patch != COMP_PATCH ||
-        !strcmp (extra, compextra))
+        strcmp (extra, compextra))
     {
-        std::cerr << "ERROR testing library, wrong library version: " << major
+        std::cerr << "ERROR testing library, wrong library version: '" << major
                   << "." << minor << "." << patch;
-        if (extra[0] != '\0') std::cerr << "-" << extra;
-        std::cerr << " vs compiled in " << COMP_MAJ << "." << COMP_MIN << "."
+        if (extra[0] != '\0') std::cerr << extra;
+        std::cerr << "' vs compiled in '" << COMP_MAJ << "." << COMP_MIN << "."
                   << COMP_PATCH;
-        if (compextra[0] != '\0') std::cerr << "-" << compextra;
-        std::cerr << std::endl;
+        if (compextra[0] != '\0') std::cerr << compextra;
+        std::cerr << "'" << std::endl;
         EXRCORE_TEST (false);
     }
-    std::cout << "Testing OpenEXR library version: " << major << "." << minor << "."
+    std::cout << "Testing OpenEXR library version: '" << major << "." << minor << "."
               << patch;
-    if (extra[0] != '\0') std::cout << "-" << extra;
-    std::cout << std::endl;
+    if (extra[0] != '\0') std::cout << extra;
+    std::cout << "'" << std::endl;
 
     exr_get_library_version (NULL, &minor, &patch, &extra);
     exr_get_library_version (&major, NULL, &patch, &extra);
     exr_get_library_version (&major, &minor, NULL, &extra);
     exr_get_library_version (&major, &minor, &patch, NULL);
+
+    major = (OPENEXR_VERSION_HEX >> 24) & 0xff;
+    minor = (OPENEXR_VERSION_HEX >> 16) & 0xff;
+    patch = (OPENEXR_VERSION_HEX >> 8) & 0xff;
+
+    EXRCORE_TEST (major == COMP_MAJ);
+    EXRCORE_TEST (minor == COMP_MIN);
+    EXRCORE_TEST (patch == COMP_PATCH);
+
+#if OPENEXR_VERSION_HEX > 0
+    // confirm the macro compiles in an #if
+#endif
 }
 
 void
@@ -352,7 +365,7 @@ testBaseDebug (const std::string& tempdir)
 void testCPUIdent (const std::string& tempdir)
 {
     int hf16c, havx, hsse2;
-    Imf::CpuId id;
+    OPENEXR_IMF_NAMESPACE::CpuId id;
     check_for_x86_simd (&hf16c, &havx, &hsse2);
 
     if (hf16c != (int)id.f16c)

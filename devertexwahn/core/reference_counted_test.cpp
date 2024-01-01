@@ -4,7 +4,6 @@
  */
 
 #include "core/reference_counted.h"
-
 #include "gmock/gmock.h"
 
 using namespace de_vertexwahn;
@@ -19,10 +18,8 @@ public:
         count--;
     }
 
-    static int count;
+    inline static int count = 0;
 };
-
-int Dummy::count = 0;
 
 TEST(Memory, Memory_When_RefrenceCountedObjectDies_ExpectoZeroCount) {
     {

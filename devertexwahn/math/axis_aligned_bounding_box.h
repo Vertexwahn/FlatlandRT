@@ -16,11 +16,11 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 struct AxisAlignedBoundingBoxType {
     using Scalar = ScalarType;
-    using Point = PointType<Dimension, ScalarType>;
-    using Vector = VectorType<Dimension, ScalarType>;
+    using Point = PointType<ScalarType, Dimension>;
+    using Vector = VectorType<ScalarType, Dimension>;
 
     Scalar width() const {
         Scalar width = max_.x() - min_.x();
@@ -100,14 +100,14 @@ struct AxisAlignedBoundingBoxType {
         return true;
     }
 
-    PointType <Dimension, ScalarType> min_;
-    PointType <Dimension, ScalarType> max_;
+    PointType<ScalarType, Dimension> min_;
+    PointType<ScalarType, Dimension> max_;
 };
 
 template<typename ScalarType>
-using AxisAlignedBoundingBox2 = AxisAlignedBoundingBoxType<2, ScalarType>;
+using AxisAlignedBoundingBox2 = AxisAlignedBoundingBoxType<ScalarType, 2>;
 template<typename ScalarType>
-using AxisAlignedBoundingBox3 = AxisAlignedBoundingBoxType<3, ScalarType>;
+using AxisAlignedBoundingBox3 = AxisAlignedBoundingBoxType<ScalarType, 3>;
 
 using AxisAlignedBoundingBox2i = AxisAlignedBoundingBox2<int>;
 using AxisAlignedBoundingBox2f = AxisAlignedBoundingBox2<float>;
@@ -166,14 +166,14 @@ union_aabb(const AxisAlignedBoundingBox3<T> &b1, const AxisAlignedBoundingBox3<T
     return ret;
 }
 
-template<unsigned int Dimension, typename ScalarType>
-inline bool operator==(const AxisAlignedBoundingBoxType<Dimension, ScalarType> &lhs,
-                       const AxisAlignedBoundingBoxType<Dimension, ScalarType> &rhs) {
+template<typename ScalarType, unsigned int Dimension>
+inline bool operator==(const AxisAlignedBoundingBoxType<ScalarType, Dimension> &lhs,
+                       const AxisAlignedBoundingBoxType<ScalarType, Dimension> &rhs) {
     return lhs.min_ == rhs.min_ && lhs.max_ == rhs.max_;
 }
 
-template<unsigned int Dimension, typename ScalarType>
-std::ostream &operator<<(std::ostream &stream, const AxisAlignedBoundingBoxType<Dimension, ScalarType> &aabb) {
+template<typename ScalarType, unsigned int Dimension>
+std::ostream &operator<<(std::ostream &stream, const AxisAlignedBoundingBoxType<ScalarType, Dimension> &aabb) {
     stream << "AABB {" << aabb.min_ << ", " << aabb.max_ << "}";
     return stream;
 }

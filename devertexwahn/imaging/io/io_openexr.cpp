@@ -112,20 +112,20 @@ void store_open_exr(const std::string_view &filename, const Image3f &image) {
     channels.insert("G", Imf::Channel(Imf::FLOAT));
     channels.insert("B", Imf::Channel(Imf::FLOAT));
 
-    FrameBuffer frameBuffer;
-    size_t compStride = sizeof(float),
-            pixelStride = 3 * compStride,
-            rowStride = pixelStride * image.width();
+    FrameBuffer frame_buffer;
+    size_t comp_stride = sizeof(float);
+    size_t pixel_stride = 3 * comp_stride;
+    size_t row_stride = pixel_stride * image.width();
 
     char *data = reinterpret_cast<char *>(image.data());
-    frameBuffer.insert("R", Imf::Slice(Imf::FLOAT, data, pixelStride, rowStride));
-    data += compStride;
-    frameBuffer.insert("G", Imf::Slice(Imf::FLOAT, data, pixelStride, rowStride));
-    data += compStride;
-    frameBuffer.insert("B", Imf::Slice(Imf::FLOAT, data, pixelStride, rowStride));
+    frame_buffer.insert("R", Imf::Slice(Imf::FLOAT, data, pixel_stride, row_stride));
+    data += comp_stride;
+    frame_buffer.insert("G", Imf::Slice(Imf::FLOAT, data, pixel_stride, row_stride));
+    data += comp_stride;
+    frame_buffer.insert("B", Imf::Slice(Imf::FLOAT, data, pixel_stride, row_stride));
 
     OutputFile file(filename.data(), header);
-    file.setFrameBuffer(frameBuffer);
+    file.setFrameBuffer(frame_buffer);
     file.writePixels(image.height());
 }
 

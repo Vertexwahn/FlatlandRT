@@ -11,7 +11,7 @@
 
 using namespace de_vertexwahn;
 
-TEST(Image, storeLoadOpenEXR) {
+TEST(Image, storeLoadOpenPPM) {
     // Arrange
     Image4b image{100, 100};
 

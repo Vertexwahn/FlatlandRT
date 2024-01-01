@@ -33,12 +33,24 @@ add_executable(OpenEXRExamples
   deepExamples.h
   deepTiledExamples.cpp
   deepTiledExamples.h
+  multipartExamples.cpp
+  multipartExamples.h
 )
 
 target_link_libraries(OpenEXRExamples OpenEXR::OpenEXR)
 set_target_properties(OpenEXRExamples PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
+
+add_executable(deepidexample deepidexample.cpp)
+target_link_libraries(deepidexample OpenEXR::OpenEXR)
+
+add_executable(deepidselect deepidselect.cpp)
+target_link_libraries(deepidselect OpenEXR::OpenEXR)
+
+
+
+
 if(WIN32 AND BUILD_SHARED_LIBS)
   target_compile_definitions(OpenEXRExamples PRIVATE OPENEXR_DLL)
 endif()
@@ -66,6 +78,8 @@ install(
     deepExamples.h
     deepTiledExamples.cpp
     deepTiledExamples.h
+    multipartExamples.cpp
+    multipartExamples.h
   DESTINATION
     ${CMAKE_INSTALL_DOCDIR}/examples
   )

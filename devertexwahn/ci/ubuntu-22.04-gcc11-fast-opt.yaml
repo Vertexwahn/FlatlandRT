@@ -3,10 +3,14 @@
 #   SPDX-License-Identifier: Apache-2.0
 #
 
-# GCC9 on Ubuntu 20.04
-# Make sure we can build with GCC9 in all different compilation modes
+# GCC11 on Ubuntu 22.04
+# Make sure we can build with GCC11 in all different compilation modes
 
 steps:
+  - script: |
+      df
+    displayName: 'Show disk space'
+
   - checkout: self
     clean: true
     fetchDepth: 1
@@ -17,6 +21,10 @@ steps:
   - script: |
       lsb_release -a
     displayName: "Show OS version"
+
+  - script: |
+      df
+    displayName: 'Show disk space'
 
   - script: |
       cd devertexwahn
@@ -47,3 +55,7 @@ steps:
       cd devertexwahn
       bazel test --config=gcc11  --compilation_mode=opt -- //...    
     displayName: "Bazel test gcc11-opt"
+
+  - script: |
+      df
+    displayName: 'Show disk space'

@@ -16,7 +16,7 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 struct PointType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     using Base = Eigen::Matrix<ScalarType, Dimension, 1>;
 
@@ -32,12 +32,12 @@ struct PointType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     PointType(const Eigen::MatrixBase<Derived>& src) : Base(src) {
     }
 
-    PointType<3,ScalarType> xyz() const {
-        return PointType<3,ScalarType>(Base::x(), Base::y(), Base::z());
+    PointType<ScalarType, 3> xyz() const {
+        return PointType<ScalarType, 3>(Base::x(), Base::y(), Base::z());
     }
 
-    PointType<2,ScalarType> zy() const {
-        return PointType<2,ScalarType>(Base::z(), Base::y());
+    PointType<ScalarType, 2> zy() const {
+        return PointType<ScalarType, 2>(Base::z(), Base::y());
     }
 
     using Base::operator=;
@@ -53,11 +53,11 @@ struct PointType : public Eigen::Matrix<ScalarType, Dimension, 1> {
 };
 
 template <typename ScalarType>
-using Point2 = PointType<2, ScalarType>;
+using Point2 = PointType<ScalarType, 2>;
 template <typename ScalarType>
-using Point3 = PointType<3, ScalarType>;
+using Point3 = PointType<ScalarType, 3>;
 template <typename ScalarType>
-using Point4 = PointType<4, ScalarType>;
+using Point4 = PointType<ScalarType, 4>;
 
 using Point2i = Point2<int>;
 using Point2f = Point2<float>;

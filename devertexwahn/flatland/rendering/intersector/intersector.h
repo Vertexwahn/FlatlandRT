@@ -13,20 +13,20 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 struct MediumEventType;
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 class ShapeType;
 
-template<unsigned int Dimension, typename ScalarType>
+template<typename ScalarType, unsigned int Dimension>
 class IntersectorType : public Object {
 public:
-    using Ray = RayType<Dimension, ScalarType>;
-    using MediumEvent = MediumEventType<Dimension, ScalarType>;
-    using Shape = ShapeType<Dimension, ScalarType>;
+    using Ray = RayType<ScalarType, Dimension>;
+    using MediumEvent = MediumEventType<ScalarType, Dimension>;
+    using Shape = ShapeType<ScalarType, Dimension>;
 
-    virtual void build_acceleration_structure(std::vector<ReferenceCounted < Shape>> shapes) = 0;
+    virtual void build_acceleration_structure(std::vector<ReferenceCounted<Shape>> shapes) = 0;
 
     virtual bool intersect(const Ray &ray, MediumEvent &me) const = 0;
 };

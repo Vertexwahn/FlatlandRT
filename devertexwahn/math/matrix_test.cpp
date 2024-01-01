@@ -46,3 +46,24 @@ TEST(Matrix44f, Matrix44f_multiplication) {
 
     EXPECT_THAT(result, expected_result);
 }
+
+TEST(Matrix44f, scale_matrix) {
+    Matrix44f result = scale_matrix(1.f, 2.f, 3.f);
+    Matrix44f expected_result;
+    expected_result << 1.f, 0.f, 0.f, 0.f,
+                       0.f, 2.f, 0.f, 0.f,
+                       0.f, 0.f, 3.f, 0.f,
+                       0.f, 0.f, 0.f, 1.f;
+    EXPECT_THAT(result, expected_result);
+}
+
+TEST(Matrix44f, translation_with_scalars) {
+    Matrix44f result = translation_matrix(1.f, 2.f, 3.f);
+
+    Matrix44f expected_result;
+    expected_result << 1.f, 0.f, 0.f, 1.f,
+            0.f, 1.f, 0.f, 2.f,
+            0.f, 0.f, 1.f, 3.f,
+            0.f, 0.f, 0.f, 1.f;
+    EXPECT_THAT(result, expected_result);
+}

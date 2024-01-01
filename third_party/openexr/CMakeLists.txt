@@ -21,13 +21,13 @@ endif()
 
 file(READ "src/lib/OpenEXRCore/openexr_version.h" VERSION_H)
 string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${VERSION_H})
-set(VER_MAJ ${CMAKE_MATCH_1})
+set(OPENEXR_VERSION_MAJOR ${CMAKE_MATCH_1})
 string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${VERSION_H})
-set(VER_MIN ${CMAKE_MATCH_1})
+set(OPENEXR_VERSION_MINOR ${CMAKE_MATCH_1})
 string(REGEX MATCH "VERSION_PATCH ([0-9]*)" _ ${VERSION_H})
-set(VER_PCH ${CMAKE_MATCH_1})
+set(OPENEXR_VERSION_PATCH ${CMAKE_MATCH_1})
 
-project(OpenEXR VERSION ${VER_MAJ}.${VER_MIN}.${VER_PCH} LANGUAGES C CXX)
+project(OpenEXR VERSION ${OPENEXR_VERSION_MAJOR}.${OPENEXR_VERSION_MINOR}.${OPENEXR_VERSION_PATCH} LANGUAGES C CXX)
 
 set(OPENEXR_VERSION_RELEASE_TYPE "-dev" CACHE STRING "Extra version tag string for OpenEXR build, such as -dev, -beta1, etc.")
 
@@ -122,9 +122,22 @@ if(NOT OPENEXR_IS_SUBPROJECT)
   include(cmake/clang-format.cmake)
 endif()
 
-option(BUILD_DOCS "Set ON to build html documentation")
-if (BUILD_DOCS AND NOT OPENEXR_IS_SUBPROJECT)
-  option(INSTALL_DOCS "Set ON to install html documentation" ON)
+option(OPENEXR_INSTALL_DOCS "Set ON to install tool manpages")
+if (OPENEXR_INSTALL_DOCS AND NOT OPENEXR_IS_SUBPROJECT)
   add_subdirectory(docs)
 endif()
 
+option(BUILD_WEBSITE "Set ON to build website source")
+if (BUILD_WEBSITE AND NOT OPENEXR_IS_SUBPROJECT)
+  add_subdirectory(website)
+endif()
+
+if (NOT OPENEXR_IS_SUBPROJECT)
+  # Even if not building the website, still make sure the website example code compiles.
+  add_subdirectory(website/src)
+endif()
+
+option(OPENEXR_BUILD_PYTHON "Set ON to build python bindings")
+if (OPENEXR_BUILD_PYTHON AND NOT OPENEXR_IS_SUBPROJECT)
+  add_subdirectory(src/wrappers/python)
+endif()

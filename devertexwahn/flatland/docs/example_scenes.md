@@ -10,6 +10,11 @@ SPDX-License-Identifier: Apache-2.0
 
 ![out](../scenes/reference_images/bunny_ref.svg)
 
+```shell
+# GCC 11 on Ubuntu 22.04 - assuming that pwd is devertexwahn 
+bazel run --config=gcc11 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
+```
+
 ### disk.flatland.xml
 
 ![out](../scenes/reference_images/disk_ref.svg)

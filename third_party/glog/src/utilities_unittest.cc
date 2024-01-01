@@ -29,15 +29,16 @@
 //
 // Author: Shinichiro Hamaji
 #include "utilities.h"
-#include "googletest.h"
-#include <glog/logging.h>
 
-#ifdef HAVE_LIB_GFLAGS
-#include <gflags/gflags.h>
+#include "glog/logging.h"
+#include "googletest.h"
+
+#ifdef GLOG_USE_GFLAGS
+#  include <gflags/gflags.h>
 using namespace GFLAGS_NAMESPACE;
 #endif
 
-using namespace GOOGLE_NAMESPACE;
+using namespace google;
 
 TEST(utilities, sync_val_compare_and_swap) {
   bool now_entering = false;
@@ -50,7 +51,7 @@ TEST(utilities, InitGoogleLoggingDeathTest) {
   ASSERT_DEATH(InitGoogleLogging("foobar"), "");
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   InitGoogleLogging(argv[0]);
   InitGoogleTest(&argc, argv);
 

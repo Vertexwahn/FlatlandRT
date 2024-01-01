@@ -30,6 +30,22 @@ TEST(Disk2f, GivenDiskCenterAndRadius_WhenInitializing_ThenInitializedDisk) {
     EXPECT_THAT(disk.radius(), diskRadius);
 }
 
+TEST(Disk2f, bounds) {
+    // Arrange
+    auto diskRadius = 25.f;
+    auto diskCenter = Vector2f{100.f, 100.f};
+    auto transform = translate(diskCenter);
+
+    PropertySet ps;
+    ps.add_property("radius", diskRadius);
+    ps.add_property("transform", transform);
+
+    Disk2f disk{ps};
+
+    // Act & Assert
+    EXPECT_THROW(disk.bounds(), std::runtime_error);
+}
+
 // Trivial hit
 TEST(Disk2f, GivenADiskAndRay_WhenRayIntersectsDisk_ThenIntersectionOnDisk) {
     // Arrange
@@ -276,7 +292,7 @@ TEST(RefractionRayHitsSphere, When_RayHitsSphereStraightFromInside_Then_ExpectSt
     Vector2f wo = -r.direction;
 
     // Act
-    bool result = refract(wo, faceforward(its.geo_frame.n, wo), 1.f / 1.6f, refracted_direction);
+    bool result = refract(wo, face_forward(its.geo_frame.n, wo), 1.f / 1.6f, refracted_direction);
 
     // Assert
     ASSERT_TRUE(result);
@@ -330,7 +346,7 @@ TEST(RefractionRayHitsAndExitsSphere, When_RayFromTopAt45Degrees_HitsSphere) {
 
     Vector2f refracted_direction2;
     Vector2f wo = -refractedRay.direction;
-    refract(wo, faceforward(its.geo_frame.n, wo), 1.6f / 1.f, refracted_direction2);
+    refract(wo, face_forward(its.geo_frame.n, wo), 1.6f / 1.f, refracted_direction2);
 
     Ray2f refractedRay2{its.p, refracted_direction2, 0.f, 50.f};
     //sc.add(refractedRay2);

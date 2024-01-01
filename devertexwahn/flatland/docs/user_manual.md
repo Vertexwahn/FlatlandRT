@@ -58,4 +58,4 @@ flatland <filename.scene.xml>
 
 ### Scene file format
 
-The scene file format is heavily influence by the scene format used by [Mitsuba 2](https://mitsuba2.readthedocs.io/en/latest/src/getting_started/file_format.html) and [Nori](https://github.com/wjakob/nori).
+The scene file format is heavily influenced by the scene format used by [Mitsuba 2](https://mitsuba2.readthedocs.io/en/latest/src/getting_started/file_format.html) and [Nori](https://github.com/wjakob/nori).

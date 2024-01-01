@@ -17,42 +17,40 @@
 #include <algorithm>
 #include <array>
 #include <bitset>
+#include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
-#include <deque>
-#include <forward_list>
 #include <functional>
 #include <initializer_list>
-#include <iterator>
+#include <ios>
 #include <limits>
-#include <list>
-#include <map>
 #include <memory>
-#include <numeric>
-#include <random>
+#include <ostream>
 #include <set>
 #include <string>
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "absl/container/btree_map.h"
-#include "absl/container/btree_set.h"
-#include "absl/container/flat_hash_map.h"
+#include "absl/base/config.h"
 #include "absl/container/flat_hash_set.h"
-#include "absl/container/node_hash_map.h"
-#include "absl/container/node_hash_set.h"
 #include "absl/hash/hash_testing.h"
 #include "absl/hash/internal/hash_test.h"
 #include "absl/hash/internal/spy_hash_state.h"
+#include "absl/memory/memory.h"
 #include "absl/meta/type_traits.h"
-#include "absl/numeric/int128.h"
 #include "absl/strings/cord_test_helpers.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "absl/types/variant.h"
+
+#if ABSL_INTERNAL_CPLUSPLUS_LANG >= 201703L
+#include <filesystem>  // NOLINT
+#endif
 
 #ifdef ABSL_HAVE_STD_STRING_VIEW
 #include <string_view>
@@ -483,6 +481,43 @@ TEST(HashValueTest, U32StringView) {
                       std::u32string_view(U"ABC"),
                       std::u32string_view(U"Some other different string_view"),
                       std::u32string_view(U"Iñtërnâtiônàlizætiøn"))));
+#endif
+}
+
+TEST(HashValueTest, StdFilesystemPath) {
+#ifndef ABSL_INTERNAL_STD_FILESYSTEM_PATH_HASH_AVAILABLE
+  GTEST_SKIP() << "std::filesystem::path is unavailable on this platform";
+#else
+  EXPECT_TRUE((is_hashable<std::filesystem::path>::value));
+
+  // clang-format off
+  const auto kTestCases = std::make_tuple(
+      std::filesystem::path(),
+      std::filesystem::path("/"),
+#ifndef __GLIBCXX__
+      // libstdc++ has a known issue normalizing "//".
+      // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=106452
+      std::filesystem::path("//"),
+#endif
+      std::filesystem::path("/a/b"),
+      std::filesystem::path("/a//b"),
+      std::filesystem::path("a/b"),
+      std::filesystem::path("a/b/"),
+      std::filesystem::path("a//b"),
+      std::filesystem::path("a//b/"),
+      std::filesystem::path("c:/"),
+      std::filesystem::path("c:\\"),
+      std::filesystem::path("c:\\/"),
+      std::filesystem::path("c:\\//"),
+      std::filesystem::path("c://"),
+      std::filesystem::path("c://\\"),
+      std::filesystem::path("/e/p"),
+      std::filesystem::path("/s/../e/p"),
+      std::filesystem::path("e/p"),
+      std::filesystem::path("s/../e/p"));
+  // clang-format on
+
+  EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly(kTestCases));
 #endif
 }
 

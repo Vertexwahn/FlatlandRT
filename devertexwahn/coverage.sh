@@ -14,7 +14,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-additional_bazel_config=$1 
+additional_bazel_config=$1
 
 bazel coverage \
 --config=gcc11 \

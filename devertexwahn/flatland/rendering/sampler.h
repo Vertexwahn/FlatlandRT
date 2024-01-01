@@ -28,8 +28,10 @@ public:
 
     virtual ~SamplerType() {}
 
+    [[nodiscard]]
     virtual ScalarType next_1d() = 0;
 
+    [[nodiscard]]
     virtual Point2 <ScalarType> next_2d() = 0;
 
     [[nodiscard]]
@@ -37,6 +39,7 @@ public:
         return sample_count_;
     };
 
+    [[nodiscard]]
     virtual std::unique_ptr<SamplerType> clone() = 0;
 
 protected:
@@ -54,20 +57,24 @@ public:
 
     virtual ~StaticDebugSamplerType() {}
 
+    [[nodiscard]]
     Scalar next_1d() override {
         return Scalar{0.5};
     }
 
+    [[nodiscard]]
     Point next_2d() override {
         return Point(Scalar{0.5}, Scalar{0.5});
     }
 
+    [[nodiscard]]
     std::unique_ptr<SamplerType<ScalarType>> clone() override {
         PropertySet ps;
         ps.add_property("sample_count", Base::sample_count_);
         return std::make_unique<StaticDebugSamplerType>(ps);
     }
 
+    [[nodiscard]]
     std::string to_string() const override {
         return "PixelCenterSampler";
     }
@@ -88,10 +95,12 @@ public:
 
     virtual ~IndependentSamplerType() {}
 
+    [[nodiscard]]
     ScalarType next_1d() override {
         return uniform_distribution_(rng_);
     }
 
+    [[nodiscard]]
     Point2 <ScalarType> next_2d() override {
         auto x = uniform_distribution_(rng_);
         auto y = uniform_distribution_(rng_);
@@ -103,6 +112,7 @@ public:
         return "IndependentSampler";
     }
 
+    [[nodiscard]]
     std::unique_ptr<SamplerType<ScalarType>> clone() override {
         PropertySet ps;
         ps.add_property("sample_count", Base::sample_count_);

@@ -27,8 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <glog/logging.h>
-#include <glog/stl_logging.h>
+#include "glog/stl_logging.h"
 
 #include <functional>
 #include <iostream>
@@ -38,6 +37,7 @@
 #include <vector>
 
 #include "config.h"
+#include "glog/logging.h"
 #include "googletest.h"
 
 using namespace std;
@@ -62,14 +62,14 @@ static void TestSTLLogging() {
 
   {
     // Test a sorted pair associative container.
-    map< int, string > m;
+    map<int, string> m;
     m[20] = "twenty";
     m[10] = "ten";
     m[30] = "thirty";
     ostringstream ss;
     ss << m;
     EXPECT_EQ(ss.str(), "(10, ten) (20, twenty) (30, thirty)");
-    map< int, string > copied_m(m);
+    map<int, string> copied_m(m);
     CHECK_EQ(m, copied_m);  // This must compile.
   }
 
@@ -82,7 +82,7 @@ static void TestSTLLogging() {
       if (i > 0) expected += ' ';
       const size_t buf_size = 256;
       char buf[buf_size];
-      snprintf(buf, buf_size, "%d", i);
+      std::snprintf(buf, buf_size, "%d", i);
       expected += buf;
     }
     v.push_back(100);
@@ -95,14 +95,14 @@ static void TestSTLLogging() {
   {
     // Test a sorted pair associative container.
     // Use a non-default comparison functor.
-    map<int, string, greater<> > m;
+    map<int, string, greater<>> m;
     m[20] = "twenty";
     m[10] = "ten";
     m[30] = "thirty";
     ostringstream ss;
     ss << m;
     EXPECT_EQ(ss.str(), "(30, thirty) (20, twenty) (10, ten)");
-    map<int, string, greater<> > copied_m(m);
+    map<int, string, greater<>> copied_m(m);
     CHECK_EQ(m, copied_m);  // This must compile.
   }
 }
