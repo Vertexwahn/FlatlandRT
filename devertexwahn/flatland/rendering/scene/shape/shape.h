@@ -7,41 +7,16 @@
 #ifndef De_Vertexwahn_Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
 #define De_Vertexwahn_Flatland_Shape_1aef9b7b_dc9e_4d86_96c6_3552a8001293_h
 
-#include "core/object.h"
-#include "math/axis_aligned_bounding_box.h"
-#include "math/frame.h"
 #include "flatland/rendering/bsdf/svg_material.h"
 #include "flatland/rendering/scene/shape/emitter.h"
+#include "flatland/rendering/scene/shape/medium_event.h"
+
+#include "math/axis_aligned_bounding_box.h"
+#include "math/frame.h"
+
+#include "core/object.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
-
-template <typename ScalarType, unsigned int Dimension>
-class ShapeType;
-
-template<typename ScalarType, unsigned int Dimension>
-struct MediumEventType {
-    using Scalar = ScalarType;
-    using Point = PointType<ScalarType, Dimension>;
-    using Normal = NormalType<ScalarType, Dimension>;
-    using Frame = FrameType<ScalarType, Dimension>;
-
-    Point p; // intersection point
-    Scalar t; // distance to intersection point
-    Frame geo_frame; // geo_frame regarding to world space
-    Frame sh_frame; // shading frame
-
-    const ShapeType<ScalarType, Dimension> *shape = nullptr;
-};
-
-template <typename ScalarType>
-using MediumEvent2 = MediumEventType<ScalarType, 2>;
-template <typename ScalarType>
-using MediumEvent3 = MediumEventType<ScalarType, 3>;
-
-using MediumEvent2f = MediumEvent2<float>;
-using MediumEvent2d = MediumEvent2<double>;
-using MediumEvent3f = MediumEvent3<float>;
-using MediumEvent3d = MediumEvent3<double>;
 
 template <typename ScalarType, unsigned int Dimension>
 class ShapeTypeBase : public Object {

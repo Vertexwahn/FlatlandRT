@@ -48,6 +48,14 @@ cc_test(
 )
 
 cc_library(
+    name = "medium_event",
+    hdrs = ["medium_event.h"],
+    deps = [
+        "//math:frame",
+    ],
+)
+
+cc_library(
     name = "polygon",
     hdrs = ["polygon.h"],
     deps = [
@@ -110,6 +118,7 @@ cc_library(
     hdrs = ["shape.h"],
     deps = [
         ":emitter",
+        ":medium_event",
         "//core:object",
         "//flatland/rendering/bsdf:svg_material",
         "//math:axis_aligned_bounding_box",
