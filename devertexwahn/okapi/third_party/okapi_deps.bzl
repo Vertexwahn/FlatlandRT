@@ -172,13 +172,13 @@ def okapi_deps():
     #)
 
     # Use local repository
-    maybe(
-        native.new_local_repository,
-        name = "pugixml",
-        build_file = "//okapi/third_party:pugixml.BUILD",
-        #path = "../third_party/pugixml-1.13",
-        path = "../third_party/pugixml",
-    )
+    #maybe(
+    #    native.new_local_repository,
+    #    name = "pugixml",
+    #    build_file = "//okapi/third_party:pugixml.BUILD",
+    #    #path = "../third_party/pugixml-1.13",
+    #    path = "../third_party/pugixml",
+    #)
 
     #-------------------------------------------------------------------------------------
     # pcg
