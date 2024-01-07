@@ -85,7 +85,7 @@ TEST(PropertySet, WhenPropertyDoesNotExist_Then_ReturnDefaultValue) {
     using PropertySet = PropertySetType<VariantType>;
 
     PropertySet ps;
-    EXPECT_THAT(ps.get_property("notExistingProperty", 42), testing::Eq(42));
+    EXPECT_THAT(ps.get_property("not_existing_property", 42), testing::Eq(42));
 }
 
 TEST(PropertySet, CopyCtor) {
