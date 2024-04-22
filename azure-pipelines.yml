@@ -102,12 +102,6 @@ jobs:
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-gcc11-dbg-part1.yaml
 
-  - job: Ubuntu22GCC11DebugPart2
-    displayName: "GCC11 dbg on Ubuntu 22.04 (Part 2)"
-    pool:
-      vmImage: 'ubuntu-22.04'
-    steps:
-      - template: devertexwahn/ci/ubuntu-22.04-gcc11-dbg-part2.yaml
   
   # Visual Studio 2019
   - job: VisualStudio2019Dbg
