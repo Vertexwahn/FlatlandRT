@@ -1,0 +1,58 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# LCOV and GCC11 on Ubuntu 22.04
+# Make sure bzlmod works
+steps:
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+  - script: |
+      lsb_release -a
+    displayName: 'Show OS version'
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+      cd devertexwahn
+      bazel version
+    displayName: 'Show Bazel version'
+
+  - script: |
+      gcc --version
+    displayName: 'Show GCC version'
+
+
+  - script: |
+      cd devertexwahn
+      bazel run --config=gcc11 -- //tools/compiler_information
+    displayName: "Show compiler information"
+
+  - script: |
+      cd devertexwahn
+      # Get rid of WORKSPACE.bazel file to make sure we only use bzlmod
+      rm WORKSPACE.bazel
+      # Get rid of WORKSPACE.bzlmod file to make sure we only use bzlmod
+      rm WORKKSPACE.bzlmod
+      rm .bazelversion
+      git diff
+      bazel version
+      bazel build --config=gcc11 -- //core/... //math/... //imaging/...
+      bazel test --config=gcc11 -- //core/... //math/... //imaging/...
+    displayName: 'Bzlmod test'
+
+  - script: |
+      df
+    displayName: 'Show disk space'
