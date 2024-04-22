@@ -80,18 +80,6 @@ jobs:
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-clang16.yaml
 
-  - job: Ubuntu22Coverage
-    displayName: "Coverage with LCOV/GCC11 on Ubuntu 22.04"
-    pool:
-      vmImage: 'ubuntu-22.04'
-    steps:
-      - template: devertexwahn/ci/ubuntu-22.04-coverage.yaml
-  #- job: Ubuntu22Docker
-  #  displayName: "aarch64 Docker"
-  #  pool:
-  #    vmImage: 'ubuntu-22.04'
-  #  steps:
-  #    - template: devertexwahn/ci/ubuntu-22.04-docker-aarch64.yaml
 
   - job: Ubuntu22Bzlmod
     displayName: "Bzlmod on Ubuntu 22.04"
