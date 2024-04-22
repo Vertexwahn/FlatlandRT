@@ -3,8 +3,6 @@
     SPDX-License-Identifier: Apache-2.0
 """
 
-load("@rules_qt//:qt.bzl", "qt_cc_binary")
-
 cc_binary(
     name = "compiler_information",
     srcs = [
