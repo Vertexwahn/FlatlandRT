@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: codespell-project/actions-codespell@v1
+      - uses: codespell-project/actions-codespell@v2
         with:
           path: devertexwahn
+          exclude_file: devertexwahn/MODULE.bazel.lock
