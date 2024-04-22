@@ -14,5 +14,4 @@ jobs:
 
       - uses: codespell-project/actions-codespell@v2
         with:
-          path: devertexwahn
-          exclude_file: MODULE.bazel.lock
+          path: devertexwahn/flatland
