@@ -47,15 +47,15 @@ protected:
 };
 
 template<typename ScalarType>
-class StaticDebugSamplerType : public SamplerType<ScalarType> {
+class ConstantSamplerType final : public SamplerType<ScalarType> {
 public:
     using Scalar = ScalarType;
     using Point = Point2<ScalarType>;
     using Base = SamplerType<ScalarType>;
 
-    StaticDebugSamplerType(const PropertySet &ps) : SamplerType<ScalarType>(ps) {}
+    ConstantSamplerType(const PropertySet &ps) : SamplerType<ScalarType>(ps) {}
 
-    virtual ~StaticDebugSamplerType() {}
+    virtual ~ConstantSamplerType() {}
 
     [[nodiscard]]
     Scalar next_1d() override {
@@ -71,7 +71,7 @@ public:
     std::unique_ptr<SamplerType<ScalarType>> clone() override {
         PropertySet ps;
         ps.add_property("sample_count", Base::sample_count_);
-        return std::make_unique<StaticDebugSamplerType>(ps);
+        return std::make_unique<ConstantSamplerType>(ps);
     }
 
     [[nodiscard]]
@@ -81,7 +81,7 @@ public:
 };
 
 template<typename ScalarType>
-class IndependentSamplerType : public SamplerType<ScalarType> {
+class IndependentSamplerType final : public SamplerType<ScalarType> {
 public:
     using Base = SamplerType<ScalarType>;
 
@@ -129,7 +129,7 @@ private:
 using Sampler2f = SamplerType<float>;
 using Sampler2d = SamplerType<double>;
 
-using StaticDebugSampler = StaticDebugSamplerType<float>;
+using ConstantSampler = ConstantSamplerType<float>;
 using IndependentSampler = IndependentSamplerType<float>;
 
 DE_VERTEXWAHN_END_NAMESPACE

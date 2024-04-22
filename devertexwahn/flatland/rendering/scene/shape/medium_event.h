@@ -27,6 +27,7 @@ struct MediumEventType {
     Scalar t; // distance to intersection point
     Frame geo_frame; // geo_frame regarding to world space
     Frame sh_frame; // shading frame
+    Point2f uv; // UV surface coordinates
 
     const ShapeType<ScalarType, Dimension> *shape = nullptr;
 };

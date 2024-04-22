@@ -234,7 +234,11 @@ namespace hypothesis {
         if (pval < alpha || !std::isfinite(pval)) {
             oss << "***** Rejected ***** the null hypothesis (p-value = " << pval << ", "
                 "significance level = " << alpha << ")" << std::endl;
-        } else {
+        }
+        else if (std::isnan(pval) || std::isinf(pval)) {
+            oss << "The p-value is not a valid number. Rejecting the null hypothesis!" << std::endl;
+        }
+        else {
             oss << "Accepted the null hypothesis (p-value = " << pval << ", "
                 "significance level = " << alpha << ")" << std::endl;
             result = true;
@@ -345,7 +349,11 @@ namespace hypothesis {
         if (pval < alpha) {
             oss << "***** Rejected ***** the null hypothesis (p-value = " << pval << ", "
                    "significance level = " << alpha << ")" << std::endl;
-        } else {
+        }
+        else if (std::isnan(pval) || std::isinf(pval)) {
+            oss << "The p-value is not a valid number. Rejecting the null hypothesis!" << std::endl;
+        }
+        else {
             oss << "Accepted the null hypothesis (p-value = " << pval << ", "
                    "significance level = " << alpha << ")" << std::endl;
             result = true;

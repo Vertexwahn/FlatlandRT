@@ -1,5 +1,5 @@
 #
-#   SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+#   SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
 #   SPDX-License-Identifier: Apache-2.0
 #
 
@@ -13,10 +13,9 @@
 # Bzlmod
 #-------------------------------------------------------------------------------------
 
-common --enable_bzlmod
-#common --registry=file:///%workspace%/registry
-common --registry=https://raw.githubusercontent.com/Vertexwahn/bazel-registry/main/ # Check if this makes Windows happy
-common --registry=https://raw.githubusercontent.com/bazelboost/registry/main
+#common --registry=file:///%workspace%/registry  # Does not work on Windows 11 + Bazel 6.5.0
+#common --registry=https://vertexwahn.de/registry
+common --registry=https://raw.githubusercontent.com/Vertexwahn/bazel-registry/main/  # Needed for Boost
 common --registry=https://bcr.bazel.build
 
 
@@ -25,11 +24,12 @@ common --registry=https://bcr.bazel.build
 #-------------------------------------------------------------------------------------
 
 # macOS (e.g. Clang 14.0.0)
-build:macos --cxxopt=-std=c++2b # see https://clang.llvm.org/cxx_status.html
-build:macos --cxxopt=-Wall
+build:macos --cxxopt=-std=c++2b  # see https://clang.llvm.org/cxx_status.html
+build:macos --cxxopt=-Wall  # Turn on all warnings
 build:macos --define compiler=macos
+build:macos --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
 #build:macos --cxxopt=-Werror # Commented out because of Embree
-##build:macos --cxxopt=-Wextra
+#build:macos --cxxopt=-Wextra
 #build:macos --spawn_strategy=local
 
 # Xcode 15 has some compiler issues - therefore there is this special config
@@ -38,20 +38,17 @@ build:macos_xcode15 --linkopt=-ld_classic # Workaround for Xcode 15 linker bug, 
 
 # macOS Intel (config used in CI jobs)
 build:clang14_macos --cxxopt=-std=c++20
-#build:clang14 --cxxopt=-mavx
-#build:clang14 --cxxopt=-mavx2
-#build:clang14 --cxxopt=-msse4.2
-#build:clang14 --cxxopt=-Werror
-build:clang14_macos --incompatible_enable_cc_toolchain_resolution
+build:clang14_macos --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
 build:clang14_macos --cxxopt=-mwaitpkg
 build:clang14_macos --define compiler=clang14_macos
 
-# macOS M1 (config is used on local MacBook M1 Pro)
-build:clang14_macos_m1 --cxxopt=-std=c++20
-build:clang14_macos_m1 --incompatible_enable_cc_toolchain_resolution
-build:clang14_macos_m1 --linkopt=-ld_classic # Workaround for Xcode 15 linker bug, see for instance https://github.com/godotengine/godot/pull/81968/files
-#build:clang14_macos_m1 --cxxopt=-mwaitpkg # lead to compilation issues on local M1 macBook
-build:clang14_macos_m1 --define compiler=clang14_macos_m1
+# not used anymore? Todo: Remove this config if it is not needed anymore
+## macOS M1 (config is used on local MacBook M1 Pro)
+#build:clang14_macos_m1 --cxxopt=-std=c++20
+#build:clang14_macos_m1 --incompatible_enable_cc_toolchain_resolution
+#build:clang14_macos_m1 --linkopt=-ld_classic # Workaround for Xcode 15 linker bug, see for instance https://github.com/godotengine/godot/pull/81968/files
+##build:clang14_macos_m1 --cxxopt=-mwaitpkg # lead to compilation issues on local M1 macBook
+#build:clang14_macos_m1 --define compiler=clang14_macos_m1
 
 # Todo: Add apple_debug config
 # https://github.com/RobotLocomotion/drake/search?q=apple_debug
@@ -60,6 +57,7 @@ build:clang14_macos_m1 --define compiler=clang14_macos_m1
 build:gcc9 --cxxopt=-std=c++2a
 build:gcc9 --cxxopt=-Wall
 build:gcc9 --define compiler=gcc9
+build:gcc9 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
 #build:gcc9 --cxxopt=-Werror # blocked by googletest
 ##build:gcc9 --cxxopt=-Wextra
 
@@ -68,12 +66,13 @@ build:remote_gcc9 --cxxopt=-Werror
 build:remote_gcc9 --define compiler=remote_gcc9
 ##build:remote_gcc9 --cxxopt=-Wextra
 
-# GCC 11.3
+# GCC 11.4
 #build:gcc11 --cxxopt=-std=c++23 # blocked by emsdk
 build:gcc11 --cxxopt=-std=c++20
 build:gcc11 --cxxopt=-Wall
 build:gcc11 --define compiler=gcc11
 build:gcc11 --cxxopt=-fpermissive # Needed for fmt
+build:gcc11 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
 #build:gcc11 --cxxopt=-Werror
 #build:gcc11 --cxxopt=-Wno-volatile # blocked by emsdk
 ##build:gcc11 --cxxopt=-Wextra
@@ -96,6 +95,19 @@ build:clang14 --incompatible_enable_cc_toolchain_resolution
 build:clang14 --features=-libtool
 build:clang14 --cxxopt=-mwaitpkg
 build:clang14 --define compiler=clang14
+
+# Clang 16.0.0 (config is used on Ubuntu)
+build:clang16 --cxxopt=-std=c++20
+#build:clang16 --cxxopt=-mavx
+#build:clang16 --cxxopt=-mavx2
+#build:clang16 --cxxopt=-msse4.2
+#build:clang16 --cxxopt=-Werror
+build:clang16 --incompatible_enable_cc_toolchain_resolution
+# Tell Bazel to pass the right flags for llvm-ar, not libtool. Only needed if you are building on darwin.
+# See https://github.com/bazelbuild/bazel/blob/5c75d0acec21459bbb13520817e3806e1507e907/tools/cpp/unix_cc_toolchain_config.bzl#L1000-L1024
+build:clang16 --features=-libtool
+build:clang16 --cxxopt=-mwaitpkg
+build:clang16 --define compiler=clang14
 
 # MinGW
 build:mingw --cxxopt=-std=c++2a

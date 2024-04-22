@@ -20,8 +20,12 @@ EXR file format, the professional-grade image storage format of the
 motion picture industry.
 
 The purpose of EXR format is to accurately and efficiently represent
-high-dynamic-range scene-linear image data and associated metadata,
-with strong support for multi-part, multi-channel use cases.
+high-dynamic-range scene-linear image data. This is a significant difference to
+most image formats, which store images that are ready for display. Software that
+handles OpenEXR images may need to process them differently to images in other
+formats such as JPEG (see :doc:`SceneLinear` for more details). OpenEXR files
+have strong support for multi-part, multi-channel use cases, and extensive
+representation of associated metadata.
 
 OpenEXR is widely used in host application software where accuracy is
 critical, such as photorealistic rendering, texture access, image
@@ -34,12 +38,12 @@ OpenEXR is a project of the `Academy Software Foundation
 Latest News
 ===========
 
-.. highlights::
+.. image:: images/news.png
+   :width: 50
+   :height: 50
+   :align: left
 
-   .. image:: images/news.png
-      :width: 100
-      :height: 100
-      :align: left
+.. highlights::
 
    .. include:: news.rst
       :start-after: .. _LatestNewsStart:
@@ -81,6 +85,8 @@ Community
     public, fortnightly on Thursdays, 1:30pm Pacific Time.
 
   - Calendar: https://lists.aswf.io/g/openexr-dev/calendar
+
+  - Meeting Notes: https://wiki.aswf.io/display/OEXR/TSC+Meetings
 
 * **Report a bug:**
 

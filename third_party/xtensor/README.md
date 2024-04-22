@@ -1,6 +1,8 @@
 # ![xtensor](docs/source/xtensor.svg)
 
-[![GithubActions](https://github.com/xtensor-stack/xtensor/actions/workflows/ci.yml/badge.svg)](https://github.com/xtensor-stack/xtensor/actions/workflows/ci.yml)
+[![GHA Linux](https://github.com/xtensor-stack/xtensor/actions/workflows/linux.yml/badge.svg)](https://github.com/xtensor-stack/xtensor/actions/workflows/linux.yml)
+[![GHA OSX](https://github.com/xtensor-stack/xtensor/actions/workflows/osx.yml/badge.svg)](https://github.com/xtensor-stack/xtensor/actions/workflows/osx.yml)
+[![GHA Windows](https://github.com/xtensor-stack/xtensor/actions/workflows/windows.yml/badge.svg)](https://github.com/xtensor-stack/xtensor/actions/workflows/windows.yml)
 [![Documentation](http://readthedocs.org/projects/xtensor/badge/?version=latest)](https://xtensor.readthedocs.io/en/latest/?badge=latest)
 [![Doxygen -> gh-pages](https://github.com/xtensor-stack/xtensor/workflows/gh-pages/badge.svg)](https://xtensor-stack.github.io/xtensor)
 [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/xtensor-stack/xtensor/stable?filepath=notebooks%2Fxtensor.ipynb)
@@ -95,7 +97,8 @@ library:
 
 | `xtensor` | `xtl`   |`xsimd` (optional) |
 |-----------|---------|-------------------|
-|  master   | ^0.7.5  |       ^10.0.0     |
+|  master   | ^0.7.5  |       ^11.0.0     |
+|  0.25.0   | ^0.7.5  |       ^11.0.0     |
 |  0.24.7   | ^0.7.0  |       ^10.0.0     |
 |  0.24.6   | ^0.7.0  |       ^10.0.0     |
 |  0.24.5   | ^0.7.0  |       ^10.0.0     |

@@ -93,6 +93,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <initializer_list>
 #include <limits>
 #include <string>
 #include <type_traits>
@@ -259,10 +260,9 @@ struct Dec {
                typename std::enable_if<(sizeof(Int) <= 8)>::type* = nullptr)
       : value(v >= 0 ? static_cast<uint64_t>(v)
                      : uint64_t{0} - static_cast<uint64_t>(v)),
-        width(spec == absl::kNoPad
-                  ? 1
-                  : spec >= absl::kSpacePad2 ? spec - absl::kSpacePad2 + 2
-                                             : spec - absl::kZeroPad2 + 2),
+        width(spec == absl::kNoPad       ? 1
+              : spec >= absl::kSpacePad2 ? spec - absl::kSpacePad2 + 2
+                                         : spec - absl::kZeroPad2 + 2),
         fill(spec >= absl::kSpacePad2 ? ' ' : '0'),
         neg(v < 0) {}
 
@@ -313,6 +313,10 @@ class AlphaNum {
  public:
   // No bool ctor -- bools convert to an integral type.
   // A bool ctor would also convert incoming pointers (bletch).
+
+  // Prevent brace initialization
+  template <typename T>
+  AlphaNum(std::initializer_list<T>) = delete;  // NOLINT(runtime/explicit)
 
   AlphaNum(int x)  // NOLINT(runtime/explicit)
       : piece_(digits_, static_cast<size_t>(

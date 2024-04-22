@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Google Inc.
+// Copyright (c) 2024, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,15 @@
 
 #include <algorithm>
 #include <csignal>
+#include <cstring>
 #include <ctime>
+#include <mutex>
+#include <sstream>
+#include <thread>
 
+#include "config.h"
 #include "glog/logging.h"
+#include "glog/platform.h"
 #include "stacktrace.h"
 #include "symbolize.h"
 #include "utilities.h"
@@ -152,7 +158,7 @@ class MinimalFormatter {
 
 // Writes the given data with the size to the standard error.
 void WriteToStderr(const char* data, size_t size) {
-  if (write(STDERR_FILENO, data, size) < 0) {
+  if (write(fileno(stderr), data, size) < 0) {
     // Ignore errors.
   }
 }
@@ -205,14 +211,12 @@ void DumpSignalInfo(int signal_number, siginfo_t* siginfo) {
   formatter.AppendString(")");
   formatter.AppendString(" received by PID ");
   formatter.AppendUint64(static_cast<uint64>(getpid()), 10);
-  formatter.AppendString(" (TID 0x");
-  // We assume pthread_t is an integral number or a pointer, rather
-  // than a complex struct.  In some environments, pthread_self()
-  // returns an uint64 but in some other environments pthread_self()
-  // returns a pointer.
-  pthread_t id = pthread_self();
-  formatter.AppendUint64(
-      reinterpret_cast<uint64>(reinterpret_cast<const char*>(id)), 16);
+  formatter.AppendString(" (TID ");
+
+  std::ostringstream oss;
+  oss << std::showbase << std::hex << std::this_thread::get_id();
+  formatter.AppendString(oss.str().c_str());
+
   formatter.AppendString(") ");
   // Only linux has the PID of the signal sender in si_pid.
 #  ifdef GLOG_OS_LINUX
@@ -230,6 +234,7 @@ void DumpSignalInfo(int signal_number, siginfo_t* siginfo) {
 void DumpStackFrameInfo(const char* prefix, void* pc) {
   // Get the symbol name.
   const char* symbol = "(unknown)";
+#if defined(HAVE_SYMBOLIZE)
   char symbolized[1024];  // Big enough for a sane symbol.
   // Symbolizes the previous address of pc because pc may be in the
   // next function.
@@ -237,6 +242,10 @@ void DumpStackFrameInfo(const char* prefix, void* pc) {
                 sizeof(symbolized))) {
     symbol = symbolized;
   }
+#else
+#  pragma message( \
+          "Symbolize functionality is not available for target platform: stack dump will contain empty frames.")
+#endif  // defined(HAVE_SYMBOLIZE)
 
   char buf[1024];  // Big enough for stack frame info.
   MinimalFormatter formatter(buf, sizeof(buf));
@@ -266,51 +275,19 @@ void InvokeDefaultSignalHandler(int signal_number) {
 #endif
 }
 
-// This variable is used for protecting FailureSignalHandler() from
-// dumping stuff while another thread is doing it.  Our policy is to let
-// the first thread dump stuff and let other threads wait.
+// This variable is used for protecting FailureSignalHandler() from dumping
+// stuff while another thread is doing it.  Our policy is to let the first
+// thread dump stuff and let other threads do nothing.
 // See also comments in FailureSignalHandler().
-static pthread_t* g_entered_thread_id_pointer = nullptr;
+static std::once_flag signaled;
 
-// Dumps signal and stack frame information, and invokes the default
-// signal handler once our job is done.
-#if defined(GLOG_OS_WINDOWS)
-void FailureSignalHandler(int signal_number)
-#else
-void FailureSignalHandler(int signal_number, siginfo_t* signal_info,
-                          void* ucontext)
+static void HandleSignal(int signal_number
+#if !defined(GLOG_OS_WINDOWS)
+                         ,
+                         siginfo_t* signal_info, void* ucontext
 #endif
-{
-  // First check if we've already entered the function.  We use an atomic
-  // compare and swap operation for platforms that support it.  For other
-  // platforms, we use a naive method that could lead to a subtle race.
+) {
 
-  // We assume pthread_self() is async signal safe, though it's not
-  // officially guaranteed.
-  pthread_t my_thread_id = pthread_self();
-  // NOTE: We could simply use pthread_t rather than pthread_t* for this,
-  // if pthread_self() is guaranteed to return non-zero value for thread
-  // ids, but there is no such guarantee.  We need to distinguish if the
-  // old value (value returned from __sync_val_compare_and_swap) is
-  // different from the original value (in this case nullptr).
-  pthread_t* old_thread_id_pointer =
-      glog_internal_namespace_::sync_val_compare_and_swap(
-          &g_entered_thread_id_pointer, static_cast<pthread_t*>(nullptr),
-          &my_thread_id);
-  if (old_thread_id_pointer != nullptr) {
-    // We've already entered the signal handler.  What should we do?
-    if (pthread_equal(my_thread_id, *g_entered_thread_id_pointer)) {
-      // It looks the current thread is reentering the signal handler.
-      // Something must be going wrong (maybe we are reentering by another
-      // type of signal?).  Kill ourself by the default signal handler.
-      InvokeDefaultSignalHandler(signal_number);
-    }
-    // Another thread is dumping stuff.  Let's wait until that thread
-    // finishes the job and kills the process.
-    while (true) {
-      sleep(1);
-    }
-  }
   // This is the first time we enter the signal handler.  We are going to
   // do some interesting stuff from here.
   // TODO(satorux): We might want to set timeout here using alarm(), but
@@ -354,15 +331,30 @@ void FailureSignalHandler(int signal_number, siginfo_t* signal_info,
 
   // Flush the logs before we do anything in case 'anything'
   // causes problems.
-  FlushLogFilesUnsafe(0);
+  FlushLogFilesUnsafe(GLOG_INFO);
 
   // Kill ourself by the default signal handler.
   InvokeDefaultSignalHandler(signal_number);
 }
 
-}  // namespace
+// Dumps signal and stack frame information, and invokes the default
+// signal handler once our job is done.
+#if defined(GLOG_OS_WINDOWS)
+void FailureSignalHandler(int signal_number)
+#else
+void FailureSignalHandler(int signal_number, siginfo_t* signal_info,
+                          void* ucontext)
+#endif
+{
+  std::call_once(signaled, &HandleSignal, signal_number
+#if !defined(GLOG_OS_WINDOWS)
+                 ,
+                 signal_info, ucontext
+#endif
+  );
+}
 
-namespace glog_internal_namespace_ {
+}  // namespace
 
 bool IsFailureSignalHandlerInstalled() {
 #ifdef HAVE_SIGACTION
@@ -379,8 +371,6 @@ bool IsFailureSignalHandlerInstalled() {
 #endif  // HAVE_SIGACTION
   return false;
 }
-
-}  // namespace glog_internal_namespace_
 
 void InstallFailureSignalHandler() {
 #ifdef HAVE_SIGACTION

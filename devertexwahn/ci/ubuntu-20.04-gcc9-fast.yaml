@@ -39,6 +39,15 @@ steps:
   - script: |
       df -H
     displayName: 'Show disk space'
+    
+  - script: |
+      cd devertexwahn
+      bazel run --config=gcc9  -- //tools/compiler_information
+    displayName: "Show compiler information"
+
+  - script: |
+      df -H
+    displayName: 'Show disk space'
 
   - script: |
       cd devertexwahn

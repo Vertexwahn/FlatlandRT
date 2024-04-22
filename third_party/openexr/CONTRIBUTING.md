@@ -11,6 +11,7 @@ explains our contribution process and procedures:
 * [Development Workflow](#Development-Workflow)
 * [Coding Style](#Coding-Style)
 * [Versioning Policy](#Versioning-Policy)
+* [Contributing to the Website](#Contributing-to-the-Website)
 * [Creating a Patch Release](#Creating-a-Patch-Release)
 * [Creating a Major/Minor Release](#Creating-a-Major/Minor-Release)
 
@@ -211,7 +212,7 @@ openexr-dev@lists.aswf.io mail list.
 
 ### Pull Requests
 
-Contributions should be submitted as Github pull requests. See
+Contributions should be submitted as GitHub pull requests. See
 [Creating a pull request](https://help.github.com/articles/creating-a-pull-request/)
 if you're unfamiliar with this concept. 
 
@@ -227,7 +228,7 @@ with a separate pull request.
 
 3. Push commits to your fork.
 
-4. Create a Github pull request from your topic branch.
+4. Create a GitHub pull request from your topic branch.
 
 5. Pull requests will be reviewed by project committers and contributors,
 who may discuss, offer constructive feedback, request changes, or approve
@@ -453,6 +454,71 @@ each version with three numbers: ``major.minor.patch``, where:
 * ``minor`` - indicates functionality added in a backwards-compatible manner
 * ``patch`` - indicates backwards-compatible bug fixes 
 
+## Contributing to the Website
+
+The https://openexr.com website is generated via
+[Sphinx](https://www.sphinx-doc.org) with the
+[Breathe](https://breathe.readthedocs.io) extension, using the
+[sphinx-press-theme](https://pypi.org/project/sphinx-press-theme), and
+is hosted by
+[readthedocs](https://readthedocs.org/projects/openexr). The website
+source is in [restructured
+text](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html)
+in the ``website`` directory.
+
+To build the website locally from the source ``.rst`` files, set the
+CMake option ``BUILD_WEBSITE=ON``. This adds the ``website`` CMake
+target. Generation is off by default.
+
+Building the website requires that ``sphinx``, ``breathe``, and
+``doxygen`` are installed. It further requires the [sphinx-press-theme]
+(https://pypi.org/project/sphinx-press-theme). Complete dependencies
+are described in the [requirements.txt](website/requirements.txtg)
+file. 
+
+On Debian/Ubuntu Linux:
+
+.. code-block::
+
+    % apt-get install doxygen python3-sphinx
+    % pip3 install breathe
+    % pip3 install sphinx_press_theme
+   
+    % mkdir _build
+    % cd _build
+    % cmake .. -DBUILD_WEBSITE=ON
+    % cmake --build . --target website 
+
+### Testing a Website Build
+
+When you have configured cmake with ``BUILD_WEBSITE=ON`` and done a
+build, you should find a file ``website/sphinx/index.html`` in the
+build directory which is the website source. Load this file in a
+browser to preview the resulting website, that is, load
+``file://<build-directory>/website/sphinx/index.html`` into your web
+browser.
+
+Once you submit a PR, a check labled ``docs/readthedocs.org:openexr``
+will validate the build. Click on the ``Details`` link to
+preview. Also, a link to this preview will be added automatically to
+the PR description.
+### Test Images
+
+To contribute a new test image, commit it to the
+[openexr-images](https://github.com/AcademySoftwareFoundation/openexr-images)
+repo, along with an associated ``.jpg`` file for display on the
+website.
+
+The [website/scripts/test_images.py](website/scripts/test_images.py)
+utility processes images from
+[openexr-images](https://github.com/AcademySoftwareFoundation/openexr-images)
+to produce `.rst` files for input to Sphinx. It runs ``exrheader`` on
+the ``.exr`` to generate the image description. It also processes
+``README`` files in the image repo for additional website content,
+useful for describing a collection of images. Once the new image is in
+the ``openexr-images`` repo, run ``website/scripts/test_images.py``,
+then commit the new/modified ``.rst`` files to git and submit a PR.
+
 ## Creating a Patch Release
 
 Making a patch release typically involves merging changes from the
@@ -591,14 +657,26 @@ The preferred workflow is:
    d. Send an email update to ``openexr-dev@lists.aswf.io`` notifying
       the community of the addition and the new tag.
 
-7. Publish the release
+7. Create a signed release tag
+
+   a. Make sure you have a [GPG
+      key](https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key)
+      and it is
+      [registered](https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key)
+      with your GitHub account and git config.
+
+   b. Create a signed tag with the release name via `git tag -s v3.1.9`.
+   
+   c. Push the tag via `git push --tags`
+   
+8. Publish the release
 
    a. Click the "Publish release" button on the GitHub release draft
 
    b. Send an email to ``openexr-dev@lists.aswf.io`` officially
       annoucing the release.
    
-8. Update the ``release`` branch, which should always point to the
+9. Update the ``release`` branch, which should always point to the
    most recent patch of the most recent minor release, i.e. the most
    preferred release.
 
@@ -608,24 +686,24 @@ The preferred workflow is:
        % git merge RB-3.1
        % git push
          
-9. Submit a PR that adds the release notes to [CHANGES.md](CHANGES.md)
-   on the main branch. Cherry-pick the release notes commit from
-   the release branch.
+10. Submit a PR that adds the release notes to [CHANGES.md](CHANGES.md)
+    on the main branch. Cherry-pick the release notes commit from
+    the release branch.
 
-   - If any changes have gone into [SECURITY.md](SECURITY), cherry-pick
-     the associated commit as well.
+    - If any changes have gone into [SECURITY.md](SECURITY), cherry-pick
+      the associated commit as well.
 
-   - Also include in this PR edits to [``docs/news.rst``](docs/news.rst)
-     that add an announcment of the release.
+    - Also include in this PR edits to [``docs/news.rst``](docs/news.rst)
+      that add an announcment of the release.
 
-10. After review/merge of the updates to ``docs/news.rst``, build the
+11. After review/merge of the updates to ``docs/news.rst``, build the
     website at https://readthedocs.org/projects/openexr.
 
-11. If the release has resolved any OSS-Fuzz issues, update the
+12. If the release has resolved any OSS-Fuzz issues, update the
     associated pages at https://bugs.chromium.org/p/oss-fuzz with a
     reference to the release.
 
-12. If the release has resolved any public CVE's, request an update
+13. If the release has resolved any public CVE's, request an update
     from the registry service providing the release and a link to the
     release notes.
 

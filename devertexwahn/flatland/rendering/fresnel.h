@@ -30,6 +30,7 @@ bool refract(const Vector3f& v, const Vector3f& n, float iorI, float iorT,
     return true;
 }
 
+/*
 // schlick approximation of fresnel reflectance
 float fresnel(float cosThetaI, float iorI, float iorT) {
     const float f0 =
@@ -37,7 +38,7 @@ float fresnel(float cosThetaI, float iorI, float iorT) {
     const auto pow5 = [](float x) { return x * x * x * x * x; };
     return f0 + (1.0f - f0) * pow5(std::max(1.0f - std::abs(cosThetaI), 0.0f));
 }
-
+*/
 DE_VERTEXWAHN_END_NAMESPACE
 
 #endif // end define De_Vertexwahn_Flatland_Rendering_fresnel_ba618a3b_8405_49fb_bd9c_36d9474e98de_h

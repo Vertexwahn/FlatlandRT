@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,9 +7,10 @@
 #ifndef De_Vertexwahn_Imaging_Image_3a91bcbd_ae4d_4c36_83dd_c06ac570322b_h
 #define De_Vertexwahn_Imaging_Image_3a91bcbd_ae4d_4c36_83dd_c06ac570322b_h
 
+#include "imaging/color.h"
+
 #include "math/point.h"
 #include "math/vector.h"
-#include "imaging/color.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
@@ -70,7 +71,7 @@ public:
         }
     }
 
-    Image& operator=(Image const& src) {
+    Image& operator=(const Image& src) {
         if(&src == this) {
             return *this;
         }
@@ -96,7 +97,7 @@ public:
         delete[] data_;
     }
 
-    void resize(int width, int height) {
+    void resize(const int width, const int height) {
         if (data_) {
             delete[] data_;
         }
@@ -160,14 +161,17 @@ public:
     }
 
     /*
-        The following layout is used:
-        +-----+-----+-----+
-        |(0|2)|(1|2)|(2|2)|
-        +-----+-----+-----+
-        |(0|1)|(1|1)|(2|1)|
-        +-----+-----+-----+
-        |(0|0)|(1|0)|(2|0)|
-        +-----+-----+-----+
+        The following layout/coordinate system is used:
+        y+
+       /|\
+        | +-----+-----+-----+
+        | |(0|2)|(1|2)|(2|2)|
+        | +-----+-----+-----+
+        | |(0|1)|(1|1)|(2|1)|
+        | +-----+-----+-----+
+        | |(0|0)|(1|0)|(2|0)|
+        | +-----+-----+-----+
+        +-------------------> x+
     */
     void set_pixel_standard_cartesian(const int x, const int y, const ColorType& color) {
         assert(check_bounds(x, y));
@@ -183,14 +187,17 @@ public:
     }
 
     /*
-        The following layout is used:
-        +-----+-----+-----+
-        |(0|0)|(1|0)|(2|0)|
-        +-----+-----+-----+
-        |(0|1)|(1|1)|(2|1)|
-        +-----+-----+-----+
-        |(0|2)|(1|2)|(2|2)|
-        +-----+-----+-----+
+        The following layout/coordinate system is used:
+        +-------------------> x+
+        | +-----+-----+-----+
+        | |(0|0)|(1|0)|(2|0)|
+        | +-----+-----+-----+
+        | |(0|1)|(1|1)|(2|1)|
+        | +-----+-----+-----+
+        | |(0|2)|(1|2)|(2|2)|
+        | +-----+-----+-----+
+        v
+        y+
     */
     ColorType get_pixel(const int x, const int y) const {
         assert(check_bounds(x, y));
@@ -231,20 +238,25 @@ private:
     int height_ = 0;
 
     /*
-        The following layout is used:
-        +-----+-----+-----+
-        |(0|0)|(1|0)|(2|0)|
-        +-----+-----+-----+
-        |(0|1)|(1|1)|(2|1)|
-        +-----+-----+-----+
-        |(0|2)|(1|2)|(2|2)|
-        +-----+-----+-----+
+        The following layout/coordinate system is used:
+        +-------------------> x+
+        | +-----+-----+-----+
+        | |(0|0)|(1|0)|(2|0)|
+        | +-----+-----+-----+
+        | |(0|1)|(1|1)|(2|1)|
+        | +-----+-----+-----+
+        | |(0|2)|(1|2)|(2|2)|
+        | +-----+-----+-----+
+        v
+        y+
     */
     ColorChannelType* data_ = nullptr;
 };
 
+using Image1b = Image<Color1b, uint8_t, 1>;
 using Image3b = Image<Color3b, uint8_t, 3>;
 using Image4b = Image<Color4b, uint8_t, 4>;
+using Image1f = Image<Color1f, float, 1>;
 using Image3f = Image<Color3f, float, 3>;
 using Image4f = Image<Color4f, float, 4>;
 

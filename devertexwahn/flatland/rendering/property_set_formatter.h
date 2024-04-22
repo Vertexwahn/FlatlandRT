@@ -20,7 +20,7 @@ struct fmt::formatter<de_vertexwahn::Vector2f> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Vector2f &v, FormatContext &ctx) {
+    auto format(const de_vertexwahn::Vector2f &v, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({}, {})", v.x(), v.y());
     }
 };
@@ -30,7 +30,7 @@ struct fmt::formatter<de_vertexwahn::Vector2d> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Vector2d &v, FormatContext &ctx) {
+    auto format(const de_vertexwahn::Vector2d &v, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({}, {})", v.x(), v.y());
     }
 };
@@ -40,7 +40,7 @@ struct fmt::formatter<de_vertexwahn::Vector3f> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Vector3f &v, FormatContext &ctx) {
+    auto format(const de_vertexwahn::Vector3f &v, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({}, {}, {})", v.x(), v.y(), v.z());
     }
 };
@@ -50,7 +50,7 @@ struct fmt::formatter<de_vertexwahn::Vector3d> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Vector3f &v, FormatContext &ctx) {
+    auto format(const de_vertexwahn::Vector3f &v, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({}, {}, {})", v.x(), v.y(), v.z());
     }
 };
@@ -60,7 +60,7 @@ struct fmt::formatter<de_vertexwahn::Point2f> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Point2f &v, FormatContext &ctx) {
+    auto format(const de_vertexwahn::Point2f &v, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({}, {})", v.x(), v.y());
     }
 };
@@ -70,7 +70,7 @@ struct fmt::formatter<de_vertexwahn::Point3f> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Point3f &v, FormatContext &ctx) {
+    auto format(const de_vertexwahn::Point3f &v, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({}, {}, {})", v.x(), v.y(), v.z());
     }
 };
@@ -80,7 +80,7 @@ struct fmt::formatter<de_vertexwahn::Point2d> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Point2d &v, FormatContext &ctx) {
+    auto format(const de_vertexwahn::Point2d &v, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({}, {})", v.x(), v.y());
     }
 };
@@ -90,7 +90,7 @@ struct fmt::formatter<de_vertexwahn::Color3f> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Color3f &c, FormatContext &ctx) {
+    auto format(const de_vertexwahn::Color3f &c, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({}, {}, {})", c.red(), c.green(), c.blue());
     }
 };
@@ -100,7 +100,7 @@ struct fmt::formatter<de_vertexwahn::Transform44f> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Transform44f &c, FormatContext &ctx) {
+    auto format(const de_vertexwahn::Transform44f &c, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({})", c.matrix()(0, 0));
     }
 };
@@ -110,7 +110,7 @@ struct fmt::formatter<de_vertexwahn::ReferenceCounted<ObjectType>> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::ReferenceCounted<ObjectType> &obj, FormatContext &ctx) {
+    auto format(const de_vertexwahn::ReferenceCounted<ObjectType> &obj, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "{}", obj->to_string());
     }
 };

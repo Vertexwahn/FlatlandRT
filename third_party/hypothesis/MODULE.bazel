@@ -1,0 +1,5 @@
+module(
+    name = "hypothesis",
+    version = "head",
+    compatibility_level = 1,
+)

@@ -1,5 +1,5 @@
 """
-    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
@@ -10,7 +10,7 @@ cc_test(
         "boost_algorithm_test.cpp",
     ],
     deps = [
-        "@boost//:algorithm",
+        "@boost.algorithm//:algorithm",
         "@googletest//:gtest_main",
     ],
 )
@@ -22,7 +22,7 @@ cc_test(
         "boost_predef_test.cpp",
     ],
     deps = [
-        "@boost//:predef",
+        "@boost.predef//:predef",
         "@googletest//:gtest_main",
     ],
 )
@@ -45,11 +45,20 @@ cc_test(
     srcs = [
         "eigen_test.cpp",
     ],
-    copts = [
-        "-Iexternal/eigen",
-    ],
     deps = [
         "@eigen",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "fmt_test",
+    size = "small",
+    srcs = [
+        "fmt_test.cpp",
+    ],
+    deps = [
+        "@fmt",
         "@googletest//:gtest_main",
     ],
 )

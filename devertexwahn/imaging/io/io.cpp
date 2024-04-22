@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,6 +14,12 @@
 #include "math/util.h"
 
 #include "boost/algorithm/string.hpp"
+
+#include "fmt/core.h"
+#include "fmt/format.h"
+
+#include <filesystem>
+#include <string_view>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
@@ -69,7 +75,28 @@ void store_image(std::string_view filename, ReferenceCounted<Image4b> image) {
     store_image(filename, *image.get());
 }
 
+std::string extract_file_extension(std::string_view filename) {
+    size_t dot_pos = filename.rfind('.');
+
+    if (dot_pos == std::string::npos)
+        return "";
+
+    std::string extension = std::string(filename.substr(dot_pos));
+
+    return extension;
+}
+
 Image3f load_image(std::string_view filename) {
+    auto extension = extract_file_extension(filename);
+
+    if(extension.empty()) {
+        throw std::runtime_error(fmt::format("A filename (\"{}\") has been provided without an extension.", filename));
+    }
+
+    if(!std::filesystem::exists(filename)) {
+        throw std::runtime_error(fmt::format("File \"{}\" does not exist.", filename));
+    }
+
     if (boost::ends_with(filename, ".exr")) {
         Image3f image = load_image_openexr(filename);
         return image;
@@ -83,7 +110,7 @@ Image3f load_image(std::string_view filename) {
         return image;
     }
 
-    throw std::runtime_error("Invalid file extension");
+    throw std::runtime_error(fmt::format("Unsupported file extension (\"{}\").", extract_file_extension(filename)));
 }
 
 // TODO: refactor this - make this available as "central service"

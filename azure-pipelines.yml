@@ -20,6 +20,16 @@ jobs:
     steps:
       - template: devertexwahn/ci/macOS-13-apple-clang14.yaml
 
+  # macOS 14/M1 is still not supported on Azure Pipelines
+  # consult documentation for Microsoft-hosted agents: 
+  # https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml
+  #- job: MacOSAppleClang14Sonoma
+  #  displayName: "Apple Clang14 on macOS 14 (Sonoma)"
+  #  pool:
+  #    vmImage: 'macOS-14'
+  #  steps:
+  #    - template: devertexwahn/ci/macOS-14-apple-clang14.yaml
+
 
   #- job: Ubuntu20Clang14
   #  displayName: "Clang14 on Ubuntu 20.04"
@@ -31,7 +41,6 @@ jobs:
   - job: Ubuntu20GCC9Fast
     displayName: "GCC9 fast on Ubuntu 20.04"
     pool:
-      #name: Default
       vmImage: 'ubuntu-20.04'
     steps:
       - template: devertexwahn/ci/ubuntu-20.04-gcc9-fast.yaml
@@ -39,19 +48,57 @@ jobs:
   - job: Ubuntu20GCC9Opt
     displayName: "GCC9 opt on Ubuntu 20.04"
     pool:
-      #name: Default
       vmImage: 'ubuntu-20.04'
     steps:
       - template: devertexwahn/ci/ubuntu-20.04-gcc9-opt.yaml
 
-  - job: Ubuntu20GCC9Debug
-    displayName: "GCC9 debug on Ubuntu 20.04"
+  - job: Ubuntu20GCC9DebugPart1
+    displayName: "GCC9 debug on Ubuntu 20.04 (Part 1)"
     pool:
-      #name: Default
       vmImage: 'ubuntu-20.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-20.04-gcc9-dbg.yaml
+      - template: devertexwahn/ci/ubuntu-20.04-gcc9-dbg-part1.yaml
 
+  - job: Ubuntu20GCC9DebugPart2
+    displayName: "GCC9 debug on Ubuntu 20.04 (Part 2)"
+    pool:
+      vmImage: 'ubuntu-20.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-20.04-gcc9-dbg-part2.yaml
+
+  - job: Ubuntu22BazelQuery
+    displayName: "Bazel query on Ubuntu 22.04"
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-22.04-bazel-query.yaml
+
+  - job: Ubuntu22Clang16
+    displayName: "Clang16 on Ubuntu 22.04"
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-22.04-clang16.yaml
+
+  - job: Ubuntu22Coverage
+    displayName: "Coverage with LCOV/GCC11 on Ubuntu 22.04"
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-22.04-coverage.yaml
+  #- job: Ubuntu22Docker
+  #  displayName: "aarch64 Docker"
+  #  pool:
+  #    vmImage: 'ubuntu-22.04'
+  #  steps:
+  #    - template: devertexwahn/ci/ubuntu-22.04-docker-aarch64.yaml
+
+  - job: Ubuntu22Bzlmod
+    displayName: "Bzlmod on Ubuntu 22.04"
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-22.04-gcc11-bzlmod.yaml
 
   - job: Ubuntu22GCC11
     displayName: "GCC11 fast opt on Ubuntu 22.04"
@@ -60,20 +107,19 @@ jobs:
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-gcc11-fast-opt.yaml
 
-  - job: Ubuntu22GCC11Debug
-    displayName: "GCC11 dbg on Ubuntu 22.04"
+  - job: Ubuntu22GCC11DebugPart1
+    displayName: "GCC11 dbg on Ubuntu 22.04 (Part 1)"
     pool:
       vmImage: 'ubuntu-22.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-22.04-gcc11-dbg.yaml
+      - template: devertexwahn/ci/ubuntu-22.04-gcc11-dbg-part1.yaml
 
-  - job: Ubuntu22Clang14
-    displayName: "Clang14 on Ubuntu 22.04"
+  - job: Ubuntu22GCC11DebugPart2
+    displayName: "GCC11 dbg on Ubuntu 22.04 (Part 2)"
     pool:
       vmImage: 'ubuntu-22.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-22.04-clang14.yaml
-
+      - template: devertexwahn/ci/ubuntu-22.04-gcc11-dbg-part2.yaml
   
   # Visual Studio 2019
   - job: VisualStudio2019Dbg

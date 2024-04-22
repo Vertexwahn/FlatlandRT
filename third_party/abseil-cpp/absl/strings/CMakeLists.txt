@@ -42,6 +42,7 @@ absl_cc_library(
     "has_absl_stringify.h"
     "internal/damerau_levenshtein_distance.h"
     "internal/string_constant.h"
+    "internal/has_absl_stringify.h"
     "match.h"
     "numbers.h"
     "str_cat.h"
@@ -273,6 +274,7 @@ absl_cc_test(
     absl::config
     absl::core_headers
     absl::dynamic_annotations
+    absl::type_traits
     GTest::gmock_main
 )
 
@@ -798,6 +800,7 @@ absl_cc_library(
   DEPS
     absl::base
     absl::config
+    absl::no_destructor
     absl::raw_logging_internal
     absl::synchronization
 )
@@ -1071,6 +1074,7 @@ absl_cc_test(
     absl::fixed_array
     absl::function_ref
     absl::hash
+    absl::hash_testing
     absl::log
     absl::optional
     absl::random_random

@@ -86,10 +86,10 @@ struct MultiPartInputFile::Data : public InputStreamMutex
             delete parts[i];
     }
 
-    Data (const Data& other) = delete;
+    Data (const Data& other)            = delete;
     Data& operator= (const Data& other) = delete;
     Data (Data&& other)                 = delete;
-    Data& operator= (Data&& other) = delete;
+    Data& operator= (Data&& other)      = delete;
 
     template <class T> T* createInputPartT (int partNumber) {}
 };
@@ -197,7 +197,7 @@ MultiPartInputFile::getPart (int partNumber)
 const Header&
 MultiPartInputFile::header (int n) const
 {
-    if (n < 0 || static_cast<size_t>(n) >= _data->_headers.size ())
+    if (n < 0 || static_cast<size_t> (n) >= _data->_headers.size ())
     {
         THROW (
             IEX_NAMESPACE::ArgExc,
@@ -544,23 +544,11 @@ MultiPartInputFile::Data::chunkOffsetReconstruction (
         else
         {
             tileOffsets[i] = NULL;
-            // (TODO) fix this so that it doesn't need to be revised for future compression types.
-            switch (parts[i]->header.compression ())
-            {
-                case DWAB_COMPRESSION: rowsizes[i] = 256; break;
-                case PIZ_COMPRESSION:
-                case B44_COMPRESSION:
-                case B44A_COMPRESSION:
-                case DWAA_COMPRESSION: rowsizes[i] = 32; break;
-                case ZIP_COMPRESSION:
-                case PXR24_COMPRESSION: rowsizes[i] = 16; break;
-                case ZIPS_COMPRESSION:
-                case RLE_COMPRESSION:
-                case NO_COMPRESSION: rowsizes[i] = 1; break;
-                default:
-                    throw (IEX_NAMESPACE::ArgExc (
-                        "Unknown compression method in chunk offset reconstruction"));
-            }
+            rowsizes[i] =
+                getCompressionNumScanlines (parts[i]->header.compression ());
+            if (rowsizes[i] < 1)
+                throw (IEX_NAMESPACE::ArgExc (
+                    "Unknown compression method in chunk offset reconstruction"));
         }
     }
 
@@ -857,7 +845,7 @@ bool
 MultiPartInputFile::partComplete (int part) const
 {
 
-    if (part < 0 || static_cast<size_t>(part) >= _data->_headers.size ())
+    if (part < 0 || static_cast<size_t> (part) >= _data->_headers.size ())
     {
         THROW (
             IEX_NAMESPACE::ArgExc,

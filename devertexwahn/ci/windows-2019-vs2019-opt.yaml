@@ -18,6 +18,11 @@ steps:
     displayName: "Show Bazel version"
 
 
+  - script: |
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base run --config=vs2019  --compilation_mode=opt -- //tools/compiler_information
+    displayName: "Show compiler information"
+
   # opt
   - script: |    
       cd devertexwahn

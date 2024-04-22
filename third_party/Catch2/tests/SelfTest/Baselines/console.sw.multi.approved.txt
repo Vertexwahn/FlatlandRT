@@ -2902,24 +2902,24 @@ ToStringGeneral.tests.cpp:<line number>
 ...............................................................................
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  CHECK( tab == '\t' )
+  CHECK( ::Catch::Detail::stringify('\t') == "'\\t'" )
 with expansion:
-  '\t' == '\t'
+  "'\t'" == "'\t'"
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  CHECK( newline == '\n' )
+  CHECK( ::Catch::Detail::stringify('\n') == "'\\n'" )
 with expansion:
-  '\n' == '\n'
+  "'\n'" == "'\n'"
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  CHECK( carr_return == '\r' )
+  CHECK( ::Catch::Detail::stringify('\r') == "'\\r'" )
 with expansion:
-  '\r' == '\r'
+  "'\r'" == "'\r'"
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  CHECK( form_feed == '\f' )
+  CHECK( ::Catch::Detail::stringify('\f') == "'\\f'" )
 with expansion:
-  '\f' == '\f'
+  "'\f'" == "'\f'"
 
 -------------------------------------------------------------------------------
 Character pretty printing
@@ -2929,29 +2929,19 @@ ToStringGeneral.tests.cpp:<line number>
 ...............................................................................
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  CHECK( space == ' ' )
+  CHECK( ::Catch::Detail::stringify( ' ' ) == "' '" )
 with expansion:
-  ' ' == ' '
+  "' '" == "' '"
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  REQUIRE( c == chars[i] )
+  CHECK( ::Catch::Detail::stringify( 'A' ) == "'A'" )
 with expansion:
-  'a' == 'a'
+  "'A'" == "'A'"
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  REQUIRE( c == chars[i] )
+  CHECK( ::Catch::Detail::stringify( 'z' ) == "'z'" )
 with expansion:
-  'z' == 'z'
-
-ToStringGeneral.tests.cpp:<line number>: PASSED:
-  REQUIRE( c == chars[i] )
-with expansion:
-  'A' == 'A'
-
-ToStringGeneral.tests.cpp:<line number>: PASSED:
-  REQUIRE( c == chars[i] )
-with expansion:
-  'Z' == 'Z'
+  "'z'" == "'z'"
 
 -------------------------------------------------------------------------------
 Character pretty printing
@@ -2961,29 +2951,19 @@ ToStringGeneral.tests.cpp:<line number>
 ...............................................................................
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  CHECK( null_terminator == '\0' )
+  CHECK( ::Catch::Detail::stringify( '\0' ) == "0" )
 with expansion:
-  0 == 0
+  "0" == "0"
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  REQUIRE( c == i )
+  CHECK( ::Catch::Detail::stringify( static_cast<char>(2) ) == "2" )
 with expansion:
-  2 == 2
+  "2" == "2"
 
 ToStringGeneral.tests.cpp:<line number>: PASSED:
-  REQUIRE( c == i )
+  CHECK( ::Catch::Detail::stringify( static_cast<char>(5) ) == "5" )
 with expansion:
-  3 == 3
-
-ToStringGeneral.tests.cpp:<line number>: PASSED:
-  REQUIRE( c == i )
-with expansion:
-  4 == 4
-
-ToStringGeneral.tests.cpp:<line number>: PASSED:
-  REQUIRE( c == i )
-with expansion:
-  5 == 5
+  "5" == "5"
 
 -------------------------------------------------------------------------------
 Clara::Arg supports single-arg parse the way Opt does
@@ -4505,12 +4485,12 @@ with expansion:
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( 1., !WithinRel( 0., 0.99 ) )
 with expansion:
-  1.0 not and 0 are within 99% of each other
+  1.0 not and 0.0 are within 99% of each other
 
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( -0., WithinRel( 0. ) )
 with expansion:
-  -0.0 and 0 are within 2.22045e-12% of each other
+  -0.0 and 0.0 are within 2.22045e-12% of each other
 
 -------------------------------------------------------------------------------
 Floating point matchers: double
@@ -4523,7 +4503,7 @@ Matchers.tests.cpp:<line number>
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( v1, WithinRel( v2 ) )
 with expansion:
-  0.0 and 2.22507e-308 are within 2.22045e-12% of each other
+  0.0 and 0.0 are within 2.22045e-12% of each other
 
 -------------------------------------------------------------------------------
 Floating point matchers: double
@@ -4643,7 +4623,7 @@ with expansion:
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( 0.0001, WithinAbs( 0., 0.001 ) || WithinRel( 0., 0.1 ) )
 with expansion:
-  0.0001 ( is within 0.001 of 0.0 or and 0 are within 10% of each other )
+  0.0001 ( is within 0.001 of 0.0 or and 0.0 are within 10% of each other )
 
 -------------------------------------------------------------------------------
 Floating point matchers: double
@@ -4692,22 +4672,22 @@ Matchers.tests.cpp:<line number>
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( 10.f, WithinRel( 11.1f, 0.1f ) )
 with expansion:
-  10.0f and 11.1 are within 10% of each other
+  10.0f and 11.1000003815 are within 10% of each other
 
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( 10.f, !WithinRel( 11.2f, 0.1f ) )
 with expansion:
-  10.0f not and 11.2 are within 10% of each other
+  10.0f not and 11.1999998093 are within 10% of each other
 
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( 1.f, !WithinRel( 0.f, 0.99f ) )
 with expansion:
-  1.0f not and 0 are within 99% of each other
+  1.0f not and 0.0 are within 99% of each other
 
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( -0.f, WithinRel( 0.f ) )
 with expansion:
-  -0.0f and 0 are within 0.00119209% of each other
+  -0.0f and 0.0 are within 0.00119209% of each other
 
 -------------------------------------------------------------------------------
 Floating point matchers: float
@@ -4720,7 +4700,7 @@ Matchers.tests.cpp:<line number>
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( v1, WithinRel( v2 ) )
 with expansion:
-  0.0f and 1.17549e-38 are within 0.00119209% of each other
+  0.0f and 0.0 are within 0.00119209% of each other
 
 -------------------------------------------------------------------------------
 Floating point matchers: float
@@ -4845,7 +4825,7 @@ with expansion:
 Matchers.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( 0.0001f, WithinAbs( 0.f, 0.001f ) || WithinRel( 0.f, 0.1f ) )
 with expansion:
-  0.0001f ( is within 0.001 of 0.0 or and 0 are within 10% of each other )
+  0.0001f ( is within 0.001 of 0.0 or and 0.0 are within 10% of each other )
 
 -------------------------------------------------------------------------------
 Floating point matchers: float
@@ -11668,9 +11648,9 @@ Misc.tests.cpp:<line number>
 ...............................................................................
 
 Misc.tests.cpp:<line number>: PASSED:
-  REQUIRE( sizeof(TestType) > 0 )
+  REQUIRE( std::is_default_constructible<TestType>::value )
 with expansion:
-  1 > 0
+  true
 
 -------------------------------------------------------------------------------
 Template test case with test types specified inside non-copyable and non-
@@ -11680,9 +11660,9 @@ Misc.tests.cpp:<line number>
 ...............................................................................
 
 Misc.tests.cpp:<line number>: PASSED:
-  REQUIRE( sizeof(TestType) > 0 )
+  REQUIRE( std::is_default_constructible<TestType>::value )
 with expansion:
-  4 > 0
+  true
 
 -------------------------------------------------------------------------------
 Template test case with test types specified inside non-default-constructible
@@ -11692,9 +11672,9 @@ Misc.tests.cpp:<line number>
 ...............................................................................
 
 Misc.tests.cpp:<line number>: PASSED:
-  REQUIRE( sizeof(TestType) > 0 )
+  REQUIRE( std::is_trivially_copyable<TestType>::value )
 with expansion:
-  1 > 0
+  true
 
 -------------------------------------------------------------------------------
 Template test case with test types specified inside non-default-constructible
@@ -11704,9 +11684,9 @@ Misc.tests.cpp:<line number>
 ...............................................................................
 
 Misc.tests.cpp:<line number>: PASSED:
-  REQUIRE( sizeof(TestType) > 0 )
+  REQUIRE( std::is_trivially_copyable<TestType>::value )
 with expansion:
-  4 > 0
+  true
 
 -------------------------------------------------------------------------------
 Template test case with test types specified inside std::tuple - MyTypes - 0
@@ -11715,9 +11695,9 @@ Misc.tests.cpp:<line number>
 ...............................................................................
 
 Misc.tests.cpp:<line number>: PASSED:
-  REQUIRE( sizeof(TestType) > 0 )
+  REQUIRE( std::is_arithmetic<TestType>::value )
 with expansion:
-  4 > 0
+  true
 
 -------------------------------------------------------------------------------
 Template test case with test types specified inside std::tuple - MyTypes - 1
@@ -11726,9 +11706,9 @@ Misc.tests.cpp:<line number>
 ...............................................................................
 
 Misc.tests.cpp:<line number>: PASSED:
-  REQUIRE( sizeof(TestType) > 0 )
+  REQUIRE( std::is_arithmetic<TestType>::value )
 with expansion:
-  1 > 0
+  true
 
 -------------------------------------------------------------------------------
 Template test case with test types specified inside std::tuple - MyTypes - 2
@@ -11737,9 +11717,9 @@ Misc.tests.cpp:<line number>
 ...............................................................................
 
 Misc.tests.cpp:<line number>: PASSED:
-  REQUIRE( sizeof(TestType) > 0 )
+  REQUIRE( std::is_arithmetic<TestType>::value )
 with expansion:
-  4 > 0
+  true
 
 -------------------------------------------------------------------------------
 TemplateTest: vectors can be sized and resized - float
@@ -17297,6 +17277,42 @@ StringManip.tests.cpp:<line number>: PASSED:
   CHECK( letters == letters )
 with expansion:
   "abcdefcg" == "abcdefcg"
+
+-------------------------------------------------------------------------------
+replaceInPlace
+  no replace in already-replaced string
+  lengthening
+-------------------------------------------------------------------------------
+StringManip.tests.cpp:<line number>
+...............................................................................
+
+StringManip.tests.cpp:<line number>: PASSED:
+  CHECK( Catch::replaceInPlace(letters, "c", "cc") )
+with expansion:
+  true
+
+StringManip.tests.cpp:<line number>: PASSED:
+  CHECK( letters == "abccdefccg" )
+with expansion:
+  "abccdefccg" == "abccdefccg"
+
+-------------------------------------------------------------------------------
+replaceInPlace
+  no replace in already-replaced string
+  shortening
+-------------------------------------------------------------------------------
+StringManip.tests.cpp:<line number>
+...............................................................................
+
+StringManip.tests.cpp:<line number>: PASSED:
+  CHECK( Catch::replaceInPlace(s, "--", "-") )
+with expansion:
+  true
+
+StringManip.tests.cpp:<line number>: PASSED:
+  CHECK( s == "--" )
+with expansion:
+  "--" == "--"
 
 -------------------------------------------------------------------------------
 replaceInPlace

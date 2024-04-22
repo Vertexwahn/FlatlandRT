@@ -19,6 +19,11 @@ steps:
 
 
 
+  - script: |
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base run --config=vs2022  -- //tools/compiler_information
+    displayName: "Show compiler information"
+
   # fastbuild
   - script: |
       cd devertexwahn

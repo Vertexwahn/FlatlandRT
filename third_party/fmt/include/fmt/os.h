@@ -9,9 +9,11 @@
 #define FMT_OS_H_
 
 #include <cerrno>
-#include <cstddef>
-#include <cstdio>
-#include <system_error>  // std::system_error
+#ifndef FMT_IMPORT_STD
+#  include <cstddef>
+#  include <cstdio>
+#  include <system_error>  // std::system_error
+#endif
 
 #include "format.h"
 
@@ -227,17 +229,22 @@ class buffered_file {
 
   FMT_API auto descriptor() const -> int;
 
-  void vprint(string_view format_str, format_args args) {
-    fmt::vprint(file_, format_str, args);
+  void vprint(string_view fmt, format_args args) {
+    fmt::vprint(file_, fmt, args);
+  }
+  void vprint_locked(string_view fmt, format_args args) {
+    fmt::vprint_locked(file_, fmt, args);
   }
 
-  template <typename... Args>
-  inline void print(string_view format_str, const Args&... args) {
-    vprint(format_str, fmt::make_format_args(args...));
+  template <typename... T>
+  inline void print(string_view fmt, const T&... args) {
+    const auto& vargs = fmt::make_format_args(args...);
+    detail::is_locking<T...>() ? vprint(fmt, vargs) : vprint_locked(fmt, vargs);
   }
 };
 
 #if FMT_USE_FCNTL
+
 // A file. Closed file is represented by a file object with descriptor -1.
 // Methods that are not declared with noexcept may throw
 // fmt::system_error in case of failure. Note that some errors such as
@@ -250,6 +257,8 @@ class FMT_API file {
 
   // Constructs a file object with a given descriptor.
   explicit file(int fd) : fd_(fd) {}
+
+  friend struct pipe;
 
  public:
   // Possible values for the oflag argument to the constructor.
@@ -313,11 +322,6 @@ class FMT_API file {
   // necessary.
   void dup2(int fd, std::error_code& ec) noexcept;
 
-  // Creates a pipe setting up read_end and write_end file objects for reading
-  // and writing respectively.
-  // DEPRECATED! Taking files as out parameters is deprecated.
-  static void pipe(file& read_end, file& write_end);
-
   // Creates a buffered_file object associated with this file and detaches
   // this file object from the file.
   auto fdopen(const char* mode) -> buffered_file;
@@ -327,6 +331,15 @@ class FMT_API file {
   // wcstring_view filename. Windows only.
   static file open_windows_file(wcstring_view path, int oflag);
 #  endif
+};
+
+struct FMT_API pipe {
+  file read_end;
+  file write_end;
+
+  // Creates a pipe setting up read_end and write_end file objects for reading
+  // and writing respectively.
+  pipe();
 };
 
 // Returns the memory page size.
@@ -370,13 +383,14 @@ struct ostream_params {
 };
 
 class file_buffer final : public buffer<char> {
+ private:
   file file_;
 
-  FMT_API void grow(size_t) override;
+  FMT_API static void grow(buffer<char>& buf, size_t);
 
  public:
   FMT_API file_buffer(cstring_view path, const ostream_params& params);
-  FMT_API file_buffer(file_buffer&& other);
+  FMT_API file_buffer(file_buffer&& other) noexcept;
   FMT_API ~file_buffer();
 
   void flush() {
@@ -423,8 +437,7 @@ class FMT_API ostream {
     output to the file.
    */
   template <typename... T> void print(format_string<T...> fmt, T&&... args) {
-    vformat_to(std::back_inserter(buffer_), fmt,
-               fmt::make_format_args(args...));
+    vformat_to(appender(buffer_), fmt, fmt::make_format_args(args...));
   }
 };
 

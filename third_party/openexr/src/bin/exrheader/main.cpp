@@ -43,30 +43,9 @@ using namespace std;
 void
 printCompression (Compression c)
 {
-    switch (c)
-    {
-        case NO_COMPRESSION: cout << "none"; break;
-
-        case RLE_COMPRESSION: cout << "run-length encoding"; break;
-
-        case ZIPS_COMPRESSION: cout << "zip, individual scanlines"; break;
-
-        case ZIP_COMPRESSION: cout << "zip, multi-scanline blocks"; break;
-
-        case PIZ_COMPRESSION: cout << "piz"; break;
-
-        case PXR24_COMPRESSION: cout << "pxr24"; break;
-
-        case B44_COMPRESSION: cout << "b44"; break;
-
-        case B44A_COMPRESSION: cout << "b44a"; break;
-
-        case DWAA_COMPRESSION: cout << "dwa, small scanline blocks"; break;
-
-        case DWAB_COMPRESSION: cout << "dwa, medium scanline blocks"; break;
-
-        default: cout << int (c); break;
-    }
+    std::string desc;
+    getCompressionDescriptionFromId (c, desc);
+    cout << desc.c_str ();
 }
 
 void
@@ -463,15 +442,16 @@ usageMessage (ostream& stream, const char* program_name, bool verbose = false)
     stream << "Usage: " << program_name << " imagefile [imagefile ...]\n";
 
     if (verbose)
-        stream << "\n"
-            "Read exr files and print the values of header attributes.\n"
-            "\n"
-            "Options:\n"
-            "  -h, --help        print this message\n"
-            "      --version     print version information\n"
-            "\n"
-            "Report bugs via https://github.com/AcademySoftwareFoundation/openexr/issues or email security@openexr.com\n"
-            "";
+        stream
+            << "\n"
+               "Read exr files and print the values of header attributes.\n"
+               "\n"
+               "Options:\n"
+               "  -h, --help        print this message\n"
+               "      --version     print version information\n"
+               "\n"
+               "Report bugs via https://github.com/AcademySoftwareFoundation/openexr/issues or email security@openexr.com\n"
+               "";
 }
 
 int
@@ -485,17 +465,17 @@ main (int argc, char** argv)
 
     for (int i = 1; i < argc; ++i)
     {
-        if (!strcmp (argv[i], "-h") || !strcmp(argv[1], "--help"))
+        if (!strcmp (argv[i], "-h") || !strcmp (argv[1], "--help"))
         {
             usageMessage (cout, "exrheader", true);
             return 0;
         }
         else if (!strcmp (argv[i], "--version"))
         {
-            const char* libraryVersion = getLibraryVersion();
-            
+            const char* libraryVersion = getLibraryVersion ();
+
             cout << "exrheader (OpenEXR) " << OPENEXR_VERSION_STRING;
-            if (strcmp(libraryVersion, OPENEXR_VERSION_STRING))
+            if (strcmp (libraryVersion, OPENEXR_VERSION_STRING))
                 cout << "(OpenEXR version " << libraryVersion << ")";
             cout << " https://openexr.com" << endl;
             cout << "Copyright (c) Contributors to the OpenEXR Project" << endl;

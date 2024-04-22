@@ -1,4 +1,4 @@
-// Copyright (c) 2006, Google Inc.
+// Copyright (c) 2024, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,27 +31,20 @@
 //
 // logging_unittest.cc covers the functionality herein
 
-#include <cerrno>
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>
+#include <iomanip>
+#include <mutex>
+#include <ostream>
+#include <streambuf>
+#include <thread>
 
-#include "utilities.h"
+#include "config.h"
+
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>  // for close() and write()
 #endif
-#include <fcntl.h>  // for open()
-
-#include <ctime>
-
-#include "base/commandlineflags.h"
-#include "config.h"
-#include "glog/logging.h"  // To pick up flag settings etc.
-#include "glog/raw_logging.h"
-
-#ifdef HAVE_STACKTRACE
-#  include "stacktrace.h"
-#endif
-
 #if defined(HAVE_SYSCALL_H)
 #  include <syscall.h>  // for syscall()
 #elif defined(HAVE_SYS_SYSCALL_H)
@@ -60,6 +53,12 @@
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
+#include <fcntl.h>  // for open()
+
+#include "glog/logging.h"
+#include "glog/raw_logging.h"
+#include "stacktrace.h"
+#include "utilities.h"
 
 #if (defined(HAVE_SYSCALL_H) || defined(HAVE_SYS_SYSCALL_H)) &&    \
     (!(defined(GLOG_OS_MACOSX)) && !(defined(GLOG_OS_OPENBSD))) && \
@@ -120,9 +119,29 @@ inline static bool VADoRawLog(char** buf, size_t* size, const char* format,
 }
 
 static const int kLogBufSize = 3000;
-static bool crashed = false;
-static CrashReason crash_reason;
+static std::once_flag crashed;
+static logging::internal::CrashReason crash_reason;
 static char crash_buf[kLogBufSize + 1] = {0};  // Will end in '\0'
+
+namespace {
+template <std::size_t N>
+class StaticStringBuf : public std::streambuf {
+ public:
+  StaticStringBuf() {
+    setp(std::begin(data_), std::end(data_));
+    setg(std::begin(data_), std::begin(data_), std::end(data_));
+  }
+  const char* data() noexcept {
+    if (pptr() != pbase() && pptr() != epptr() && *(pptr() - 1) != '\0') {
+      sputc('\0');
+    }
+    return data_;
+  }
+
+ private:
+  char data_[N];
+};
+}  // namespace
 
 GLOG_ATTRIBUTE_FORMAT(printf, 4, 5)
 void RawLog__(LogSeverity severity, const char* file, int line,
@@ -132,14 +151,24 @@ void RawLog__(LogSeverity severity, const char* file, int line,
         !IsGoogleLoggingInitialized())) {
     return;  // this stderr log message is suppressed
   }
+
+  // We do not have any any option other that string streams to obtain the
+  // thread identifier as the corresponding value is not convertible to an
+  // integer. Use a statically allocated buffer to avoid dynamic memory
+  // allocations.
+  StaticStringBuf<kLogBufSize> sbuf;
+  std::ostream oss(&sbuf);
+
+  oss << std::setw(5) << std::this_thread::get_id();
+
   // can't call localtime_r here: it can allocate
   char buffer[kLogBufSize];
   char* buf = buffer;
   size_t size = sizeof(buffer);
 
   // NOTE: this format should match the specification in base/logging.h
-  DoRawLog(&buf, &size, "%c00000000 00:00:00.000000 %5u %s:%d] RAW: ",
-           LogSeverityNames[severity][0], static_cast<unsigned int>(GetTID()),
+  DoRawLog(&buf, &size, "%c00000000 00:00:00.000000 %s %s:%d] RAW: ",
+           GetLogSeverityName(severity)[0], sbuf.data(),
            const_basename(const_cast<char*>(file)), line);
 
   // Record the position and size of the buffer after the prefix
@@ -159,9 +188,9 @@ void RawLog__(LogSeverity severity, const char* file, int line,
   // avoiding FILE buffering (to avoid invoking malloc()), and bypassing
   // libc (to side-step any libc interception).
   // We write just once to avoid races with other invocations of RawLog__.
-  safe_write(STDERR_FILENO, buffer, strlen(buffer));
+  safe_write(fileno(stderr), buffer, strlen(buffer));
   if (severity == GLOG_FATAL) {
-    if (!sync_val_compare_and_swap(&crashed, false, true)) {
+    std::call_once(crashed, [file, line, msg_start, msg_size] {
       crash_reason.filename = file;
       crash_reason.line_number = line;
       memcpy(crash_buf, msg_start, msg_size);  // Don't include prefix
@@ -173,7 +202,7 @@ void RawLog__(LogSeverity severity, const char* file, int line,
       crash_reason.depth = 0;
 #endif
       SetCrashReason(&crash_reason);
-    }
+    });
     LogMessage::Fail();  // abort()
   }
 }

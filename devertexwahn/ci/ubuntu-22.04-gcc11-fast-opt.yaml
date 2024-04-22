@@ -38,6 +38,11 @@ steps:
 
   - script: |
       cd devertexwahn
+      bazel run --config=gcc11  -- //tools/compiler_information
+    displayName: "Show compiler information"
+
+  - script: |
+      cd devertexwahn
       bazel build --config=gcc11  -- //...
     displayName: "Bazel build gcc11-fastbuild"
 

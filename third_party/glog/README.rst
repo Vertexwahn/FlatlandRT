@@ -39,20 +39,52 @@ particular `severity level <#severity-levels>`__>), e.g.,
    }
 
 
-For a detailed overview of glog features and their usage, please refer
-to the `user guide <#user-guide>`__.
+The library can be installed using various package managers or compiled from
+`source <#building-from-source>`__. For a detailed overview of glog features and
+their usage, please refer to the `user guide <#user-guide>`__.
+
+.. pull-quote::
+   [!IMPORTANT]
+
+   The above example requires further `Bazel <#bazel>`__ or
+   `CMake <#usage-in-projects>`__ setup for use in own projects.
+
 
 .. contents:: Table of Contents
 
 
-Building from Source
---------------------
+Usage in Projects
+~~~~~~~~~~~~~~~~~
 
-glog supports multiple build systems for compiling the project from
-source: `Bazel <#bazel>`__, `CMake <#cmake>`__, `vcpkg <#vcpkg>`__, and `conan <#conan>`__.
+Assuming that glog was previously `built using CMake <#cmake>`__ or installed
+using a package manager, you can use the CMake command :cmake:`find_package` to
+build against glog in your CMake project as follows:
+
+.. code:: cmake
+
+   cmake_minimum_required (VERSION 3.16)
+   project (myproj VERSION 1.0)
+
+   find_package (glog 0.7.0 REQUIRED)
+
+   add_executable (myapp main.cpp)
+   target_link_libraries (myapp glog::glog)
+
+
+Compile definitions and options will be added automatically to your
+target as needed.
+
+Alternatively, glog can be incorporated into using the CMake command
+:cmake:`add_subdirectory` to include glog directly from a subdirectory of your
+project by replacing the :cmake:`find_package` call from the previous snippet by
+:cmake:`add_subdirectory`. The :cmake:`glog::glog` target is in this case an
+:cmake:`ALIAS` library target for the ``glog`` library target.
+
+Building from Source
+~~~~~~~~~~~~~~~~~~~~
 
 Bazel
-~~~~~
+^^^^^
 
 To use glog within a project which uses the
 `Bazel <https://bazel.build/>`__ build tool, add the following lines to
@@ -77,8 +109,8 @@ your ``WORKSPACE`` file:
    )
 
 You can then add :bazel:`@com_github_google_glog//:glog` to the deps section
-of a :bazel:`cc_binary` or :bazel:`cc_library` rule, and :code:`#include
-<glog/logging.h>` to include it in your source code. Here’s a simple example:
+of a :bazel:`cc_binary` or :bazel:`cc_library` rule, and :code:`#include <glog/logging.h>`
+to include it in your source code. Here’s a simple example:
 
 .. code:: bazel
 
@@ -89,25 +121,13 @@ of a :bazel:`cc_binary` or :bazel:`cc_library` rule, and :code:`#include
    )
 
 CMake
-~~~~~
+^^^^^
 
-glog also supports CMake that can be used to build the project on a wide
-range of platforms. If you don’t have CMake installed already, you can
-download it for from CMake’s `official
-website <http://www.cmake.org>`__.
+glog can be compiled using `CMake <http://www.cmake.org>`__ on a wide range of
+platforms. The typical workflow for building glog  on a Unix-like system with
+GNU Make as build tool is as follows:
 
-CMake works by generating native makefiles or build projects that can be
-used in the compiler environment of your choice. You can either build
-glog with CMake as a standalone project or it can be incorporated into
-an existing CMake build for another project.
-
-Building glog with CMake
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-When building glog as a standalone project, on Unix-like systems with
-GNU Make as build tool, the typical workflow is:
-
-1. Get the source code and change to it. e.g., cloning with git:
+1. Clone the repository and change into source directory.
 
   .. code:: bash
 
@@ -144,36 +164,26 @@ GNU Make as build tool, the typical workflow is:
 
      cmake --build build --target install
 
-Consuming glog in a CMake Project
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you have glog installed in your system, you can use the CMake command
-:cmake:`find_package` to build against glog in your CMake Project as follows:
+Once successfully built, glog can be
+`integrated into own projects <#usage-in-projects>`__.
 
-.. code:: cmake
 
-   cmake_minimum_required (VERSION 3.16)
-   project (myproj VERSION 1.0)
+conan
+~~~~~
 
-   find_package (glog 0.6.0 REQUIRED)
+You can download and install glog using the `conan
+<https://conan.io>`__ package manager:
 
-   add_executable (myapp main.cpp)
-   target_link_libraries (myapp glog::glog)
+.. code:: bash
 
-Compile definitions and options will be added automatically to your
-target as needed.
+   pip install conan
+   conan install -r conancenter glog/<glog-version>@
 
-Incorporating glog into a CMake Project
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You can also use the CMake command :cmake:`add_subdirectory` to include glog
-directly from a subdirectory of your project by replacing the
-:cmake:`find_package` call from the previous example by
-:cmake:`add_subdirectory`. The :cmake:`glog::glog` target is in this case an
-:cmake:`ALIAS` library target for the ``glog`` library target.
-
-Again, compile definitions and options will be added automatically to
-your target as needed.
+The glog recipe in conan center is kept up to date by conan center index community
+contributors. If the version is out of date, please create an
+issue or pull request on the `conan-center-index
+<https://github.com/conan-io/conan-center-index>`__ repository.
 
 vcpkg
 ~~~~~
@@ -193,22 +203,6 @@ The glog port in vcpkg is kept up to date by Microsoft team members and
 community contributors. If the version is out of date, please create an
 issue or pull request on the vcpkg repository.
 
-conan
-~~~~~
-
-You can download and install glog using the `conan
-<https://conan.io>`__ package manager:
-
-.. code:: bash
-
-   pip install conan
-   conan install -r conancenter glog/<glog-version>@
-
-The glog recipe in conan center is kept up to date by conan center index community
-contributors. If the version is out of date, please create an
-issue or pull request on the `conan-center-index
-<https://github.com/conan-io/conan-center-index>`__ repository.
-
 User Guide
 ----------
 
@@ -227,23 +221,152 @@ Severity Levels
 ~~~~~~~~~~~~~~~
 
 You can specify one of the following severity levels (in increasing
-order of severity): ``INFO``, ``WARNING``, ``ERROR``, and ``FATAL``.
+order of severity):
+
+1. ``INFO``,
+2. ``WARNING``,
+3. ``ERROR``, and
+4. ``FATAL``.
+
 Logging a ``FATAL`` message terminates the program (after the message is
-logged). Note that messages of a given severity are logged not only in
-the logfile for that severity, but also in all logfiles of lower
-severity. E.g., a message of severity ``FATAL`` will be logged to the
-logfiles of severity ``FATAL``, ``ERROR``, ``WARNING``, and ``INFO``.
+logged).
+
+.. pull-quote::
+   [!NOTE]
+
+   Messages of a given severity are logged not only to corresponding severity
+   logfile but also to other logfiles of lower severity. For instance, a message
+   of severity ``FATAL`` will be logged to logfiles of severity ``FATAL``,
+   ``ERROR``, ``WARNING``, and ``INFO``.
 
 The ``DFATAL`` severity logs a ``FATAL`` error in debug mode (i.e.,
 there is no ``NDEBUG`` macro defined), but avoids halting the program in
 production by automatically reducing the severity to ``ERROR``.
 
-Unless otherwise specified, glog writes to the filename
-``/tmp/\<program name\>.\<hostname\>.\<user name\>.log.\<severity level\>.\<date\>-\<time\>.\<pid\>``
-(e.g.,
-``/tmp/hello_world.example.com.hamaji.log.INFO.20080709-222411.10474``).
-By default, glog copies the log messages of severity level ``ERROR`` or
-``FATAL`` to standard error (``stderr``) in addition to log files.
+Unless otherwise specified, glog uses the format
+
+::
+
+    <tmp>/<program name>.<hostname>.<user name>.log.<severity level>.<date>-<time>.<pid>
+
+for log filenames written to a directory designated as ``<tmp>`` and determined
+according to the following rules.
+
+**Windows**
+    glog uses the
+    `GetTempPathA <https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-gettemppatha>`__
+    API function to retrieve the directory for temporary files with a fallback to
+
+    1. ``C:\TMP\``
+    2. ``C:\TEMP\``
+
+    (in the order given.)
+
+**non-Windows**
+    The directory is determined by referencing the environment variables
+
+    1. ``TMPDIR``
+    2. ``TMP``
+
+    if set with a fallback to ``/tmp/``.
+
+The default path to a log file on Linux, for instance, could be
+
+::
+
+    /tmp/hello_world.example.com.hamaji.log.INFO.20080709-222411.10474
+
+By default, glog echos ``ERROR`` and ``FATAL`` messages to standard error in
+addition to log files.
+
+
+Log Line Prefix Format
+~~~~~~~~~~~~~~~~~~~~~~
+
+Log lines have this form:
+
+::
+
+    Lyyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg...
+
+where the fields are defined as follows:
+
+==================== =========================================================================
+Placeholder          Meaning
+==================== =========================================================================
+``L``                A single character, representing the log level (e.g., ``I`` for ``INFO``)
+``yyyy``             The year
+``mm``               The month (zero padded; i.e., May is ``05``)
+``dd``               The day (zero padded)
+``hh:mm:ss.uuuuuu``  Time in hours, minutes and fractional seconds
+``threadid``         The space-padded thread ID
+``file``             The file name
+``line``             The line number
+``msg``              The user-supplied message
+==================== =========================================================================
+
+Example:
+
+::
+
+  I1103 11:57:31.739339 24395 google.cc:2341] Command line: ./some_prog
+  I1103 11:57:31.739403 24395 google.cc:2342] Process id 24395
+
+.. pull-quote::
+   [!NOTE]
+
+   Although microseconds are useful for comparing events on a single machine,
+   clocks on different machines may not be well synchronized. Hence, use with
+   caution when comparing the low bits of timestamps from different machines.
+
+
+Customizing the Log Line Prefix
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The predefined log line prefix can be replaced using a user-provided callback
+that formats the corresponding output.
+
+For each log entry, the callback will be invoked with a reference to a
+``google::LogMessage`` instance containing the severity, filename, line number,
+thread ID, and time of the event. It will also be given a reference to the
+output stream, whose contents will be prepended to the actual message in the
+final log line.
+
+For example, the following function outputs a prefix that matches glog's default
+format. The third parameter ``data`` can be used to access user-supplied data
+which unless specified defaults to :cpp:`nullptr`.
+
+.. code:: cpp
+
+    void MyPrefixFormatter(std::ostream& s, const google::LogMessage& m, void* /*data*/) {
+       s << google::GetLogSeverityName(m.severity())[0]
+       << setw(4) << 1900 + m.time().year()
+       << setw(2) << 1 + m.time().month()
+       << setw(2) << m.time().day()
+       << ' '
+       << setw(2) << m.time().hour() << ':'
+       << setw(2) << m.time().min()  << ':'
+       << setw(2) << m.time().sec() << "."
+       << setw(6) << m.time().usec()
+       << ' '
+       << setfill(' ') << setw(5)
+       << m.thread_id() << setfill('0')
+       << ' '
+       << m.basename() << ':' << m.line() << "]";
+    }
+
+
+To enable the use of a prefix formatter, use the
+
+.. code:: cpp
+
+    google::InstallPrefixFormatter(&MyPrefixFormatter);
+
+function to pass a pointer to the corresponding :cpp:`MyPrefixFormatter`
+callback during initialization. :cpp:`InstallPrefixFormatter` takes a second
+optional argument of type  :cpp:`void*` that allows supplying user data to the
+callback.
+
 
 Setting Flags
 ~~~~~~~~~~~~~
@@ -251,8 +374,8 @@ Setting Flags
 Several flags influence glog’s output behavior. If the `Google gflags library
 <https://github.com/gflags/gflags>`__ is installed on your machine, the build
 system will automatically detect and use it, allowing you to pass flags on the
-command line. For example, if you want to turn the flag :cmd:`--logtostderr` on,
-you can start your application with the following command line:
+command line. For example, if you want to activate :cmd:`--logtostderr`, you can
+start your application with the following command line:
 
 .. code:: bash
 
@@ -268,10 +391,14 @@ environment variables, prefixing the flag name with ``GLOG_``, e.g.,
 The following flags are most commonly used:
 
 ``logtostderr`` (``bool``, default=\ ``false``)
-   Log messages to ``stderr`` instead of logfiles. Note: you can set
-   binary flags to ``true`` by specifying ``1``, ``true``, or ``yes``
-   (case insensitive). Also, you can set binary flags to ``false`` by
-   specifying ``0``, ``false``, or ``no`` (again, case insensitive).
+   Log messages to ``stderr`` instead of logfiles.
+
+   .. pull-quote::
+      [!TIP]
+
+      You can set boolean flags to :cpp:`true` by specifying ``1``, :cpp:`true`,
+      or ``yes``. To set boolean flags to :cpp:`false`, specify ``0``,
+      ``false``, or ``no``. In either case the spelling is case-insensitive.
 
 ``stderrthreshold`` (``int``, default=2, which is ``ERROR``)
    Copy log messages at or above this level to stderr in addition to
@@ -288,20 +415,20 @@ The following flags are most commonly used:
    default logging directory.
 
 ``v`` (``int``, default=0)
-   Show all ``VLOG(m)`` messages for ``m`` less or equal the value of
-   this flag. Overridable by :cmd:`--vmodule`. See `the section about
-   verbose logging <#verbose-logging>`__ for more detail.
+   Show all ``VLOG(m)`` messages for ``m`` less or equal the value of this flag.
+   Overridable by :cmd:`--vmodule`. Refer to `verbose logging <#verbose-logging>`__
+   for more detail.
 
 ``vmodule`` (``string``, default="")
    Per-module verbose level. The argument has to contain a
-   comma-separated list of <module name>=<log level>. <module name> is a
+   comma-separated list of ``<module name>=<log level>``. ``<module name>`` is a
    glob pattern (e.g., ``gfs*`` for all modules whose name starts with
    "gfs"), matched against the filename base (that is, name ignoring
-   .cc/.h./-inl.h). <log level> overrides any value given by :cmd:`--v`.
-   See also `the section about verbose logging <#verbose-logging>`__.
+   .cc/.h./-inl.h). ``<log level>`` overrides any value given by :cmd:`--v`.
+   See also `verbose logging <#verbose-logging>`__ for more details.
 
-There are some other flags defined in logging.cc. Please grep the source
-code for ``DEFINE_`` to see a complete list of all flags.
+Additional flags are defined in `flags.cc <src/flags.cc>`__. Please see the
+source for their complete list.
 
 You can also modify flag values in your program by modifying global
 variables ``FLAGS_*`` . Most settings start working immediately after
@@ -341,8 +468,12 @@ logging is most useful for informational messages.
    LOG_EVERY_N(INFO, 10) << "Got the " << google::COUNTER << "th cookie";
 
 The above line outputs a log messages on the 1st, 11th, 21st, ... times
-it is executed. Note that the special ``google::COUNTER`` value is used
-to identify which repetition is happening.
+it is executed.
+
+.. pull-quote::
+   [!NOTE]
+
+   The placeholder ``google::COUNTER`` identifies the recurring repetition.
 
 You can combine conditional and occasional logging with the following
 macro.
@@ -359,11 +490,11 @@ output to the first n occurrences:
 
    LOG_FIRST_N(INFO, 20) << "Got the " << google::COUNTER << "th cookie";
 
-Outputs log messages for the first 20 times it is executed. Again, the
+Outputs log messages for the first 20 times it is executed. The
 ``google::COUNTER`` identifier indicates which repetition is happening.
 
 Other times, it is desired to only log a message periodically based on a time.
-So for example, to log a message every 10ms:
+For instance, to log a message every 10ms:
 
 .. code:: cpp
 
@@ -456,21 +587,32 @@ constructor initializer lists.
        Something* ptr_;
    };
 
-Note that you cannot use this macro as a C++ stream due to this feature.
-Please use ``CHECK_EQ`` described above to log a custom message before
-aborting the application.
+
+.. pull-quote::
+   [!WARNING]
+
+   Due to the argument forwarding, ``CHECK_NOTNULL`` cannot be used to
+   simultaneously stream an additional custom message. To provide a custom
+   message, one can use the macro ``CHECK_EQ`` prior to the failing check.
 
 If you are comparing C strings (:cpp:`char *`), a handy set of macros performs
-case sensitive as well as case insensitive comparisons - ``CHECK_STREQ``,
-``CHECK_STRNE``, ``CHECK_STRCASEEQ``, and ``CHECK_STRCASENE``. The CASE versions
-are case-insensitive. You can safely pass :cpp:`nullptr` pointers for this macro. They
-treat :cpp:`nullptr` and any non-:cpp:`nullptr` string as not equal. Two :cpp:`nullptr`\
-s are equal.
+both case sensitive and insensitive comparisons - ``CHECK_STREQ``,
+``CHECK_STRNE``, ``CHECK_STRCASEEQ``, and ``CHECK_STRCASENE``. The
+``CHECK_*CASE*`` macro variants are case-insensitive. You can safely pass
+:cpp:`nullptr` pointers to this macro. They treat :cpp:`nullptr` and any
+non-:cpp:`nullptr` string as not equal. Two :cpp:`nullptr`\ s are equal.
 
-Note that both arguments may be temporary strings which are destructed
-at the end of the current "full expression" (e.g.,
-:cpp:`CHECK_STREQ(Foo().c_str(), Bar().c_str())` where ``Foo`` and ``Bar``
-return C++’s :cpp:`std::string`).
+.. pull-quote::
+   [!NOTE]
+
+   Both arguments may be temporary objects which are destructed at the end of
+   the current "full expression", such as
+
+   .. code:: cpp
+
+      CHECK_STREQ(Foo().c_str(), Bar().c_str());
+
+   where ``Foo`` and ``Bar`` return :cpp:`std::string`.
 
 The ``CHECK_DOUBLE_EQ`` macro checks the equality of two floating point
 values, accepting a small error margin. ``CHECK_NEAR`` accepts a third
@@ -492,12 +634,19 @@ controls which verbose messages are logged:
 
 With ``VLOG``, the lower the verbose level, the more likely messages are to be
 logged. For example, if :cmd:`--v==1`, ``VLOG(1)`` will log, but ``VLOG(2)``
-will not log. This is opposite of the severity level, where ``INFO`` is 0, and
-``ERROR`` is 2. :cmd:`--minloglevel` of 1 will log ``WARNING`` and above. Though
-you can specify any integers for both ``VLOG`` macro and :cmd:`--v` flag, the
-common values for them are small positive integers. For example, if you write
-``VLOG(0)``, you should specify :cmd:`--v=-1` or lower to silence it. This is
-less useful since we may not want verbose logs by default in most cases. The
+will not log.
+
+.. pull-quote::
+   [!CAUTION]
+
+   The ``VLOG`` behavior is opposite of the severity level logging, where
+   ``INFO``, ``ERROR``, etc. are defined in increasing order and thus
+   :cmd:`--minloglevel` of 1 will only log ``WARNING`` and above.
+
+Though you can specify any integers for both ``VLOG`` macro and :cmd:`--v` flag,
+the common values for them are small positive integers. For example, if you
+write ``VLOG(0)``, you should specify :cmd:`--v=-1` or lower to silence it. This
+is less useful since we may not want verbose logs by default in most cases. The
 ``VLOG`` macros always log at the ``INFO`` log level (when they log at all).
 
 Verbose logging can be controlled from the command line on a per-module
@@ -507,20 +656,21 @@ basis:
 
    --vmodule=mapreduce=2,file=1,gfs*=3 --v=0
 
-will:
+Specifying these options will specficially:
 
-(a) Print ``VLOG(2)`` and lower messages from mapreduce.{h,cc}
-(b) Print ``VLOG(1)`` and lower messages from file.{h,cc}
-(c) Print ``VLOG(3)`` and lower messages from files prefixed with "gfs"
-(d) Print ``VLOG(0)`` and lower messages from elsewhere
+1. Print ``VLOG(2)`` and lower messages from mapreduce.{h,cc}
+2. Print ``VLOG(1)`` and lower messages from file.{h,cc}
+3. Print ``VLOG(3)`` and lower messages from files prefixed with "gfs"
+4. Print ``VLOG(0)`` and lower messages from elsewhere
 
-The wildcarding functionality shown by (c) supports both ’*’ (matches 0
-or more characters) and ’?’ (matches any single character) wildcards.
-Please also check the section about `command line flags <#setting-flags>`__.
+The wildcarding functionality 3. supports both ``*`` (matches 0
+or more characters) and ``?`` (matches any single character) wildcards.
+Please also refer to `command line flags <#setting-flags>`__ for more
+information.
 
-There’s also ``VLOG_IS_ON(n)`` "verbose level" condition macro. This
-macro returns true when the :cmd:`--v` is equal or greater than ``n``. To
-be used as
+There’s also ``VLOG_IS_ON(n)`` "verbose level" condition macro. This macro
+returns ``true`` when the :cmd:`--v` is equal to or greater than ``n``. The
+macro can be used as follows:
 
 .. code:: cpp
 
@@ -531,7 +681,7 @@ be used as
 
 Verbose level condition macros ``VLOG_IF``, ``VLOG_EVERY_N`` and
 ``VLOG_IF_EVERY_N`` behave analogous to ``LOG_IF``, ``LOG_EVERY_N``,
-``LOF_IF_EVERY``, but accept a numeric verbosity level as opposed to a
+``LOG_IF_EVERY_N``, but accept a numeric verbosity level as opposed to a
 severity level.
 
 .. code:: cpp
@@ -548,48 +698,6 @@ severity level.
          "Present occurrence is " << google::COUNTER;
 
 
-Custom Log Prefix Format
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-glog supports changing the format of the prefix attached to log messages by
-receiving a user-provided callback to be used to generate such strings.
-
-For each log entry, the callback will be invoked with a ``LogMessageInfo``
-struct containing the severity, filename, line number, thread ID, and time of
-the event. It will also be given a reference to the output stream, whose
-contents will be prepended to the actual message in the final log line.
-
-For example:
-
-.. code:: cpp
-
-    /* This function writes a prefix that matches glog's default format.
-     * (The third parameter can be used to receive user-supplied data, and is
-     * nullptr by default.)
-     */
-    void CustomPrefix(std::ostream &s, const LogMessageInfo &l, void*) {
-       s << l.severity[0]
-       << setw(4) << 1900 + l.time.year()
-       << setw(2) << 1 + l.time.month()
-       << setw(2) << l.time.day()
-       << ' '
-       << setw(2) << l.time.hour() << ':'
-       << setw(2) << l.time.min()  << ':'
-       << setw(2) << l.time.sec() << "."
-       << setw(6) << l.time.usec()
-       << ' '
-       << setfill(' ') << setw(5)
-       << l.thread_id << setfill('0')
-       << ' '
-       << l.filename << ':' << l.line_number << "]";
-    }
-
-
-To enable the use of ``CustomPrefix()``, simply give glog a pointer to it
-during initialization: ``InitGoogleLogging(argv[0], &CustomPrefix);``.
-
-Optionally, ``InitGoogleLogging()`` takes a third argument of type  ``void*``
-to pass on to the callback function.
 
 Failure Signal Handler
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -647,10 +755,12 @@ by :cpp:`InstallFailureFunction`.
      google::InstallFailureFunction(&YourFailureFunction);
    }
 
-By default, glog tries to dump stacktrace and makes the program exit
-with status 1. The stacktrace is produced only when you run the program
-on an architecture for which glog supports stack tracing (as of
-September 2008, glog supports stack tracing for x86 and x86_64).
+By default, glog tries to dump the stacktrace and calls :cpp:`std::abort`. The
+stacktrace is generated only when running the application on a system supported
+by glog. Currently, glog supports x86, x86_64, PowerPC architectures,
+``libunwind``, and the Debug Help Library (``dbghelp``) on Windows for
+extracting the stack trace.
+
 
 Raw Logging
 ~~~~~~~~~~~
@@ -658,8 +768,8 @@ Raw Logging
 The header file ``<glog/raw_logging.h>`` can be used for thread-safe logging,
 which does not allocate any memory or acquire any locks. Therefore, the macros
 defined in this header file can be used by low-level memory allocation and
-synchronization code. Please check `src/glog/raw_logging.h.in
-<src/glog/raw_logging.h.in>`__ for detail.
+synchronization code. Please check
+`src/glog/raw_logging.h <src/glog/raw_logging.h>`__ for detail.
 
 Google Style ``perror()``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -716,7 +826,16 @@ To enable the log cleaner:
 
 .. code:: cpp
 
-   google::EnableLogCleaner(3); // keep your logs for 3 days
+   using namespace std::chrono_literals;
+   google::EnableLogCleaner(24h * 3); // keep your logs for 3 days
+
+
+In C++20 (and later) this can be shortened to:
+
+.. code:: cpp
+
+   using namespace std::chrono_literals;
+   google::EnableLogCleaner(3d); // keep your logs for 3 days
 
 And then glog will check if there are overdue logs whenever a flush is
 performed. In this example, any log file from your project whose last
@@ -768,9 +887,9 @@ anymore for functions defined in ``glog/logging.h`` .
 If you don’t need ``ERROR`` defined by ``windows.h``, there are a couple
 of more workarounds which sometimes don’t work:
 
--  ``#define WIN32_LEAN_AND_MEAN`` or ``NOGDI`` **before** you
-   ``#include windows.h``.
--  ``#undef ERROR`` **after** you ``#include windows.h`` .
+-  :cpp:`#define WIN32_LEAN_AND_MEAN` or :cpp:`NOGDI` **before**
+   :cpp:`#include <windows.h>`.
+-  :cpp:`#undef ERROR` **after** :cpp:`#include <windows.h>`.
 
 See `this
 issue <http://code.google.com/p/google-glog/issues/detail?id=33>`__ for
@@ -812,19 +931,19 @@ Using :cmd:`-static` is rare, though, so unless you know this will affect you it
 probably won’t.
 
 If you cannot or do not wish to install libunwind, you can still try to
-use two kinds of stack-unwinder: 1. glibc built-in stack-unwinder and 2.
-frame pointer based stack-unwinder.
+use two kinds of stack-unwinder:
 
-1. As we already mentioned, glibc’s unwinder has a deadlock issue.
-   However, if you don’t use :cpp:`InstallFailureSignalHandler()` or you
-   don’t worry about the rare possibilities of deadlocks, you can use
-   this stack-unwinder. If you specify no options and ``libunwind``
-   isn’t detected on your system, the configure script chooses this
-   unwinder by default.
+glibc built-in stack-unwinder
+    As we already mentioned, glibc’s unwinder has a deadlock issue. However, if
+    you don’t use :cpp:`InstallFailureSignalHandler()` or you don’t worry about
+    the rare possibilities of deadlocks, you can use this stack-unwinder. If you
+    specify no options and ``libunwind`` isn’t detected on your system, the
+    configure script chooses this unwinder by default.
 
-2. The frame pointer based stack unwinder requires that your
-   application, the glog library, and system libraries like libc, all be
-   compiled with a frame pointer. This is *not* the default for x86-64.
+frame pointer based stack-unwinder
+    The frame pointer based stack unwinder requires that your application, the
+    glog library, and system libraries like libc, all be compiled with a frame
+    pointer. This is *not* the default for x86-64.
 
 
 How to Contribute

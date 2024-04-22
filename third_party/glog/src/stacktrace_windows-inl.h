@@ -31,13 +31,13 @@
 //
 // Windows implementation - just use CaptureStackBackTrace
 
+// clang-format off
+#include <windows.h> // Must come before <dbghelp.h>
 #include <dbghelp.h>
-
-#include "config.h"
-#include "port.h"
-#include "stacktrace.h"
+// clang-format on
 
 namespace google {
+inline namespace glog_internal_namespace_ {
 
 int GetStackTrace(void** result, int max_depth, int skip_count) {
   if (max_depth > 64) {
@@ -49,4 +49,5 @@ int GetStackTrace(void** result, int max_depth, int skip_count) {
                                static_cast<DWORD>(max_depth), result, nullptr);
 }
 
+}  // namespace glog_internal_namespace_
 }  // namespace google

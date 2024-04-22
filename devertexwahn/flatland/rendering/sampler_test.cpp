@@ -151,7 +151,7 @@ TEST(IndependentSampler, clone) {
 }
 
 TEST(PixelCenterSampler, GivenPixelCenterSample_WhenRequestingSample_ThenExpectAlwaysCenterPosition) {
-    StaticDebugSampler pcs{{}};
+    ConstantSampler pcs{{}};
 
     EXPECT_THAT(pcs.next_1d(), .5f);
     EXPECT_THAT(pcs.next_2d(), Point2f(.5f, .5f));

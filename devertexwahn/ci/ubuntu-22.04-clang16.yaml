@@ -1,0 +1,74 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# Clang 14 on Ubuntu 22.04
+# Make sure we can build with Clang 14 in all different compilation modes
+
+steps:
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+      cd devertexwahn
+      bazel version
+    displayName: 'Show Bazel version'
+
+  - script: |
+      sudo apt-get update
+      sudo apt-get -y install libncurses5 # needed by Clang
+    displayName: "Install libncurses5"
+
+
+  # fastbuild
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang16  -- //...     
+    displayName: 'Bazel build clang14-fastbuild'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang16  -- //...     
+    displayName: 'Bazel test clang14-fastbuild'
+
+  # dbg
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang16  --compilation_mode=dbg -- //...     
+    displayName: 'Bazel build clang14-dbg'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang16  --compilation_mode=dbg -- //...     
+    displayName: 'Bazel test clang14-dbg'
+
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang16  --compilation_mode=opt -- //...     
+    displayName: 'Bazel build clang14-opt'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang16  --compilation_mode=opt -- //...     
+    displayName: 'Bazel test clang14-opt'
+
+  - script: |
+      df
+    displayName: 'Show disk space'

@@ -8,6 +8,7 @@
 #define De_Vertexwahn_Flatland_Rendering_BSDF_11d72dcc_a416_4530_b706_b1e69711c5c5_h
 
 #include "flatland/rendering/property_set.h"
+#include "flatland/rendering/scene/shape/medium_event.h"
 
 #include "imaging/color.h"
 
@@ -20,9 +21,11 @@ template <typename ScalarType, unsigned int Dimension>
 struct BSDFSampleType {
     using Scalar = ScalarType;
     using Vector = VectorType<ScalarType, Dimension>;
+    using MediumEvent = MediumEventType<ScalarType, Dimension>;
 
     Vector wi;
     Vector wo;
+    const MediumEvent* me;
 };
 
 using BSDFSample2f = BSDFSampleType<float, 2>;
@@ -46,6 +49,7 @@ public:
     using Vector = VectorType<ScalarType, Dimension>;
     using Color = ColorType<ScalarType, 3>;
     using BSDFSample = BSDFSampleType<ScalarType, Dimension>;
+    using MediumEvent = MediumEventType<ScalarType, Dimension>;
 
     BSDFType(const PropertySet &ps) {}
 

@@ -30,13 +30,13 @@ namespace Catch {
 
     class TestRegistry : public ITestCaseRegistry {
     public:
-        ~TestRegistry() override = default;
-
         void registerTest( Detail::unique_ptr<TestCaseInfo> testInfo, Detail::unique_ptr<ITestInvoker> testInvoker );
 
         std::vector<TestCaseInfo*> const& getAllInfos() const override;
         std::vector<TestCaseHandle> const& getAllTests() const override;
         std::vector<TestCaseHandle> const& getAllTestsSorted( IConfig const& config ) const override;
+
+        ~TestRegistry() override; // = default
 
     private:
         std::vector<Detail::unique_ptr<TestCaseInfo>> m_owned_test_infos;

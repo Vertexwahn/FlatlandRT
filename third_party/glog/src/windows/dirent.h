@@ -6,8 +6,8 @@
  * under the MIT license.  For all details and documentation, see
  * https://github.com/tronkko/dirent
  */
-#ifndef DIRENT_H
-#define DIRENT_H
+#ifndef GLOG_INTERNAL_WINDOWS_DIRENT_H
+#define GLOG_INTERNAL_WINDOWS_DIRENT_H
 
 /* Hide warnings about unreferenced local functions */
 #if defined(__clang__)
@@ -35,6 +35,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
+#include <memory>
 
 /* Indicates that d_type field is available in dirent structure */
 #define _DIRENT_HAVE_D_TYPE
@@ -622,8 +623,6 @@ static WIN32_FIND_DATAW* dirent_next(_WDIR* dirp) {
  * Open directory stream using plain old C-string.
  */
 static DIR* opendir(const char* dirname) {
-  struct DIR* dirp;
-
   /* Must have directory name */
   if (dirname == nullptr || dirname[0] == '\0') {
     dirent_set_errno(ENOENT);
@@ -631,7 +630,9 @@ static DIR* opendir(const char* dirname) {
   }
 
   /* Allocate memory for DIR structure */
-  dirp = (DIR*)malloc(sizeof(struct DIR));
+  std::unique_ptr<DIR, decltype(&free)> dirp{
+      static_cast<DIR*>(malloc(sizeof(struct DIR))), &free};
+
   if (!dirp) {
     return nullptr;
   }
@@ -649,23 +650,18 @@ static DIR* opendir(const char* dirname) {
        * the output buffer is too small to contain the resulting
        * string.
        */
-      goto exit_free;
+      return nullptr;
     }
 
     /* Open directory stream using wide-character name */
     dirp->wdirp = _wopendir(wname);
     if (!dirp->wdirp) {
-      goto exit_free;
+      return nullptr;
     }
   }
 
   /* Success */
-  return dirp;
-
-  /* Failure */
-exit_free:
-  free(dirp);
-  return nullptr;
+  return dirp.release();
 }
 
 /*
@@ -1041,4 +1037,4 @@ static void dirent_set_errno(int error) {
 #ifdef __cplusplus
 }
 #endif
-#endif /*DIRENT_H*/
+#endif /*GLOG_INTERNAL_WINDOWS_DIRENT_H*/

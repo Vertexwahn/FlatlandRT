@@ -24,7 +24,7 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 // Copied from https://github.com/mitsuba-renderer/mitsuba3/blob/16261c1bd1f4805b8799300f93c91ba3af8174f0/src/core/string.cpp#L75
 // Mitsuba3
-// TODO: Move to core - string class
+// TODO(Vertexwahn): Move to core - string class
 // or replace by boost::split(tokens, csv, boost::is_any_of(","));?
 std::vector<std::string> tokenize(const std::string &string,
                                   const std::string &delim = ", ",

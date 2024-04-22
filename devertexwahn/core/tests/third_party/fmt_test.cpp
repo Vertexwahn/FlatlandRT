@@ -16,6 +16,8 @@
 
 #include "gmock/gmock.h"
 
+#include <string>
+
 TEST(fmt, TextFormatting) {
     std::string message = fmt::format("The answer is {}.", 42);
     EXPECT_THAT(message, "The answer is 42.");
@@ -32,7 +34,7 @@ struct fmt::formatter<complex> {
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(complex const &number, FormatContext &ctx) {
+    auto format(complex const &number, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "{0}+i{1}", number.a, number.b);
     }
 };

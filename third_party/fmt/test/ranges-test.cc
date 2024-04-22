@@ -20,6 +20,7 @@
 #  include <ranges>
 #endif
 
+#include "fmt/format.h"
 #include "gtest/gtest.h"
 
 #if !FMT_GCC_VERSION || FMT_GCC_VERSION >= 601
@@ -57,8 +58,13 @@ TEST(ranges_test, format_vector) {
   EXPECT_EQ(fmt::format("{:n:#x}", v), "0x1, 0x2, 0x3, 0x5, 0x7, 0xb");
 
   auto vc = std::vector<char>{'a', 'b', 'c'};
+  auto vec = std::vector<char>{'a', '\n', '\t'};
   auto vvc = std::vector<std::vector<char>>{vc, vc};
   EXPECT_EQ(fmt::format("{}", vc), "['a', 'b', 'c']");
+  EXPECT_EQ(fmt::format("{:s}", vc), "\"abc\"");
+  EXPECT_EQ(fmt::format("{:?s}", vec), "\"a\\n\\t\"");
+  EXPECT_EQ(fmt::format("{:s}", vec), "\"a\n\t\"");
+  EXPECT_EQ(fmt::format("{::s}", vvc), "[\"abc\", \"abc\"]");
   EXPECT_EQ(fmt::format("{}", vvc), "[['a', 'b', 'c'], ['a', 'b', 'c']]");
   EXPECT_EQ(fmt::format("{:n}", vvc), "['a', 'b', 'c'], ['a', 'b', 'c']");
   EXPECT_EQ(fmt::format("{:n:n}", vvc), "'a', 'b', 'c', 'a', 'b', 'c'");
@@ -287,7 +293,7 @@ TEST(ranges_test, range) {
   EXPECT_EQ(fmt::format("{}", z), "[0, 0, 0]");
 }
 
-enum test_enum { foo };
+enum test_enum { foo, bar };
 auto format_as(test_enum e) -> int { return e; }
 
 TEST(ranges_test, enum_range) {
@@ -299,6 +305,40 @@ TEST(ranges_test, enum_range) {
 TEST(ranges_test, unformattable_range) {
   EXPECT_FALSE((fmt::has_formatter<std::vector<unformattable>,
                                    fmt::format_context>::value));
+}
+#endif
+
+TEST(ranges_test, join) {
+  using fmt::join;
+  int v1[3] = {1, 2, 3};
+  auto v2 = std::vector<float>();
+  v2.push_back(1.2f);
+  v2.push_back(3.4f);
+  void* v3[2] = {&v1[0], &v1[1]};
+
+  EXPECT_EQ(fmt::format("({})", join(v1, v1 + 3, ", ")), "(1, 2, 3)");
+  EXPECT_EQ(fmt::format("({})", join(v1, v1 + 1, ", ")), "(1)");
+  EXPECT_EQ(fmt::format("({})", join(v1, v1, ", ")), "()");
+  EXPECT_EQ(fmt::format("({:03})", join(v1, v1 + 3, ", ")), "(001, 002, 003)");
+  EXPECT_EQ("(+01.20, +03.40)",
+            fmt::format("({:+06.2f})", join(v2.begin(), v2.end(), ", ")));
+
+  EXPECT_EQ(fmt::format("{0:{1}}", join(v1, v1 + 3, ", "), 1), "1, 2, 3");
+
+  EXPECT_EQ(fmt::format("{}, {}", v3[0], v3[1]),
+            fmt::format("{}", join(v3, v3 + 2, ", ")));
+
+  EXPECT_EQ(fmt::format("({})", join(v1, ", ")), "(1, 2, 3)");
+  EXPECT_EQ(fmt::format("({:+06.2f})", join(v2, ", ")), "(+01.20, +03.40)");
+
+  auto v4 = std::vector<test_enum>{foo, bar, foo};
+  EXPECT_EQ(fmt::format("{}", join(v4, " ")), "0 1 0");
+}
+
+#ifdef __cpp_lib_byte
+TEST(ranges_test, join_bytes) {
+  auto v = std::vector<std::byte>{std::byte(1), std::byte(2), std::byte(3)};
+  EXPECT_EQ(fmt::format("{}", fmt::join(v, ", ")), "1, 2, 3");
 }
 #endif
 
@@ -420,6 +460,22 @@ TEST(ranges_test, join_range) {
       "0,1,2,3,4");
 #  endif
 }
+
+namespace adl {
+struct vec : std::vector<int> {
+  using std::vector<int>::vector;  // inherit all constructors
+};
+
+// ADL-found begin() and end() skip the first and last element
+auto begin(vec& v) -> typename vec::iterator { return v.begin() + 1; }
+auto end(vec& v) -> typename vec::iterator { return v.end() - 1; }
+}
+
+TEST(ranges_test, format_join_adl_begin_end) {
+  auto v = adl::vec{41, 42, 43, 44};
+  EXPECT_EQ(fmt::format("{}", fmt::join(v, "/")), "42/43");
+}
+
 #endif  // FMT_RANGES_TEST_ENABLE_JOIN
 
 #if defined(__cpp_lib_ranges) && __cpp_lib_ranges >= 202302L
@@ -557,4 +613,15 @@ auto format_as(const tieable& t) -> std::tuple<int, double> {
 
 TEST(ranges_test, format_as_tie) {
   EXPECT_EQ(fmt::format("{}", tieable()), "(3, 0.42)");
+}
+
+struct lvalue_qualified_begin_end {
+  int arr[5] = {1, 2, 3, 4, 5};
+
+  auto begin() & -> const int* { return arr; }
+  auto end() & -> const int* { return arr + 5; }
+};
+
+TEST(ranges_test, lvalue_qualified_begin_end) {
+  EXPECT_EQ(fmt::format("{}", lvalue_qualified_begin_end{}), "[1, 2, 3, 4, 5]");
 }

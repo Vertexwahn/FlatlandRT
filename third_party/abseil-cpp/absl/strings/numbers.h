@@ -172,8 +172,8 @@ size_t SixDigitsToBuffer(double d, absl::Nonnull<char*> buffer);
 // terminating '\0'. At most `kFastToBufferSize` bytes are written.
 absl::Nonnull<char*> FastIntToBuffer(int32_t i, absl::Nonnull<char*> buffer)
     ABSL_INTERNAL_NEED_MIN_SIZE(buffer, kFastToBufferSize);
-absl::Nonnull<char*> FastIntToBuffer(uint32_t i, absl::Nonnull<char*> buffer)
-    ABSL_INTERNAL_NEED_MIN_SIZE(buffer, kFastToBufferSize);
+absl::Nonnull<char*> FastIntToBuffer(uint32_t n, absl::Nonnull<char*> out_str)
+    ABSL_INTERNAL_NEED_MIN_SIZE(out_str, kFastToBufferSize);
 absl::Nonnull<char*> FastIntToBuffer(int64_t i, absl::Nonnull<char*> buffer)
     ABSL_INTERNAL_NEED_MIN_SIZE(buffer, kFastToBufferSize);
 absl::Nonnull<char*> FastIntToBuffer(uint64_t i, absl::Nonnull<char*> buffer)

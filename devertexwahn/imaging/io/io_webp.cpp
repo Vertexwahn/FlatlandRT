@@ -10,6 +10,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

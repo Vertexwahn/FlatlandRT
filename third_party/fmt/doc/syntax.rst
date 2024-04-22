@@ -153,7 +153,8 @@ Preceding the *width* field by a zero (``'0'``) character enables sign-aware
 zero-padding for numeric types. It forces the padding to be placed after the
 sign or base (if any) but before the digits. This is used for printing fields in
 the form '+000000120'. This option is only valid for numeric types and it has no
-effect on formatting of infinity and NaN.
+effect on formatting of infinity and NaN. This option is ignored when any
+alignment specifier is present.
 
 The *precision* is a decimal number indicating how many digits should be
 displayed after the decimal point for a floating-point value formatted with
@@ -353,7 +354,7 @@ The available presentation types (*chrono_type*) are:
 |         | The modified command ``%Ec`` produces the locale's alternate date  |
 |         | and time representation.                                           |
 +---------+--------------------------------------------------------------------+
-| ``'C'`` | The year divided by 100 using floored division, e.g. "55". If the  |
+| ``'C'`` | The year divided by 100 using floored division, e.g. "19". If the  |
 |         | result is a single decimal digit, it is prefixed with 0.           |
 |         | The modified command ``%EC`` produces the locale's alternative     |
 |         | representation of the century.                                     |
@@ -490,14 +491,33 @@ Range Format Specifications
 Format specifications for range types have the following syntax:
 
 .. productionlist:: sf
-   range_format_spec: [":" [`underlying_spec`]]
+   range_format_spec: ["n"][`range_type`][`range_underlying_spec`]
 
-The `underlying_spec` is parsed based on the formatter of the range's
-reference type.
+The ``'n'`` option formats the range without the opening and closing brackets. 
 
-By default, a range of characters or strings is printed escaped and quoted. But
-if any `underlying_spec` is provided (even if it is empty), then the characters
-or strings are printed according to the provided specification.
+The available presentation types for `range_type` are:
+
++---------+----------------------------------------------------------+
+| Type    | Meaning                                                  |
++=========+==========================================================+
+| none    | Default format.              |
++---------+----------------------------------------------------------+
+| ``'s'`` | String format. The range is formatted as a string.       |                                                     
++---------+----------------------------------------------------------+
+| ``'?s'``| Debug format. The range is formatted as an escaped       |        
+|         | string.                                                  |
++---------+----------------------------------------------------------+
+
+If `range_type` is ``'s'`` or ``'?s'``, the range element type must be a
+character type. The ``'n'`` option and `range_underlying_spec` are mutually
+exclusive with ``'s'`` and ``'?s'``. 
+
+The `range_underlying_spec` is parsed based on the formatter of the range's
+element type.
+
+By default, a range of characters or strings is printed escaped and quoted.
+But if any `range_underlying_spec` is provided (even if it is empty), then
+the characters or strings are printed according to the provided specification.
 
 Examples::
 
@@ -507,6 +527,12 @@ Examples::
   // Result: [0xa, 0x14, 0x1e]
   fmt::format("{}", vector{'h', 'e', 'l', 'l', 'o'});
   // Result: ['h', 'e', 'l', 'l', 'o']
+  fmt::format("{:n}", vector{'h', 'e', 'l', 'l', 'o'});
+  // Result: 'h', 'e', 'l', 'l', 'o'
+  fmt::format("{:s}", vector{'h', 'e', 'l', 'l', 'o'});
+  // Result: "hello"
+  fmt::format("{:?s}", vector{'h', 'e', 'l', 'l', 'o', '\n'});
+  // Result: "hello\n"
   fmt::format("{::}", vector{'h', 'e', 'l', 'l', 'o'});
   // Result: [h, e, l, l, o]
   fmt::format("{::d}", vector{'h', 'e', 'l', 'l', 'o'});

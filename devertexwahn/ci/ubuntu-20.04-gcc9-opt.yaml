@@ -39,6 +39,15 @@ steps:
   - script: |
       df -H
     displayName: 'Show disk space'
+    
+  - script: |
+      cd devertexwahn
+      bazel run --config=gcc9  --compilation_mode=opt -- //tools/compiler_information
+    displayName: "Show compiler information"
+
+  - script: |
+      df -H
+    displayName: 'Show disk space'
 
   # Qt compilation does not work: "You must build your code with position independent code if Qt was built with -reduce-relocations. " "Compile your code with -fPIC (and not with -fPIE)."
   - script: |

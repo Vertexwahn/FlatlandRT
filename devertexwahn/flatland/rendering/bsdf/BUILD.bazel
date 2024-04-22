@@ -12,6 +12,7 @@ cc_library(
         "//core:object",
         "//core:reference_counted",
         "//flatland/rendering:property_set",
+        "//flatland/rendering/scene/shape:medium_event",
         "//imaging:color",
     ],
 )

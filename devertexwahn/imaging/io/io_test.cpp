@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,8 +12,54 @@
 
 using namespace de_vertexwahn;
 
+namespace de_vertexwahn {
+    std::string extract_file_extension(std::string_view filename);
+}
+
+TEST(extract_file_extension, test) {
+    EXPECT_THAT(extract_file_extension("image.exr"), std::string(".exr"));
+    EXPECT_THAT(extract_file_extension("image.jepg"), std::string(".jepg"));
+    EXPECT_THAT(extract_file_extension("image.jpg"), std::string(".jpg"));
+    EXPECT_THAT(extract_file_extension("image.png"), std::string(".png"));
+    EXPECT_THAT(extract_file_extension("image"), std::string(""));
+    EXPECT_THAT(extract_file_extension("image.unsupported_extension"), std::string(".unsupported_extension"));
+}
+
 TEST(io, WhenTryToLoadANonExistingImage_ThenThrowException) {
-    EXPECT_THROW(load_image("muh.unknown_extension"), std::runtime_error);
+    EXPECT_THAT([]() { load_image("not_exsiting_image.exr"); },
+                ::testing::ThrowsMessage<std::runtime_error>("File \"not_exsiting_image.exr\" does not exist."));
+}
+
+TEST(io, WhenTryToLoadFileWithNotSupportedExtension_ThenThrowException) {
+    // Arrange
+
+    // write a dummy file
+    std::ofstream file("image.unsupported_extension");
+    EXPECT_TRUE(file.is_open());
+    if(file.is_open()) {
+        file << "Dummy file for testing load_image.\n";
+        file.close();
+    }
+
+    // Act & Assert
+    EXPECT_THAT([]() { load_image("image.unsupported_extension"); },
+                ::testing::ThrowsMessage<std::runtime_error>("Unsupported file extension (\".unsupported_extension\")."));
+}
+
+TEST(io, WhenTryToLoadImageWithoutExtension_ThenThrowException) {
+    // Arrange
+
+    // write a dummy file without extension
+    std::ofstream file("image");
+    EXPECT_TRUE(file.is_open());
+    if(file.is_open()) {
+        file << "Dummy file for testing load_image.\n";
+        file.close();
+    }
+
+    // Act & Assert
+    EXPECT_THAT([]() { load_image("image"); },
+        ::testing::ThrowsMessage<std::runtime_error>("A filename (\"image\") has been provided without an extension."));
 }
 
 TEST(io, WhenTryToStoreImageWithUnkownExtension_ThenThrowException) {

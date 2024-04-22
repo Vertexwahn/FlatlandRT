@@ -1,4 +1,4 @@
-// Copyright (c) 2008, Google Inc.
+// Copyright (c) 2024, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,17 +29,29 @@
 //
 // Author: Shinichiro Hamaji
 
+#define _GNU_SOURCE 1
+
 #include "utilities.h"
 
+#include <atomic>
+#include <cerrno>
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
 
+#include "base/googleinit.h"
 #include "config.h"
+#include "glog/flags.h"
+#include "glog/logging.h"
+#include "stacktrace.h"
+#include "symbolize.h"
+
+#ifdef GLOG_OS_ANDROID
+#  include <android/log.h>
+#endif
 #ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 #endif
-#include <ctime>
 #if defined(HAVE_SYSCALL_H)
 #  include <syscall.h>  // for syscall()
 #elif defined(HAVE_SYS_SYSCALL_H)
@@ -54,11 +66,10 @@
 #ifdef HAVE_PWD_H
 #  include <pwd.h>
 #endif
-#ifdef __ANDROID__
-#  include <android/log.h>
-#endif
 
-#include "base/googleinit.h"
+#if defined(HAVE___PROGNAME)
+extern char* __progname;
+#endif
 
 using std::string;
 
@@ -70,6 +81,35 @@ bool IsGoogleLoggingInitialized() {
   return g_program_invocation_short_name != nullptr;
 }
 
+inline namespace glog_internal_namespace_ {
+
+constexpr int FileDescriptor::InvalidHandle;
+
+void AlsoErrorWrite(LogSeverity severity, const char* tag,
+                    const char* message) noexcept {
+#if defined(GLOG_OS_WINDOWS)
+  (void)severity;
+  (void)tag;
+  // On Windows, also output to the debugger
+  ::OutputDebugStringA(message);
+#elif defined(GLOG_OS_ANDROID)
+  constexpr int android_log_levels[] = {
+      ANDROID_LOG_INFO,
+      ANDROID_LOG_WARN,
+      ANDROID_LOG_ERROR,
+      ANDROID_LOG_FATAL,
+  };
+
+  __android_log_write(android_log_levels[severity], tag, message);
+#else
+  (void)severity;
+  (void)tag;
+  (void)message;
+#endif
+}
+
+}  // namespace glog_internal_namespace_
+
 }  // namespace google
 
 // The following APIs are all internal.
@@ -78,9 +118,6 @@ bool IsGoogleLoggingInitialized() {
 #  include "base/commandlineflags.h"
 #  include "stacktrace.h"
 #  include "symbolize.h"
-
-GLOG_DEFINE_bool(symbolize_stacktrace, true,
-                 "Symbolize the stack trace in the tombstone");
 
 namespace google {
 
@@ -92,15 +129,11 @@ static const int kPrintfPointerFieldWidth = 2 + 2 * sizeof(void*);
 
 static void DebugWriteToStderr(const char* data, void*) {
   // This one is signal-safe.
-  if (write(STDERR_FILENO, data, strlen(data)) < 0) {
+  if (write(fileno(stderr), data, strlen(data)) < 0) {
     // Ignore errors.
   }
-#  if defined(__ANDROID__)
-  // ANDROID_LOG_FATAL as fatal error occurred and now is dumping call stack.
-  __android_log_write(ANDROID_LOG_FATAL,
-                      glog_internal_namespace_::ProgramInvocationShortName(),
-                      data);
-#  endif
+  AlsoErrorWrite(GLOG_FATAL,
+                 glog_internal_namespace_::ProgramInvocationShortName(), data);
 }
 
 static void DebugWriteToString(const char* data, void* arg) {
@@ -183,61 +216,31 @@ DumpStackTraceAndExit() {
 
 namespace google {
 
-namespace glog_internal_namespace_ {
+inline namespace glog_internal_namespace_ {
+
+const char* const_basename(const char* filepath) {
+  const char* base = strrchr(filepath, '/');
+#ifdef GLOG_OS_WINDOWS  // Look for either path separator in Windows
+  if (!base) base = strrchr(filepath, '\\');
+#endif
+  return base ? (base + 1) : filepath;
+}
 
 const char* ProgramInvocationShortName() {
   if (g_program_invocation_short_name != nullptr) {
     return g_program_invocation_short_name;
-  } else {
-    // TODO(hamaji): Use /proc/self/cmdline and so?
-    return "UNKNOWN";
   }
-}
-
-#ifdef GLOG_OS_WINDOWS
-struct timeval {
-  long tv_sec, tv_usec;
-};
-
-// Based on:
-// http://www.google.com/codesearch/p?hl=en#dR3YEbitojA/os_win32.c&q=GetSystemTimeAsFileTime%20license:bsd
-// See COPYING for copyright information.
-static int gettimeofday(struct timeval* tv, void* /*tz*/) {
-#  ifdef __GNUC__
-#    pragma GCC diagnostic push
-#    pragma GCC diagnostic ignored "-Wlong-long"
-#  endif
-#  define EPOCHFILETIME (116444736000000000ULL)
-  FILETIME ft;
-  ULARGE_INTEGER li;
-  uint64 tt;
-
-  GetSystemTimeAsFileTime(&ft);
-  li.LowPart = ft.dwLowDateTime;
-  li.HighPart = ft.dwHighDateTime;
-  tt = (li.QuadPart - EPOCHFILETIME) / 10;
-  tv->tv_sec = tt / 1000000;
-  tv->tv_usec = tt % 1000000;
-#  ifdef __GNUC__
-#    pragma GCC diagnostic pop
-#  endif
-
-  return 0;
-}
+#if defined(HAVE_PROGRAM_INVOCATION_SHORT_NAME)
+  return program_invocation_short_name;
+#elif defined(HAVE_GETPROGNAME)
+  return getprogname();
+#elif defined(HAVE___PROGNAME)
+  return __progname;
+#elif defined(HAVE___ARGV)
+  return const_basename(__argv[0]);
+#else
+  return "UNKNOWN";
 #endif
-
-int64 CycleClock_Now() {
-  // TODO(hamaji): temporary impementation - it might be too slow.
-  struct timeval tv;
-  gettimeofday(&tv, nullptr);
-  return static_cast<int64>(tv.tv_sec) * 1000000 + tv.tv_usec;
-}
-
-int64 UsecToCycles(int64 usec) { return usec; }
-
-WallTime WallTime_Now() {
-  // Now, cycle clock is retuning microseconds since the epoch.
-  return CycleClock_Now() * 0.000001;
 }
 
 static int32 g_main_thread_pid = getpid();
@@ -250,61 +253,6 @@ bool PidHasChanged() {
   }
   g_main_thread_pid = pid;
   return true;
-}
-
-pid_t GetTID() {
-  // On Linux and MacOSX, we try to use gettid().
-#if defined GLOG_OS_LINUX || defined GLOG_OS_MACOSX
-#  ifndef __NR_gettid
-#    ifdef GLOG_OS_MACOSX
-#      define __NR_gettid SYS_gettid
-#    elif !defined __i386__
-#      error "Must define __NR_gettid for non-x86 platforms"
-#    else
-#      define __NR_gettid 224
-#    endif
-#  endif
-  static bool lacks_gettid = false;
-  if (!lacks_gettid) {
-#  if (defined(GLOG_OS_MACOSX) && defined(HAVE_PTHREAD_THREADID_NP))
-    uint64_t tid64;
-    const int error = pthread_threadid_np(nullptr, &tid64);
-    pid_t tid = error ? -1 : static_cast<pid_t>(tid64);
-#  else
-    auto tid = static_cast<pid_t>(syscall(__NR_gettid));
-#  endif
-    if (tid != -1) {
-      return tid;
-    }
-    // Technically, this variable has to be volatile, but there is a small
-    // performance penalty in accessing volatile variables and there should
-    // not be any serious adverse effect if a thread does not immediately see
-    // the value change to "true".
-    lacks_gettid = true;
-  }
-#endif  // GLOG_OS_LINUX || GLOG_OS_MACOSX
-
-  // If gettid() could not be used, we use one of the following.
-#if defined GLOG_OS_LINUX
-  return getpid();  // Linux:  getpid returns thread ID when gettid is absent
-#elif defined GLOG_OS_WINDOWS && !defined GLOG_OS_CYGWIN
-  return static_cast<pid_t>(GetCurrentThreadId());
-#elif defined GLOG_OS_OPENBSD
-  return getthrid();
-#elif defined(HAVE_PTHREAD)
-  // If none of the techniques above worked, we use pthread_self().
-  return (pid_t)(uintptr_t)pthread_self();
-#else
-  return -1;
-#endif
-}
-
-const char* const_basename(const char* filepath) {
-  const char* base = strrchr(filepath, '/');
-#ifdef GLOG_OS_WINDOWS  // Look for either path separator in Windows
-  if (!base) base = strrchr(filepath, '\\');
-#endif
-  return base ? (base + 1) : filepath;
 }
 
 static string g_my_user_name;
@@ -339,29 +287,19 @@ static void MyUserNameInitializer() {
 }
 REGISTER_MODULE_INITIALIZER(utilities, MyUserNameInitializer())
 
-#ifdef HAVE_STACKTRACE
-void DumpStackTraceToString(string* stacktrace) {
-  DumpStackTrace(1, DebugWriteToString, stacktrace);
-}
-#endif
-
 // We use an atomic operation to prevent problems with calling CrashReason
 // from inside the Mutex implementation (potentially through RAW_CHECK).
-static const CrashReason* g_reason = nullptr;
+static std::atomic<const logging::internal::CrashReason*> g_reason{nullptr};
 
-void SetCrashReason(const CrashReason* r) {
-  sync_val_compare_and_swap(&g_reason, reinterpret_cast<const CrashReason*>(0),
-                            r);
+void SetCrashReason(const logging::internal::CrashReason* r) {
+  const logging::internal::CrashReason* expected = nullptr;
+  g_reason.compare_exchange_strong(expected, r);
 }
 
 void InitGoogleLoggingUtilities(const char* argv0) {
   CHECK(!IsGoogleLoggingInitialized())
       << "You called InitGoogleLogging() twice!";
-  const char* slash = strrchr(argv0, '/');
-#ifdef GLOG_OS_WINDOWS
-  if (!slash) slash = strrchr(argv0, '\\');
-#endif
-  g_program_invocation_short_name = slash ? slash + 1 : argv0;
+  g_program_invocation_short_name = const_basename(argv0);
 
 #ifdef HAVE_STACKTRACE
   InstallFailureFunction(&DumpStackTraceAndExit);
@@ -380,17 +318,12 @@ void ShutdownGoogleLoggingUtilities() {
 
 }  // namespace glog_internal_namespace_
 
-}  // namespace google
-
-// Make an implementation of stacktrace compiled.
-#ifdef STACKTRACE_H
-#  include STACKTRACE_H
-#  if 0
-// For include scanners which can't handle macro expansions.
-#    include "stacktrace_generic-inl.h"
-#    include "stacktrace_libunwind-inl.h"
-#    include "stacktrace_powerpc-inl.h"
-#    include "stacktrace_x86-inl.h"
-#    include "stacktrace_x86_64-inl.h"
-#  endif
+#ifdef HAVE_STACKTRACE
+std::string GetStackTrace() {
+  std::string stacktrace;
+  DumpStackTrace(1, DebugWriteToString, &stacktrace);
+  return stacktrace;
+}
 #endif
+
+}  // namespace google

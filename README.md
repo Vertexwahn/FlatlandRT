@@ -17,7 +17,7 @@ From left to right: Refraction, ambient occlusion and reflection:
 
 ![Refraction, ambient occlusion and reflection](docs/images/header.svg)
 
-Quadtree intersection of 2d triangle meshes:
+Quadtree intersection of 2D triangle meshes:
 
 ![Quadtree](docs/images/quadtree_StopSplitIfAtLeastTwoChildsHaveAsManySubShapesAsParent.svg)
 

@@ -19,9 +19,6 @@
 /* Define to 1 if you have the <glob.h> header file. */
 #cmakedefine HAVE_GLOB_H
 
-/* Define to 1 if you have the `pthread' library (-lpthread). */
-#cmakedefine HAVE_LIBPTHREAD
-
 /* define if you have google gmock library */
 #cmakedefine HAVE_LIB_GMOCK
 
@@ -31,23 +28,17 @@
 /* define if you have dbghelp library */
 #cmakedefine HAVE_DBGHELP
 
-/* define to disable multithreading support. */
-#cmakedefine NO_THREADS
-
 /* Define if you have the 'pread' function */
 #cmakedefine HAVE_PREAD
 
-/* Define if you have POSIX threads libraries and header files. */
-#cmakedefine HAVE_PTHREAD
+/* Define if you have the 'posix_fadvise' function in <fcntl.h> */
+#cmakedefine HAVE_POSIX_FADVISE
 
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine HAVE_PWD_H
 
 /* Define if you have the 'pwrite' function */
 #cmakedefine HAVE_PWRITE
-
-/* define if the compiler implements pthread_rwlock_* */
-#cmakedefine HAVE_RWLOCK
 
 /* Define if you have the 'sigaction' function */
 #cmakedefine HAVE_SIGACTION
@@ -60,6 +51,15 @@
 
 /* Define to 1 if you have the <syslog.h> header file. */
 #cmakedefine HAVE_SYSLOG_H
+
+/* Define to 1 if you have the <elf.h> header file. */
+#cmakedefine HAVE_ELF_H
+
+/* Define to 1 if you have the <sys/exec_elf.h> header file. */
+#cmakedefine HAVE_SYS_EXEC_ELF_H
+
+/* Define to 1 if you have the <link.h> header file. */
+#cmakedefine HAVE_LINK_H
 
 /* Define to 1 if you have the <sys/syscall.h> header file. */
 #cmakedefine HAVE_SYS_SYSCALL_H
@@ -91,9 +91,6 @@
 /* define if you have libunwind */
 #cmakedefine HAVE_LIBUNWIND
 
-/* define if your compiler has __sync_val_compare_and_swap */
-#cmakedefine HAVE___SYNC_VAL_COMPARE_AND_SWAP
-
 /* define if symbolize support is available */
 #cmakedefine HAVE_SYMBOLIZE
 
@@ -118,10 +115,6 @@
 /* define if we should print file offsets in traces instead of symbolizing. */
 #cmakedefine PRINT_UNSYMBOLIZED_STACK_TRACES
 
-/* Define to necessary symbol if this constant uses a non-standard name on
-   your system. */
-#cmakedefine PTHREAD_CREATE_JOINABLE
-
 /* The size of `void *', as computed by sizeof. */
 #cmakedefine SIZEOF_VOID_P ${SIZEOF_VOID_P}
 
@@ -131,7 +124,19 @@
 /* Define if thread-local storage is enabled. */
 #cmakedefine GLOG_THREAD_LOCAL_STORAGE
 
-/* Replacement for deprecated syscall(SYS_gettid) on macOS. */
-#cmakedefine HAVE_PTHREAD_THREADID_NP ${HAVE_PTHREAD_THREADID_NP}
+/* define if abi::__cxa_demangle is available in cxxabi.h */
+#cmakedefine HAVE___CXA_DEMANGLE
+
+/* define if __argv is available in cstdlib */
+#cmakedefine HAVE___ARGV
+
+/* define if __progname is available */
+#cmakedefine HAVE___PROGNAME
+
+/* define if getprogname is available in cstdlib */
+#cmakedefine HAVE_GETPROGNAME
+
+/* define if program_invocation_short_name is available in cerrno */
+#cmakedefine HAVE_PROGRAM_INVOCATION_SHORT_NAME
 
 #endif  // GLOG_CONFIG_H

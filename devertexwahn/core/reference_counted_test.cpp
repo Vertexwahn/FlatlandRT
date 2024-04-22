@@ -1,9 +1,10 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
 #include "core/reference_counted.h"
+
 #include "gmock/gmock.h"
 
 using namespace de_vertexwahn;

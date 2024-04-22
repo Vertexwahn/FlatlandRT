@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Google Inc.
+// Copyright (c) 2024, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,8 +31,22 @@
 
 #include <fcntl.h>
 
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <mutex>
+#include <queue>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include "config.h"
-#include "utilities.h"
 #ifdef HAVE_GLOB_H
 #  include <glob.h>
 #endif
@@ -44,23 +58,12 @@
 #  include <sys/wait.h>
 #endif
 
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <memory>
-#include <queue>
-#include <sstream>
-#include <string>
-#include <vector>
-
 #include "base/commandlineflags.h"
 #include "glog/logging.h"
 #include "glog/raw_logging.h"
 #include "googletest.h"
-
-DECLARE_string(log_backtrace_at);  // logging.cc
+#include "stacktrace.h"
+#include "utilities.h"
 
 #ifdef GLOG_USE_GFLAGS
 #  include <gflags/gflags.h>
@@ -183,22 +186,26 @@ static void BM_vlog(int n) {
 }
 BENCHMARK(BM_vlog)
 
+namespace {
+
 // Dynamically generate a prefix using the default format and write it to the
 // stream.
-void PrefixAttacher(std::ostream& s, const LogMessageInfo& l, void* data) {
+void PrefixAttacher(std::ostream& s, const LogMessage& m, void* data) {
   // Assert that `data` contains the expected contents before producing the
   // prefix (otherwise causing the tests to fail):
   if (data == nullptr || *static_cast<string*>(data) != "good data") {
     return;
   }
 
-  s << l.severity[0] << setw(4) << 1900 + l.time.year() << setw(2)
-    << 1 + l.time.month() << setw(2) << l.time.day() << ' ' << setw(2)
-    << l.time.hour() << ':' << setw(2) << l.time.min() << ':' << setw(2)
-    << l.time.sec() << "." << setw(6) << l.time.usec() << ' ' << setfill(' ')
-    << setw(5) << l.thread_id << setfill('0') << ' ' << l.filename << ':'
-    << l.line_number << "]";
+  s << GetLogSeverityName(m.severity())[0] << setw(4) << 1900 + m.time().year()
+    << setw(2) << 1 + m.time().month() << setw(2) << m.time().day() << ' '
+    << setw(2) << m.time().hour() << ':' << setw(2) << m.time().min() << ':'
+    << setw(2) << m.time().sec() << "." << setw(6) << m.time().usec() << ' '
+    << setfill(' ') << setw(5) << m.thread_id() << setfill('0') << ' '
+    << m.basename() << ':' << m.line() << "]";
 }
+
+}  // namespace
 
 int main(int argc, char** argv) {
   FLAGS_colorlogtostderr = false;
@@ -220,8 +227,8 @@ int main(int argc, char** argv) {
   // Setting a custom prefix generator (it will use the default format so that
   // the golden outputs can be reused):
   string prefix_attacher_data = "good data";
-  InitGoogleLogging(argv[0], &PrefixAttacher,
-                    static_cast<void*>(&prefix_attacher_data));
+  InitGoogleLogging(argv[0]);
+  InstallPrefixFormatter(&PrefixAttacher, &prefix_attacher_data);
 
   EXPECT_TRUE(IsGoogleLoggingInitialized());
 
@@ -354,10 +361,19 @@ struct NewHook {
   ~NewHook() { g_new_hook = nullptr; }
 };
 
+namespace {
+int* allocInt() { return new int; }
+}  // namespace
+
 TEST(DeathNoAllocNewHook, logging) {
   // tests that NewHook used below works
   NewHook new_hook;
-  ASSERT_DEATH({ new int; }, "unexpected new");
+  // Avoid unused warnings under MinGW
+  //
+  // NOTE MSVC produces warning C4551 here if we do not take the address of the
+  // function explicitly.
+  (void)&allocInt;
+  ASSERT_DEATH({ allocInt(); }, "unexpected new");
 }
 
 void TestRawLogging() {
@@ -775,19 +791,17 @@ static void CheckFile(const string& name, const string& expected_string,
   GetFiles(name + "*", &files);
   CHECK_EQ(files.size(), 1UL);
 
-  FILE* file = fopen(files[0].c_str(), "r");
+  std::unique_ptr<std::FILE> file{fopen(files[0].c_str(), "r")};
   CHECK(file != nullptr) << ": could not open " << files[0];
   char buf[1000];
-  while (fgets(buf, sizeof(buf), file) != nullptr) {
+  while (fgets(buf, sizeof(buf), file.get()) != nullptr) {
     char* first = strstr(buf, expected_string.c_str());
     // if first == nullptr, not found.
     // Terser than if (checkInFileOrNot && first != nullptr || !check...
     if (checkInFileOrNot != (first == nullptr)) {
-      fclose(file);
       return;
     }
   }
-  fclose(file);
   LOG(FATAL) << "Did " << (checkInFileOrNot ? "not " : "") << "find "
              << expected_string << " in " << files[0];
 }
@@ -927,7 +941,8 @@ struct MyLogger : public base::Logger {
 
   ~MyLogger() override { *set_on_destruction_ = true; }
 
-  void Write(bool /* should_flush */, time_t /* timestamp */,
+  void Write(bool /* should_flush */,
+             const std::chrono::system_clock::time_point& /* timestamp */,
              const char* message, size_t length) override {
     data.append(message, length);
   }
@@ -966,8 +981,8 @@ static void TestErrno() {
 
 static void TestOneTruncate(const char* path, uint64 limit, uint64 keep,
                             size_t dsize, size_t ksize, size_t expect) {
-  int fd;
-  CHECK_ERR(fd = open(path, O_RDWR | O_CREAT | O_TRUNC, 0600));
+  FileDescriptor fd{open(path, O_RDWR | O_CREAT | O_TRUNC, 0600)};
+  CHECK_ERR(fd);
 
   const char *discardstr = "DISCARDME!", *keepstr = "KEEPME!";
   const size_t discard_size = strlen(discardstr), keep_size = strlen(keepstr);
@@ -976,13 +991,13 @@ static void TestOneTruncate(const char* path, uint64 limit, uint64 keep,
   size_t written = 0;
   while (written < dsize) {
     size_t bytes = min(dsize - written, discard_size);
-    CHECK_ERR(write(fd, discardstr, bytes));
+    CHECK_ERR(write(fd.get(), discardstr, bytes));
     written += bytes;
   }
   written = 0;
   while (written < ksize) {
     size_t bytes = min(ksize - written, keep_size);
-    CHECK_ERR(write(fd, keepstr, bytes));
+    CHECK_ERR(write(fd.get(), keepstr, bytes));
     written += bytes;
   }
 
@@ -990,25 +1005,22 @@ static void TestOneTruncate(const char* path, uint64 limit, uint64 keep,
 
   // File should now be shorter
   struct stat statbuf;
-  CHECK_ERR(fstat(fd, &statbuf));
+  CHECK_ERR(fstat(fd.get(), &statbuf));
   CHECK_EQ(static_cast<size_t>(statbuf.st_size), expect);
-  CHECK_ERR(lseek(fd, 0, SEEK_SET));
+  CHECK_ERR(lseek(fd.get(), 0, SEEK_SET));
 
   // File should contain the suffix of the original file
   const size_t buf_size = static_cast<size_t>(statbuf.st_size) + 1;
-  char* buf = new char[buf_size];
-  memset(buf, 0, buf_size);
-  CHECK_ERR(read(fd, buf, buf_size));
+  std::vector<char> buf(buf_size);
+  CHECK_ERR(read(fd.get(), buf.data(), buf_size));
 
-  const char* p = buf;
+  const char* p = buf.data();
   size_t checked = 0;
   while (checked < expect) {
     size_t bytes = min(expect - checked, keep_size);
     CHECK(!memcmp(p, keepstr, bytes));
     checked += bytes;
   }
-  close(fd);
-  delete[] buf;
 }
 
 static void TestTruncate() {
@@ -1060,8 +1072,9 @@ struct RecordDeletionLogger : public base::Logger {
     *set_on_destruction_ = false;
   }
   ~RecordDeletionLogger() override { *set_on_destruction_ = true; }
-  void Write(bool force_flush, time_t timestamp, const char* message,
-             size_t length) override {
+  void Write(bool force_flush,
+             const std::chrono::system_clock::time_point& timestamp,
+             const char* message, size_t length) override {
     wrapped_logger_->Write(force_flush, timestamp, message, length);
   }
   void Flush() override { wrapped_logger_->Flush(); }
@@ -1143,13 +1156,11 @@ static void TestLogPeriodically() {
 }
 
 namespace google {
-namespace glog_internal_namespace_ {
-extern  // in logging.cc
-    bool
-    SafeFNMatch_(const char* pattern, size_t patt_len, const char* str,
-                 size_t str_len);
+inline namespace glog_internal_namespace_ {
+// in logging.cc
+extern bool SafeFNMatch_(const char* pattern, size_t patt_len, const char* str,
+                         size_t str_len);
 }  // namespace glog_internal_namespace_
-using glog_internal_namespace_::SafeFNMatch_;
 }  // namespace google
 
 static bool WrapSafeFNMatch(string pattern, string str) {
@@ -1187,40 +1198,40 @@ static vector<string> global_messages;
 // helper for TestWaitingLogSink below.
 // Thread that does the logic of TestWaitingLogSink
 // It's free to use LOG() itself.
-class TestLogSinkWriter : public Thread {
+class TestLogSinkWriter {
  public:
-  TestLogSinkWriter() {
-    SetJoinable(true);
-    Start();
-  }
+  TestLogSinkWriter() : t_{&TestLogSinkWriter::Run, this} {}
 
   // Just buffer it (can't use LOG() here).
   void Buffer(const string& message) {
-    mutex_.Lock();
+    mutex_.lock();
     RAW_LOG(INFO, "Buffering");
     messages_.push(message);
-    mutex_.Unlock();
+    mutex_.unlock();
     RAW_LOG(INFO, "Buffered");
   }
 
   // Wait for the buffer to clear (can't use LOG() here).
   void Wait() {
+    using namespace std::chrono_literals;
     RAW_LOG(INFO, "Waiting");
-    mutex_.Lock();
+    mutex_.lock();
     while (!NoWork()) {
-      mutex_.Unlock();
-      SleepForMilliseconds(1);
-      mutex_.Lock();
+      mutex_.unlock();
+      std::this_thread::sleep_for(1ms);
+      mutex_.lock();
     }
     RAW_LOG(INFO, "Waited");
-    mutex_.Unlock();
+    mutex_.unlock();
   }
 
   // Trigger thread exit.
   void Stop() {
-    MutexLock l(&mutex_);
+    std::lock_guard<std::mutex> l(mutex_);
     should_exit_ = true;
   }
+
+  void Join() { t_.join(); }
 
  private:
   // helpers ---------------
@@ -1230,22 +1241,23 @@ class TestLogSinkWriter : public Thread {
   bool HaveWork() { return !messages_.empty() || should_exit_; }
 
   // Thread body; CAN use LOG() here!
-  void Run() override {
+  void Run() {
+    using namespace std::chrono_literals;
     while (true) {
-      mutex_.Lock();
+      mutex_.lock();
       while (!HaveWork()) {
-        mutex_.Unlock();
-        SleepForMilliseconds(1);
-        mutex_.Lock();
+        mutex_.unlock();
+        std::this_thread::sleep_for(1ms);
+        mutex_.lock();
       }
       if (should_exit_ && messages_.empty()) {
-        mutex_.Unlock();
+        mutex_.unlock();
         break;
       }
       // Give the main thread time to log its message,
       // so that we get a reliable log capture to compare to golden file.
       // Same for the other sleep below.
-      SleepForMilliseconds(20);
+      std::this_thread::sleep_for(20ms);
       RAW_LOG(INFO, "Sink got a messages");  // only RAW_LOG under mutex_ here
       string message = messages_.front();
       messages_.pop();
@@ -1253,8 +1265,8 @@ class TestLogSinkWriter : public Thread {
       // where LOG() usage can't be eliminated,
       // e.g. pushing the message over with an RPC:
       size_t messages_left = messages_.size();
-      mutex_.Unlock();
-      SleepForMilliseconds(20);
+      mutex_.unlock();
+      std::this_thread::sleep_for(20ms);
       // May not use LOG while holding mutex_, because Buffer()
       // acquires mutex_, and Buffer is called from LOG(),
       // which has its own internal mutex:
@@ -1267,7 +1279,8 @@ class TestLogSinkWriter : public Thread {
 
   // data ---------------
 
-  Mutex mutex_;
+  std::thread t_;
+  std::mutex mutex_;
   bool should_exit_{false};
   queue<string> messages_;  // messages to be logged
 };
@@ -1278,7 +1291,7 @@ class TestLogSinkWriter : public Thread {
 class TestWaitingLogSink : public LogSink {
  public:
   TestWaitingLogSink() {
-    tid_ = pthread_self();  // for thread-specific behavior
+    tid_ = std::this_thread::get_id();  // for thread-specific behavior
     AddLogSink(this);
   }
   ~TestWaitingLogSink() override {
@@ -1296,7 +1309,7 @@ class TestWaitingLogSink : public LogSink {
     // Push it to Writer thread if we are the original logging thread.
     // Note: Something like ThreadLocalLogSink is a better choice
     //       to do thread-specific LogSink logic for real.
-    if (pthread_equal(tid_, pthread_self())) {
+    if (tid_ == std::this_thread::get_id()) {
       writer_.Buffer(ToString(severity, base_filename, line, logmsgtime,
                               message, message_len));
     }
@@ -1304,11 +1317,11 @@ class TestWaitingLogSink : public LogSink {
 
   void WaitTillSent() override {
     // Wait for Writer thread if we are the original logging thread.
-    if (pthread_equal(tid_, pthread_self())) writer_.Wait();
+    if (tid_ == std::this_thread::get_id()) writer_.Wait();
   }
 
  private:
-  pthread_t tid_;
+  std::thread::id tid_;
   TestLogSinkWriter writer_;
 };
 
@@ -1319,15 +1332,16 @@ static void TestLogSinkWaitTillSent() {
   // reentered
   global_messages.clear();
   {
+    using namespace std::chrono_literals;
     TestWaitingLogSink sink;
     // Sleeps give the sink threads time to do all their work,
     // so that we get a reliable log capture to compare to the golden file.
     LOG(INFO) << "Message 1";
-    SleepForMilliseconds(60);
+    std::this_thread::sleep_for(60ms);
     LOG(ERROR) << "Message 2";
-    SleepForMilliseconds(60);
+    std::this_thread::sleep_for(60ms);
     LOG(WARNING) << "Message 3";
-    SleepForMilliseconds(60);
+    std::this_thread::sleep_for(60ms);
   }
   for (auto& global_message : global_messages) {
     LOG(INFO) << "Sink capture: " << global_message;
@@ -1337,28 +1351,26 @@ static void TestLogSinkWaitTillSent() {
 
 TEST(Strerror, logging) {
   int errcode = EINTR;
-  char* msg = strdup(strerror(errcode));
-  const size_t buf_size = strlen(msg) + 1;
-  char* buf = new char[buf_size];
+  std::string msg = strerror(errcode);
+  const size_t buf_size = msg.size() + 1;
+  std::vector<char> buf(buf_size);
   CHECK_EQ(posix_strerror_r(errcode, nullptr, 0), -1);
   buf[0] = 'A';
-  CHECK_EQ(posix_strerror_r(errcode, buf, 0), -1);
+  CHECK_EQ(posix_strerror_r(errcode, buf.data(), 0), -1);
   CHECK_EQ(buf[0], 'A');
   CHECK_EQ(posix_strerror_r(errcode, nullptr, buf_size), -1);
 #if defined(GLOG_OS_MACOSX) || defined(GLOG_OS_FREEBSD) || \
     defined(GLOG_OS_OPENBSD)
   // MacOSX or FreeBSD considers this case is an error since there is
   // no enough space.
-  CHECK_EQ(posix_strerror_r(errcode, buf, 1), -1);
+  CHECK_EQ(posix_strerror_r(errcode, buf.data(), 1), -1);
 #else
-  CHECK_EQ(posix_strerror_r(errcode, buf, 1), 0);
+  CHECK_EQ(posix_strerror_r(errcode, buf.data(), 1), 0);
 #endif
-  CHECK_STREQ(buf, "");
-  CHECK_EQ(posix_strerror_r(errcode, buf, buf_size), 0);
-  CHECK_STREQ(buf, msg);
-  delete[] buf;
+  CHECK_STREQ(buf.data(), "");
+  CHECK_EQ(posix_strerror_r(errcode, buf.data(), buf_size), 0);
+  CHECK_STREQ(buf.data(), msg.c_str());
   CHECK_EQ(msg, StrError(errcode));
-  free(msg);
 }
 
 // Simple routines to look at the sizes of generated code for LOG(FATAL) and
@@ -1404,7 +1416,7 @@ TEST(LogAtLevel, Basic) {
   EXPECT_CALL(log, Log(GLOG_WARNING, StrNe(__FILE__), "function version"));
   EXPECT_CALL(log, Log(GLOG_INFO, __FILE__, "macro version"));
 
-  int severity = GLOG_WARNING;
+  LogSeverity severity = GLOG_WARNING;
   LogAtLevel(severity, "function version");
 
   severity = GLOG_INFO;
@@ -1522,11 +1534,12 @@ TEST(LogMsgTime, gmtoff) {
    * */
   google::LogMessage log_obj(__FILE__, __LINE__);
 
-  long int nGmtOff = log_obj.getLogMessageTime().gmtoff();
+  std::chrono::seconds gmtoff = log_obj.time().gmtoffset();
   // GMT offset ranges from UTC-12:00 to UTC+14:00
-  const long utc_min_offset = -43200;
-  const long utc_max_offset = 50400;
-  EXPECT_TRUE((nGmtOff >= utc_min_offset) && (nGmtOff <= utc_max_offset));
+  using namespace std::chrono_literals;
+  constexpr std::chrono::hours utc_min_offset = -12h;
+  constexpr std::chrono::hours utc_max_offset = +14h;
+  EXPECT_TRUE((gmtoff >= utc_min_offset) && (gmtoff <= utc_max_offset));
 }
 
 TEST(EmailLogging, ValidAddress) {
@@ -1558,4 +1571,18 @@ TEST(EmailLogging, MaliciousAddress) {
 
   EXPECT_FALSE(
       SendEmail("!/bin/true@example.com", "Example subject", "Example body"));
+}
+
+TEST(Logging, FatalThrow) {
+  auto const fail_func =
+      InstallFailureFunction(+[]()
+#if defined(__has_attribute)
+#  if __has_attribute(noreturn)
+                                  __attribute__((noreturn))
+#  endif  // __has_attribute(noreturn)
+#endif    // defined(__has_attribute)
+                             { throw std::logic_error{"fail"}; });
+  auto restore_fail = [fail_func] { InstallFailureFunction(fail_func); };
+  ScopedExit<decltype(restore_fail)> restore{restore_fail};
+  EXPECT_THROW({ LOG(FATAL) << "must throw to fail"; }, std::logic_error);
 }

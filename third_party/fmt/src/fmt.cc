@@ -2,37 +2,44 @@ module;
 
 // Put all implementation-provided headers into the global module fragment
 // to prevent attachment to this module.
-#include <algorithm>
+#ifndef FMT_IMPORT_STD
+#  include <algorithm>
+#  include <chrono>
+#  include <cmath>
+#  include <cstddef>
+#  include <cstdint>
+#  include <cstdio>
+#  include <cstdlib>
+#  include <cstring>
+#  include <ctime>
+#  include <exception>
+#  include <filesystem>
+#  include <fstream>
+#  include <functional>
+#  include <iterator>
+#  include <limits>
+#  include <locale>
+#  include <memory>
+#  include <optional>
+#  include <ostream>
+#  include <stdexcept>
+#  include <string>
+#  include <string_view>
+#  include <system_error>
+#  include <thread>
+#  include <type_traits>
+#  include <typeinfo>
+#  include <utility>
+#  include <variant>
+#  include <vector>
+#else
+#  include <limits.h>
+#  include <stdint.h>
+#  include <stdio.h>
+#  include <time.h>
+#endif
 #include <cerrno>
-#include <chrono>
 #include <climits>
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <exception>
-#include <filesystem>
-#include <fstream>
-#include <functional>
-#include <iterator>
-#include <limits>
-#include <locale>
-#include <memory>
-#include <optional>
-#include <ostream>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <system_error>
-#include <thread>
-#include <type_traits>
-#include <typeinfo>
-#include <utility>
-#include <variant>
-#include <vector>
 #include <version>
 
 #if __has_include(<cxxabi.h>)
@@ -83,6 +90,10 @@ export module fmt;
 extern "C++" {
 #endif
 
+#ifndef FMT_OS
+#  define FMT_OS 1
+#endif
+
 // All library-provided declarations and definitions must be in the module
 // purview to be exported.
 #include "fmt/args.h"
@@ -90,7 +101,9 @@ extern "C++" {
 #include "fmt/color.h"
 #include "fmt/compile.h"
 #include "fmt/format.h"
-#include "fmt/os.h"
+#if FMT_OS
+#  include "fmt/os.h"
+#endif
 #include "fmt/printf.h"
 #include "fmt/std.h"
 #include "fmt/xchar.h"
@@ -105,4 +118,6 @@ module :private;
 #endif
 
 #include "format.cc"
-#include "os.cc"
+#if FMT_OS
+#  include "os.cc"
+#endif
