@@ -20,9 +20,6 @@ jobs:
     steps:
       - template: devertexwahn/ci/macOS-13-apple-clang14.yaml
 
-  # macOS 14/M1 is still not supported on Azure Pipelines
-  # consult documentation for Microsoft-hosted agents: 
-  # https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml
   - job: MacOSAppleClang14Sonoma
     displayName: "Apple Clang14 on macOS 14 (Sonoma)"
     pool:
