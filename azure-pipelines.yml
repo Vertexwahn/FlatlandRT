@@ -78,6 +78,13 @@ jobs:
       - template: devertexwahn/ci/ubuntu-22.04-clang16.yaml
 
 
+  - job: Ubuntu22Cppcheck
+    displayName: "Cppcheck on Ubuntu 22.04"
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-22.04-cppcheck.yaml
+
   - job: Ubuntu22Bzlmod
     displayName: "Bzlmod on Ubuntu 22.04"
     pool:

@@ -1,0 +1,42 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2024 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# GCC11 on Ubuntu 22.04
+# cppcheck
+
+steps:
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+      sudo apt-get update
+    displayName: "Install Cppcheck"
+
+  - script: |
+      cd devertexwahn
+      cppcheck --version
+    displayName: "Show Cppcheck version"
+
+
+  - script: |
+      cd devertexwahn
+      cppcheck core # imaging
+    displayName: "Show compiler information"
