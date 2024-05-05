@@ -28,6 +28,7 @@ steps:
 
   - script: |
       sudo apt-get update
+      sudo apt-get install cppcheck
     displayName: "Install Cppcheck"
 
   - script: |
