@@ -48,6 +48,11 @@ steps:
 
   - script: |
       cd devertexwahn
+      cppcheck imaging
+    displayName: "Cppcheck imaging"
+
+  - script: |
+      cd devertexwahn
       cppcheck math
     displayName: "Cppcheck math"
 
