@@ -22,7 +22,7 @@ public:
     inline static int count = 0;
 };
 
-TEST(Memory, Memory_When_RefrenceCountedObjectDies_ExpectoZeroCount) {
+TEST(Memory, Memory_When_ReferenceCountedObjectDies_ExpectZeroCount) {
     {
         ReferenceCounted<Dummy> foo = make_reference_counted<Dummy>();
     }

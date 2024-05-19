@@ -35,8 +35,8 @@ TEST(glog, log_message) {
     // Assert
     // Try to read log
     std::ifstream file("log.txt");
-    std::string str((std::istreambuf_iterator<char>(file)),
-                    std::istreambuf_iterator<char>());
+    //std::string str((std::istreambuf_iterator<char>(file)),
+    //                std::istreambuf_iterator<char>());
     const char* test_tmpdir = std::getenv("TEST_TMPDIR");
 
     ASSERT_STRNE(nullptr, test_tmpdir);

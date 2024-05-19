@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -25,7 +25,7 @@ protected:
     ReferenceCounted<Polygon2f> polygon = nullptr;
 };
 
-TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayIntesectsPolygon_ThenIntersectionOnPolygon) {
+TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayIntersectsPolygon_ThenIntersectionOnPolygon) {
     // Arrange
     Point2f ray_origin{0.f, 100.f};
     Vector2f ray_direction{1.f, 0.f};
@@ -57,7 +57,7 @@ TEST_F(Polygon2fTest, GivenAPolygonAndRay_WhenRayMissesPolygon_ThenNoIntersectio
     EXPECT_FALSE(hit);
 }
 
-TEST(Polygon2f, GivenTranslatedPolygon_WhenConvertedToSvg_ThenExpectTranslationInsvg_string) {
+TEST(Polygon2f, GivenTranslatedPolygon_WhenConvertedToSvg_ThenExpectTranslationInSvg_string) {
     std::vector<Point2f> points = {
             {0.f, 0.f},
             {1.f, 1.f},
@@ -114,7 +114,7 @@ TEST(Polygon2f, AssumePlausibleNormal) {
     EXPECT_GE(its.geo_frame.n.y(), 0.f);
 }
 
-TEST(Polygon2f, GivenARotateCube_WhenComputingIntersection_ThenAssumePlausibeNormals) {
+TEST(Polygon2f, GivenARotateCube_WhenComputingIntersection_ThenAssumePlausibleNormals) {
     // Arrange
     std::vector<Point2f> points = create_square(100.f);
 

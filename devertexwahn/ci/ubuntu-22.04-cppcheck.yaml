@@ -38,22 +38,23 @@ steps:
 
   - script: |
       cd devertexwahn
-      cppcheck core
+      #cppcheck --enable=all --error-exitcode=1 core
+      cppcheck --error-exitcode=1 core
     displayName: "Cppcheck core"
 
   - script: |
       cd devertexwahn
-      cppcheck flatland
+      cppcheck --error-exitcode=1 flatland
     displayName: "Cppcheck flatland"
 
   - script: |
       cd devertexwahn
-      cppcheck imaging
+      cppcheck --error-exitcode=1 imaging
     displayName: "Cppcheck imaging"
 
   - script: |
       cd devertexwahn
-      cppcheck math
+      cppcheck --error-exitcode=1 math
     displayName: "Cppcheck math"
 
 

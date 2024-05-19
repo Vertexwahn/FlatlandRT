@@ -69,8 +69,6 @@ TEST(ShapeFactory, WhenCreatingADisk_ThenDiskHasCorrectRadiusAndTransform) {
     ps.add_property("transform", translate(Vector2f{100.f, 200.f}));
     ps.add_property("radius", diskRadius);
 
-    std::filesystem::path path;
-
     // Act
     sf.register_class<Disk2f>("Disk");
     auto shape = sf.create_instance("Disk", ps);
