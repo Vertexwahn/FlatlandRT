@@ -36,6 +36,21 @@ steps:
       cppcheck --version
     displayName: "Show Cppcheck version"
 
+  - script: |
+      cd devertexwahn
+      cppcheck core
+    displayName: "Cppcheck core"
+
+  - script: |
+      cd devertexwahn
+      cppcheck flatland
+    displayName: "Cppcheck flatland"
+
+  - script: |
+      cd devertexwahn
+      cppcheck math
+    displayName: "Cppcheck math"
+
 
   - script: |
       cd devertexwahn

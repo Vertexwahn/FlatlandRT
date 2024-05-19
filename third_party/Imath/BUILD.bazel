@@ -22,6 +22,7 @@ expand_template(
         "#cmakedefine01 IMATH_USE_NOEXCEPT": "#define IMATH_USE_NOEXCEPT 1",
     },
     template = "config/ImathConfig.h.in",
+    visibility = ["//visibility:public"],
 )
 
 cc_library(

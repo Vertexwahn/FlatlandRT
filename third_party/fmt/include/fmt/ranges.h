@@ -13,6 +13,7 @@
 #  include <iterator>
 #  include <tuple>
 #  include <type_traits>
+#  include <utility>
 #endif
 
 #include "format.h"
@@ -581,19 +582,16 @@ struct formatter<
 
   template <typename FormatContext>
   auto format(map_type& map, FormatContext& ctx) const -> decltype(ctx.out()) {
-    auto mapper = detail::range_mapper<buffered_context<Char>>();
     auto out = ctx.out();
-    auto it = detail::range_begin(map);
-    auto end = detail::range_end(map);
-
     basic_string_view<Char> open = detail::string_literal<Char, '{'>{};
     if (!no_delimiters_) out = detail::copy<Char>(open, out);
     int i = 0;
+    auto mapper = detail::range_mapper<buffered_context<Char>>();
     basic_string_view<Char> sep = detail::string_literal<Char, ',', ' '>{};
-    for (; it != end; ++it) {
+    for (auto&& value : map) {
       if (i > 0) out = detail::copy<Char>(sep, out);
       ctx.advance_to(out);
-      detail::for_each2(formatters_, mapper.map(*it),
+      detail::for_each2(formatters_, mapper.map(value),
                         detail::format_tuple_element<FormatContext>{
                             0, ctx, detail::string_literal<Char, ':', ' '>{}});
       ++i;
@@ -611,7 +609,7 @@ struct join_view : detail::view {
   basic_string_view<Char> sep;
 
   join_view(It b, Sentinel e, basic_string_view<Char> s)
-      : begin(b), end(e), sep(s) {}
+      : begin(std::move(b)), end(e), sep(s) {}
 };
 
 template <typename It, typename Sentinel, typename Char>
@@ -625,26 +623,31 @@ struct formatter<join_view<It, Sentinel, Char>, Char> {
 #endif
   formatter<remove_cvref_t<value_type>, Char> value_formatter_;
 
+  using view_ref = conditional_t<std::is_copy_constructible<It>::value,
+                                 const join_view<It, Sentinel, Char>&,
+                                 join_view<It, Sentinel, Char>&&>;
+
  public:
+  using nonlocking = void;
+
   template <typename ParseContext>
   FMT_CONSTEXPR auto parse(ParseContext& ctx) -> const Char* {
     return value_formatter_.parse(ctx);
   }
 
   template <typename FormatContext>
-  auto format(const join_view<It, Sentinel, Char>& value,
-              FormatContext& ctx) const -> decltype(ctx.out()) {
-    auto it = value.begin;
+  auto format(view_ref& value, FormatContext& ctx) const
+      -> decltype(ctx.out()) {
+    auto it = std::forward<view_ref>(value).begin;
     auto out = ctx.out();
-    if (it != value.end) {
+    if (it == value.end) return out;
+    out = value_formatter_.format(*it, ctx);
+    ++it;
+    while (it != value.end) {
+      out = detail::copy<Char>(value.sep.begin(), value.sep.end(), out);
+      ctx.advance_to(out);
       out = value_formatter_.format(*it, ctx);
       ++it;
-      while (it != value.end) {
-        out = detail::copy<Char>(value.sep.begin(), value.sep.end(), out);
-        ctx.advance_to(out);
-        out = value_formatter_.format(*it, ctx);
-        ++it;
-      }
     }
     return out;
   }
@@ -656,7 +659,7 @@ struct formatter<join_view<It, Sentinel, Char>, Char> {
  */
 template <typename It, typename Sentinel>
 auto join(It begin, Sentinel end, string_view sep) -> join_view<It, Sentinel> {
-  return {begin, end, sep};
+  return {std::move(begin), end, sep};
 }
 
 /**

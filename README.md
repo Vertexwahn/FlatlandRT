@@ -46,7 +46,7 @@ You can use Flatland by invoking the following commands:
 ```shell
 git clone https://github.com/Vertexwahn/FlatlandRT # clone the repository
 cd FlatlandRT # change directory to cloned repository
-cd devertexwahn # switch to the location where the WORKSPACE.bazel file is located
+cd devertexwahn # switch to the location where the MODULE.bazel file is located
 ```
 
 *Render a scene with Windows 10/11 x64 with Visual Studio 2019:*
@@ -133,11 +133,11 @@ Make sure that lcov is installed.
 sudo apt install lcov
 ```
 
-Go to the directory that contains the `WORKSPACE.bazel` file and execute:
+Go to the directory that contains the `MODULE.bazel` file and execute:
 
 ```shell
 ./coverage.sh buchgr_remote_cache
-xdg-open coverage_report/index.html
+open coverage_report/index.html
 ```
 
 #### Address Sanitizer
@@ -212,25 +212,25 @@ If you find any copyright or license violations or issues please let me know.
 
 ### Third party dependencies
 
-* {fmt} (https://github.com/fmtlib/fmt) (see `third_party` folder)
-* abseil (https://abseil.io/) (see `third_party` folder)
 * Boost (https://www.boost.org/) (third party dependency) ([License](devertexwahn/flatland/LICENSES/boost/LICENSE))
 * Catch2 (https://github.com/catchorg/Catch2) (see `third_party` folder)
 * Eigen (see `third_party` folder)
-* gflags (https://github.com/gflags/gflags/) (see `third_party` folder)
-* glog (https://github.com/google/glog) (see `third_party` folder)
 * Google Test (https://github.com/google/googletest) (see `third_party` folder)
-* hypothesis (https://github.com/wjakob/hypothesis) (see `third_party` folder)
 * Imath (see `third_party` folder)
-* [libpng](/third_party/libpng-1.6.40) (http://www.libpng.org/pub/png/libpng.html) ([License](/third_party/libpng-1.6.40/LICENSE))
 * LLVM toolchain for Bazel (see `third_party` folder)
 * [OpenEXR](/third_party/openexr) (https://github.com/AcademySoftwareFoundation/openexr) ([License](/third_party/openexr/LICENSE.md))
+* [libpng](/third_party/libpng-1.6.40) (http://www.libpng.org/pub/png/libpng.html) ([License](/third_party/libpng-1.6.40/LICENSE))
 * [pcg-cpp](/third_party/pcg-cpp) (https://github.com/imneme/pcg-cpp/)
 * [pugixml](/third_party/pugixml-1.13) (https://pugixml.org/, https://github.com/zeux/pugixml)
 * [rules_boost](/third_party/rules_boost) (https://github.com/nelhage/rules_boost) ([License](/third_party/rules_boost/LICENSE))
 * [rules_pkg-0.9.1](/third_party/rules_pkg)
+* abseil (https://abseil.io/) (see `third_party` folder)
+* gflags (https://github.com/gflags/gflags/) (see `third_party` folder)
+* glog (https://github.com/google/glog) (see `third_party` folder)
+* hypothesis (https://github.com/wjakob/hypothesis) (see `third_party` folder)
 * yaml-cpp (https://github.com/jbeder/yaml-cpp) (third party dependency) ([License](devertexwahn/flatland/LICENSES/yaml-cpp/LICENSE))
 * zlib (https://zlib.net/) ([License](devertexwahn/flatland/LICENSES/third_party/zlib-1.2.11/README))
+* {fmt} (https://github.com/fmtlib/fmt) (see `third_party` folder)
 
 ### Artwork
 

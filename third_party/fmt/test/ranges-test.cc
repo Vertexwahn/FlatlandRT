@@ -652,3 +652,56 @@ struct lvalue_qualified_begin_end {
 TEST(ranges_test, lvalue_qualified_begin_end) {
   EXPECT_EQ(fmt::format("{}", lvalue_qualified_begin_end{}), "[1, 2, 3, 4, 5]");
 }
+
+#if !defined(__cpp_lib_ranges) || __cpp_lib_ranges <= 202106L
+#  define ENABLE_INPUT_RANGE_JOIN_TEST 0
+#elif FMT_CLANG_VERSION
+#  if FMT_CLANG_VERSION > 1500
+#    define ENABLE_INPUT_RANGE_JOIN_TEST 1
+#  else
+#    define ENABLE_INPUT_RANGE_JOIN_TEST 0
+#  endif
+#else
+#  define ENABLE_INPUT_RANGE_JOIN_TEST 1
+#endif
+
+#if ENABLE_INPUT_RANGE_JOIN_TEST
+TEST(ranges_test, input_range_join) {
+  auto iss = std::istringstream("1 2 3 4 5");
+  auto view = std::views::istream<std::string>(iss);
+  EXPECT_EQ("1, 2, 3, 4, 5",
+            fmt::format("{}", fmt::join(view.begin(), view.end(), ", ")));
+}
+
+TEST(ranges_test, input_range_join_overload) {
+  auto iss = std::istringstream("1 2 3 4 5");
+  EXPECT_EQ(
+      "1.2.3.4.5",
+      fmt::format("{}", fmt::join(std::views::istream<std::string>(iss), ".")));
+}
+#endif
+
+TEST(ranges_test, std_istream_iterator_join) {
+  auto&& iss = std::istringstream("1 2 3 4 5");
+  auto first = std::istream_iterator<int>(iss);
+  auto last = std::istream_iterator<int>();
+  EXPECT_EQ("1, 2, 3, 4, 5", fmt::format("{}", fmt::join(first, last, ", ")));
+}
+
+TEST(ranges_test, movable_only_istream_iter_join) {
+  // Mirrors C++20 std::ranges::basic_istream_view::iterator.
+  struct noncopyable_istream_iterator : std::istream_iterator<int> {
+    explicit noncopyable_istream_iterator(std::istringstream& iss)
+        : std::istream_iterator<int>{iss} {}
+    noncopyable_istream_iterator(const noncopyable_istream_iterator&) = delete;
+    noncopyable_istream_iterator(noncopyable_istream_iterator&&) = default;
+  };
+  static_assert(
+      !std::is_copy_constructible<noncopyable_istream_iterator>::value, "");
+
+  auto&& iss = std::istringstream("1 2 3 4 5");
+  auto first = noncopyable_istream_iterator(iss);
+  auto last = std::istream_iterator<int>();
+  EXPECT_EQ("1, 2, 3, 4, 5",
+            fmt::format("{}", fmt::join(std::move(first), last, ", ")));
+}
