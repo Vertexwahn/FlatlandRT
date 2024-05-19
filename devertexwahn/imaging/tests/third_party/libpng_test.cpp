@@ -39,20 +39,21 @@ TEST(libpng, load_png_test) {
 
         ASSERT_TRUE(false);
     }
+    else {
+        png_init_io(png_ptr, fp);
 
-    png_init_io(png_ptr, fp);
+        unsigned int sig_read = 0;
+        png_set_sig_bytes(png_ptr, sig_read);
 
-    unsigned int sig_read = 0;
-    png_set_sig_bytes(png_ptr, sig_read);
+        png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, png_voidp_NULL);
 
-    png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, png_voidp_NULL);
+        int width = png_get_image_width(png_ptr, info_ptr);
+        int height = png_get_image_height(png_ptr, info_ptr);
 
-    int width = png_get_image_width(png_ptr, info_ptr);
-    int height = png_get_image_height(png_ptr, info_ptr);
+        EXPECT_THAT(width, 400);
+        EXPECT_THAT(height, 400);
 
-    EXPECT_THAT(width, 400);
-    EXPECT_THAT(height, 400);
-
-    png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
-    fclose(fp);
+        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+        fclose(fp);
+    }
 }
