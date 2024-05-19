@@ -63,6 +63,7 @@ ReferenceCounted<Image4b> load_image_png_as_Image4b(std::string_view filename) {
     if(!info) abort();
 
     if(setjmp(png_jmpbuf(png))) {
+        fclose(fp);
         throw std::runtime_error("Invalid file format");
         abort();
     }
@@ -199,7 +200,9 @@ bool store_png(const char *filename, const Image4b &image) {
     int height = image.height();
 
     FILE *fp = fopen(filename, "wb");
+
     if (fp == nullptr) {
+        if (fp != nullptr) fclose(fp);
         LOG(INFO) << "Store PNG: Could not open file " << filename;
         return false;
     }
@@ -207,6 +210,7 @@ bool store_png(const char *filename, const Image4b &image) {
     png_bytep row = nullptr;
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (png_ptr == nullptr) {
+        if (fp != nullptr) fclose(fp);
         LOG(ERROR) << "Store PNG: Could not allocate write struct (" << filename << ")";
         return false;
     }
@@ -264,6 +268,7 @@ bool store_png(const char *filename, const Image3f &image) {
     png_bytep row = nullptr;
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (png_ptr == nullptr) {
+        if (fp != nullptr) fclose(fp);
         LOG(ERROR) << "Store PNG: Could not allocate write struct (" << filename << ")";
         return false;
     }
