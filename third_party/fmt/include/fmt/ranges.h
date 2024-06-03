@@ -20,6 +20,7 @@
 
 FMT_BEGIN_NAMESPACE
 
+FMT_EXPORT
 enum class range_format { disabled, map, set, sequence, string, debug_string };
 
 namespace detail {
@@ -68,7 +69,7 @@ template <typename T, typename Enable = void>
 struct has_member_fn_begin_end_t : std::false_type {};
 
 template <typename T>
-struct has_member_fn_begin_end_t<T, void_t<decltype(std::declval<T>().begin()),
+struct has_member_fn_begin_end_t<T, void_t<decltype(*std::declval<T>().begin()),
                                            decltype(std::declval<T>().end())>>
     : std::true_type {};
 
@@ -99,15 +100,15 @@ struct has_mutable_begin_end : std::false_type {};
 
 template <typename T>
 struct has_const_begin_end<
-    T,
-    void_t<
-        decltype(detail::range_begin(std::declval<const remove_cvref_t<T>&>())),
-        decltype(detail::range_end(std::declval<const remove_cvref_t<T>&>()))>>
+    T, void_t<decltype(*detail::range_begin(
+                  std::declval<const remove_cvref_t<T>&>())),
+              decltype(detail::range_end(
+                  std::declval<const remove_cvref_t<T>&>()))>>
     : std::true_type {};
 
 template <typename T>
 struct has_mutable_begin_end<
-    T, void_t<decltype(detail::range_begin(std::declval<T&>())),
+    T, void_t<decltype(*detail::range_begin(std::declval<T&>())),
               decltype(detail::range_end(std::declval<T&>())),
               // the extra int here is because older versions of MSVC don't
               // SFINAE properly unless there are distinct types
@@ -495,7 +496,8 @@ struct range_formatter<
     for (; it != end; ++it) {
       if (i > 0) out = detail::copy<Char>(separator_, out);
       ctx.advance_to(out);
-      out = underlying_.format(mapper.map(*it), ctx);
+      auto&& item = *it;  // Need an lvalue
+      out = underlying_.format(mapper.map(item), ctx);
       ++i;
     }
     out = detail::copy<Char>(closing_bracket_, out);
@@ -503,6 +505,7 @@ struct range_formatter<
   }
 };
 
+FMT_EXPORT
 template <typename T, typename Char, typename Enable = void>
 struct range_format_kind
     : conditional_t<
@@ -528,7 +531,9 @@ struct formatter<
 
  public:
   FMT_CONSTEXPR formatter() {
-    if (range_format_kind<R, Char>::value != range_format::set) return;
+    if (detail::const_check(range_format_kind<R, Char>::value !=
+                            range_format::set))
+      return;
     range_formatter_.set_brackets(detail::string_literal<Char, '{'>{},
                                   detail::string_literal<Char, '}'>{});
   }
@@ -653,30 +658,26 @@ struct formatter<join_view<It, Sentinel, Char>, Char> {
   }
 };
 
-/**
-  Returns a view that formats the iterator range `[begin, end)` with elements
-  separated by `sep`.
- */
+/// Returns a view that formats the iterator range `[begin, end)` with elements
+/// separated by `sep`.
 template <typename It, typename Sentinel>
 auto join(It begin, Sentinel end, string_view sep) -> join_view<It, Sentinel> {
   return {std::move(begin), end, sep};
 }
 
 /**
-  \rst
-  Returns a view that formats `range` with elements separated by `sep`.
-
-  **Example**::
-
-    std::vector<int> v = {1, 2, 3};
-    fmt::print("{}", fmt::join(v, ", "));
-    // Output: "1, 2, 3"
-
-  ``fmt::join`` applies passed format specifiers to the range elements::
-
-    fmt::print("{:02}", fmt::join(v, ", "));
-    // Output: "01, 02, 03"
-  \endrst
+ * Returns a view that formats `range` with elements separated by `sep`.
+ *
+ * **Example**:
+ *
+ *     auto v = std::vector<int>{1, 2, 3};
+ *     fmt::print("{}", fmt::join(v, ", "));
+ *     // Output: 1, 2, 3
+ *
+ * `fmt::join` applies passed format specifiers to the range elements:
+ *
+ *     fmt::print("{:02}", fmt::join(v, ", "));
+ *     // Output: 01, 02, 03
  */
 template <typename Range>
 auto join(Range&& r, string_view sep)
@@ -801,15 +802,13 @@ struct formatter<
 FMT_BEGIN_EXPORT
 
 /**
-  \rst
-  Returns an object that formats `tuple` with elements separated by `sep`.
-
-  **Example**::
-
-    std::tuple<int, char> t = {1, 'a'};
-    fmt::print("{}", fmt::join(t, ", "));
-    // Output: "1, a"
-  \endrst
+ * Returns an object that formats `std::tuple` with elements separated by `sep`.
+ *
+ * **Example**:
+ *
+ *     auto t = std::tuple<int, char>{1, 'a'};
+ *     fmt::print("{}", fmt::join(t, ", "));
+ *     // Output: 1, a
  */
 template <typename... T>
 FMT_CONSTEXPR auto join(const std::tuple<T...>& tuple, string_view sep)
@@ -818,15 +817,13 @@ FMT_CONSTEXPR auto join(const std::tuple<T...>& tuple, string_view sep)
 }
 
 /**
-  \rst
-  Returns an object that formats `initializer_list` with elements separated by
-  `sep`.
-
-  **Example**::
-
-    fmt::print("{}", fmt::join({1, 2, 3}, ", "));
-    // Output: "1, 2, 3"
-  \endrst
+ * Returns an object that formats `std::initializer_list` with elements
+ * separated by `sep`.
+ *
+ * **Example**:
+ *
+ *     fmt::print("{}", fmt::join({1, 2, 3}, ", "));
+ *     // Output: "1, 2, 3"
  */
 template <typename T>
 auto join(std::initializer_list<T> list, string_view sep)

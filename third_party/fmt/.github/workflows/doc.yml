@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
     - name: Add ubuntu mirrors
       run: |
@@ -25,12 +25,10 @@ jobs:
       run: |
         sudo apt update
         sudo apt install doxygen python3-virtualenv
-        sudo npm install -g less \
-             git://github.com/clean-css/clean-css#1f0692ee48a68404e9c7f2764d95b863a891f17b # v5.3.3
         cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
       env:
         KEY: ${{secrets.KEY}}
-      run: $GITHUB_WORKSPACE/support/build-docs.py
+      run: # $GITHUB_WORKSPACE/support/build-docs.py
