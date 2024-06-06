@@ -599,6 +599,7 @@ static bool ParseDecltype(State *state);
 static bool ParseType(State *state);
 static bool ParseCVQualifiers(State *state);
 static bool ParseBuiltinType(State *state);
+static bool ParseVendorExtendedType(State *state);
 static bool ParseFunctionType(State *state);
 static bool ParseBareFunctionType(State *state);
 static bool ParseOverloadAttribute(State *state);
@@ -617,6 +618,7 @@ static bool ParseUnionSelector(State* state);
 static bool ParseFunctionParam(State* state);
 static bool ParseBracedExpression(State *state);
 static bool ParseExpression(State *state);
+static bool ParseInitializer(State *state);
 static bool ParseExprPrimary(State *state);
 static bool ParseExprCastValueAndTrailingE(State *state);
 static bool ParseQRequiresClauseExpr(State *state);
@@ -785,6 +787,7 @@ static bool ParseNestedName(State *state) {
 // <template-prefix> ::= <prefix> <(template) unqualified-name>
 //                   ::= <template-param>
 //                   ::= <substitution>
+//                   ::= <vendor-extended-type>
 static bool ParsePrefix(State *state) {
   ComplexityGuard guard(state);
   if (guard.IsTooComplex()) return false;
@@ -793,6 +796,11 @@ static bool ParsePrefix(State *state) {
     MaybeAppendSeparator(state);
     if (ParseTemplateParam(state) || ParseDecltype(state) ||
         ParseSubstitution(state, /*accept_std=*/true) ||
+        // Although the official grammar does not mention it, nested-names
+        // shaped like Nu14__some_builtinIiE6memberE occur in practice, and it
+        // is not clear what else a compiler is supposed to do when a
+        // vendor-extended type has named members.
+        ParseVendorExtendedType(state) ||
         ParseUnscopedName(state) ||
         (ParseOneCharToken(state, 'M') && ParseUnnamedTypeName(state))) {
       has_something = true;
@@ -814,6 +822,7 @@ static bool ParsePrefix(State *state) {
 //                    ::= <source-name> [<abi-tags>]
 //                    ::= <local-source-name> [<abi-tags>]
 //                    ::= <unnamed-type-name> [<abi-tags>]
+//                    ::= DC <source-name>+ E  # C++17 structured binding
 //
 // <local-source-name> is a GCC extension; see below.
 static bool ParseUnqualifiedName(State *state) {
@@ -824,6 +833,14 @@ static bool ParseUnqualifiedName(State *state) {
       ParseUnnamedTypeName(state)) {
     return ParseAbiTags(state);
   }
+
+  // DC <source-name>+ E
+  ParseState copy = state->parse_state;
+  if (ParseTwoCharToken(state, "DC") && OneOrMore(ParseSourceName, state) &&
+      ParseOneCharToken(state, 'E')) {
+    return true;
+  }
+  state->parse_state = copy;
   return false;
 }
 
@@ -1073,12 +1090,13 @@ static bool ParseOperatorName(State *state, int *arity) {
 //                ::= TH <name>  # thread-local initialization
 //                ::= Tc <call-offset> <call-offset> <(base) encoding>
 //                ::= GV <(object) name>
+//                ::= GR <(object) name> [<seq-id>] _
 //                ::= T <call-offset> <(base) encoding>
 // G++ extensions:
 //                ::= TC <type> <(offset) number> _ <(base) type>
 //                ::= TF <type>
 //                ::= TJ <type>
-//                ::= GR <name>
+//                ::= GR <name>  # without final _, perhaps an earlier form?
 //                ::= GA <encoding>
 //                ::= Th <call-offset> <(base) encoding>
 //                ::= Tv <call-offset> <(base) encoding>
@@ -1145,10 +1163,22 @@ static bool ParseSpecialName(State *state) {
   }
   state->parse_state = copy;
 
-  if (ParseTwoCharToken(state, "GR") && ParseName(state)) {
+  // <special-name> ::= GR <(object) name> [<seq-id>] _  # modern standard
+  //                ::= GR <(object) name>  # also recognized
+  if (ParseTwoCharToken(state, "GR")) {
+    MaybeAppend(state, "reference temporary for ");
+    if (!ParseName(state)) {
+      state->parse_state = copy;
+      return false;
+    }
+    const bool has_seq_id = ParseSeqId(state);
+    const bool has_underscore = ParseOneCharToken(state, '_');
+    if (has_seq_id && !has_underscore) {
+      state->parse_state = copy;
+      return false;
+    }
     return true;
   }
-  state->parse_state = copy;
 
   if (ParseTwoCharToken(state, "GA") && ParseEncoding(state)) {
     return true;
@@ -1373,7 +1403,7 @@ static bool ParseCVQualifiers(State *state) {
 }
 
 // <builtin-type> ::= v, etc.  # single-character builtin types
-//                ::= u <source-name> [I <type> E]
+//                ::= <vendor-extended-type>
 //                ::= Dd, etc.  # two-character builtin types
 //
 // Not supported:
@@ -1396,6 +1426,16 @@ static bool ParseBuiltinType(State *state) {
       return true;  // ::= Dd, etc.  # two-character builtin types
     }
   }
+
+  return ParseVendorExtendedType(state);
+}
+
+// <vendor-extended-type> ::= u <source-name> [I <type> E]
+//
+// NOTE: [I <type> E] is a vendor extension (http://shortn/_FrINpH1XC5).
+static bool ParseVendorExtendedType(State *state) {
+  ComplexityGuard guard(state);
+  if (guard.IsTooComplex()) return false;
 
   ParseState copy = state->parse_state;
   if (ParseOneCharToken(state, 'u') && ParseSourceName(state)) {
@@ -1945,21 +1985,32 @@ static bool ParseBracedExpression(State *state) {
 // <expression> ::= <1-ary operator-name> <expression>
 //              ::= <2-ary operator-name> <expression> <expression>
 //              ::= <3-ary operator-name> <expression> <expression> <expression>
+//              ::= pp_ <expression>  # ++e; pp <expression> is e++
+//              ::= mm_ <expression>  # --e; mm <expression> is e--
 //              ::= cl <expression>+ E
 //              ::= cp <simple-id> <expression>* E # Clang-specific.
 //              ::= so <type> <expression> [<number>] <union-selector>* [p] E
 //              ::= cv <type> <expression>      # type (expression)
 //              ::= cv <type> _ <expression>* E # type (expr-list)
 //              ::= tl <type> <braced-expression>* E
+//              ::= il <braced-expression>* E
+//              ::= [gs] nw <expression>* _ <type> E
+//              ::= [gs] nw <expression>* _ <type> <initializer>
 //              ::= dc <type> <expression>
 //              ::= sc <type> <expression>
 //              ::= cc <type> <expression>
 //              ::= rc <type> <expression>
+//              ::= ti <type>
+//              ::= te <expression>
 //              ::= st <type>
+//              ::= at <type>
+//              ::= az <expression>
+//              ::= nx <expression>
 //              ::= <template-param>
 //              ::= <function-param>
 //              ::= sZ <template-param>
 //              ::= sZ <function-param>
+//              ::= sP <template-arg>* E
 //              ::= <expr-primary>
 //              ::= dt <expression> <unresolved-name> # expr.name
 //              ::= pt <expression> <unresolved-name> # expr->name
@@ -1968,6 +2019,8 @@ static bool ParseBracedExpression(State *state) {
 //              ::= fr <binary operator-name> <expression>
 //              ::= fL <binary operator-name> <expression> <expression>
 //              ::= fR <binary operator-name> <expression> <expression>
+//              ::= tw <expression>
+//              ::= tr
 //              ::= sr <type> <unqualified-name> <template-args>
 //              ::= sr <type> <unqualified-name>
 //              ::= u <source-name> <template-arg>* E  # vendor extension
@@ -1985,6 +2038,15 @@ static bool ParseExpression(State *state) {
   // Object/function call expression.
   if (ParseTwoCharToken(state, "cl") && OneOrMore(ParseExpression, state) &&
       ParseOneCharToken(state, 'E')) {
+    return true;
+  }
+  state->parse_state = copy;
+
+  // Preincrement and predecrement.  Postincrement and postdecrement are handled
+  // by the operator-name logic later on.
+  if ((ParseThreeCharToken(state, "pp_") ||
+       ParseThreeCharToken(state, "mm_")) &&
+      ParseExpression(state)) {
     return true;
   }
   state->parse_state = copy;
@@ -2017,6 +2079,25 @@ static bool ParseExpression(State *state) {
   if (ParseTwoCharToken(state, "tl") && ParseType(state) &&
       ZeroOrMore(ParseBracedExpression, state) &&
       ParseOneCharToken(state, 'E')) {
+    return true;
+  }
+  state->parse_state = copy;
+
+  // <expression> ::= il <braced-expression>* E
+  if (ParseTwoCharToken(state, "il") &&
+      ZeroOrMore(ParseBracedExpression, state) &&
+      ParseOneCharToken(state, 'E')) {
+    return true;
+  }
+  state->parse_state = copy;
+
+  // <expression> ::= [gs] nw <expression>* _ <type> E
+  //              ::= [gs] nw <expression>* _ <type> <initializer>
+  if (Optional(ParseTwoCharToken(state, "gs")) &&
+      ParseTwoCharToken(state, "nw") &&
+      ZeroOrMore(ParseExpression, state) && ParseOneCharToken(state, '_') &&
+      ParseType(state) &&
+      (ParseOneCharToken(state, 'E') || ParseInitializer(state))) {
     return true;
   }
   state->parse_state = copy;
@@ -2067,8 +2148,38 @@ static bool ParseExpression(State *state) {
   }
   state->parse_state = copy;
 
+  // typeid(type)
+  if (ParseTwoCharToken(state, "ti") && ParseType(state)) {
+    return true;
+  }
+  state->parse_state = copy;
+
+  // typeid(expression)
+  if (ParseTwoCharToken(state, "te") && ParseExpression(state)) {
+    return true;
+  }
+  state->parse_state = copy;
+
   // sizeof type
   if (ParseTwoCharToken(state, "st") && ParseType(state)) {
+    return true;
+  }
+  state->parse_state = copy;
+
+  // alignof(type)
+  if (ParseTwoCharToken(state, "at") && ParseType(state)) {
+    return true;
+  }
+  state->parse_state = copy;
+
+  // alignof(expression), a GNU extension
+  if (ParseTwoCharToken(state, "az") && ParseExpression(state)) {
+    return true;
+  }
+  state->parse_state = copy;
+
+  // noexcept(expression) appearing as an expression in a dependent signature
+  if (ParseTwoCharToken(state, "nx") && ParseExpression(state)) {
     return true;
   }
   state->parse_state = copy;
@@ -2079,6 +2190,15 @@ static bool ParseExpression(State *state) {
   //              ::= sZ <function-param>
   if (ParseTwoCharToken(state, "sZ") &&
       (ParseFunctionParam(state) || ParseTemplateParam(state))) {
+    return true;
+  }
+  state->parse_state = copy;
+
+  // sizeof...(pack) captured from an alias template
+  //
+  // <expression> ::= sP <template-arg>* E
+  if (ParseTwoCharToken(state, "sP") && ZeroOrMore(ParseTemplateArg, state) &&
+      ParseOneCharToken(state, 'E')) {
     return true;
   }
   state->parse_state = copy;
@@ -2103,6 +2223,15 @@ static bool ParseExpression(State *state) {
     return true;
   }
   state->parse_state = copy;
+
+  // tw <expression>: throw e
+  if (ParseTwoCharToken(state, "tw") && ParseExpression(state)) {
+    return true;
+  }
+  state->parse_state = copy;
+
+  // tr: throw (rethrows an exception from the handler that caught it)
+  if (ParseTwoCharToken(state, "tr")) return true;
 
   // Object and pointer member access expressions.
   //
@@ -2155,6 +2284,20 @@ static bool ParseExpression(State *state) {
   state->parse_state = copy;
 
   return ParseUnresolvedName(state);
+}
+
+// <initializer> ::= pi <expression>* E
+static bool ParseInitializer(State *state) {
+  ComplexityGuard guard(state);
+  if (guard.IsTooComplex()) return false;
+  ParseState copy = state->parse_state;
+
+  if (ParseTwoCharToken(state, "pi") && ZeroOrMore(ParseExpression, state) &&
+      ParseOneCharToken(state, 'E')) {
+    return true;
+  }
+  state->parse_state = copy;
+  return false;
 }
 
 // <expr-primary> ::= L <type> <(value) number> E
@@ -2352,6 +2495,12 @@ static bool ParseLocalNameSuffix(State *state) {
       (IsDigit(RemainingInput(state)[0]) || RemainingInput(state)[0] == '_')) {
     int number = -1;
     Optional(ParseNumber(state, &number));
+    if (number < -1 || number > 2147483645) {
+      // Work around overflow cases.  We do not expect these outside of a fuzzer
+      // or other source of adversarial input.  If we do detect overflow here,
+      // we'll print {default arg#1}.
+      number = -1;
+    }
     number += 2;
 
     // The ::{default arg#1}:: infix must be rendered before the lambda itself,

@@ -4,8 +4,8 @@ The {fmt} library API consists of the following components:
 
 - [`fmt/base.h`](#base-api): the base API providing main formatting functions
   for `char`/UTF-8 with C++20 compile-time checks and minimal dependencies
-- [`fmt/format.h`](#format-api): the full format API providing additional
-  formatting functions and locale support
+- [`fmt/format.h`](#format-api): `fmt::format` and other formatting functions
+  as well as locale support
 - [`fmt/ranges.h`](#ranges-api): formatting of ranges and tuples
 - [`fmt/chrono.h`](#chrono-api): date and time formatting
 - [`fmt/std.h`](#std-api): formatters for standard library types
@@ -28,11 +28,12 @@ dependencies for better compile times. This header is only beneficial when
 using {fmt} as a library (the default) and not in the header-only mode.
 It also provides `formatter` specializations for the following types:
 
-- `int`, `unsigned`, `long long`, `unsigned long long`
+- `int`, `long long`,
+- `unsigned`, `unsigned long long`
 - `float`, `double`, `long double`
 - `bool`
 - `char`
-- `const char*`, `fmt::string_view`
+- `const char*`, [`fmt::string_view`](#basic_string_view)
 - `const void*`
 
 The following functions use [format string syntax](syntax.md) similar to that
@@ -44,7 +45,7 @@ surrounded by braces `{}`. The fields are replaced with formatted arguments
 in the resulting string. [`fmt::format_string`](#format_string) is a format
 string which can be implicitly constructed from a string literal or a
 `constexpr` string and is checked at compile time in C++20. To pass a runtime
-format string wrap it in [fmt::runtime](#runtime).
+format string wrap it in [`fmt::runtime`](#runtime).
 
 *args* is an argument list representing objects to be formatted.
 

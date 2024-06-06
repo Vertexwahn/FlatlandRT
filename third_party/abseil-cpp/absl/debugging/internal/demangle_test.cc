@@ -192,6 +192,27 @@ TEST(Demangle, FailsOnTwoArgTemplateBuiltinType) {
       Demangle("_Z3fooIicEu17__my_builtin_typeIT_T0_Ev", tmp, sizeof(tmp)));
 }
 
+TEST(Demangle, TypeNestedUnderTemplatedBuiltinType) {
+  char tmp[100];
+
+  // Source:
+  //
+  // template <typename T>
+  // typename std::remove_reference_t<T>::type f(T t);
+  //
+  // struct C { using type = C; };
+  //
+  // f<const C&>(C{});
+  //
+  // These days std::remove_reference_t is implemented in terms of a vendor
+  // builtin __remove_reference_t.  A full demangling might look like:
+  //
+  // __remove_reference_t<C const&>::type f<C const&>(C const&)
+  ASSERT_TRUE(Demangle("_Z1fIRK1CENu20__remove_reference_tIT_E4typeES3_",
+                       tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
 TEST(Demangle, TemplateTemplateParamSubstitution) {
   char tmp[100];
 
@@ -391,6 +412,33 @@ TEST(Demangle, LambdaInClassMemberDefaultArgument) {
   ASSERT_FALSE(Demangle("_ZZN1S1fEPFvvEEdn1_NKUlvE_clEv", tmp, sizeof(tmp)));
 }
 
+TEST(Demangle, AvoidSignedOverflowForUnfortunateParameterNumbers) {
+  char tmp[100];
+
+  // Here <number> + 2 fits in an int, but just barely.  (We expect no such
+  // input in practice: real functions don't have billions of arguments.)
+  ASSERT_TRUE(Demangle("_ZZN1S1fEPFvvEEd2147483645_NKUlvE_clEv",
+                       tmp, sizeof(tmp)));
+  EXPECT_STREQ(tmp,
+               "S::f()::{default arg#2147483647}::{lambda()#1}::operator()()");
+
+  // Now <number> is an int, but <number> + 2 is not.
+  ASSERT_TRUE(Demangle("_ZZN1S1fEPFvvEEd2147483646_NKUlvE_clEv",
+                       tmp, sizeof(tmp)));
+  EXPECT_STREQ(tmp, "S::f()::{default arg#1}::{lambda()#1}::operator()()");
+
+  // <number> is the largest int.
+  ASSERT_TRUE(Demangle("_ZZN1S1fEPFvvEEd2147483647_NKUlvE_clEv",
+                       tmp, sizeof(tmp)));
+  EXPECT_STREQ(tmp, "S::f()::{default arg#1}::{lambda()#1}::operator()()");
+
+  // <number> itself does not fit into an int.  ParseNumber truncates the value
+  // to int, yielding a large negative number, which we strain out.
+  ASSERT_TRUE(Demangle("_ZZN1S1fEPFvvEEd2147483648_NKUlvE_clEv",
+                       tmp, sizeof(tmp)));
+  EXPECT_STREQ(tmp, "S::f()::{default arg#1}::{lambda()#1}::operator()()");
+}
+
 TEST(Demangle, SubstpackNotationForTroublesomeTemplatePack) {
   char tmp[100];
 
@@ -564,6 +612,41 @@ TEST(Demangle, StringLiterals) {
   EXPECT_STREQ("f<>()", tmp);
 }
 
+TEST(Demangle, GlobalInitializers) {
+  char tmp[80];
+
+  // old form without suffix
+  EXPECT_TRUE(Demangle("_ZGR1v", tmp, sizeof(tmp)));
+  EXPECT_STREQ("reference temporary for v", tmp);
+
+  // modern form for the whole initializer
+  EXPECT_TRUE(Demangle("_ZGR1v_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("reference temporary for v", tmp);
+
+  // next subobject in depth-first preorder traversal
+  EXPECT_TRUE(Demangle("_ZGR1v0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("reference temporary for v", tmp);
+
+  // subobject with a larger seq-id
+  EXPECT_TRUE(Demangle("_ZGR1v1Z_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("reference temporary for v", tmp);
+}
+
+TEST(Demangle, StructuredBindings) {
+  char tmp[80];
+
+  // Source:
+  //
+  // struct S { int a, b; };
+  // const auto& [x, y] = S{1, 2};
+
+  // [x, y]
+  EXPECT_TRUE(Demangle("_ZDC1x1yE", tmp, sizeof(tmp)));
+
+  // reference temporary for [x, y]
+  EXPECT_TRUE(Demangle("_ZGRDC1x1yE_", tmp, sizeof(tmp)));
+}
+
 // Test the GNU abi_tag extension.
 TEST(Demangle, AbiTags) {
   char tmp[80];
@@ -685,6 +768,66 @@ TEST(Demangle, SubobjectAddresses) {
   EXPECT_STREQ("f<>()", tmp);
 }
 
+TEST(Demangle, Preincrement) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> auto f(T t) -> decltype(T{++t}) { return t; }
+  // template auto f<int>(int t) -> decltype(int{++t});
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(int{++fp}) f<int>(int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTtlT_pp_fp_EES0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, Postincrement) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> auto f(T t) -> decltype(T{t++}) { return t; }
+  // template auto f<int>(int t) -> decltype(int{t++});
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(int{fp++}) f<int>(int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTtlT_ppfp_EES0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, Predecrement) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> auto f(T t) -> decltype(T{--t}) { return t; }
+  // template auto f<int>(int t) -> decltype(int{--t});
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(int{--fp}) f<int>(int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTtlT_mm_fp_EES0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, Postdecrement) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> auto f(T t) -> decltype(T{t--}) { return t; }
+  // template auto f<int>(int t) -> decltype(int{t--});
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(int{fp--}) f<int>(int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTtlT_mmfp_EES0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
 TEST(Demangle, UnaryFoldExpressions) {
   char tmp[80];
 
@@ -762,6 +905,22 @@ TEST(Demangle, SizeofPacks) {
   // S<sizeof... (fp)> g<int, long>(int, long)
   EXPECT_TRUE(Demangle("_Z1gIJilEE1SIXsZfp_EEDpT_", tmp, sizeof(tmp)));
   EXPECT_STREQ("g<>()", tmp);
+}
+
+TEST(Demangle, SizeofPackInvolvingAnAliasTemplate) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class... T> using A = char[sizeof...(T)];
+  // template <class... U> void f(const A<U..., int>&) {}
+  // template void f<int>(const A<int, int>&);
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // void f<int>(char const (&) [sizeof... (int, int)])
+  EXPECT_TRUE(Demangle("_Z1fIJiEEvRAsPDpT_iE_Kc", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
 }
 
 TEST(Demangle, Spaceship) {
@@ -847,6 +1006,146 @@ TEST(Demangle, DirectListInitialization) {
   EXPECT_TRUE(Demangle("_Z1jI1AEDTtlT_di1adXLi1ELi3ELi42EEEv",
                        tmp, sizeof(tmp)));
   EXPECT_STREQ("j<>()", tmp);
+}
+
+TEST(Demangle, SimpleInitializerLists) {
+  char tmp[80];
+
+  // Common preamble of source-code examples in this test function:
+  //
+  // #include <initializer_list>
+  //
+  // template <class T> void g(std::initializer_list<T>) {}
+
+  // Source:
+  //
+  // template <class T> auto f() -> decltype(g<T>({})) {}
+  // template auto f<int>() -> decltype(g<int>({}));
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(g<int>({})) f<int>()
+  EXPECT_TRUE(Demangle("_Z1fIiEDTcl1gIT_EilEEEv", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+
+  // Source:
+  //
+  // template <class T> auto f(T x) -> decltype(g({x})) {}
+  // template auto f<int>(int x) -> decltype(g({x}));
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(g({fp})) f<int>(int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTcl1gilfp_EEET_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+
+  // Source:
+  //
+  // template <class T> auto f(T x, T y) -> decltype(g({x, y})) {}
+  // template auto f<int>(int x, int y) -> decltype(g({x, y}));
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(g({fp, fp0})) f<int>(int, int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTcl1gilfp_fp0_EEET_S1_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, BracedListImplicitlyConstructingAClassObject) {
+  char tmp[80];
+
+  // Source:
+  //
+  // struct S { int v; };
+  // void g(S) {}
+  // template <class T> auto f(T x) -> decltype(g({.v = x})) {}
+  // template auto f<int>(int x) -> decltype(g({.v = x}));
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(g({.v = fp})) f<int>(int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTcl1gildi1vfp_EEET_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, SimpleNewExpression) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> decltype(T{*new T}) f() { return T{}; }
+  // template decltype(int{*new int}) f<int>();
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(int{*(new int)}) f<int>()
+  EXPECT_TRUE(Demangle("_Z1fIiEDTtlT_denw_S0_EEEv", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, NewExpressionWithEmptyParentheses) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> decltype(T{*new T()}) f() { return T{}; }
+  // template decltype(int{*new int()}) f<int>();
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(int{*(new int)}) f<int>()
+  EXPECT_TRUE(Demangle("_Z1fIiEDTtlT_denw_S0_piEEEv", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, NewExpressionWithNonemptyParentheses) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> decltype(T{*new T(42)}) f() { return T{}; }
+  // template decltype(int{*new int(42)}) f<int>();
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(int{*(new int(42))}) f<int>()
+  EXPECT_TRUE(Demangle("_Z1fIiEDTtlT_denw_S0_piLi42EEEEv", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, PlacementNewExpression) {
+  char tmp[80];
+
+  // Source:
+  //
+  // #include <new>
+  //
+  // template <class T> auto f(T t) -> decltype(T{*new (&t) T(42)}) {
+  //   return t;
+  // }
+  // template auto f<int>(int t) -> decltype(int{*new (&t) int(42)});
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(int{*(new(&fp) int(42))}) f<int>(int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTtlT_denwadfp__S0_piLi42EEEES0_",
+                       tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, GlobalScopeNewExpression) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> decltype(T{*::new T}) f() { return T{}; }
+  // template decltype(int{*::new int}) f<int>();
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(int{*(::new int)}) f<int>()
+  EXPECT_TRUE(Demangle("_Z1fIiEDTtlT_degsnw_S0_EEEv", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
 }
 
 TEST(Demangle, ReferenceQualifiedFunctionTypes) {
@@ -936,6 +1235,115 @@ TEST(Demangle, ReinterpretCast) {
   //
   // decltype(reinterpret_cast<int const*>(fp)) f<int>(int*)
   EXPECT_TRUE(Demangle("_Z1fIiEDTrcPKT_fp_EPS0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, TypeidType) {
+  char tmp[80];
+
+  // Source:
+  //
+  // #include <typeinfo>
+  //
+  // template <class T> decltype(typeid(T).name()) f(T) { return nullptr; }
+  // template decltype(typeid(int).name()) f<int>(int);
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(typeid (int).name()) f<int>(int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTcldttiT_4nameEES0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, TypeidExpression) {
+  char tmp[80];
+
+  // Source:
+  //
+  // #include <typeinfo>
+  //
+  // template <class T> decltype(typeid(T{}).name()) f(T) { return nullptr; }
+  // template decltype(typeid(int{}).name()) f<int>(int);
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(typeid (int{}).name()) f<int>(int)
+  EXPECT_TRUE(Demangle("_Z1fIiEDTcldttetlT_E4nameEES0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, AlignofType) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> T f(T (&a)[alignof(T)]) { return a[0]; }
+  // template int f<int>(int (&)[alignof(int)]);
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // int f<int>(int (&) [alignof (int)])
+  EXPECT_TRUE(Demangle("_Z1fIiET_RAatS0__S0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, AlignofExpression) {
+  char tmp[80];
+
+  // Source (note that this uses a GNU extension; it is not standard C++):
+  //
+  // template <class T> T f(T (&a)[alignof(T{})]) { return a[0]; }
+  // template int f<int>(int (&)[alignof(int{})]);
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // int f<int>(int (&) [alignof (int{})])
+  EXPECT_TRUE(Demangle("_Z1fIiET_RAaztlS0_E_S0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, NoexceptExpression) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <class T> void f(T (&a)[noexcept(T{})]) {}
+  // template void f<int>(int (&)[noexcept(int{})]);
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // void f<int>(int (&) [noexcept (int{})])
+  EXPECT_TRUE(Demangle("_Z1fIiEvRAnxtlT_E_S0_", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, UnaryThrow) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <bool b> decltype(b ? throw b : 0) f() { return 0; }
+  // template decltype(false ? throw false : 0) f<false>();
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(false ? throw false : 0) f<false>()
+  EXPECT_TRUE(Demangle("_Z1fILb0EEDTquT_twT_Li0EEv", tmp, sizeof(tmp)));
+  EXPECT_STREQ("f<>()", tmp);
+}
+
+TEST(Demangle, NullaryThrow) {
+  char tmp[80];
+
+  // Source:
+  //
+  // template <bool b> decltype(b ? throw : 0) f() { return 0; }
+  // template decltype(false ? throw : 0) f<false>();
+  //
+  // Full LLVM demangling of the instantiation of f:
+  //
+  // decltype(false ? throw : 0) f<false>()
+  EXPECT_TRUE(Demangle("_Z1fILb0EEDTquT_trLi0EEv", tmp, sizeof(tmp)));
   EXPECT_STREQ("f<>()", tmp);
 }
 

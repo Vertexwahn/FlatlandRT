@@ -33,6 +33,11 @@ struct RayType {
         return std::abs(direction.norm() - Scalar{1.0}) < epsilon;
     }
 
+    [[nodiscard]]
+    bool has_nans() const {
+        return std::isnan(min_t) || std::isnan(max_t) || origin.has_nans() || direction.h;
+    }
+
     Point origin;
     Vector direction;
     Scalar min_t;

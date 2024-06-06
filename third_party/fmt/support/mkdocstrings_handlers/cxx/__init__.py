@@ -101,21 +101,26 @@ def convert_return_type(d: Definition, node: et.Element) -> None:
     if len(parts) > 1:
       d.trailing_return_type = normalize_type(parts[1])
 
+def render_param(param: Definition) -> str:
+  return param.type + (f'&nbsp;{param.name}' if len(param.name) > 0 else '')
+
 def render_decl(d: Definition) -> None:
   text = ''
   if d.id is not None:
     text += f'<a id="{d.id}">\n'
-  text += '<pre><code class="language-cpp">'
+  text += '<pre><code class="language-cpp decl">'
 
+  text += '<div>'
   if d.template_params is not None:
     text += 'template &lt;'
-    text += ', '.join(
-      [f'{p.type} {p.name}'.rstrip() for p in d.template_params])
+    text += ', '.join([render_param(p) for p in d.template_params])
     text += '&gt;\n'
+  text += '</div>'
 
+  text += '<div>'
   end = ';'
   if d.kind == 'function' or d.kind == 'variable':
-    text += d.type + ' '
+    text += d.type + ' ' if len(d.type) > 0 else ''
   elif d.kind == 'typedef':
     text += 'using '
   elif d.kind == 'define':
@@ -129,13 +134,12 @@ def render_decl(d: Definition) -> None:
       (p.type + ' ' if p.type else '') + p.name for p in d.params])
     text += '(' + escape_html(params) + ')'
     if d.trailing_return_type:
-      text += '\n ' \
-        if len(d.name) + len(params) + len(d.trailing_return_type) > 68 else ''
-      text += ' -> ' + escape_html(d.trailing_return_type)
+      text += ' -&NoBreak;>&nbsp;' + escape_html(d.trailing_return_type)
   elif d.kind == 'typedef':
     text += ' = ' + escape_html(d.type)
 
   text += end
+  text += '</div>'
   text += '</code></pre>\n'
   if d.id is not None:
     text += f'</a>\n'
