@@ -99,6 +99,24 @@ TEST(Ray2d, GivenARay2d_WhenPrintedToStdOutput_ExpectRayTypeRay2d) {
     EXPECT_THAT(output, testing::HasSubstr("]"));
 }
 
+TEST(Ray2f, GivenRayWithNoNaNs_WhenHasNaNsCheckIsPerformed_ExpectNoNaNDetected) {
+    Point2f origin{0.f, 0.f};
+    Vector2f direction{ std::numeric_limits<float>::infinity(), 0.f};
+
+    Ray2f r{origin, direction, 1.f, std::numeric_limits<float>::infinity()};
+
+    EXPECT_TRUE(r.has_nans());
+}
+
+TEST(Ray2f, GivenRayWithNaNs_WhenHasNaNsCheckIsPerformed_ExpectNaNDetected) {
+    Point2f origin{0.f, 0.f};
+    Vector2f direction{1.f, 0.f};
+
+    Ray2f r{origin, direction, 1.f, 10.0f};
+
+    EXPECT_FALSE(r.has_nans());
+}
+
 TEST(Ray3f, GivenARay3f_WhenPrintedToStdOutput_ExpectRayTypeRay3f) {
     Point3f origin{0.f, 0.f, 0.f};
     Vector3f direction{1.f, 0.f, 0.f};
@@ -116,7 +134,7 @@ TEST(Ray3f, GivenARay3f_WhenPrintedToStdOutput_ExpectRayTypeRay3f) {
     EXPECT_THAT(output, testing::HasSubstr("]"));
 }
 
-TEST(internal_convertTypToString, GivenIntegralType_WhenConverTypeToString_ThenShortStringRepersentationExpected) {
+TEST(internal_convertTypToString, GivenIntegralType_WhenConvertTypeToString_ThenShortStringRepersentationExpected) {
     EXPECT_THAT(internal::convert_type_to_string<int>::value, 'i');
     EXPECT_THAT(internal::convert_type_to_string<float>::value, 'f');
     EXPECT_THAT(internal::convert_type_to_string<double>::value, 'd');

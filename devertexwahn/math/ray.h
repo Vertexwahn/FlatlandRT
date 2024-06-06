@@ -35,7 +35,7 @@ struct RayType {
 
     [[nodiscard]]
     bool has_nans() const {
-        return std::isnan(min_t) || std::isnan(max_t) || origin.has_nans() || direction.h;
+        return std::isnan(min_t) || std::isnan(max_t) || origin.has_nans() || direction.has_nans();
     }
 
     Point origin;
