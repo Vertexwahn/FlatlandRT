@@ -101,9 +101,9 @@ TEST(Ray2d, GivenARay2d_WhenPrintedToStdOutput_ExpectRayTypeRay2d) {
 
 TEST(Ray2f, GivenRayWithNoNaNs_WhenHasNaNsCheckIsPerformed_ExpectNoNaNDetected) {
     Point2f origin{0.f, 0.f};
-    Vector2f direction{ std::numeric_limits<float>::infinity(), 0.f};
+    Vector2f direction{1.f, 0.f};
 
-    Ray2f r{origin, direction, 1.f, std::numeric_limits<float>::infinity()};
+    Ray2f r{origin, direction, 1.f, std::numeric_limits<double>::quiet_NaN()};
 
     EXPECT_TRUE(r.has_nans());
 }
