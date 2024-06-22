@@ -7,18 +7,23 @@
 
 set -euo pipefail
 
-# Provide a additional bazel config (bazel remote cache config expected)
-if [ "$#" -ne 1 ]; then
-    echo "Wrong number of parameters detected"
+# Check arguments
+if [ "$#" -ge 2 ]; then
+    echo "To many arguments detected. You can provide either one or no argument"
     echo "Usage: $0 <additional_bazel_config>"
     exit 1
 fi
 
-additional_bazel_config=$1
+additional_bazel_config=""
+
+# Provide a additional bazel config (bazel remote cache config expected) if provided
+if [ "$#" -eq 1 ]; then
+    additional_bazel_config="--config=$1"
+fi
 
 bazel coverage \
 --config=gcc11 \
---config=${additional_bazel_config} \
+${additional_bazel_config} \
 --combined_report=lcov \
 -- //...
 
