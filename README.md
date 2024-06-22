@@ -210,7 +210,7 @@ If you find any copyright or license violations or issues please let me know.
 
 * LLVM toolchain for Bazel (https://github.com/grailbio/bazel-toolchain) (building Flatland with LLVM) ([License](licenses/llvm_bazel_toolchain/LICENSE))
 
-### Third party dependencies
+### Third-party dependencies
 
 * Boost (https://www.boost.org/) (third party dependency) ([License](devertexwahn/flatland/LICENSES/boost/LICENSE))
 * Catch2 (https://github.com/catchorg/Catch2) (see `third_party` folder)
@@ -236,8 +236,8 @@ If you find any copyright or license violations or issues please let me know.
 
 The Stanford Bunny was derived from the Stanford Bunny provided from the Stanford 3D Scanning Repository (see [here](http://graphics.stanford.edu/data/3Dscanrep/#bunny)).
 
-The data for the Donut, Armadillo and Stanford Bunny for the 2D triangle data was derived from https://github.com/mmacklin/sandbox.
+The data for the Donut, Armadillo, and Stanford Bunny for the 2D triangle data was derived from https://github.com/mmacklin/sandbox.
 
 ### Credits
 
-A big thank goes to all the providers, developers, and maintainers of the aforementioned open source projects and artifacts.
+A big thank goes to all the providers, developers, and maintainers of the aforementioned open-source projects and artifacts.
