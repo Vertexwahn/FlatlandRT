@@ -13,7 +13,7 @@ using namespace de_vertexwahn;
 // The following test are failing on Windows in fastbuild and opt build mode. 
 // dbg mode works.
 // For now, those test are exclude on Windows
-#ifndef BOOST_OS_WINDOWS
+#ifndef DE_VERTEXWAHN_OS_WINDOWS
 
 TEST(Logging, HelloWorldVerbose) {
     testing::internal::CaptureStdout();
