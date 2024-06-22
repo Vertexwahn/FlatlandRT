@@ -80,6 +80,13 @@ jobs:
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-clang16.yaml
 
+  - job: Ubuntu22Coverage
+    displayName: "Coverage with LCOV/GCC11 on Ubuntu 22.04"
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-22.04-coverage.yaml
+
 
   - job: Ubuntu22Cppcheck
     displayName: "Cppcheck on Ubuntu 22.04"
