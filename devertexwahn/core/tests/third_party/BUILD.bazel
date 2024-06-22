@@ -26,3 +26,15 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "spdlog_test",
+    size = "small",
+    srcs = [
+        "spdlog_test.cpp",
+    ],
+    deps = [
+        "@spdlog",
+        "@googletest//:gtest_main",
+    ],
+)

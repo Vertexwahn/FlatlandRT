@@ -38,7 +38,9 @@
 #  define FMT_REMOVE_TRANSITIVE_INCLUDES
 #endif
 
-#ifndef FMT_IMPORT_STD
+#include "base.h"
+
+#ifndef FMT_MODULE
 #  include <cmath>             // std::signbit
 #  include <cstdint>           // uint32_t
 #  include <cstring>           // std::memcpy
@@ -51,24 +53,19 @@
 #  include <stdexcept>     // std::runtime_error
 #  include <string>        // std::string
 #  include <system_error>  // std::system_error
-#endif
-
-#include "base.h"
 
 // Checking FMT_CPLUSPLUS for warning suppression in MSVC.
-#if FMT_HAS_INCLUDE(<bit>) && FMT_CPLUSPLUS > 201703L && \
-    !defined(FMT_IMPORT_STD)
-#  include <bit>  // std::bit_cast
-#endif
+#  if FMT_HAS_INCLUDE(<bit>) && FMT_CPLUSPLUS > 201703L
+#    include <bit>  // std::bit_cast
+#  endif
 
 // libc++ supports string_view in pre-c++17.
-#if FMT_HAS_INCLUDE(<string_view>) && \
-    (FMT_CPLUSPLUS >= 201703L || defined(_LIBCPP_VERSION))
-#  ifndef FMT_IMPORT_STD
+#  if FMT_HAS_INCLUDE(<string_view>) && \
+      (FMT_CPLUSPLUS >= 201703L || defined(_LIBCPP_VERSION))
 #    include <string_view>
+#    define FMT_USE_STRING_VIEW
 #  endif
-#  define FMT_USE_STRING_VIEW
-#endif
+#endif  // FMT_MODULE
 
 #if defined __cpp_inline_variables && __cpp_inline_variables >= 201606L
 #  define FMT_INLINE_VARIABLE inline
@@ -1068,6 +1065,8 @@ template <typename Locale> class format_facet : public Locale::facet {
     return do_put(out, val, specs);
   }
 };
+
+FMT_END_EXPORT
 
 namespace detail {
 
@@ -3865,6 +3864,7 @@ FMT_API void report_error(format_func func, int error_code,
                           const char* message) noexcept;
 }  // namespace detail
 
+FMT_BEGIN_EXPORT
 FMT_API auto vsystem_error(int error_code, string_view format_str,
                            format_args args) -> std::system_error;
 
@@ -4285,6 +4285,8 @@ extern template FMT_API auto decimal_point_impl(locale_ref) -> char;
 extern template FMT_API auto decimal_point_impl(locale_ref) -> wchar_t;
 #endif  // FMT_HEADER_ONLY
 
+FMT_END_EXPORT
+
 template <typename T, typename Char, type TYPE>
 template <typename FormatContext>
 FMT_CONSTEXPR FMT_INLINE auto native_formatter<T, Char, TYPE>::format(
@@ -4300,7 +4302,6 @@ FMT_CONSTEXPR FMT_INLINE auto native_formatter<T, Char, TYPE>::format(
   return write<Char>(ctx.out(), val, specs, ctx.locale());
 }
 
-FMT_END_EXPORT
 }  // namespace detail
 
 FMT_BEGIN_EXPORT
@@ -4318,7 +4319,7 @@ inline namespace literals {
  * **Example**:
  *
  *     using namespace fmt::literals;
- *     fmt::print("Elapsed time: {s:.2f} seconds", "s"_a=1.23);
+ *     fmt::print("The answer is {answer}.", "answer"_a=42);
  */
 #  if FMT_USE_NONTYPE_TEMPLATE_ARGS
 template <detail_exported::fixed_string Str> constexpr auto operator""_a() {

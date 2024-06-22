@@ -8,7 +8,10 @@
 #ifndef FMT_STD_H_
 #define FMT_STD_H_
 
-#ifndef FMT_IMPORT_STD
+#include "format.h"
+#include "ostream.h"
+
+#ifndef FMT_MODULE
 #  include <atomic>
 #  include <bitset>
 #  include <complex>
@@ -20,17 +23,8 @@
 #  include <typeinfo>
 #  include <utility>
 #  include <vector>
-#endif
 
-#include "format.h"
-#include "ostream.h"
-
-#if FMT_HAS_INCLUDE(<version>)
-#  include <version>
-#endif
-
-#ifndef FMT_IMPORT_STD
-// Checking FMT_CPLUSPLUS for warning suppression in MSVC.
+// Check FMT_CPLUSPLUS to suppress a bogus warning in MSVC.
 #  if FMT_CPLUSPLUS >= 201703L
 #    if FMT_HAS_INCLUDE(<filesystem>)
 #      include <filesystem>
@@ -42,14 +36,18 @@
 #      include <optional>
 #    endif
 #  endif
-
-#  if FMT_HAS_INCLUDE(<expected>) && FMT_CPLUSPLUS > 202002L
-#    include <expected>
-#  endif
-
+// Use > instead of >= in the version check because <source_location> may be
+// available after C++17 but before C++20 is marked as implemented.
 #  if FMT_CPLUSPLUS > 201703L && FMT_HAS_INCLUDE(<source_location>)
 #    include <source_location>
 #  endif
+#  if FMT_CPLUSPLUS > 202002L && FMT_HAS_INCLUDE(<expected>)
+#    include <expected>
+#  endif
+#endif  // FMT_MODULE
+
+#if FMT_HAS_INCLUDE(<version>)
+#  include <version>
 #endif
 
 // GCC 4 does not support FMT_HAS_INCLUDE.
@@ -160,6 +158,22 @@ template <typename Char> struct formatter<std::filesystem::path, Char> {
                          specs);
   }
 };
+
+class path : public std::filesystem::path {
+ public:
+  auto display_string() const -> std::string {
+    const std::filesystem::path& base = *this;
+    return fmt::format(FMT_STRING("{}"), base);
+  }
+  auto system_string() const -> std::string { return string(); }
+
+  auto generic_display_string() const -> std::string {
+    const std::filesystem::path& base = *this;
+    return fmt::format(FMT_STRING("{:g}"), base);
+  }
+  auto generic_system_string() const -> std::string { return generic_string(); }
+};
+
 FMT_END_NAMESPACE
 #endif  // FMT_CPP_LIB_FILESYSTEM
 

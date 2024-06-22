@@ -24,6 +24,7 @@ std::string vs_product_name(int version) {
         {1937, "Visual Studio 2022 17.7.0"},
         {1938, "Visual Studio 2022 17.8.3"},
         {1939, "Visual Studio 2022 17.9.2"},
+        {1940, "Visual Studio 2022 17.10.1"},
     };
 
     auto it = versions.find(version);

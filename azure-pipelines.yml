@@ -3,6 +3,9 @@
 #   SPDX-License-Identifier: Apache-2.0
 #
 
+# References:
+# - [Microsoft-hosted agents](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml)
+
 
 jobs:
   - job: MacOSAppleClang14Monterey

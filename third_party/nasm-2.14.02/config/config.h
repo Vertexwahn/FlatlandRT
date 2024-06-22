@@ -1,3 +1,7 @@
+// Copied from https://github.com/tensorflow/tensorflow/blob/master/third_party/nasm/config.h
+// The copied code is available under the Apache-2.0 license
+// Copyright of the copied code belongs to the TensorFlow Authors
+
 /* config/config.h.  Generated from config.h.in by configure.  */
 /* config/config.h.in.  Generated from configure.ac by autoheader.  */
 

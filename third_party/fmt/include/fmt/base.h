@@ -8,16 +8,19 @@
 #ifndef FMT_BASE_H_
 #define FMT_BASE_H_
 
-#include <limits.h>  // CHAR_BIT
-#include <stdio.h>   // FILE
-#include <string.h>  // strlen
+#if defined(FMT_IMPORT_STD) && !defined(FMT_MODULE)
+#  define FMT_MODULE
+#endif
 
-#ifndef FMT_IMPORT_STD
+// c headers are preferable for performance reasons
+#ifndef FMT_MODULE
+#  include <limits.h>  // CHAR_BIT
+#  include <stdio.h>   // FILE
+#  include <string.h>  // strlen
+
 // <cstddef> is also included transitively from <type_traits>.
 #  include <cstddef>      // std::byte
 #  include <type_traits>  // std::enable_if
-#else
-import std;
 #endif
 
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
@@ -144,6 +147,8 @@ import std;
 #  define FMT_USE_NONTYPE_TEMPLATE_ARGS 1
 #elif defined(__cpp_nontype_template_args) && \
     __cpp_nontype_template_args >= 201911L
+#  define FMT_USE_NONTYPE_TEMPLATE_ARGS 1
+#elif FMT_CLANG_VERSION >= 1200 && FMT_CPLUSPLUS >= 202002L
 #  define FMT_USE_NONTYPE_TEMPLATE_ARGS 1
 #else
 #  define FMT_USE_NONTYPE_TEMPLATE_ARGS 0
@@ -2019,7 +2024,7 @@ constexpr auto make_format_args(T&... args)
  *
  * **Example**:
  *
- *     fmt::print("Elapsed time: {s:.2f} seconds", fmt::arg("s", 1.23));
+ *     fmt::print("The answer is {answer}.", fmt::arg("answer", 42));
  */
 template <typename Char, typename T>
 inline auto arg(const Char* name, const T& arg) -> detail::named_arg<Char, T> {

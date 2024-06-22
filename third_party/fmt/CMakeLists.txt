@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...3.26)
+cmake_minimum_required(VERSION 3.8...3.28)
 
 # Fallback for using newer policies on CMake <3.12.
 if (${CMAKE_VERSION} VERSION_LESS 3.12)
@@ -36,6 +36,12 @@ function(enable_module target)
   endif ()
 endfunction()
 
+set(FMT_USE_CMAKE_MODULES FALSE)
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.28 AND
+    CMAKE_GENERATOR STREQUAL "Ninja")
+  set(FMT_USE_CMAKE_MODULES TRUE)
+endif ()
+
 # Adds a library compiled with C++20 module support.
 # `enabled` is a CMake variables that specifies if modules are enabled.
 # If modules are disabled `add_module_library` falls back to creating a
@@ -53,6 +59,7 @@ function(add_module_library name)
   if (NOT ${${AML_IF}})
     # Create a non-modular library.
     target_sources(${name} PRIVATE ${AML_FALLBACK})
+    set_target_properties(${name} PROPERTIES CXX_SCAN_FOR_MODULES OFF)
     return()
   endif ()
 
@@ -62,48 +69,55 @@ function(add_module_library name)
     target_compile_options(${name} PUBLIC -fmodules-ts)
   endif ()
 
-  # `std` is affected by CMake options and may be higher than C++20.
-  get_target_property(std ${name} CXX_STANDARD)
+  target_compile_definitions(${name} PRIVATE FMT_MODULE)
 
-  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(pcms)
-    foreach (src ${sources})
-      get_filename_component(pcm ${src} NAME_WE)
-      set(pcm ${pcm}.pcm)
+  if (FMT_USE_CMAKE_MODULES)
+    target_sources(${name} PUBLIC FILE_SET fmt TYPE CXX_MODULES
+                   FILES ${sources})
+  else()
+    # `std` is affected by CMake options and may be higher than C++20.
+    get_target_property(std ${name} CXX_STANDARD)
 
-      # Propagate -fmodule-file=*.pcm to targets that link with this library.
-      target_compile_options(
-        ${name} PUBLIC -fmodule-file=${CMAKE_CURRENT_BINARY_DIR}/${pcm})
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+      set(pcms)
+      foreach (src ${sources})
+        get_filename_component(pcm ${src} NAME_WE)
+        set(pcm ${pcm}.pcm)
 
-      # Use an absolute path to prevent target_link_libraries prepending -l
-      # to it.
-      set(pcms ${pcms} ${CMAKE_CURRENT_BINARY_DIR}/${pcm})
-      add_custom_command(
-        OUTPUT ${pcm}
-        COMMAND ${CMAKE_CXX_COMPILER}
-                -std=c++${std} -x c++-module --precompile -c
-                -o ${pcm} ${CMAKE_CURRENT_SOURCE_DIR}/${src}
-                "-I$<JOIN:$<TARGET_PROPERTY:${name},INCLUDE_DIRECTORIES>,;-I>"
-        # Required by the -I generator expression above.
-        COMMAND_EXPAND_LISTS
-        DEPENDS ${src})
-    endforeach ()
+        # Propagate -fmodule-file=*.pcm to targets that link with this library.
+        target_compile_options(
+          ${name} PUBLIC -fmodule-file=${CMAKE_CURRENT_BINARY_DIR}/${pcm})
 
-    # Add .pcm files as sources to make sure they are built before the library.
-    set(sources)
-    foreach (pcm ${pcms})
-      get_filename_component(pcm_we ${pcm} NAME_WE)
-      set(obj ${pcm_we}.o)
-      # Use an absolute path to prevent target_link_libraries prepending -l.
-      set(sources ${sources} ${pcm} ${CMAKE_CURRENT_BINARY_DIR}/${obj})
-      add_custom_command(
-        OUTPUT ${obj}
-        COMMAND ${CMAKE_CXX_COMPILER} $<TARGET_PROPERTY:${name},COMPILE_OPTIONS>
-                -c -o ${obj} ${pcm}
-        DEPENDS ${pcm})
-    endforeach ()
-  endif ()
-  target_sources(${name} PRIVATE ${sources})
+        # Use an absolute path to prevent target_link_libraries prepending -l
+        # to it.
+        set(pcms ${pcms} ${CMAKE_CURRENT_BINARY_DIR}/${pcm})
+        add_custom_command(
+          OUTPUT ${pcm}
+          COMMAND ${CMAKE_CXX_COMPILER}
+                  -std=c++${std} -x c++-module --precompile -c
+                  -o ${pcm} ${CMAKE_CURRENT_SOURCE_DIR}/${src}
+                  "-I$<JOIN:$<TARGET_PROPERTY:${name},INCLUDE_DIRECTORIES>,;-I>"
+          # Required by the -I generator expression above.
+          COMMAND_EXPAND_LISTS
+          DEPENDS ${src})
+      endforeach ()
+
+      # Add .pcm files as sources to make sure they are built before the library.
+      set(sources)
+      foreach (pcm ${pcms})
+        get_filename_component(pcm_we ${pcm} NAME_WE)
+        set(obj ${pcm_we}.o)
+        # Use an absolute path to prevent target_link_libraries prepending -l.
+        set(sources ${sources} ${pcm} ${CMAKE_CURRENT_BINARY_DIR}/${obj})
+        add_custom_command(
+          OUTPUT ${obj}
+          COMMAND ${CMAKE_CXX_COMPILER} $<TARGET_PROPERTY:${name},COMPILE_OPTIONS>
+                  -c -o ${obj} ${pcm}
+          DEPENDS ${pcm})
+      endforeach ()
+    endif ()
+    target_sources(${name} PRIVATE ${sources})
+  endif()
 endfunction()
 
 include(CMakeParseArguments)
@@ -153,6 +167,7 @@ option(FMT_CUDA_TEST "Generate the cuda-test target." OFF)
 option(FMT_OS "Include OS-specific APIs." ON)
 option(FMT_MODULE "Build a module instead of a traditional library." OFF)
 option(FMT_SYSTEM_HEADERS "Expose headers with marking them as system." OFF)
+option(FMT_UNICODE "Enable Unicode support." ON)
 
 if (FMT_TEST AND FMT_MODULE)
   # The tests require {fmt} to be compiled as traditional library
@@ -285,8 +300,7 @@ add_module_library(fmt src/fmt.cc FALLBACK
 add_library(fmt::fmt ALIAS fmt)
 if (FMT_MODULE)
   enable_module(fmt)
-endif ()
-if (FMT_OS)
+elseif (FMT_OS)
   target_sources(fmt PRIVATE src/os.cc)
 else()
   target_compile_definitions(fmt PRIVATE FMT_OS=0)
@@ -341,10 +355,10 @@ endif ()
 add_library(fmt-header-only INTERFACE)
 add_library(fmt::fmt-header-only ALIAS fmt-header-only)
 
-if (MSVC)
+if (MSVC AND FMT_UNICODE)
   # Unicode support requires compiling with /utf-8.
-  target_compile_options(fmt PUBLIC /utf-8)
-  target_compile_options(fmt-header-only INTERFACE /utf-8)
+  target_compile_options(fmt PUBLIC $<$<COMPILE_LANGUAGE:CXX>:/utf-8>)
+  target_compile_options(fmt-header-only INTERFACE $<$<COMPILE_LANGUAGE:CXX>:/utf-8>)
 endif ()
 
 target_compile_definitions(fmt-header-only INTERFACE FMT_HEADER_ONLY=1)
@@ -396,12 +410,18 @@ if (FMT_INSTALL)
 
   set(INSTALL_TARGETS fmt fmt-header-only)
 
+  set(INSTALL_FILE_SET)
+  if (FMT_USE_CMAKE_MODULES)
+    set(INSTALL_FILE_SET FILE_SET fmt DESTINATION "${FMT_INC_DIR}/fmt")
+  endif()
+
   # Install the library and headers.
   install(TARGETS ${INSTALL_TARGETS} EXPORT ${targets_export_name}
           LIBRARY DESTINATION ${FMT_LIB_DIR}
           ARCHIVE DESTINATION ${FMT_LIB_DIR}
           PUBLIC_HEADER DESTINATION "${FMT_INC_DIR}/fmt"
-          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+          ${INSTALL_FILE_SET})
 
   # Use a namespace because CMake provides better diagnostics for namespaced
   # imported targets.
@@ -434,15 +454,17 @@ function(add_doc_target)
   endif ()
 
   set(sources )
-  foreach (source api.md index.md syntax.md usage.md fmt.css fmt.js)
+  foreach (source api.md index.md syntax.md get-started.md fmt.css fmt.js)
     set(sources ${sources} doc/${source})
   endforeach()
 
   add_custom_target(
     doc
     COMMAND
-      ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR}/support
+      ${CMAKE_COMMAND}
+        -E env PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR}/support/python
         ${MKDOCS} build -f ${CMAKE_CURRENT_SOURCE_DIR}/support/mkdocs.yml
+                        --site-dir ${CMAKE_CURRENT_BINARY_DIR}/site
                         --no-directory-urls
     SOURCES ${sources})
 

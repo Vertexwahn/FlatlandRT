@@ -261,7 +261,7 @@ disallowed.
 
 ::: format_context
 
-### Compile-Time Format String Checks
+### Compile-Time Checks
 
 Compile-time format string checks are enabled by default on compilers
 that support C++20 `consteval`. On older compilers you can use the
@@ -333,6 +333,8 @@ formatting functions and locale support.
 
 ::: vformat(string_view, format_args)
 
+::: operator""_a()
+
 ### Utilities
 
 ::: ptr(T)
@@ -357,12 +359,6 @@ functions.
 ::: system_error
 
 ::: format_system_error
-
-### Literal-Based API
-
-The following user-defined literals are defined in `fmt/format.h`.
-
-::: operator""_a()
 
 ### Custom Allocators
 
@@ -421,7 +417,7 @@ parameter to avoid the expensive `<locale>` include.
 ::: formatted_size(const Locale&, format_string<T...>, T&&...)
 
 <a id="legacy-checks"></a>
-### Legacy Compile-Time Format String Checks
+### Legacy Compile-Time Checks
 
 `FMT_STRING` enables compile-time checks on older compilers. It requires
 C++14 or later and is a no-op in C++11.
@@ -533,12 +529,13 @@ feature](https://en.cppreference.com/w/cpp/feature_test).
 ## Format String Compilation
 
 `fmt/compile.h` provides format string compilation enabled via the
-`FMT_COMPILE` macro or the `_cf` user-defined literal. Format strings
-marked with `FMT_COMPILE` or `_cf` are parsed, checked and converted
-into efficient formatting code at compile-time. This supports arguments
-of built-in and string types as well as user-defined types with `format`
-functions taking the format context type as a template parameter in
-their `formatter` specializations. For example:
+`FMT_COMPILE` macro or the `_cf` user-defined literal defined in
+namespace `fmt::literals`. Format strings marked with `FMT_COMPILE`
+or `_cf` are parsed, checked and converted into efficient formatting
+code at compile-time. This supports arguments of built-in and string
+types as well as user-defined types with `format` functions taking
+the format context type as a template parameter in their `formatter`
+specializations. For example:
 
     template <> struct fmt::formatter<point> {
       constexpr auto parse(format_parse_context& ctx);

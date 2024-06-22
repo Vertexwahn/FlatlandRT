@@ -2,10 +2,12 @@
 # Copyright (c) 2012 - present, Victor Zverovich
 
 import os
-import xml.etree.ElementTree as et
-from mkdocstrings.handlers.base import BaseHandler
-from typing import Any, Mapping, Optional
+from pathlib import Path
+from typing import Any, List, Mapping, Optional
 from subprocess import CalledProcessError, PIPE, Popen, STDOUT
+import xml.etree.ElementTree as et
+
+from mkdocstrings.handlers.base import BaseHandler
 
 class Definition:
   '''A definition extracted by Doxygen.'''
@@ -38,7 +40,7 @@ tag_text_map = {
 def escape_html(s: str) -> str:
   return s.replace("<", "&lt;")
 
-def doxyxml2html(nodes: list[et.Element]):
+def doxyxml2html(nodes: List[et.Element]):
   out = ''
   for n in nodes:
     tag = tag_map.get(n.tag)
@@ -55,7 +57,7 @@ def doxyxml2html(nodes: list[et.Element]):
       out += n.tail
   return out
 
-def convert_template_params(node: et.Element) -> Optional[list[Definition]]:
+def convert_template_params(node: et.Element) -> Optional[List[Definition]]:
   templateparamlist = node.find('templateparamlist')
   if templateparamlist is None:
     return None
@@ -67,7 +69,7 @@ def convert_template_params(node: et.Element) -> Optional[list[Definition]]:
     params.append(param)
   return params
 
-def get_description(node: et.Element) -> list[et.Element]:
+def get_description(node: et.Element) -> List[et.Element]:
   return node.findall('briefdescription/para') + \
          node.findall('detaileddescription/para')
 
@@ -156,10 +158,11 @@ class CxxHandler(BaseHandler):
 
     # Run doxygen.
     cmd = ['doxygen', '-']
-    doc_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    include_dir = os.path.join(os.path.dirname(doc_dir), 'include', 'fmt')
+    doc_dir = Path(__file__).parents[3]
+    top_dir = os.path.dirname(doc_dir)
+    include_dir = os.path.join(top_dir, 'include', 'fmt')
     self._ns2doxyxml = {}
-    self._doxyxml_dir = 'doxyxml'
+    self._doxyxml_dir = os.path.join(top_dir, 'build', 'doxyxml')
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
     out, _ = p.communicate(input=r'''
         PROJECT_NAME      = fmt
@@ -201,7 +204,7 @@ class CxxHandler(BaseHandler):
           root.append(node)
 
   def collect_compound(self, identifier: str,
-                       cls: list[et.Element]) -> Definition:
+                       cls: List[et.Element]) -> Definition:
     '''Collect a compound definition such as a struct.'''
     path = os.path.join(self._doxyxml_dir, cls[0].get('refid') + '.xml')
     with open(path) as f:
@@ -287,6 +290,8 @@ class CxxHandler(BaseHandler):
     return self.collect_compound(identifier, cls)
 
   def render(self, d: Definition, config: dict) -> str:
+    if d.id is not None:
+      self.do_heading('', 0, id=d.id)
     text = '<div class="docblock">\n'
     text += render_decl(d)
     text += '<div class="docblock-desc">\n'

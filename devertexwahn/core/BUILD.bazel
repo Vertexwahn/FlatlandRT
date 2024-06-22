@@ -27,10 +27,26 @@ cc_test(
 
 cc_library(
     name = "logging",
+    srcs = [
+        "logging.cpp",
+    ],
     hdrs = [
         "logging.h",
     ],
-    deps = ["@glog"],
+    deps = [
+        "@glog",
+        "@spdlog",
+    ],
+)
+
+cc_test(
+    name = "logging_test",
+    srcs = ["logging_test.cpp"],
+    deps = [
+        ":logging",
+        ":platform",
+        "@googletest//:gtest_main",
+    ],
 )
 
 cc_library(
@@ -103,6 +119,15 @@ cc_test(
         "//flatland/rendering/integrator",
         "//flatland/rendering/scene/shape:disk",
         "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "platform",
+    srcs = ["platform.h"],
+    deps = [
+        ":namespace",
+        "@boost.predef",
     ],
 )
 

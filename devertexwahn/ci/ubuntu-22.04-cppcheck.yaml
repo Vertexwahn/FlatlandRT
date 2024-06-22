@@ -26,9 +26,19 @@ steps:
       df
     displayName: 'Show disk space'
 
+  # Note: apt-get cannot be used to install Cppcheck since it has only an old version that give some false positives
+  #- script: |
+  #    sudo apt-get update
+  #    sudo apt-get install cppcheck
+  #  displayName: "Install Cppcheck"
+
   - script: |
-      sudo apt-get update
-      sudo apt-get install cppcheck
+      curl -L -o cppcheck.tar.gz https://github.com/danmar/cppcheck/archive/refs/tags/2.14.1.tar.gz
+      tar xzf cppcheck.tar.gz
+      cd cppcheck-2.14.1
+      cmake -S . -B build
+      cmake --build build
+      sudo cmake --install build
     displayName: "Install Cppcheck"
 
   - script: |
@@ -39,26 +49,21 @@ steps:
   - script: |
       cd devertexwahn
       #cppcheck --enable=all --error-exitcode=1 core
-      cppcheck --error-exitcode=1 core
+      cppcheck --check-level=exhaustive --error-exitcode=1 core
     displayName: "Cppcheck core"
 
   - script: |
       cd devertexwahn
-      cppcheck --error-exitcode=1 flatland
+      cppcheck --check-level=exhaustive --error-exitcode=1 flatland
     displayName: "Cppcheck flatland"
 
   - script: |
       cd devertexwahn
-      cppcheck --error-exitcode=1 imaging
+      cppcheck --check-level=exhaustive --error-exitcode=1 imaging
     displayName: "Cppcheck imaging"
 
   - script: |
       cd devertexwahn
-      cppcheck --error-exitcode=1 math
+      cppcheck --check-level=exhaustive --error-exitcode=1 math
     displayName: "Cppcheck math"
 
-
-  - script: |
-      cd devertexwahn
-      cppcheck core # imaging
-    displayName: "Show compiler information"
