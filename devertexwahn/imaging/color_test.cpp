@@ -128,3 +128,17 @@ TEST(Color3f, to_string) {
     Color3f c{.5f, .6f, .7f};
     EXPECT_THAT(c.to_string(), "0.5, 0.6, 0.7");
 }
+
+TEST(Color3f, hot_to_cold_color_ramp) {
+    Color3f cold = hot_to_cold_color_ramp(.0f, .0f, 1.f);
+
+    EXPECT_THAT(cold.red(), 0.0f);
+    EXPECT_THAT(cold.green(), 0.0f);
+    EXPECT_THAT(cold.blue(), 1.0f);
+
+    Color3f hot = hot_to_cold_color_ramp(1.f, .0f, 1.f);
+
+    EXPECT_THAT(hot.red(), 1.0f);
+    EXPECT_THAT(hot.green(), 0.0f);
+    EXPECT_THAT(hot.blue(), 0.0f);
+}
