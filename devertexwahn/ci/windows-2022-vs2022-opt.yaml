@@ -38,9 +38,6 @@ steps:
       get-volume
     displayName: "Check available memory"
 
-  # Serveral tests are exculde here because of incorrect VC runtime DLLs 
-  # https://github.com/google/googletest/issues/4556
-  # https://github.com/actions/runner-images/issues/10004
   - script: |    
       cd devertexwahn
       bazel --output_base=C:/bazel_output_base test --config=vs2022  --compilation_mode=opt -- //... 
