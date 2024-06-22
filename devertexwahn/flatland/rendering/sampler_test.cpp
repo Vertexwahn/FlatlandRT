@@ -156,3 +156,12 @@ TEST(PixelCenterSampler, GivenPixelCenterSample_WhenRequestingSample_ThenExpectA
     EXPECT_THAT(pcs.next_1d(), .5f);
     EXPECT_THAT(pcs.next_2d(), Point2f(.5f, .5f));
 }
+
+TEST(ConstantSamplerType, clone) {
+    PropertySet ps;
+    ConstantSampler sampler{ps};
+
+    auto cloned_sampler = sampler.clone();
+
+    EXPECT_THAT(cloned_sampler->to_string(), ::testing::HasSubstr("PixelCenterSampler"));
+}
