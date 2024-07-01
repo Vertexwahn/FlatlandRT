@@ -22,9 +22,14 @@ public:
     [[nodiscard]]
     double elapsed_seconds() const;
 
+    [[nodiscard]]
+    double elapsed_milliseconds() const;
+
 private:
-    using clock = std::chrono::steady_clock;
-    clock::time_point start_;
+    using clock = std::chrono::high_resolution_clock;
+    using time_point = clock::time_point;
+
+    time_point last_; // last time when reset was called or the timer object was created
 };
 
 DE_VERTEXWAHN_END_NAMESPACE

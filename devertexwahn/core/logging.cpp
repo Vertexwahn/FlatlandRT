@@ -57,6 +57,30 @@ namespace de_vertexwahn {
 
 namespace detail {
 
+static std::mutex LOGGER_MUTEX;
+
+/*
+template<typename Mt>
+class SinkWithCallback : public spdlog::sinks::base_sink<Mt> {
+public:
+    template<class F>
+    explicit SinkWithCallback(F &&_callback) noexcept
+            : callback_{std::forward<F>(callback_)} {}
+
+protected:
+    void sink_it_(const spdlog::details::log_msg &msg) override {
+        auto level = msg.level;
+        auto level_name = spdlog::level::to_short_c_str(level);
+        auto message = fmt::to_string(msg.payload);
+        callback_(level_name, message.c_str());
+    }
+    void flush_() override {}
+
+private:
+    std::function<void(const char *, const char *)> callback_;
+};
+*/
+
 static de_vertexwahn::logger LOGGER = [] {
     auto sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     spdlog::logger l{"console", sink};
@@ -66,7 +90,25 @@ static de_vertexwahn::logger LOGGER = [] {
 #else
     spdlog::level::level_enum log_level = spdlog::level::info;
 #endif
-
+    if (auto env_level_c_str = getenv("DE_VERTEXWAHN_LOG_LEVEL")) {
+        std::string env_level{env_level_c_str};
+        for (auto &c : env_level) { c = static_cast<char>(tolower(c)); }
+        if (env_level == "verbose") {
+            log_level = spdlog::level::debug;
+        } else if (env_level == "info") {
+            log_level = spdlog::level::info;
+        } else if (env_level == "warning") {
+            log_level = spdlog::level::warn;
+        } else if (env_level == "error") {
+            log_level = spdlog::level::err;
+        } else {
+            LOG_WARNING_WITH_LOCATION(
+                    "Invalid log level '{}'. "
+                    "Please choose from 'verbose', 'info', 'warning' and 'error'. "
+                    "Fallback to default log level '{}'.",
+                    env_level, std::to_string(log_level));
+        }
+    }
     l.set_level(log_level);
     return l;
 }();
@@ -75,7 +117,21 @@ static de_vertexwahn::logger LOGGER = [] {
     return LOGGER;
 }
 
+void set_sink(de_vertexwahn::sink_ptr sink) noexcept {
+    std::lock_guard _lock{LOGGER_MUTEX};
+    LOGGER.sinks().clear();
+    if (sink) {
+        LOGGER.sinks().emplace_back(std::move(sink));
+    }
 }
+
+/*
+de_vertexwahn::sink_ptr create_sink_with_callback(std::function<void(const char *level, const char *message)> callback) noexcept {
+    return std::make_shared<de_vertexwahn::detail::SinkWithCallback<std::mutex>>(std::move(callback));
+}
+*/
+
+} // namespace detail
 
 void log_level_verbose() noexcept { detail::default_logger().set_level(spdlog::level::debug); }
 void log_level_info() noexcept { detail::default_logger().set_level(spdlog::level::info); }

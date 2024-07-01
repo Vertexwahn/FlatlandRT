@@ -203,7 +203,7 @@ bool store_png(const char *filename, const Image4b &image) {
 
     if (fp == nullptr) {
         if (fp != nullptr) fclose(fp);
-        LOG(INFO) << "Store PNG: Could not open file " << filename;
+        LOG_INFO_WITH_LOCATION("Store PNG: Could not open file {}", filename);
         return false;
     }
 
@@ -211,17 +211,17 @@ bool store_png(const char *filename, const Image4b &image) {
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (png_ptr == nullptr) {
         if (fp != nullptr) fclose(fp);
-        LOG(ERROR) << "Store PNG: Could not allocate write struct (" << filename << ")";
+        LOG_ERROR_WITH_LOCATION("Store PNG: Could not allocate write struct ({})", filename);
         return false;
     }
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (info_ptr == nullptr) {
-        LOG(ERROR) << "Store PNG: Could not allocate info struct (" << filename << ")";
+        LOG_ERROR_WITH_LOCATION("Store PNG: Could not allocate info struct ({})", filename);
     }
 
     if (setjmp(png_jmpbuf(png_ptr))) {
-        LOG(ERROR) << "Store PNG: Set jumpbuf failed (" << filename << ")";
+        LOG_ERROR_WITH_LOCATION("Store PNG: Set jumpbuf failed ({})", filename);
     }
 
     png_init_io(png_ptr, fp);
@@ -261,7 +261,7 @@ bool store_png(const char *filename, const Image3f &image) {
 
     FILE *fp = fopen(filename, "wb");
     if (fp == nullptr) {
-        LOG(INFO) << "Store PNG: Could not open file " << filename;
+        LOG_INFO_WITH_LOCATION("Store PNG: Could not open file {}", filename);
         return false;
     }
 
@@ -269,17 +269,17 @@ bool store_png(const char *filename, const Image3f &image) {
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (png_ptr == nullptr) {
         if (fp != nullptr) fclose(fp);
-        LOG(ERROR) << "Store PNG: Could not allocate write struct (" << filename << ")";
+        LOG_ERROR_WITH_LOCATION("Store PNG: Could not allocate write struct ({})", filename);
         return false;
     }
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (info_ptr == nullptr) {
-        LOG(ERROR) << "Store PNG: Could not allocate info struct (" << filename << ")";
+        LOG_ERROR_WITH_LOCATION("Store PNG: Could not allocate info struct ({})", filename);
     }
 
     if (setjmp(png_jmpbuf(png_ptr))) {
-        LOG(ERROR) << "Store PNG: Set jumpbuf failed (" << filename << ")";
+        LOG_ERROR_WITH_LOCATION("Store PNG: Set jumpbuf failed ({})", filename);
     }
 
     png_init_io(png_ptr, fp);

@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -22,7 +22,8 @@ public:
     using Scalar = ScalarType;
 
     BruteForceIntersector(const PropertySet &ps) {
-        LOG(INFO) << "Using brute force integrator";
+        //LOG(INFO) << "Using brute force integrator";
+        LOG_INFO_WITH_LOCATION("Using brute force intersector");
     }
 
     void build_acceleration_structure(std::vector<ReferenceCounted<Shape>> shapes) override {

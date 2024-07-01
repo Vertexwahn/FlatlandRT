@@ -230,12 +230,13 @@ TEST(build_quadtree, GivenSingleTriangle_WhenBuildingQuadtree_ExpectRootAsLeave)
 
     auto sub_shape_ids = tip.sub_shape_ids();
 
-    QuadtreeBuildDescription qtbd{
+    QuadtreeBuildDescription qtbd {
             &tip,
             tip.bounds(),
             sub_shape_ids,
             MAX_LEAVE_SIZE
     };
+
     auto *root = build_quadtree(qtbd);
     EXPECT_FALSE(root == nullptr);
 

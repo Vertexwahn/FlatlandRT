@@ -28,11 +28,11 @@ enum ExitStatus {
 };
 
 void log_boost_version() {
-    LOG(INFO) << "Using Boost "
-              << BOOST_VERSION / 100000 << "."      // major version
-              << BOOST_VERSION / 100 % 1000 << "."  // minor version
-              << BOOST_VERSION % 100                // patch level
-              << std::endl;
+    LOG_INFO_WITH_LOCATION("Using Boost {}.{}.{}",
+                           BOOST_VERSION / 100000,      // major version
+                           BOOST_VERSION / 100 % 1000,  // minor version
+                           BOOST_VERSION % 100  // patch level
+    );
 }
 
 void plot_quadtree(QuadtreeNode *node, SvgCanvas2f *canvas) {
@@ -67,18 +67,18 @@ int main(int argc, char **argv) {
         log_boost_version();
 
         if (!std::filesystem::exists(filename)) {
-            LOG(ERROR) << "File " << filename << " does not exist";
+            LOG_ERROR_WITH_LOCATION("File {} does not exist", filename.string());
             return ExitStatus::SceneFileNotFound;
         }
 
-        LOG(INFO) << "Loading scene " << std::filesystem::path(filename) << ".";
+        LOG_INFO_WITH_LOCATION("Loading scene {}", filename.string());
 
         auto scene = load_scene2f(filename.string());
 
         auto sensor = scene->sensor();
 
         if (sensor == nullptr) {
-            LOG(ERROR) << "Sensor is missing in scene description";
+            LOG_ERROR_WITH_LOCATION("Sensor is missing in scene description");
             return ExitStatus::SensorMissing;
         }
 
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
                 sensor->film()->width(),
                 sensor->film()->height());
 
-        LOG(INFO) << "Begin rendering.";
+        LOG_INFO_WITH_LOCATION("Begin rendering.");
 
         auto integrator = scene->integrator();
         integrator->set_canvas(canvas);
@@ -105,19 +105,19 @@ int main(int argc, char **argv) {
         // determine out path
         std::filesystem::path out_path = fmt::format("{}/{}", filename.parent_path().string(), sensor->film()->filename());
 
-        LOG(INFO) << "Store SVG to " << out_path;
+        LOG_INFO_WITH_LOCATION("Store SVG to {}", out_path.string());
 
         canvas->store(out_path.string());
 
-        LOG(INFO) << "Done";
-        LOG(INFO) << "Shutting down now";
+        LOG_INFO_WITH_LOCATION("Done");
+        LOG_INFO_WITH_LOCATION("Shutting down now");
     }
     catch (Exception &ex) {
-        LOG(ERROR) << ex.what();
+        LOG_ERROR_WITH_LOCATION("{}", ex.what());
         return ExitStatus::UnknownError;
     }
     catch (std::exception &ex) {
-        LOG(ERROR) << ex.what();
+        LOG_ERROR_WITH_LOCATION("{}", ex.what());
         return ExitStatus::UnknownError;
     }
 

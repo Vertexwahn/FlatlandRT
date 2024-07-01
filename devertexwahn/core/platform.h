@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2023-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -11,7 +11,7 @@
 
 #include "boost/predef.h"
 
-DE_VERTEXWAHN_BEGIN_NAMESPACE
+#include <string_view>
 
 #if BOOST_OS_WINDOWS
 #define DE_VERTEXWAHN_OS_WINDOWS
@@ -24,6 +24,10 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 #if BOOST_OS_LINUX
 #define DE_VERTEXWAHN_OS_LINUX
 #endif
+
+DE_VERTEXWAHN_BEGIN_NAMESPACE
+
+[[nodiscard]] void *dynamic_module_find_symbol(void *handle, std::string_view name) noexcept;
 
 DE_VERTEXWAHN_END_NAMESPACE
 

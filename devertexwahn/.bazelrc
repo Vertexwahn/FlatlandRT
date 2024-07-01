@@ -163,3 +163,4 @@ build:iwyu --aspects @com_github_storypku_bazel_iwyu//bazel/iwyu:iwyu.bzl%iwyu_a
 build:iwyu --output_groups=report
 
 try-import %workspace%/.bazelrc.remote_cache
+try-import %workspace%/.bazelrc.build_meta

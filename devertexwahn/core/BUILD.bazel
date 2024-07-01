@@ -45,6 +45,31 @@ cc_test(
     deps = [
         ":logging",
         ":platform",
+        "//core/tests:test_logger",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "logging_test_env_info",
+    srcs = ["logging_test_env.cpp"],
+    env = {"DE_VERTEXWAHN_LOG_LEVEL": "info"},
+    deps = [
+        ":logging",
+        ":platform",
+        "//core/tests:test_logger",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "logging_test_env_warning",
+    srcs = ["logging_test_env.cpp"],
+    env = {"DE_VERTEXWAHN_LOG_LEVEL": "warning"},
+    deps = [
+        ":logging",
+        ":platform",
+        "//core/tests:test_logger",
         "@googletest//:gtest_main",
     ],
 )
@@ -124,11 +149,51 @@ cc_test(
 
 cc_library(
     name = "platform",
-    srcs = ["platform.h"],
+    srcs = [
+        "platform.cpp",
+        "platform.h",
+    ],
+    linkopts = select({
+        "@platforms//os:windows": [
+            "-DEFAULTLIB:advapi32.lib",
+            "-DEFAULTLIB:cfgmgr32.lib",
+        ],
+        "@platforms//os:linux": [
+            "-ldl",  # only needed for GCC9 - not for GCC11
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
+        ":logging",
         ":namespace",
+        ":timer",
         "@boost.predef",
     ],
+)
+
+cc_test(
+    name = "platform_test",
+    srcs = [
+        "platform_test.cpp",
+    ],
+    data = [
+        ":platform_test_library",
+    ],
+    linkopts = select({
+        "@platforms//os:linux": ["-Wl,-rpath,bazel-bin"],
+        "//conditions:default": [],
+    }),
+    deps = [
+        ":platform",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "platform_test_library",
+    srcs = ["platform_test_library.cpp"],
+    #linkopts = ["-ldl"],
+    alwayslink = True,
 )
 
 cc_library(

@@ -8,6 +8,7 @@
 
 using namespace de_vertexwahn;
 
+//#include <catch2.hpp>
 #include "catch2/catch_test_macros.hpp"
 
 TEST_CASE("Rectangle2f",

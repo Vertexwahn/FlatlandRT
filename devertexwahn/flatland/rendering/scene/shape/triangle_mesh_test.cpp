@@ -115,6 +115,29 @@ TEST(TriangleMesh2, GivenTranslationTransform_WhenConstructionAMesh_ThenExpectTr
     EXPECT_THAT(actual_transform.matrix(), expected_matrix);
 }
 
+TEST(TriangleMesh2f, intersect) {
+    // Arrange
+    std::vector<Point2f> points = {
+            {0.f, 0.f},
+            {1.f, 0.f},
+            {1.f, 1.f}
+    };
+
+    std::vector<std::uint32_t> indices = {0, 1, 2};
+
+    auto transform = identity<float>();
+
+    PropertySet ps;
+    ps.add_property("transform", transform);
+
+    TriangleMesh2f tm{ps, points, indices};
+
+    // Act
+    MediumEvent2f me;
+    Ray2f ray{Point2f{0.f, 0.f}, Vector2f{1.f, 0.f}, 0.f, 100.f};
+    ASSERT_DEATH(tm.intersect(ray, me), "");
+}
+
 TEST(TriangleMesh2, GivenTriangle_WhenComputingBound_ExpectCorrectBounds) {
     // Arrange
     std::vector<Point2f> points = {

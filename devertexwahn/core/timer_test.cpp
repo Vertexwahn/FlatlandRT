@@ -26,3 +26,10 @@ TEST(Timer, reset) {
     timer.reset();
     EXPECT_LE(timer.elapsed_seconds(), 1.0);
 }
+
+TEST(Timer, reset2) {
+    Timer timer;
+    std::this_thread::sleep_for(1000ms);
+    timer.reset();
+    EXPECT_LE(timer.elapsed_milliseconds(), 1000.0);
+}

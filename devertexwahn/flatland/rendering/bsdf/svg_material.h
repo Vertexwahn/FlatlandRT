@@ -34,11 +34,11 @@ public:
     Color3f fill_color() const;
 
     [[nodiscard]]
-    virtual Color3f sample(BSDFSample2f& sample, const Point2& sample_point) const override;
+    Color3f sample(BSDFSample2f& sample, const Point2& sample_point) const override;
     [[nodiscard]]
-    virtual float pdf(const BSDFSample2f& sample) const override { return 0.f; };
+    float pdf(const BSDFSample2f& sample) const override { return 0.f; };
     [[nodiscard]]
-    virtual Color3f evaluate(const BSDFSample2f& sample) const override;
+    Color3f evaluate(const BSDFSample2f& sample) const override;
 
 private:
     Color3f stroke_color_{0.f, 0.f, 0.f};

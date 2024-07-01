@@ -5,9 +5,12 @@
 
 #pragma once
 
+#include "flatland/rendering/scene/shape/shape.h"
+
 #include "math/axis_aligned_bounding_box.h"
 #include "math/geometry.h"
-#include "flatland/rendering/scene/shape/shape.h"
+
+#include "core/logging.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
@@ -82,9 +85,7 @@ public:
     }
 
     bool intersect(const RayType<ScalarType, 2> &ray, MediumEventType<ScalarType, 2> &me) const override {
-        //throw std::runtime_error("Triangle mesh intersection not implemented");
-        //LOG(ERROR) << "Triangle mesh intersection not implemented";
-        std::cout << "Triangle mesh intersection not implemented" << std::endl;
+        LOG_ERROR_WITH_LOCATION("Triangle mesh intersection not implemented");
         return false;
     }
 

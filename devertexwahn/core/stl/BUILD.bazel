@@ -1,0 +1,15 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2024 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+cc_library(
+    name = "string",
+    hdrs = [
+        "string.h",
+    ],
+    features = [
+        "parse_headers",
+    ],
+    visibility = ["//visibility:public"],
+)

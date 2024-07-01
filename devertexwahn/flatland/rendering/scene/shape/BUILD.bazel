@@ -142,6 +142,7 @@ cc_library(
     name = "triangle_mesh",
     hdrs = ["triangle_mesh.h"],
     deps = [
+        "//core:logging",
         "//flatland/rendering/scene/shape",
         "//math:axis_aligned_bounding_box",
         "//math:geometry",

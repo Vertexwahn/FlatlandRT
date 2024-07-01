@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -14,7 +14,7 @@ void render(Integrator2f *integrator, ReferenceCounted<SvgCanvas2f> canvas_, con
     assert(scene);
     assert(canvas_);
 
-    LOG(INFO) << "Begin rendering.";
+    LOG_INFO_WITH_LOCATION("Begin rendering.");
 
     for (auto shape: scene->shapes()) {
         canvas_->add(shape.get());

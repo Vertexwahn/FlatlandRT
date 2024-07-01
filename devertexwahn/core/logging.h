@@ -43,19 +43,22 @@
 
 #include "spdlog/spdlog.h"
 
-//#include "fmt/core.h"
-
 // Old logging based on glog - deprecated
 #include "gflags/gflags.h"
 #include "glog/logging.h"
-// LOG(INFO) << "some text";
 
 namespace de_vertexwahn {
 
 using spdlog::logger;
+using spdlog::sink_ptr;
 
 namespace detail {
     [[nodiscard]] de_vertexwahn::logger &default_logger() noexcept;
+    void set_sink(de_vertexwahn::sink_ptr sink) noexcept;
+    de_vertexwahn::sink_ptr create_sink_with_callback(
+            std::function<void(const char *level,
+                               const char *message)>
+    callback) noexcept;
 } // namespace de_vertexwahn::detail
 
 template<typename... Args>
@@ -74,9 +77,9 @@ inline void log_warning(Args &&...args) noexcept {
 }
 
 template<typename... Args>
-/*[[noreturn]]*/ /*FORCE_INLINE*/ inline void log_error(Args &&...args) noexcept {
+[[noreturn]] inline void log_error(Args &&...args) noexcept {
     detail::default_logger().error(std::forward<Args>(args)...);
-    //std::abort();
+    std::abort();
 }
 
 /// Set log level as verbose

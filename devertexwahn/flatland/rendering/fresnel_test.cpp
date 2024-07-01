@@ -11,7 +11,15 @@
 
 using namespace de_vertexwahn;
 
-TEST(fresnel, reflect) {
+TEST(refract, total_internal_reflection) {
+    Vector3f v{1.f, 0.1f, 0.f};
+    Vector3f n{0.f, 1.f, 0.f};
+
+    Vector3f t;
+    EXPECT_FALSE(refract(v, n, 1.5f, 1.0f, t));
+}
+
+TEST(reflection, reflect) {
     Vector3f v{-1.f, 1.f, 0.f};
     Vector3f n{0.f, 1.f, 0.f};
 
