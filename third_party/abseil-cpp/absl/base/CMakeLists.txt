@@ -754,6 +754,7 @@ absl_cc_library(
   DEPS
     absl::config
     absl::core_headers
+    absl::malloc_internal
 )
 
 absl_cc_test(

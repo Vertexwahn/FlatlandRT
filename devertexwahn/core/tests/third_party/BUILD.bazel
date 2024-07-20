@@ -16,25 +16,13 @@ cc_test(
 )
 
 cc_test(
-    name = "glog_test",
-    size = "small",
-    srcs = [
-        "glog_test.cpp",
-    ],
-    deps = [
-        "@glog",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "spdlog_test",
     size = "small",
     srcs = [
         "spdlog_test.cpp",
     ],
     deps = [
-        "@spdlog",
         "@googletest//:gtest_main",
+        "@spdlog",
     ],
 )

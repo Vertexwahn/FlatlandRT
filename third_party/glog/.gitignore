@@ -1,4 +1,0 @@
-*.orig
-/build*/
-/site/
-bazel-*

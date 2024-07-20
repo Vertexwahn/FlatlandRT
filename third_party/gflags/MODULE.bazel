@@ -1,4 +1,0 @@
-module(
-    name = "gflags",
-    compatibility_level = 1,
-)

@@ -22,7 +22,6 @@ public:
     using Scalar = ScalarType;
 
     BruteForceIntersector(const PropertySet &ps) {
-        //LOG(INFO) << "Using brute force integrator";
         LOG_INFO_WITH_LOCATION("Using brute force intersector");
     }
 

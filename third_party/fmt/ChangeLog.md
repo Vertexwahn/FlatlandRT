@@ -1,4 +1,30 @@
-# 11.0.0 - TBD
+# 11.0.2 - TBD
+
+- Fixed compatibility with non-POSIX systems
+  (https://github.com/fmtlib/fmt/issues/4054).
+
+- Made `Glib::ustring` not be confused with `std::string`
+  (https://github.com/fmtlib/fmt/issues/4052).
+
+# 11.0.1 - 2024-07-05
+
+- Fixed version number in the inline namespace
+  (https://github.com/fmtlib/fmt/issues/4047).
+
+- Fixed disabling Unicode support via CMake
+  (https://github.com/fmtlib/fmt/issues/4051).
+
+- Fixed deprecated `visit_format_arg` (https://github.com/fmtlib/fmt/pull/4043).
+  Thanks @nebkat.
+
+- Fixed handling of a sign and improved the `std::complex` formater
+  (https://github.com/fmtlib/fmt/pull/4034,
+  https://github.com/fmtlib/fmt/pull/4050). Thanks @tesch1 and @phprus.
+
+- Removed a redundant check in the formatter for `std::expected`
+  (https://github.com/fmtlib/fmt/pull/4040). Thanks @phprus.
+
+# 11.0.0 - 2024-07-01
 
 - Added `fmt/base.h` which provides a subset of the API with minimal include
   dependencies and enough functionality to replace all uses of the `printf`
@@ -16,9 +42,9 @@
   | Boost Format | 55.0             |
 
   This gives almost 4x improvement in build speed compared to version 10.
-  Note that this is purely formatting code and includes. In real projects the
-  difference from `printf` will be smaller partly because common standard
-  headers will be included in almost any translation unit (TU) anyway.
+  Note that the benchmark is purely formatting code and includes. In real
+  projects the difference from `printf` will be smaller partly because common
+  standard headers will be included in almost any translation unit (TU) anyway.
   In particular, in every case except `printf` above ~1s is spent in total on
   including `<type_traits>` in all TUs.
 
@@ -68,11 +94,11 @@
   Benchmark             Time             CPU   Iterations
   -------------------------------------------------------
   printf             81.8 ns         81.5 ns      8496899
-  fmt::print (10.*)  63.8 ns         61.9 ns     11524151
+  fmt::print (10.x)  63.8 ns         61.9 ns     11524151
   fmt::print (11.0)  51.3 ns         51.0 ns     13846580
   ```
 
-- Improved safety of `fmt::format_to` when writting to an array
+- Improved safety of `fmt::format_to` when writing to an array
   (https://github.com/fmtlib/fmt/pull/3805).
   For example ([godbolt](https://www.godbolt.org/z/cYrn8dWY8)):
 
@@ -81,7 +107,7 @@
   auto result = fmt::format_to(volkswagen, "elephant");
   ```
 
-  no longer results in a buffer oveflow. Instead the output will be truncated
+  no longer results in a buffer overflow. Instead the output will be truncated
   and you can get the end iterator and whether truncation occurred from the
   `result` object. Thanks @ThePhD.
 
@@ -94,7 +120,7 @@
   compiled with Unicode enabled.
 
 - Added a formatter for `std::expected`
-  (https://github.com/fmtlib/fmt/pull/3834. Thanks @dominicpoeschko.
+  (https://github.com/fmtlib/fmt/pull/3834). Thanks @dominicpoeschko.
 
 - Added a formatter for `std::complex`
   (https://github.com/fmtlib/fmt/issues/1467,
@@ -172,7 +198,7 @@
 - Moved range and iterator overloads of `fmt::join` to `fmt/ranges.h`, next
   to other overloads.
 
-- Fixed hanling of types with `begin` returning `void` such as Eigen matrices
+- Fixed handling of types with `begin` returning `void` such as Eigen matrices
   (https://github.com/fmtlib/fmt/issues/3839,
   https://github.com/fmtlib/fmt/pull/3964). Thanks @Arghnews.
 
@@ -223,7 +249,7 @@
 - Improved named argument validation
   (https://github.com/fmtlib/fmt/issues/3817).
 
-- Disabled copy contruction/assignment for `fmt::format_arg_store` and
+- Disabled copy construction/assignment for `fmt::format_arg_store` and
   fixed moved construction (https://github.com/fmtlib/fmt/pull/3833).
   Thanks @ivafanas.
 

@@ -546,6 +546,7 @@ constexpr auto to_pointer(OutputIt, size_t) -> T* {
 template <typename T> auto to_pointer(basic_appender<T> it, size_t n) -> T* {
   buffer<T>& buf = get_container(it);
   auto size = buf.size();
+  buf.try_reserve(size + n);
   if (buf.capacity() < size + n) return nullptr;
   buf.try_resize(size + n);
   return buf.data() + size;
@@ -2317,15 +2318,13 @@ FMT_CONSTEXPR auto write(OutputIt out, T value) -> OutputIt {
   if (negative) abs_value = ~abs_value + 1;
   int num_digits = count_digits(abs_value);
   auto size = (negative ? 1 : 0) + static_cast<size_t>(num_digits);
-  auto it = reserve(out, size);
-  if (auto ptr = to_pointer<Char>(it, size)) {
+  if (auto ptr = to_pointer<Char>(out, size)) {
     if (negative) *ptr++ = static_cast<Char>('-');
     format_decimal<Char>(ptr, abs_value, num_digits);
     return out;
   }
-  if (negative) *it++ = static_cast<Char>('-');
-  it = format_decimal<Char>(it, abs_value, num_digits).end;
-  return base_iterator(out, it);
+  if (negative) *out++ = static_cast<Char>('-');
+  return format_decimal<Char>(out, abs_value, num_digits).end;
 }
 
 // DEPRECATED!
@@ -3629,9 +3628,7 @@ auto write(OutputIt out, monostate, format_specs = {}, locale_ref = {})
 template <typename Char, typename OutputIt>
 FMT_CONSTEXPR auto write(OutputIt out, basic_string_view<Char> value)
     -> OutputIt {
-  auto it = reserve(out, value.size());
-  it = copy_noinline<Char>(value.begin(), value.end(), it);
-  return base_iterator(out, it);
+  return copy_noinline<Char>(value.begin(), value.end(), out);
 }
 
 template <typename Char, typename OutputIt, typename T,
@@ -3972,15 +3969,19 @@ struct formatter<T, Char, enable_if_t<detail::has_format_as<T>::value>>
     : formatter<detail::format_as_t<T>, Char> {
   template <typename FormatContext>
   auto format(const T& value, FormatContext& ctx) const -> decltype(ctx.out()) {
-    using base = formatter<detail::format_as_t<T>, Char>;
     auto&& val = format_as(value);  // Make an lvalue reference for format.
-    return base::format(val, ctx);
+    return formatter<detail::format_as_t<T>, Char>::format(val, ctx);
   }
 };
 
-#define FMT_FORMAT_AS(Type, Base) \
-  template <typename Char>        \
-  struct formatter<Type, Char> : formatter<Base, Char> {}
+#define FMT_FORMAT_AS(Type, Base)                                              \
+  template <typename Char>                                                     \
+  struct formatter<Type, Char> : formatter<Base, Char> {                       \
+    template <typename FormatContext>                                          \
+    auto format(Type value, FormatContext& ctx) const -> decltype(ctx.out()) { \
+      return formatter<Base, Char>::format(value, ctx);                        \
+    }                                                                          \
+  }
 
 FMT_FORMAT_AS(signed char, int);
 FMT_FORMAT_AS(unsigned char, unsigned);

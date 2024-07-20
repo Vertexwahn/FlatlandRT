@@ -14,12 +14,14 @@
 
 #include "absl/base/internal/poison.h"
 
-#include <atomic>
-#include <cstdint>  // NOLINT - used in ifdef
 #include <cstdlib>
 
-#include "absl/base/attributes.h"
 #include "absl/base/config.h"
+#include "absl/base/internal/direct_mmap.h"
+
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 
 #if defined(ABSL_HAVE_ADDRESS_SANITIZER)
 #include <sanitizer/asan_interface.h>
@@ -27,52 +29,53 @@
 #include <sanitizer/msan_interface.h>
 #elif defined(ABSL_HAVE_MMAP)
 #include <sys/mman.h>
-#elif defined(_MSC_VER)
+#elif defined(_WIN32)
 #include <windows.h>
 #endif
 
 namespace absl {
 ABSL_NAMESPACE_BEGIN
 namespace base_internal {
-namespace {
-constexpr size_t kPageSize = 1 << 12;
-alignas(kPageSize) static char poison_page[kPageSize];
-}  // namespace
-
-std::atomic<void*> poison_data = {&poison_page};
 
 namespace {
 
-#if defined(ABSL_HAVE_ADDRESS_SANITIZER)
-void PoisonBlock(void* data) { ASAN_POISON_MEMORY_REGION(data, kPageSize); }
-#elif defined(ABSL_HAVE_MEMORY_SANITIZER)
-void PoisonBlock(void* data) { __msan_poison(data, kPageSize); }
-#elif defined(ABSL_HAVE_MMAP)
-void PoisonBlock(void* data) { mprotect(data, kPageSize, PROT_NONE); }
-#elif defined(_MSC_VER)
-void PoisonBlock(void* data) {
-  DWORD old_mode = 0;
-  VirtualProtect(data, kPageSize, PAGE_NOACCESS, &old_mode);
-}
+size_t GetPageSize() {
+#ifdef _WIN32
+  SYSTEM_INFO system_info;
+  GetSystemInfo(&system_info);
+  return system_info.dwPageSize;
+#elif defined(__wasm__) || defined(__asmjs__) || defined(__hexagon__)
+  return getpagesize();
 #else
-void PoisonBlock(void* data) {
-  // We can't make poisoned memory, so just use a likely bad pointer.
-  // Pointers are required to have high bits that are all zero or all one for
-  // certain 64-bit CPUs. This pointer value will hopefully cause a crash on
-  // dereference and also be clearly recognizable as invalid.
-  constexpr uint64_t kBadPtr = 0xBAD0BAD0BAD0BAD0;
-  poison_data = reinterpret_cast<void*>(static_cast<uintptr_t>(kBadPtr));
-}
+  return static_cast<size_t>(sysconf(_SC_PAGESIZE));
 #endif
-
-void* InitializePoisonedPointer() {
-  PoisonBlock(&poison_page);
-  return &poison_page;
 }
 
 }  // namespace
 
-ABSL_ATTRIBUTE_UNUSED void* force_initialize = InitializePoisonedPointer();
+void* InitializePoisonedPointerInternal() {
+  const size_t block_size = GetPageSize();
+#if defined(ABSL_HAVE_ADDRESS_SANITIZER)
+  void* data = malloc(block_size);
+  ASAN_POISON_MEMORY_REGION(data, block_size);
+#elif defined(ABSL_HAVE_MEMORY_SANITIZER)
+  void* data = malloc(block_size);
+  __msan_poison(data, block_size);
+#elif defined(ABSL_HAVE_MMAP)
+  void* data = DirectMmap(nullptr, block_size, PROT_NONE,
+                          MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  if (data == MAP_FAILED) return GetBadPointerInternal();
+#elif defined(_WIN32)
+  void* data = VirtualAlloc(nullptr, block_size, MEM_RESERVE | MEM_COMMIT,
+                            PAGE_NOACCESS);
+  if (data == nullptr) return GetBadPointerInternal();
+#else
+  return GetBadPointerInternal();
+#endif
+  // Return the middle of the block so that dereferences before and after the
+  // pointer will both crash.
+  return static_cast<char*>(data) + block_size / 2;
+}
 
 }  // namespace base_internal
 ABSL_NAMESPACE_END

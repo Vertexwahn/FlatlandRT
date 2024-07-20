@@ -27,12 +27,11 @@ public:
     using Scalar = ScalarType;
     using Sampler = SamplerType<ScalarType>;
 
-    PathMirrorReflection2(const PropertySet &ps) : IntegratorType<ScalarType, 2>(ps) {
+    explicit PathMirrorReflection2(const PropertySet &ps) : IntegratorType<ScalarType, 2>(ps) {
         max_depth = ps.get_property("max_depth", 5);
     }
 
-    virtual ~PathMirrorReflection2() {
-    }
+    virtual ~PathMirrorReflection2() = default;
 
     Color trace(
             const Scene2<ScalarType> *scene,

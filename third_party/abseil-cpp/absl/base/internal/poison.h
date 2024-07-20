@@ -15,7 +15,7 @@
 #ifndef ABSL_BASE_INTERNAL_POISON_H_
 #define ABSL_BASE_INTERNAL_POISON_H_
 
-#include <atomic>
+#include <cstdint>
 
 #include "absl/base/config.h"
 
@@ -23,10 +23,33 @@ namespace absl {
 ABSL_NAMESPACE_BEGIN
 namespace base_internal {
 
-extern std::atomic<void*> poison_data;
+inline void* GetBadPointerInternal() {
+  // A likely bad pointer. Pointers are required to have high bits that are all
+  // zero or all one for certain 64-bit CPUs. This pointer value will hopefully
+  // cause a crash on dereference and also be clearly recognizable as invalid.
+  constexpr uint64_t kBadPtr = 0xBAD0BAD0BAD0BAD0;
+  auto ret = reinterpret_cast<void*>(static_cast<uintptr_t>(kBadPtr));
+#ifndef _MSC_VER  // MSVC doesn't support inline asm with `volatile`.
+  // Try to prevent the compiler from optimizing out the undefined behavior.
+  asm volatile("" : : "r"(ret) :);  // NOLINT
+#endif
+  return ret;
+}
+
+void* InitializePoisonedPointerInternal();
 
 inline void* get_poisoned_pointer() {
-  return poison_data.load(std::memory_order_relaxed);
+#if defined(NDEBUG) && !defined(ABSL_HAVE_ADDRESS_SANITIZER) && \
+    !defined(ABSL_HAVE_MEMORY_SANITIZER)
+  // In optimized non-sanitized builds, avoid the function-local static because
+  // of the codegen and runtime cost.
+  return GetBadPointerInternal();
+#else
+  // Non-optimized builds may use more robust implementation. Note that we can't
+  // use a static global because Chromium doesn't allow non-constinit globals.
+  static void* ptr = InitializePoisonedPointerInternal();
+  return ptr;
+#endif
 }
 
 }  // namespace base_internal

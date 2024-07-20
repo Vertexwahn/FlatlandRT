@@ -45,6 +45,10 @@ function(add_fmt_test name)
   add_fmt_executable(${name} ${sources})
   target_link_libraries(${name} ${libs})
 
+  if (ADD_FMT_TEST_HEADER_ONLY AND NOT FMT_UNICODE)
+    target_compile_definitions(${name} PUBLIC FMT_UNICODE=0)
+  endif ()
+
   # Define if certain C++ features can be used.
   if (FMT_PEDANTIC)
     target_compile_options(${name} PRIVATE ${PEDANTIC_COMPILE_FLAGS})
@@ -105,6 +109,9 @@ add_fmt_test(xchar-test)
 add_fmt_test(enforce-checks-test)
 target_compile_definitions(enforce-checks-test PRIVATE
                            -DFMT_ENFORCE_COMPILE_STRING)
+
+add_executable(perf-sanity perf-sanity.cc)
+target_link_libraries(perf-sanity fmt::fmt)
 
 if (FMT_MODULE)
   # The tests need {fmt} to be compiled as traditional library
@@ -229,7 +236,7 @@ if (FMT_PEDANTIC AND NOT WIN32 AND NOT (
     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 endif ()
 
-# This test are disabled on Windows because it is only *NIX issue.
+# This test is disabled on Windows because it is POSIX-specific.
 if (FMT_PEDANTIC AND NOT WIN32)
   add_test(static-export-test ${CMAKE_CTEST_COMMAND}
     -C ${CMAKE_BUILD_TYPE}

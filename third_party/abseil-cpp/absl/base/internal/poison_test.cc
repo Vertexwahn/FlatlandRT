@@ -29,8 +29,10 @@ TEST(PoisonTest, CrashesOnDereference) {
   GTEST_SKIP() << "On Android, poisoned pointer dereference times out instead "
                   "of crashing.";
 #endif
-  void* poisoned_ptr = get_poisoned_pointer();
-  EXPECT_DEATH_IF_SUPPORTED(std::cout << *static_cast<int*>(poisoned_ptr), "");
+  int* poisoned_ptr = static_cast<int*>(get_poisoned_pointer());
+  EXPECT_DEATH_IF_SUPPORTED(std::cout << *poisoned_ptr, "");
+  EXPECT_DEATH_IF_SUPPORTED(std::cout << *(poisoned_ptr - 10), "");
+  EXPECT_DEATH_IF_SUPPORTED(std::cout << *(poisoned_ptr + 10), "");
 }
 
 }  // namespace

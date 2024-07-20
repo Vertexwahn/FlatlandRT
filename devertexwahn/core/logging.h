@@ -43,10 +43,6 @@
 
 #include "spdlog/spdlog.h"
 
-// Old logging based on glog - deprecated
-#include "gflags/gflags.h"
-#include "glog/logging.h"
-
 namespace de_vertexwahn {
 
 using spdlog::logger;

@@ -53,11 +53,6 @@ ABSL_FLAG(std::string, scene_filename, "scene.xml", "Okapi scene filename use as
 
 int main(int argc, char **argv) {
     try {
-        FLAGS_logtostderr = true;
-        //google::SetLogDestination(google::GLOG_INFO,"log.txt");
-        google::InitGoogleLogging(argv[0]);
-        //gflags::ParseCommandLineFlags(&argc, &argv, true);
-
         absl::FlagsUsageConfig flags_config;
         flags_config.version_string = &version_string;
         absl::SetFlagsUsageConfig(flags_config);
@@ -67,7 +62,7 @@ int main(int argc, char **argv) {
         log_boost_version();
 
         if (!std::filesystem::exists(filename)) {
-            LOG_ERROR_WITH_LOCATION("File {} does not exist", filename.string());
+            LOG_WARNING_WITH_LOCATION("File {} does not exist", filename.string());
             return ExitStatus::SceneFileNotFound;
         }
 
@@ -78,7 +73,7 @@ int main(int argc, char **argv) {
         auto sensor = scene->sensor();
 
         if (sensor == nullptr) {
-            LOG_ERROR_WITH_LOCATION("Sensor is missing in scene description");
+            LOG_WARNING_WITH_LOCATION("Sensor is missing in scene description");
             return ExitStatus::SensorMissing;
         }
 
@@ -113,11 +108,11 @@ int main(int argc, char **argv) {
         LOG_INFO_WITH_LOCATION("Shutting down now");
     }
     catch (Exception &ex) {
-        LOG_ERROR_WITH_LOCATION("{}", ex.what());
+        LOG_WARNING_WITH_LOCATION("{}", ex.what());
         return ExitStatus::UnknownError;
     }
     catch (std::exception &ex) {
-        LOG_ERROR_WITH_LOCATION("{}", ex.what());
+        LOG_WARNING_WITH_LOCATION("{}", ex.what());
         return ExitStatus::UnknownError;
     }
 

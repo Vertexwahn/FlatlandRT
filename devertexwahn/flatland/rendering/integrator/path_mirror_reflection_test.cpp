@@ -3,8 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/scene/load_scene.h"
+#include "flatland/rendering/integrator/path_mirror_reflection.h"
 #include "flatland/rendering/rendering.h"
+#include "flatland/rendering/scene/load_scene.h"
 
 #include "gmock/gmock.h"
 
@@ -29,6 +30,22 @@ TEST(PathMirrorReflection, GivenSceneWithMirror_WhenRayHitsMirror_ExpectReflecti
     EXPECT_FLOAT_EQ(sc->rays()[0].direction.y(), sqrt(.5f));
     EXPECT_FLOAT_EQ(sc->rays()[1].direction.x(), sqrt(.5f));
     EXPECT_FLOAT_EQ(sc->rays()[1].direction.y(), -sqrt(.5f));
+}
+
+
+TEST(PathMirrorReflection2, trace) {
+    PropertySet ps;
+    ps.add_property("max_depth", 5);
+    PathMirrorReflection2f path_mirror_reflection{ps};
+
+    Ray2f ray{Point2f{0.f, 0.f}, Vector2f{1.f, 0.f}, 0.f, 20000.f};
+    auto color = path_mirror_reflection.trace(
+            nullptr,
+            nullptr,
+            ray,
+            100);
+
+    EXPECT_THAT(color.red(), testing::FloatNear(0.0, 0.01));
 }
 
 // todo: reflection inside a shape?

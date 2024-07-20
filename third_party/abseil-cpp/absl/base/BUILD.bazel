@@ -880,6 +880,7 @@ cc_library(
     deps = [
         ":config",
         ":core_headers",
+        ":malloc_internal",
     ],
 )
 
