@@ -7,19 +7,18 @@
 
 set -euo pipefail
 
-# Check arguments
-if [ "$#" -ge 2 ]; then
-    echo "To many arguments detected. You can provide either one or no argument"
-    echo "Usage: $0 <additional_bazel_config>"
-    exit 1
-fi
-
+show_html_page=false
 additional_bazel_config=""
 
-# Provide a additional bazel config (bazel remote cache config expected) if provided
-if [ "$#" -eq 1 ]; then
-    additional_bazel_config="--config=$1"
-fi
+# Parse arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --show_report|-s) show_html_page=true ;;
+        --additonal_bazel_config=*) additional_bazel_config="--config=${1#*=}" ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
 
 bazel coverage \
 --config=gcc11 \
@@ -39,10 +38,13 @@ echo "Current coverage: $current_line_coverage"
 old_line_coverage="95.0"
 echo "Old coverage: $old_line_coverage"
 
+# Open coverage report if flag is set
+if [ "$show_html_page" = true ]; then
+    open coverage_report/index.html
+fi
+
 # if old coverage is higher than current coverage, fail
 if (( $(echo "$current_line_coverage < $old_line_coverage"|bc -l) )); then
     echo "Line coverage is lower than expected"
     exit 1
 fi
-
-#open coverage_report/index.html

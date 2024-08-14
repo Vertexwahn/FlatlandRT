@@ -161,6 +161,11 @@ Point3f convert_csv_to_point3f(const std::string& csv) {
 
 Color3f convert_csv_to_color3f(const std::string& csv) {
     std::vector<float> values = convert_to_float_vector(csv);
+
+    if(values.size() == 1) {
+        return Color3f{values[0]};
+    }
+
     assert(values.size() == 3);
     return Color3f{values[0], values[1], values[2]};
 }

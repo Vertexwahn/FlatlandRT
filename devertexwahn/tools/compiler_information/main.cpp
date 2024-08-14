@@ -19,6 +19,7 @@ std::string semantic_versioning_string(int major, int minor, int patch) {
 // See https://dev.to/yumetodo/list-of-mscver-and-mscfullver-8nd
 std::string vs_product_name(int version) {
     std::map<int, std::string> versions {
+        {1929, "Visual Studio 2019 16.11.2"},
         {1933, "Visual Studio 2022 17.3.6"},
         {1936, "Visual Studio 2022 17.6.2"},
         {1937, "Visual Studio 2022 17.7.0"},

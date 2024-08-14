@@ -102,6 +102,11 @@ Image3f load_image(std::string_view filename) {
         return image;
     }
 
+    if(boost::ends_with(filename, ".jpg")) {
+        Image3f image = load_image_jpeg(filename.data());
+        return image;
+    }
+
     if (boost::ends_with(filename, ".png")) {
         ReferenceCounted<Image3f> tmp_image = load_image_png(filename);
 

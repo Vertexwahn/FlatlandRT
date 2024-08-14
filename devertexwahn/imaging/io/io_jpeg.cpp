@@ -9,6 +9,45 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
+Image3f load_image_jpeg(const char* filename) {
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+
+    FILE * infile;
+    JSAMPARRAY buffer;
+    int row_stride;
+
+    if ((infile = fopen(filename, "rb")) == nullptr) {
+        fprintf(stderr, "can't open %s\n", filename);
+        exit(1);
+    }
+
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_decompress(&cinfo);
+    jpeg_stdio_src(&cinfo, infile);
+    (void) jpeg_read_header(&cinfo, TRUE);
+    (void) jpeg_start_decompress(&cinfo);
+
+    row_stride = cinfo.output_width * cinfo.output_components;
+    buffer = (*cinfo.mem->alloc_sarray)
+            ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+
+    Image3f image(cinfo.output_width, cinfo.output_height);
+
+    while (cinfo.output_scanline < cinfo.output_height) {
+        (void) jpeg_read_scanlines(&cinfo, buffer, 1);
+        for(int x = 0; x < cinfo.output_width; ++x) {
+            image.set_pixel(x, cinfo.output_scanline - 1, Color3f(buffer[0][x * 3] / 255.f, buffer[0][x * 3 + 1] / 255.f, buffer[0][x * 3 + 2] / 255.f));
+        }
+    }
+
+    (void) jpeg_finish_decompress(&cinfo);
+    jpeg_destroy_decompress(&cinfo);
+    fclose(infile);
+
+    return image;
+}
+
 bool store_jpeg(const char *filename, const Image4b &image) {
     int image_width = image.width();
     int image_height = image.height();

@@ -330,7 +330,14 @@ struct formatter<Tuple, Char,
   template <typename ParseContext>
   FMT_CONSTEXPR auto parse(ParseContext& ctx) -> decltype(ctx.begin()) {
     auto it = ctx.begin();
-    if (it != ctx.end() && *it != '}') report_error("invalid format specifier");
+    auto end = ctx.end();
+    if (it != end && detail::to_ascii(*it) == 'n') {
+      ++it;
+      set_brackets({}, {});
+      set_separator({});
+    }
+    if (it != end && *it != '}') report_error("invalid format specifier");
+    ctx.advance_to(it);
     detail::for_each(formatters_, detail::parse_empty_specs<ParseContext>{ctx});
     return it;
   }
@@ -415,7 +422,7 @@ struct range_formatter<
     auto buf = basic_memory_buffer<Char>();
     for (; it != end; ++it) buf.push_back(*it);
     auto specs = format_specs();
-    specs.type = presentation_type::debug;
+    specs.set_type(presentation_type::debug);
     return detail::write<Char>(
         out, basic_string_view<Char>(buf.data(), buf.size()), specs);
   }

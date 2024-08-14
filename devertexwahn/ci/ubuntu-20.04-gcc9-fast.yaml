@@ -8,7 +8,7 @@
 
 steps:
   - script: |
-      df -H
+      df -h
     displayName: 'Show disk space'
 
   - checkout: self
@@ -18,12 +18,13 @@ steps:
     submodules: false
 
 
+
   - script: |
       lsb_release -a
     displayName: 'Show OS version'
 
   - script: |
-      df -H
+      df -h
     displayName: 'Show disk space'
 
   - script: |
@@ -37,7 +38,7 @@ steps:
 
 
   - script: |
-      df -H
+      df -h
     displayName: 'Show disk space'
     
   - script: |
@@ -46,7 +47,7 @@ steps:
     displayName: "Show compiler information"
 
   - script: |
-      df -H
+      df -h
     displayName: 'Show disk space'
 
   - script: |
@@ -55,7 +56,7 @@ steps:
     displayName: 'Bazel build gcc9-fastbuild'
 
   - script: |
-      df -H
+      df -h
     displayName: 'Show disk space'
 
   - script: |

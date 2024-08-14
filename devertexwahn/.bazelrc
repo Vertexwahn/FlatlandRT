@@ -159,8 +159,14 @@ build:clang-tidy --cxxopt=-std=c++17
 build:optimized build --copt=-O3
 
 # IWYU
-build:iwyu --aspects @com_github_storypku_bazel_iwyu//bazel/iwyu:iwyu.bzl%iwyu_aspect
+# More details here: https://github.com/storypku/bazel_iwyu/pull/12
+#build:iwyu --@bazel_iwyu//:iwyu_mappings=@my_repo//tools:iwyu_mappings
+build:iwyu --config=gcc11
+#build:iwyu --config=clang16
+build:iwyu --aspects @bazel_iwyu//bazel/iwyu:iwyu.bzl%iwyu_aspect
 build:iwyu --output_groups=report
+build:iwyu --build_tag_filters=-no-iwyu # To include everything except the rules tagged with "no-iwyu"
+build:iwyu --@bazel_iwyu//:iwyu_opts=--verbose=3,--no_fwd_decls,--cxx17ns,--max_line_length=127
 
 try-import %workspace%/.bazelrc.remote_cache
 try-import %workspace%/.bazelrc.build_meta

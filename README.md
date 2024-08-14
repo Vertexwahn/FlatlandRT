@@ -136,7 +136,7 @@ sudo apt install lcov
 Go to the directory that contains the `MODULE.bazel` file and execute:
 
 ```shell
-./coverage.sh buchgr_remote_cache
+./coverage.sh --additonal_bazel_config=buchgr_remote_cache
 open coverage_report/index.html
 ```
 

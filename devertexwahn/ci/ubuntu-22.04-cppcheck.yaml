@@ -18,6 +18,7 @@ steps:
     submodules: false
 
 
+
   - script: |
       lsb_release -a
     displayName: "Show OS version"
@@ -33,9 +34,9 @@ steps:
   #  displayName: "Install Cppcheck"
 
   - script: |
-      curl -L -o cppcheck.tar.gz https://github.com/danmar/cppcheck/archive/refs/tags/2.14.1.tar.gz
+      curl -L -o cppcheck.tar.gz https://github.com/danmar/cppcheck/archive/refs/tags/2.14.2.tar.gz
       tar xzf cppcheck.tar.gz
-      cd cppcheck-2.14.1
+      cd cppcheck-2.14.2
       cmake -S . -B build
       cmake --build build
       sudo cmake --install build
