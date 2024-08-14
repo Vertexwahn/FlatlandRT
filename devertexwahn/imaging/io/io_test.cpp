@@ -158,3 +158,24 @@ TEST(Image, try_to_store_image4f_with_invalid_extension) {
     Image3f img{2,2};
     EXPECT_THROW(store_image("test.invalid_extension", img), std::runtime_error);
 }
+
+TEST(Image, WhenTryToLoadNonExistingFile_ThenThrowException) {
+    EXPECT_THROW(load_image_asImage4f("non_existing_file.png"), std::runtime_error);
+}
+
+TEST(Image, load_image_asImage4f) {
+    // Arrange
+    auto image = make_reference_counted<Image3b>(100, 100);
+
+    for (int y = 0; y < image->height(); ++y) {
+        for (int x = 0; x < image->width(); ++x) {
+            image->set_pixel(x, y, Color3b{255, 128, 0});
+        }
+    }
+
+    // Act
+    store_image("test.png", image);
+
+    auto img = load_image_asImage4f("test.png");
+    EXPECT_THAT(img.get_pixel(0,0), (Color4f{1.f, 0.501960814f, 0.f, 1.f}));
+}

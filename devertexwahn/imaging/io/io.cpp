@@ -146,6 +146,10 @@ Image3b load_image_asImage3b(std::string_view filename) {
 }
 
 Image4f load_image_asImage4f(std::string_view filename) {
+    if(std::filesystem::exists(filename) == false) {
+        throw std::runtime_error(fmt::format("File \"{}\" does not exist.", filename));
+    }
+
     if (boost::ends_with(filename, ".png")) {
         auto image = load_image_png_as_Image4b(filename);
 
