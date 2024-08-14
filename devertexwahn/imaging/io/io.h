@@ -23,6 +23,7 @@ void store_image(std::string_view filename, const Image4b &image);
 
 Image3f load_image(std::string_view filename);
 Image3b load_image_asImage3b(std::string_view filename);
+Image4f load_image_asImage4f(std::string_view filename);
 
 DE_VERTEXWAHN_END_NAMESPACE
 

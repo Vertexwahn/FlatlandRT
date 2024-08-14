@@ -69,3 +69,18 @@ TEST(Image, store_jpeg2) {
 
     store_jpeg("red_square.jpg", image);
 }
+
+TEST(Image, load_image_jpeg) {
+    auto image = load_image_jpeg("imaging/tests/data/red_square_quality100.jpg");
+
+    EXPECT_THAT(image.width(), 768);
+    EXPECT_THAT(image.height(), 768);
+
+    for(int x = 0; x < image.width(); ++x) {
+        for(int y = 0; y < image.height(); ++y) {
+            EXPECT_LE(std::abs(image.get_pixel(x, y).red()-1.0f), 0.1f);
+            EXPECT_LE(std::abs(image.get_pixel(x, y).green()), 0.f);
+            EXPECT_LE(std::abs(image.get_pixel(x, y).blue()), 0.f);
+        }
+    }
+}

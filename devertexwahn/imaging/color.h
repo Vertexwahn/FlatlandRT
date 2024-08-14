@@ -56,6 +56,11 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
         return Base::z();
     }
 
+    Scalar &alpha() {
+        static_assert(Dimension > 3);
+        return (*this)[3];
+    }
+
     const Scalar &red() const {
         static_assert(Dimension > 0);
         return Base::x();
@@ -69,6 +74,15 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     const Scalar &blue() const {
         static_assert(Dimension > 2);
         return Base::z();
+    }
+
+    const Scalar &alpha() const {
+        static_assert(Dimension > 3);
+        return (*this)[3];
+    }
+
+    const ColorType<Scalar,3> rgb() const {
+        return ColorType<Scalar,3>{red(), green(), blue()};
     }
 
     ColorType &clamp(const ScalarType min = ScalarType{0}, const ScalarType max = ScalarType{1}) {

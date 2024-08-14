@@ -145,4 +145,25 @@ Image3b load_image_asImage3b(std::string_view filename) {
     throw std::runtime_error("Invalid file extension");
 }
 
+Image4f load_image_asImage4f(std::string_view filename) {
+    if (boost::ends_with(filename, ".png")) {
+        auto image = load_image_png_as_Image4b(filename);
+
+        Image4f converted_image = Image4f(image->width(), image->height());
+
+        for (int y = 0; y < image->height(); ++y) {
+            for (int x = 0; x < image->width(); ++x) {
+                Color4b c = image->get_pixel(x, y);
+                auto converted_color = ColorConverter::convertTo<Color4f>(c);
+                converted_image.set_pixel(x,y,converted_color);
+            }
+        }
+
+        //Image4f image = load_image_openexr(filename);
+        return converted_image;
+    }
+
+    throw std::runtime_error("Invalid file extension");
+}
+
 DE_VERTEXWAHN_END_NAMESPACE
