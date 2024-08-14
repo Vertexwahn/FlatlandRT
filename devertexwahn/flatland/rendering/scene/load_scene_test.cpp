@@ -16,9 +16,22 @@ namespace de_vertexwahn {
     Point3f convert_csv_to_point3f(const std::string& csv);
     template <>
     Transform44f read_transform<3>(const pugi::xml_node &xmlTransform);
+    std::vector<std::string> tokenize(const std::string &string,
+                                       const std::string &delim = ", ",
+                                       bool include_empty = false);
 }
 
 using namespace de_vertexwahn;
+
+TEST(tokenize, TokenizeTrivialList) {
+    std::string input = "1, 2, 3";
+    auto tokens = tokenize(input);
+
+    EXPECT_THAT(tokens.size(), 3u);
+    EXPECT_THAT(tokens[0], "1");
+    EXPECT_THAT(tokens[1], "2");
+    EXPECT_THAT(tokens[2], "3");
+}
 
 TEST(load_scene, convert_csv_to_vector2f) {
     std::string input = "2.3, 3.4";
