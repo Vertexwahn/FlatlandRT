@@ -27,10 +27,17 @@ TEST(IQA_Image3b, GivenIdenticalImages_WhenComparing_ExpectEqual) {
     EXPECT_THAT(are_equal(a, b), true);
 }
 
-TEST(IQA, GivenDifferentImages_WhenComparing_ExpectNotEqual) {
+TEST(IQA, GivenDifferentImages3f_WhenComparing_ExpectNotEqual) {
     Image3f a{100, 100};
     Image3f b{100, 100};
     b.set_pixel(0, 0, Color3f{1.f, .5f, .25f});
+    EXPECT_THAT(are_equal(a, b), false);
+}
+
+TEST(IQA, GivenDifferentImages3b_WhenComparing_ExpectNotEqual) {
+    Image3b a{100, 100};
+    Image3b b{100, 100};
+    b.set_pixel(0, 0, Color3b{255, 128, 64});
     EXPECT_THAT(are_equal(a, b), false);
 }
 

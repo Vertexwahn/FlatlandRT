@@ -69,25 +69,3 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
-
-cc_library(
-    name = "iqa",
-    srcs = ["iqa/iqa.cpp"],
-    hdrs = ["iqa/iqa.h"],
-    deps = [
-        "//core:reference_counted",
-        "//imaging:image",
-    ],
-)
-
-cc_test(
-    name = "iqa_test",
-    size = "small",
-    srcs = [
-        "iqa/iqa_test.cpp",
-    ],
-    deps = [
-        ":iqa",
-        "@googletest//:gtest_main",
-    ],
-)
