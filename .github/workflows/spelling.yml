@@ -14,4 +14,16 @@ jobs:
 
       - uses: codespell-project/actions-codespell@v2
         with:
+          path: devertexwahn/core
+
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          path: devertexwahn/math
+
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          path: devertexwahn/imaging
+
+      - uses: codespell-project/actions-codespell@v2
+        with:
           path: devertexwahn/flatland
