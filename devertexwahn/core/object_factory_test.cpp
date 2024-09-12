@@ -3,9 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/object_factory.h"
-#include "flatland/rendering/integrator/integrator.h"
-#include "flatland/rendering/scene/shape/disk.h"
+#include "core/object_factory.hpp"
+#include "flatland/rendering/integrator/integrator.hpp"
+#include "flatland/rendering/scene/shape/disk.hpp"
 
 using namespace de_vertexwahn;
 

@@ -7,18 +7,18 @@
  *  SPDX-License-Identifier: BSD-3-Clause-LBNL
  */
 
-#include "flatland/rendering/scene/load_scene.h"
+#include "flatland/rendering/scene/load_scene.hpp"
 
-#include "core/object_factory.h"
-#include "flatland/rendering/integrator/path_mirror_reflection.h"
-#include "flatland/rendering/integrator/path_specular_transmission.h"
-#include "flatland/rendering/intersector/brute_force_intersector.h"
-#include "flatland/rendering/intersector/quadtree_intersector.h"
-#include "flatland/rendering/scene/shape/disk.h"
-#include "flatland/rendering/scene/shape/polygon.h"
-#include "flatland/rendering/scene/shape/rectangle.h"
-#include "flatland/rendering/scene/shape/triangle_mesh.h"
-#include "flatland/rendering/integrator/ambient_occlusion.h"
+#include "core/object_factory.hpp"
+#include "flatland/rendering/integrator/path_mirror_reflection.hpp"
+#include "flatland/rendering/integrator/path_specular_transmission.hpp"
+#include "flatland/rendering/intersector/brute_force_intersector.hpp"
+#include "flatland/rendering/intersector/quadtree_intersector.hpp"
+#include "flatland/rendering/scene/shape/disk.hpp"
+#include "flatland/rendering/scene/shape/polygon.hpp"
+#include "flatland/rendering/scene/shape/rectangle.hpp"
+#include "flatland/rendering/scene/shape/triangle_mesh.hpp"
+#include "flatland/rendering/integrator/ambient_occlusion.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

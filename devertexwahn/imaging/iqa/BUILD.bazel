@@ -1,7 +1,7 @@
 cc_library(
     name = "iqa",
     srcs = ["iqa.cpp"],
-    hdrs = ["iqa.h"],
+    hdrs = ["iqa.hpp"],
     visibility = ["//visibility:public"],
     deps = [
         "//core:reference_counted",

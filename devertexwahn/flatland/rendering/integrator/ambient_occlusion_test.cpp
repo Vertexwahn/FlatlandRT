@@ -3,9 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/integrator/ambient_occlusion.h"
-#include "flatland/rendering/scene/load_scene.h"
-#include "flatland/rendering/rendering.h"
+#include "flatland/rendering/integrator/ambient_occlusion.hpp"
+#include "flatland/rendering/scene/load_scene.hpp"
+#include "flatland/rendering/rendering.hpp"
 
 #include "gmock/gmock.h"
 

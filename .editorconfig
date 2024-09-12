@@ -1,4 +1,9 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
 root = true
+
+[*.{h,cc,cpp}]
+indent_style = space
 
 [*]
 end_of_line = lf

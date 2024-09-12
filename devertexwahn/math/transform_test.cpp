@@ -3,8 +3,8 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "math/util.h"
-#include "math/transform.h"
+#include "math/util.hpp"
+#include "math/transform.hpp"
 
 #include "gmock/gmock.h"
 

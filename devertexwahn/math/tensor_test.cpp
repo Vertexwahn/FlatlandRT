@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "math/tensor.h"
+#include "math/tensor.hpp"
 
 #include "gmock/gmock.h"
 

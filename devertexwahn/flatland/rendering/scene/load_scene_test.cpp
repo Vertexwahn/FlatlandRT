@@ -3,9 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/scene/load_scene.h"
-#include "flatland/rendering/scene/shape/rectangle.h"
-#include "flatland/rendering/scene/shape/disk.h"
+#include "flatland/rendering/scene/load_scene.hpp"
+#include "flatland/rendering/scene/shape/rectangle.hpp"
+#include "flatland/rendering/scene/shape/disk.hpp"
 
 #include "gmock/gmock.h"
 

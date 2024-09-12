@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/scene/shape/triangle_mesh.h"
+#include "flatland/rendering/scene/shape/triangle_mesh.hpp"
 
 using namespace de_vertexwahn;
 

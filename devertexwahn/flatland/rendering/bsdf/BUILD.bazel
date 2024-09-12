@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "bsdf",
-    hdrs = ["bsdf.h"],
+    hdrs = ["bsdf.hpp"],
     deps = [
         "//core:object",
         "//core:reference_counted",
@@ -32,7 +32,7 @@ cc_test(
 cc_library(
     name = "svg_material",
     srcs = ["svg_material.cpp"],
-    hdrs = ["svg_material.h"],
+    hdrs = ["svg_material.hpp"],
     deps = [
         ":bsdf",
     ],

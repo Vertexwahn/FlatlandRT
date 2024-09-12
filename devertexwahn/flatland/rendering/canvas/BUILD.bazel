@@ -7,13 +7,13 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "label",
-    hdrs = ["label.h"],
+    hdrs = ["label.hpp"],
     deps = [],
 )
 
 cc_library(
     name = "svg_canvas",
-    hdrs = ["svg_canvas.h"],
+    hdrs = ["svg_canvas.hpp"],
     deps = [
         ":label",
         "//flatland/rendering/scene/shape",

@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/object_factory.h"
+#include "core/object_factory.hpp"
 
 #include "fmt/core.h"
 

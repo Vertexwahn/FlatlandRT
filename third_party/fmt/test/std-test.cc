@@ -36,8 +36,10 @@ TEST(std_test, path) {
             "Шчучыншчына");
   EXPECT_EQ(fmt::format("{}", path(L"\xd800")), "�");
   EXPECT_EQ(fmt::format("{}", path(L"HEAD \xd800 TAIL")), "HEAD � TAIL");
-  EXPECT_EQ(fmt::format("{}", path(L"HEAD \xD83D\xDE00 TAIL")), "HEAD \xF0\x9F\x98\x80 TAIL");
-  EXPECT_EQ(fmt::format("{}", path(L"HEAD \xD83D\xD83D\xDE00 TAIL")), "HEAD �\xF0\x9F\x98\x80 TAIL");
+  EXPECT_EQ(fmt::format("{}", path(L"HEAD \xD83D\xDE00 TAIL")),
+            "HEAD \xF0\x9F\x98\x80 TAIL");
+  EXPECT_EQ(fmt::format("{}", path(L"HEAD \xD83D\xD83D\xDE00 TAIL")),
+            "HEAD �\xF0\x9F\x98\x80 TAIL");
   EXPECT_EQ(fmt::format("{:?}", path(L"\xd800")), "\"\\ud800\"");
 #  endif
 }
@@ -138,6 +140,7 @@ TEST(std_test, optional) {
 
 TEST(std_test, expected) {
 #ifdef __cpp_lib_expected
+  EXPECT_EQ(fmt::format("{}", std::expected<void, int>{}), "expected()");
   EXPECT_EQ(fmt::format("{}", std::expected<int, int>{1}), "expected(1)");
   EXPECT_EQ(fmt::format("{}", std::expected<int, int>{std::unexpected(1)}),
             "unexpected(1)");
@@ -161,6 +164,7 @@ TEST(std_test, expected) {
   EXPECT_FALSE(
       (fmt::is_formattable<std::expected<int, unformattable2>>::value));
   EXPECT_TRUE((fmt::is_formattable<std::expected<int, int>>::value));
+  EXPECT_TRUE((fmt::is_formattable<std::expected<void, int>>::value));
 #endif
 }
 

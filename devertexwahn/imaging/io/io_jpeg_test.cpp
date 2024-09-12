@@ -5,7 +5,7 @@
 
 #include "gmock/gmock.h"
 
-#include "imaging/io/io_jpeg.h"
+#include "imaging/io/io_jpeg.hpp"
 
 #include <algorithm>
 #include <filesystem>

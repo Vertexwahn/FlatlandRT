@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "disk",
-    srcs = ["disk.h"],
+    srcs = ["disk.hpp"],
     deps = [
         "//flatland/rendering:property_set",
         "//flatland/rendering/scene/shape",
@@ -30,7 +30,7 @@ cc_test(
 
 cc_library(
     name = "emitter",
-    hdrs = ["emitter.h"],
+    hdrs = ["emitter.hpp"],
     deps = [
         "//core:object",
         "//imaging:color",
@@ -49,7 +49,7 @@ cc_test(
 
 cc_library(
     name = "medium_event",
-    hdrs = ["medium_event.h"],
+    hdrs = ["medium_event.hpp"],
     deps = [
         "//math:frame",
     ],
@@ -57,7 +57,7 @@ cc_library(
 
 cc_library(
     name = "polygon",
-    hdrs = ["polygon.h"],
+    hdrs = ["polygon.hpp"],
     deps = [
         "//flatland/rendering/scene/shape",
         "//math:geometry",
@@ -79,7 +79,7 @@ cc_test(
 
 cc_library(
     name = "rectangle",
-    hdrs = ["rectangle.h"],
+    hdrs = ["rectangle.hpp"],
     deps = [
         "//flatland/rendering/scene/shape",
         "//math:geometry",
@@ -115,7 +115,7 @@ cc_test(
 
 cc_library(
     name = "shape",
-    hdrs = ["shape.h"],
+    hdrs = ["shape.hpp"],
     deps = [
         ":emitter",
         ":medium_event",
@@ -140,7 +140,7 @@ cc_test(
 
 cc_library(
     name = "triangle_mesh",
-    hdrs = ["triangle_mesh.h"],
+    hdrs = ["triangle_mesh.hpp"],
     deps = [
         "//core:logging",
         "//flatland/rendering/scene/shape",

@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/property_set_formatter.h"
+#include "flatland/rendering/property_set_formatter.hpp"
 
 #include "gmock/gmock.h"
 

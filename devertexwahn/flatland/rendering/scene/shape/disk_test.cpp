@@ -3,9 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "math/refract.h"
-#include "math/util.h"
-#include "flatland/rendering/scene/shape/disk.h"
+#include "math/refract.hpp"
+#include "math/util.hpp"
+#include "flatland/rendering/scene/shape/disk.hpp"
 
 #include "gmock/gmock.h"
 

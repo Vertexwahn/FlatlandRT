@@ -3,9 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "imaging/io/io_png.h"
-#include "imaging/color_converter.h"
-#include "core/logging.h"
+#include "imaging/io/io_png.hpp"
+#include "imaging/color_converter.hpp"
+#include "core/logging.hpp"
 
 #include "png.h"
 

@@ -8,7 +8,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "exception",
     srcs = ["exception.cpp"],
-    hdrs = ["exception.h"],
+    hdrs = ["exception.hpp"],
     deps = [
         ":namespace",
         "@boost.predef",
@@ -31,7 +31,7 @@ cc_library(
         "logging.cpp",
     ],
     hdrs = [
-        "logging.h",
+        "logging.hpp",
     ],
     deps = [
         "@spdlog",
@@ -76,14 +76,14 @@ cc_test(
 cc_library(
     name = "namespace",
     hdrs = [
-        "namespace.h",
+        "namespace.hpp",
     ],
 )
 
 cc_library(
     name = "non_copyable",
     hdrs = [
-        "non_copyable.h",
+        "non_copyable.hpp",
     ],
     deps = [
         ":namespace",
@@ -98,7 +98,7 @@ cc_library(
         "object.cpp",
     ],
     hdrs = [
-        "object.h",
+        "object.hpp",
     ],
     deps = [
         ":namespace",
@@ -123,7 +123,7 @@ cc_library(
         "object_factory.cpp",
     ],
     hdrs = [
-        "object_factory.h",
+        "object_factory.hpp",
     ],
     deps = [
         ":object",
@@ -150,7 +150,7 @@ cc_library(
     name = "platform",
     srcs = [
         "platform.cpp",
-        "platform.h",
+        "platform.hpp",
     ],
     linkopts = select({
         "@platforms//os:windows": [
@@ -201,7 +201,7 @@ cc_library(
         "property_set.cpp",
     ],
     hdrs = [
-        "property_set.h",
+        "property_set.hpp",
     ],
     deps = [
         "//core:namespace",
@@ -248,7 +248,7 @@ cc_library(
         "timer.cpp",
     ],
     hdrs = [
-        "timer.h",
+        "timer.hpp",
     ],
     visibility = ["//visibility:public"],
     deps = [":namespace"],

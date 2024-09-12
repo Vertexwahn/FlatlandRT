@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "axis_aligned_bounding_box",
-    hdrs = ["axis_aligned_bounding_box.h"],
+    hdrs = ["axis_aligned_bounding_box.hpp"],
     deps = [
         ":point",
         ":vector",
@@ -29,7 +29,7 @@ cc_test(
 
 cc_library(
     name = "frame",
-    hdrs = ["frame.h"],
+    hdrs = ["frame.hpp"],
     deps = [
         ":normal",
         ":vector",
@@ -53,7 +53,7 @@ cc_library(
     srcs = [
         "geometry.inc",
     ],
-    hdrs = ["geometry.h"],
+    hdrs = ["geometry.hpp"],
     deps = [
         ":point",
         #"@boost//:algorithm",
@@ -80,7 +80,7 @@ cc_test(
 
 cc_library(
     name = "intersection",
-    hdrs = ["intersection.h"],
+    hdrs = ["intersection.hpp"],
     deps = [
         ":normal",
         ":point",
@@ -102,7 +102,7 @@ cc_test(
 
 cc_library(
     name = "matrix",
-    hdrs = ["matrix.h"],
+    hdrs = ["matrix.hpp"],
     deps = [
         "//core:namespace",
         "@eigen",
@@ -123,7 +123,7 @@ cc_test(
 
 cc_library(
     name = "normal",
-    hdrs = ["normal.h"],
+    hdrs = ["normal.hpp"],
     deps = [
         "//core:namespace",
         "@eigen",
@@ -144,7 +144,7 @@ cc_test(
 
 cc_library(
     name = "point",
-    hdrs = ["point.h"],
+    hdrs = ["point.hpp"],
     deps = [
         "//core:namespace",
         "@eigen",
@@ -165,7 +165,7 @@ cc_test(
 
 cc_library(
     name = "quaternion",
-    hdrs = ["quaternion.h"],
+    hdrs = ["quaternion.hpp"],
     deps = [
         "//core:namespace",
         "@eigen",
@@ -184,7 +184,7 @@ cc_test(
 cc_library(
     name = "ray",
     hdrs = [
-        "ray.h",
+        "ray.hpp",
     ],
     deps = [
         ":point",
@@ -207,7 +207,7 @@ cc_test(
 cc_library(
     name = "refract",
     srcs = ["refract.cpp"],
-    hdrs = ["refract.h"],
+    hdrs = ["refract.hpp"],
     deps = [
         ":normal",
         ":vector",
@@ -230,7 +230,7 @@ cc_test(
 
 cc_library(
     name = "sampling",
-    hdrs = ["sampling.h"],
+    hdrs = ["sampling.hpp"],
     deps = [
         "//core:namespace",
         "//math:normal",
@@ -255,7 +255,7 @@ cc_test(
 
 cc_library(
     name = "tensor",
-    hdrs = ["tensor.h"],
+    hdrs = ["tensor.hpp"],
     deps = [
         "//core:namespace",
         "@xtensor",
@@ -274,7 +274,7 @@ cc_test(
 
 cc_library(
     name = "transform",
-    hdrs = ["transform.h"],
+    hdrs = ["transform.hpp"],
     deps = [
         ":matrix",
         ":normal",
@@ -299,7 +299,7 @@ cc_test(
 
 cc_library(
     name = "util",
-    hdrs = ["util.h"],
+    hdrs = ["util.hpp"],
     deps = [
         "//core:namespace",
         #"@boost//:predef",
@@ -322,7 +322,7 @@ cc_test(
 
 cc_library(
     name = "vector",
-    hdrs = ["vector.h"],
+    hdrs = ["vector.hpp"],
     deps = [
         "//core:namespace",
         "@eigen",

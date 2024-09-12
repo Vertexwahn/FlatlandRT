@@ -3,10 +3,10 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/intersector/quadtree_intersector.h"
+#include "flatland/rendering/intersector/quadtree_intersector.hpp"
 
-#include "core/logging.h"
-#include "math/util.h"
+#include "core/logging.hpp"
+#include "math/util.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

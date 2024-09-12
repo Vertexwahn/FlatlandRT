@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "math/util.h"
+#include "math/util.hpp"
 
 #include "gmock/gmock.h"
 

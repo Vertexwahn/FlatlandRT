@@ -3,10 +3,10 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/tests/test_logger.h"
+#include "core/tests/test_logger.hpp"
 
-#include "core/logging.h"
-#include "core/platform.h"
+#include "core/logging.hpp"
+#include "core/platform.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

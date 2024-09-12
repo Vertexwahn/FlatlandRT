@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/tests/test_logger.h"
+#include "core/tests/test_logger.hpp"
 
 #include "spdlog/sinks/basic_file_sink.h"
 

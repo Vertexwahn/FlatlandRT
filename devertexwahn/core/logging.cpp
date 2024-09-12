@@ -48,7 +48,7 @@
 // Logging in Mitsuba 3
 // https://github.com/mitsuba-renderer/mitsuba3/blob/master/include/mitsuba/core/logger.h
 
-#include "core/logging.h"
+#include "core/logging.hpp"
 
 #include "spdlog/sinks/base_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"

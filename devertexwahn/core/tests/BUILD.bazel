@@ -8,7 +8,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "test_logger",
     srcs = ["test_logger.cpp"],
-    hdrs = ["test_logger.h"],
+    hdrs = ["test_logger.hpp"],
     deps = [
         "//core:logging",
         "@spdlog",

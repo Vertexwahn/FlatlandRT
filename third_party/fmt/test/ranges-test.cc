@@ -363,8 +363,7 @@ TEST(ranges_test, enum_range) {
 
 #if !FMT_MSC_VERSION
 TEST(ranges_test, unformattable_range) {
-  EXPECT_FALSE((fmt::has_formatter<std::vector<unformattable>,
-                                   fmt::format_context>::value));
+  EXPECT_FALSE((fmt::is_formattable<std::vector<unformattable>, char>::value));
 }
 #endif
 
@@ -561,7 +560,7 @@ TEST(ranges_test, escape) {
   EXPECT_EQ(fmt::format("{}", vec{"\x7f"}), "[\"\\x7f\"]");
   EXPECT_EQ(fmt::format("{}", vec{"n\xcc\x83"}), "[\"n\xcc\x83\"]");
 
-  if (fmt::detail::use_utf8()) {
+  if (FMT_USE_UTF8) {
     EXPECT_EQ(fmt::format("{}", vec{"\xcd\xb8"}), "[\"\\u0378\"]");
     // Unassigned Unicode code points.
     EXPECT_EQ(fmt::format("{}", vec{"\xf0\xaa\x9b\x9e"}), "[\"\\U0002a6de\"]");
@@ -579,7 +578,11 @@ TEST(ranges_test, escape) {
 
   EXPECT_EQ(fmt::format("{}", std::vector<std::vector<char>>{{'x'}}),
             "[['x']]");
+
+// Disabled due to a clang 17 bug: https://github.com/fmtlib/fmt/issues/4144.
+#if FMT_CLANG_VERSION >= 1800
   EXPECT_EQ(fmt::format("{}", std::tuple<std::vector<char>>{{'x'}}), "(['x'])");
+#endif
 }
 
 template <typename R> struct fmt_ref_view {

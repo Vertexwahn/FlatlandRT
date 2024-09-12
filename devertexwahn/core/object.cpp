@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/object.h"
+#include "core/object.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

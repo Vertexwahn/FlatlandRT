@@ -3,9 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/integrator/path_specular_transmission.h"
-#include "flatland/rendering/rendering.h"
-#include "flatland/rendering/scene/load_scene.h"
+#include "flatland/rendering/integrator/path_specular_transmission.hpp"
+#include "flatland/rendering/rendering.hpp"
+#include "flatland/rendering/scene/load_scene.hpp"
 
 #include "gmock/gmock.h"
 

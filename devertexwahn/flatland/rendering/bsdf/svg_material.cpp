@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/bsdf/svg_material.h"
+#include "flatland/rendering/bsdf/svg_material.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/scene/shape/shape.h"
+#include "flatland/rendering/scene/shape/shape.hpp"
 
 #include "gmock/gmock.h"
 

@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/bsdf/bsdf.h"
+#include "flatland/rendering/bsdf/bsdf.hpp"
 
 #include "gmock/gmock.h"
 

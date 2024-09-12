@@ -3,8 +3,8 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/canvas/svg_canvas.h"
-#include "math/geometry.h"
+#include "flatland/rendering/canvas/svg_canvas.hpp"
+#include "math/geometry.hpp"
 
 #include <iomanip>
 #include <iostream>

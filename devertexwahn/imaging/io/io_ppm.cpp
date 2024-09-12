@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "imaging/io/io_ppm.h"
+#include "imaging/io/io_ppm.hpp"
 
 #include <fstream>
 

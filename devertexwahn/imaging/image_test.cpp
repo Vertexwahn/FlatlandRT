@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "imaging/io/io.h"
+#include "imaging/io/io.hpp"
 
 #include "gmock/gmock.h"
 

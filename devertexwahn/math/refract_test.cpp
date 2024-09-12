@@ -3,8 +3,8 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "math/refract.h"
-#include "math/util.h"
+#include "math/refract.hpp"
+#include "math/util.hpp"
 
 #include "gmock/gmock.h"
 

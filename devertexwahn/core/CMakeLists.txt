@@ -7,18 +7,18 @@
 # Feel free to open a pull request for improvements of the CMake build support.
 
 add_library(flatland.core SHARED
-    logging.h
-    namespace.h
-    non_copyable.h
+        logging.hpp
+        namespace.hpp
+        non_copyable.hpp
     object.cpp
-    object.h
-    object_factory.h
+        object.hpp
+        object_factory.hpp
     object_factory.cpp
     property_set.cpp
-    property_set.h
+        property_set.hpp
     reference_counted.h
     timer.cpp
-    timer.h
+        timer.hpp
 )
 
 target_include_directories(flatland.core

@@ -3,11 +3,11 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/integrator/path_specular_transmission.h"
+#include "flatland/rendering/integrator/path_specular_transmission.hpp"
 
-#include "core/logging.h"
-#include "math/refract.h"
-#include "flatland/rendering/scene/scene.h"
+#include "core/logging.hpp"
+#include "math/refract.hpp"
+#include "flatland/rendering/scene/scene.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

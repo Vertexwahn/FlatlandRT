@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/exception.h"
+#include "core/exception.hpp"
 
 #include "gmock/gmock.h"
 

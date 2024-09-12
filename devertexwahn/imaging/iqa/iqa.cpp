@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "imaging/iqa/iqa.h"
+#include "imaging/iqa/iqa.hpp"
 
 #include <cassert>
 

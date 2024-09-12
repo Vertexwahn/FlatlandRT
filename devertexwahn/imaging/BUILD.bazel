@@ -8,7 +8,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "color",
     srcs = ["color.cpp"],
-    hdrs = ["color.h"],
+    hdrs = ["color.hpp"],
     deps = [
         "//core:namespace",
         "//math:util",
@@ -30,7 +30,7 @@ cc_test(
 
 cc_library(
     name = "color_converter",
-    hdrs = ["color_converter.h"],
+    hdrs = ["color_converter.hpp"],
     deps = [
         ":color",
         "//core:namespace",
@@ -50,7 +50,7 @@ cc_test(
 cc_library(
     name = "image",
     srcs = ["image.cpp"],
-    hdrs = ["image.h"],
+    hdrs = ["image.hpp"],
     deps = [
         ":color",
         "//math:point",

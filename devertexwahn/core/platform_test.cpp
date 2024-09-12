@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/platform.h"
+#include "core/platform.hpp"
 
 using namespace de_vertexwahn;
 

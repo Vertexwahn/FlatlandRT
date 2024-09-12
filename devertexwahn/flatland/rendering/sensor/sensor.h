@@ -7,9 +7,9 @@
 #ifndef De_Vertexwahn_Core_Sensor2_84975de0_f654_425b_85f1_5cbf7a1f77eb_h
 #define De_Vertexwahn_Core_Sensor2_84975de0_f654_425b_85f1_5cbf7a1f77eb_h
 
-#include "core/namespace.h"
-#include "core/object.h"
-#include "math/transform.h"
+#include "core/namespace.hpp"
+#include "core/object.hpp"
+#include "math/transform.hpp"
 #include "flatland/rendering/property_set.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE

@@ -3,15 +3,15 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "imaging/color_converter.h"
-#include "imaging/io/io.h"
-#include "imaging/io/io_jpeg.h"
-#include "imaging/io/io_openexr.h"
-#include "imaging/io/io_png.h"
-#include "imaging/io/io_ppm.h"
-#include "imaging/io/io_webp.h"
+#include "imaging/color_converter.hpp"
+#include "imaging/io/io.hpp"
+#include "imaging/io/io_jpeg.hpp"
+#include "imaging/io/io_openexr.hpp"
+#include "imaging/io/io_png.hpp"
+#include "imaging/io/io_ppm.hpp"
+#include "imaging/io/io_webp.hpp"
 
-#include "math/util.h"
+#include "math/util.hpp"
 
 #include "boost/algorithm/string.hpp"
 

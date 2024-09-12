@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "imaging/io/io_openexr.h"
+#include "imaging/io/io_openexr.hpp"
 
 #include "src/lib/OpenEXR/ImfArray.h"
 #include "src/lib/OpenEXR/ImfChannelList.h"

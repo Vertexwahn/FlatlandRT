@@ -1,7 +1,7 @@
 // more details here regarding the PFM Portable FloatMap Image Format:
 // https://www.pauldebevec.com/Research/HDR/PFM/
 
-#include "imaging/io/io_pfm.h"
+#include "imaging/io/io_pfm.hpp"
 
 #include <fstream>
 

@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "fresnel",
-    srcs = ["fresnel.h"],
+    srcs = ["fresnel.hpp"],
     deps = [
         "//core:namespace",
         "//math:vector",
@@ -31,7 +31,7 @@ cc_library(
     name = "property_set",
     hdrs = [
         "property_set.h",
-        "property_set_formatter.h",
+        "property_set_formatter.hpp",
     ],
     deps = [
         "//core:object",
@@ -71,7 +71,7 @@ cc_library(
     name = "rendering",
     srcs = [
         "rendering.cpp",
-        "rendering.h",
+        "rendering.hpp",
     ],
     visibility = ["//visibility:public"],
     deps = [
@@ -82,7 +82,7 @@ cc_library(
 
 cc_library(
     name = "sampler",
-    hdrs = ["sampler.h"],
+    hdrs = ["sampler.hpp"],
     deps = [
         "//core:object",
         "//flatland/rendering:property_set",

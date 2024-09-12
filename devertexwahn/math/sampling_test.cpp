@@ -3,8 +3,8 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "flatland/rendering/sampler.h"
-#include "math/sampling.h"
+#include "flatland/rendering/sampler.hpp"
+#include "math/sampling.hpp"
 using namespace de_vertexwahn;
 
 #include "hypothesis.h"

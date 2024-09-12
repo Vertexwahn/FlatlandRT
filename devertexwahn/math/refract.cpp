@@ -1,4 +1,4 @@
-#include "math/refract.h"
+#include "math/refract.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

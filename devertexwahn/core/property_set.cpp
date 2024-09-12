@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/property_set.h"
+#include "core/property_set.hpp"
 
 #include "fmt/core.h"
 

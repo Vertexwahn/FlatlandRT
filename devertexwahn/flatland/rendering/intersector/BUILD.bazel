@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "brute_force_intersector",
-    hdrs = ["brute_force_intersector.h"],
+    hdrs = ["brute_force_intersector.hpp"],
     deps = [
         ":intersector",
         "//core:logging",
@@ -17,7 +17,7 @@ cc_library(
 
 cc_library(
     name = "intersector",
-    hdrs = ["intersector.h"],
+    hdrs = ["intersector.hpp"],
     deps = [
         "//core:object",
         "//core:reference_counted",
@@ -28,7 +28,7 @@ cc_library(
 cc_library(
     name = "quadtree_intersector",
     srcs = ["quadtree_intersector.cpp"],
-    hdrs = ["quadtree_intersector.h"],
+    hdrs = ["quadtree_intersector.hpp"],
     deps = [
         ":intersector",
         "//core:logging",

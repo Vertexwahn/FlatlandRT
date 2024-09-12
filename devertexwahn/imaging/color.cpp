@@ -1,7 +1,7 @@
 // Code copied form paulbourke 
 // Modified by julianamann
 
-#include "imaging/color.h"
+#include "imaging/color.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

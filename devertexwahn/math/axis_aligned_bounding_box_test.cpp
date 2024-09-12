@@ -3,8 +3,8 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "math/axis_aligned_bounding_box.h"
-#include "math/ray.h"
+#include "math/axis_aligned_bounding_box.hpp"
+#include "math/ray.hpp"
 
 #include "gmock/gmock.h"
 

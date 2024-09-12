@@ -32,9 +32,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "core/platform.h"
-#include "core/timer.h"
-#include "core/logging.h"
+#include "core/platform.hpp"
+#include "core/timer.hpp"
+#include "core/logging.hpp"
 
 #if defined(DE_VERTEXWAHN_OS_WINDOWS) // Windows related code
 

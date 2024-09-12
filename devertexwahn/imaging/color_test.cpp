@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "imaging/color.h"
+#include "imaging/color.hpp"
 
 #include "gmock/gmock.h"
 

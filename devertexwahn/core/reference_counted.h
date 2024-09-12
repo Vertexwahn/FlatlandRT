@@ -7,7 +7,7 @@
 #ifndef De_Vertexwahn_Core_ReferenceCounted_238dd615_2085_4070_b244_14af1a114dc8_h
 #define De_Vertexwahn_Core_ReferenceCounted_238dd615_2085_4070_b244_14af1a114dc8_h
 
-#include "core/namespace.h"
+#include "core/namespace.hpp"
 
 #include <memory>
 

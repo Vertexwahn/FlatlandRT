@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: CC-BY-SA-3.0
  */
 
-#include "io_webp.h"
+#include "io_webp.hpp"
 
 #include "webp/encode.h"
 #include "webp/decode.h"

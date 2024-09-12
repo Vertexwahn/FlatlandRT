@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "ambient_occlusion",
-    hdrs = ["ambient_occlusion.h"],
+    hdrs = ["ambient_occlusion.hpp"],
     deps = [
         "//core:namespace",
         "//flatland/rendering/integrator",
@@ -32,7 +32,7 @@ cc_test(
 
 cc_library(
     name = "integrator",
-    srcs = ["integrator.h"],
+    srcs = ["integrator.hpp"],
     deps = [
         "//core:logging",
         "//core:object",
@@ -44,7 +44,7 @@ cc_library(
 
 cc_library(
     name = "path_mirror_reflection",
-    hdrs = ["path_mirror_reflection.h"],
+    hdrs = ["path_mirror_reflection.hpp"],
     deps = [
         "//flatland/rendering/integrator",
         "//math:refract",
@@ -69,7 +69,7 @@ cc_test(
 cc_library(
     name = "path_specular_transmission",
     srcs = ["path_specular_transmission.cpp"],
-    hdrs = ["path_specular_transmission.h"],
+    hdrs = ["path_specular_transmission.hpp"],
     deps = [
         "//flatland/rendering/scene",
         "//math:refract",

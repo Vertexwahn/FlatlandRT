@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/timer.h"
+#include "core/timer.hpp"
 
 #include <stdint.h>
 

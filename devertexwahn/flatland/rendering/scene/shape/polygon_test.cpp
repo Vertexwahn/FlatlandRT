@@ -3,9 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "math/geometry.h"
-#include "math/util.h"
-#include "flatland/rendering/scene/shape/polygon.h"
+#include "math/geometry.hpp"
+#include "math/util.hpp"
+#include "flatland/rendering/scene/shape/polygon.hpp"
 
 #include "gmock/gmock.h"
 

@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "imaging/image.h"
+#include "imaging/image.hpp"
 
 #include "ImfInputFile.h"
 #include "ImfHeader.h"

@@ -3,8 +3,8 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "math/util.h"
-#include "flatland/rendering/scene/shape/rectangle.h"
+#include "math/util.hpp"
+#include "flatland/rendering/scene/shape/rectangle.hpp"
 
 using namespace de_vertexwahn;
 

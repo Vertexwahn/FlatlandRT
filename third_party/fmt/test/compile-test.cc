@@ -198,7 +198,7 @@ TEST(compile_test, format_to_n) {
   EXPECT_STREQ("2a", buffer);
 }
 
-#  if FMT_USE_CONSTEVAL && (!FMT_MSC_VERSION || FMT_MSC_VERSION >= 1930)
+#  if FMT_USE_CONSTEVAL && (!FMT_MSC_VERSION || FMT_MSC_VERSION >= 1940)
 TEST(compile_test, constexpr_formatted_size) {
   FMT_CONSTEXPR20 size_t size = fmt::formatted_size(FMT_COMPILE("{}"), 42);
   EXPECT_EQ(size, 2);
@@ -334,6 +334,7 @@ TEST(compile_time_formatting_test, integer) {
   EXPECT_EQ("0X4A", test_format<5>(FMT_COMPILE("{:#X}"), 0x4a));
 
   EXPECT_EQ("   42", test_format<6>(FMT_COMPILE("{:5}"), 42));
+  EXPECT_EQ("   42", test_format<6>(FMT_COMPILE("{:5}"), 42l));
   EXPECT_EQ("   42", test_format<6>(FMT_COMPILE("{:5}"), 42ll));
   EXPECT_EQ("   42", test_format<6>(FMT_COMPILE("{:5}"), 42ull));
 
