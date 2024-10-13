@@ -8,14 +8,6 @@
 
 
 jobs:
-  - job: MacOSAppleClang14Monterey
-    displayName: "Apple Clang14 on macOS 12 (Monterey)"
-    pool:
-      vmImage: 'macOS-12'
-    steps:
-      - template: devertexwahn/ci/macOS-12-apple-clang14.yaml
-
-
   - job: MacOSAppleClang14Ventura
     displayName: "Apple Clang14 on macOS 13 (Ventura)"
     pool:
@@ -108,6 +100,13 @@ jobs:
       vmImage: 'ubuntu-22.04'
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-gcc11-fast-opt.yaml
+
+  - job: Ubuntu24GCC13
+    displayName: "GCC13 fastbuild opt on Ubuntu 24.04"
+    pool:
+      vmImage: 'ubuntu-24.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-24.04-gcc13-fast-opt.yaml
 
   - job: Ubuntu22GCC11DebugPart1
     displayName: "GCC11 dbg on Ubuntu 22.04 (Part 1)"

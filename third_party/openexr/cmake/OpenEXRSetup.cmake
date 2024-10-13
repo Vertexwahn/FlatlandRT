@@ -12,13 +12,14 @@ endif()
 ## Target configuration
 
 # What C++ standard to compile for
-# VFX Platform 18 is c++14, so let's enable that by default
-set(tmp 14)
-if(CMAKE_CXX_STANDARD)
+# VFX Platform 21 is c++17, so 21, 22, 23, 24 gives us 4+ years of 17
+set(tmp 17)
+if(CMAKE_CXX_STANDARD GREATER tmp)
   set(tmp ${CMAKE_CXX_STANDARD})
 endif()
 set(OPENEXR_CXX_STANDARD "${tmp}" CACHE STRING "C++ standard to compile against")
 set(tmp)
+message(STATUS "Building against C++ Standard: ${OPENEXR_CXX_STANDARD}")
 
 set(OPENEXR_NAMESPACE_CUSTOM "0" CACHE STRING "Whether the namespace has been customized (so external users know)")
 set(OPENEXR_INTERNAL_IMF_NAMESPACE "Imf_${OPENEXR_VERSION_API}" CACHE STRING "Real namespace for OpenEXR that will end up in compiled symbols")
@@ -226,7 +227,7 @@ else()
 
   FetchContent_GetProperties(Deflate)
   if(NOT Deflate_POPULATED)
-    FetchContent_Populate(Deflate)
+    FetchContent_MakeAvailable(Deflate)
   endif()
 
   # Rather than actually compile something, just embed the sources
@@ -288,7 +289,7 @@ if(NOT TARGET Imath::Imath AND NOT Imath_FOUND)
     
   FetchContent_GetProperties(Imath)
   if(NOT Imath_POPULATED)
-    FetchContent_Populate(Imath)
+    FetchContent_MakeAvailable(Imath)
 
     # Propagate OpenEXR's install setting to Imath
     set(IMATH_INSTALL ${OPENEXR_INSTALL})
@@ -296,9 +297,6 @@ if(NOT TARGET Imath::Imath AND NOT Imath_FOUND)
     # Propagate OpenEXR's setting for pkg-config generation to Imath:
     # If OpenEXR is generating it, the internal Imath should, too.
     set(IMATH_INSTALL_PKG_CONFIG ${OPENEXR_INSTALL_PKG_CONFIG}) 
-    
-    # hrm, cmake makes Imath lowercase for the properties (to imath)
-    add_subdirectory(${imath_SOURCE_DIR} ${imath_BINARY_DIR})
   endif()
   # the install creates this but if we're using the library locally we
   # haven't installed the header files yet, so need to extract those

@@ -342,14 +342,12 @@ VISIT_TYPE(unsigned long, unsigned long long);
 #endif
 
 #if FMT_BUILTIN_TYPES
-#  define CHECK_ARG(expected, value)                                 \
-    {                                                                \
-      testing::StrictMock<mock_visitor<decltype(expected)>> visitor; \
-      EXPECT_CALL(visitor, visit(expected));                         \
-      auto var = value;                                              \
-      fmt::basic_format_arg<fmt::format_context>(                    \
-          fmt::detail::arg_mapper<char>::map(var))                   \
-          .visit(visitor);                                           \
+#  define CHECK_ARG(expected, value)                                  \
+    {                                                                 \
+      testing::StrictMock<mock_visitor<decltype(expected)>> visitor;  \
+      EXPECT_CALL(visitor, visit(expected));                          \
+      auto var = value;                                               \
+      fmt::basic_format_arg<fmt::format_context>(var).visit(visitor); \
     }
 #else
 #  define CHECK_ARG(expected, value)
@@ -786,10 +784,10 @@ TEST(base_test, format_explicitly_convertible_to_std_string_view) {
 #  endif
 #endif
 
-TEST(base_test, has_const_formatter) {
-  EXPECT_TRUE((fmt::detail::has_const_formatter<const_formattable, char>()));
+TEST(base_test, has_formatter) {
+  EXPECT_TRUE((fmt::detail::has_formatter<const const_formattable, char>()));
   EXPECT_FALSE(
-      (fmt::detail::has_const_formatter<nonconst_formattable, char>()));
+      (fmt::detail::has_formatter<const nonconst_formattable, char>()));
 }
 
 TEST(base_test, format_nonconst) {
@@ -869,4 +867,18 @@ FMT_END_NAMESPACE
 TEST(base_test, format_to_custom_container) {
   auto c = custom_container();
   fmt::format_to(std::back_inserter(c), "");
+}
+
+struct nondeterministic_format_string {
+  mutable int i = 0;
+  FMT_CONSTEXPR operator string_view() const {
+    return string_view("{}", i++ != 0 ? 2 : 0);
+  }
+};
+
+TEST(base_test, no_repeated_format_string_conversions) {
+#if !FMT_GCC_VERSION
+  char buf[10];
+  fmt::format_to(buf, nondeterministic_format_string());
+#endif
 }

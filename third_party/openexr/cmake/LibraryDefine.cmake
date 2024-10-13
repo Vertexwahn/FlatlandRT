@@ -10,7 +10,7 @@ function(OPENEXR_DEFINE_LIBRARY libname)
   cmake_parse_arguments(OPENEXR_CURLIB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if (MSVC)
-    set(_openexr_extra_flags "/EHsc")
+    set(_openexr_extra_flags "/EHsc" "/MP")
   endif()
   set(objlib ${libname})
   add_library(${objlib}
@@ -18,14 +18,11 @@ function(OPENEXR_DEFINE_LIBRARY libname)
     ${OPENEXR_CURLIB_SOURCES})
 
   # Use ${OPENEXR_CXX_STANDARD} to determine the standard we use to compile
-  # OpenEXR itself. But the headers only require C++11 features, so that's
-  # all we need to pass on as interface requirements to downstream projects.
-  # For example, it's fine for an OpenEXR built with C++14 to be called from
-  # an app that is compiled with C++11; OpenEXR needn't force the app to
-  # also use C++14.
+  # OpenEXR itself. The headers will use string_view and such, so ensure
+  # the user is at least 17, but could be higher
   target_compile_features(${objlib}
                           PRIVATE cxx_std_${OPENEXR_CXX_STANDARD}
-                          INTERFACE cxx_std_11 )
+                          INTERFACE cxx_std_17 )
 
   # we are embedding libdeflate
   target_include_directories(${objlib} PRIVATE ${EXR_DEFLATE_INCLUDE_DIR})

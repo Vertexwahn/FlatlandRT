@@ -561,6 +561,11 @@ Matcher<T> A();
 // and MUST NOT BE USED IN USER CODE!!!
 namespace internal {
 
+// Used per go/ranked-overloads for dispatching.
+struct Rank0 {};
+struct Rank1 : Rank0 {};
+using HighestRank = Rank1;
+
 // If the explanation is not empty, prints it to the ostream.
 inline void PrintIfNotEmpty(const std::string& explanation,
                             ::std::ostream* os) {
@@ -1419,34 +1424,55 @@ class AnyOfMatcherImpl : public MatcherInterface<const T&> {
 
   bool MatchAndExplain(const T& x,
                        MatchResultListener* listener) const override {
+    // This method uses matcher's explanation when explaining the result.
+    // However, if matcher doesn't provide one, this method uses matcher's
+    // description.
     std::string no_match_result;
-
-    // If either matcher1_ or matcher2_ matches x, we just need to
-    // explain why *one* of them matches.
-    for (size_t i = 0; i < matchers_.size(); ++i) {
+    for (const Matcher<T>& matcher : matchers_) {
       StringMatchResultListener slistener;
-      if (matchers_[i].MatchAndExplain(x, &slistener)) {
-        *listener << slistener.str();
-        return true;
-      } else {
-        if (no_match_result.empty()) {
-          no_match_result = slistener.str();
+      // Return explanation for first match.
+      if (matcher.MatchAndExplain(x, &slistener)) {
+        const std::string explanation = slistener.str();
+        if (!explanation.empty()) {
+          *listener << explanation;
         } else {
-          std::string result = slistener.str();
-          if (!result.empty()) {
-            no_match_result += ", and ";
-            no_match_result += result;
-          }
+          *listener << "which matches (" << Describe(matcher) << ")";
+        }
+        return true;
+      }
+      // Keep track of explanations in case there is no match.
+      std::string explanation = slistener.str();
+      if (explanation.empty()) {
+        explanation = DescribeNegation(matcher);
+      }
+      if (no_match_result.empty()) {
+        no_match_result = explanation;
+      } else {
+        if (!explanation.empty()) {
+          no_match_result += ", and ";
+          no_match_result += explanation;
         }
       }
     }
 
-    // Otherwise we need to explain why *both* of them fail.
     *listener << no_match_result;
     return false;
   }
 
  private:
+  // Returns matcher description as a string.
+  std::string Describe(const Matcher<T>& matcher) const {
+    StringMatchResultListener listener;
+    matcher.DescribeTo(listener.stream());
+    return listener.str();
+  }
+
+  std::string DescribeNegation(const Matcher<T>& matcher) const {
+    StringMatchResultListener listener;
+    matcher.DescribeNegationTo(listener.stream());
+    return listener.str();
+  }
+
   const std::vector<Matcher<T>> matchers_;
 };
 
@@ -2934,10 +2960,6 @@ class EachMatcher {
   const M inner_matcher_;
 };
 
-// Use go/ranked-overloads for dispatching.
-struct Rank0 {};
-struct Rank1 : Rank0 {};
-
 namespace pair_getters {
 using std::get;
 template <typename T>
@@ -3891,6 +3913,21 @@ GTEST_API_ std::string FormatMatcherDescription(
     bool negation, const char* matcher_name,
     const std::vector<const char*>& param_names, const Strings& param_values);
 
+// Overloads to support `OptionalMatcher` being used with a type that either
+// supports implicit conversion to bool or a `has_value()` method.
+template <typename Optional>
+auto IsOptionalEngaged(const Optional& optional,
+                       Rank1) -> decltype(!!optional) {
+  // The use of double-negation here is to preserve historical behavior where
+  // the matcher used `operator!` rather than directly using `operator bool`.
+  return !static_cast<bool>(!optional);
+}
+template <typename Optional>
+auto IsOptionalEngaged(const Optional& optional,
+                       Rank0) -> decltype(!optional.has_value()) {
+  return optional.has_value();
+}
+
 // Implements a matcher that checks the value of a optional<> type variable.
 template <typename ValueMatcher>
 class OptionalMatcher {
@@ -3923,7 +3960,7 @@ class OptionalMatcher {
 
     bool MatchAndExplain(Optional optional,
                          MatchResultListener* listener) const override {
-      if (!optional) {
+      if (!IsOptionalEngaged(optional, HighestRank())) {
         *listener << "which is not engaged";
         return false;
       }
@@ -5245,9 +5282,10 @@ inline InnerMatcher AllArgs(const InnerMatcher& matcher) {
 }
 
 // Returns a matcher that matches the value of an optional<> type variable.
-// The matcher implementation only uses '!arg' and requires that the optional<>
-// type has a 'value_type' member type and that '*arg' is of type 'value_type'
-// and is printable using 'PrintToString'. It is compatible with
+// The matcher implementation only uses '!arg' (or 'arg.has_value()' if '!arg`
+// isn't a valid expression) and requires that the optional<> type has a
+// 'value_type' member type and that '*arg' is of type 'value_type' and is
+// printable using 'PrintToString'. It is compatible with
 // std::optional/std::experimental::optional.
 // Note that to compare an optional type variable against nullopt you should
 // use Eq(nullopt) and not Eq(Optional(nullopt)). The latter implies that the

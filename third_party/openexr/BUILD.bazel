@@ -12,7 +12,7 @@ expand_template(
     name = "IexConfig",
     out = "src/lib/Iex/IexConfig.h",
     substitutions = {
-        "@IEX_INTERNAL_NAMESPACE@": "Iex_3_2",
+        "@IEX_INTERNAL_NAMESPACE@": "Iex_3_3",
         "@IEX_NAMESPACE_CUSTOM@": "0",
         "@IEX_NAMESPACE@": "Iex",
     },
@@ -34,7 +34,7 @@ expand_template(
     name = "IlmThreadConfig",
     out = "src/lib/IlmThread/IlmThreadConfig.h",
     substitutions = {
-        "@ILMTHREAD_INTERNAL_NAMESPACE@": "IlmThread_3_2",
+        "@ILMTHREAD_INTERNAL_NAMESPACE@": "IlmThread_3_3",
         "@ILMTHREAD_NAMESPACE_CUSTOM@": "0",
         "@ILMTHREAD_NAMESPACE@": "IlmThread",
         "#cmakedefine01 ILMTHREAD_HAVE_POSIX_SEMAPHORES": "#define ILMTHREAD_HAVE_POSIX_SEMAPHORES 0",
@@ -48,14 +48,14 @@ expand_template(
     out = "src/lib/OpenEXR/OpenEXRConfig.h",
     substitutions = {
         "@OPENEXR_IMF_NAMESPACE@": "Imf",
-        "@OPENEXR_INTERNAL_IMF_NAMESPACE@": "Imf_3_2",
-        "@OPENEXR_LIB_VERSION@": "3.2.0",
-        "@OPENEXR_NAMESPACE_CUSTOM@": "3.2.0",
-        "@OPENEXR_PACKAGE_NAME@": "OpenEXR 3.2.0",
+        "@OPENEXR_INTERNAL_IMF_NAMESPACE@": "Imf_3_3",
+        "@OPENEXR_LIB_VERSION@": "3.3.0",
+        "@OPENEXR_NAMESPACE_CUSTOM@": "3.3.0",
+        "@OPENEXR_PACKAGE_NAME@": "OpenEXR 3.3.0",
         "@OPENEXR_VERSION_EXTRA@": "",
-        "@OPENEXR_VERSION@": "3.2.0",
+        "@OPENEXR_VERSION@": "3.3.0",
         "@OPENEXR_VERSION_MAJOR@": "3",
-        "@OPENEXR_VERSION_MINOR@": "2",
+        "@OPENEXR_VERSION_MINOR@": "3",
         "@OPENEXR_VERSION_PATCH@": "0",
         "#cmakedefine OPENEXR_ENABLE_API_VISIBILITY": "#define OPENEXR_ENABLE_API_VISIBILITY",
         "#cmakedefine OPENEXR_HAVE_LARGE_STACK 1": "/* #undef OPENEXR_HAVE_LARGE_STACK */",
@@ -108,6 +108,7 @@ cc_library(
         "//conditions:default": [],
     }),
     includes = [
+        "src/lib",
         "src/lib/Iex",
         "src/lib/OpenEXR",
         "src/lib/OpenEXRCore",
@@ -134,6 +135,7 @@ cc_library(
         "src/lib/IlmThread/IlmThreadMutex.h",
         "src/lib/IlmThread/IlmThreadNamespace.h",
         "src/lib/IlmThread/IlmThreadPool.h",
+        "src/lib/IlmThread/IlmThreadProcessGroup.h",
         "src/lib/IlmThread/IlmThreadSemaphore.h",
     ],
     features = select({
@@ -141,6 +143,7 @@ cc_library(
         "//conditions:default": [],
     }),
     includes = [
+        "src/lib",
         "src/lib/IlmThread",
         "src/lib/OpenEXRCore",
     ],
@@ -153,7 +156,6 @@ cc_library(
         "src/lib/IlmThread/IlmThreadConfig.h",
         "src/lib/OpenEXR/OpenEXRConfig.h",
         "src/lib/OpenEXR/OpenEXRConfigInternal.h",
-        "src/lib/OpenEXR/dwaLookups.h",
         "src/lib/OpenEXRCore/attributes.c",
         "src/lib/OpenEXRCore/backward_compatibility.h",
         "src/lib/OpenEXRCore/base.c",
@@ -164,6 +166,7 @@ cc_library(
         "src/lib/OpenEXRCore/context.c",
         "src/lib/OpenEXRCore/debug.c",
         "src/lib/OpenEXRCore/decoding.c",
+        "src/lib/OpenEXRCore/dwaLookups.h",
         "src/lib/OpenEXRCore/encoding.c",
         "src/lib/OpenEXRCore/float_vector.c",
         "src/lib/OpenEXRCore/internal_attr.h",
@@ -257,7 +260,7 @@ cc_library(
         }),
     visibility = ["//visibility:public"],
     deps = [
-        "@imath//:Imath",
+        "@imath",
         "@libdeflate//:deflate",
     ],
 )
@@ -278,6 +281,8 @@ cc_library(
         "src/lib/OpenEXR/ImfCompression.cpp",
         "src/lib/OpenEXR/ImfCompressionAttribute.cpp",
         "src/lib/OpenEXR/ImfCompressor.cpp",
+        "src/lib/OpenEXR/ImfContext.cpp",
+        "src/lib/OpenEXR/ImfContextInit.cpp",
         "src/lib/OpenEXR/ImfConvert.cpp",
         "src/lib/OpenEXR/ImfDeepCompositing.cpp",
         "src/lib/OpenEXR/ImfDeepFrameBuffer.cpp",
@@ -357,8 +362,6 @@ cc_library(
         "src/lib/OpenEXR/ImfWav.cpp",
         "src/lib/OpenEXR/ImfZip.cpp",
         "src/lib/OpenEXR/ImfZipCompressor.cpp",
-        "src/lib/OpenEXR/b44ExpLogTable.h",
-        "src/lib/OpenEXR/dwaLookups.h",
     ],
     hdrs = [
         "src/lib/Iex/IexConfig.h",
@@ -380,6 +383,8 @@ cc_library(
         "src/lib/OpenEXR/ImfCompression.h",
         "src/lib/OpenEXR/ImfCompressionAttribute.h",
         "src/lib/OpenEXR/ImfCompressor.h",
+        "src/lib/OpenEXR/ImfContext.h",
+        "src/lib/OpenEXR/ImfContextInit.h",
         "src/lib/OpenEXR/ImfConvert.h",
         "src/lib/OpenEXR/ImfDeepCompositing.h",
         "src/lib/OpenEXR/ImfDeepFrameBuffer.h",
@@ -395,7 +400,6 @@ cc_library(
         "src/lib/OpenEXR/ImfDeepTiledOutputPart.h",
         "src/lib/OpenEXR/ImfDoubleAttribute.h",
         "src/lib/OpenEXR/ImfDwaCompressor.h",
-        "src/lib/OpenEXR/ImfDwaCompressorSimd.h",
         "src/lib/OpenEXR/ImfEnvmap.h",
         "src/lib/OpenEXR/ImfEnvmapAttribute.h",
         "src/lib/OpenEXR/ImfExport.h",
@@ -479,17 +483,14 @@ cc_library(
         "src/lib/OpenEXR/OpenEXRConfig.h",
         "src/lib/OpenEXR/OpenEXRConfigInternal.h",
     ],
-    copts = select({
-        ":windows": [],
-        "//conditions:default": [
-            "-Wno-error",
-        ],
-    }),
     features = select({
         ":windows": ["windows_export_all_symbols"],
         "//conditions:default": [],
     }),
-    includes = ["src/lib/OpenEXR"],
+    includes = [
+        "src/lib",
+        "src/lib/OpenEXR",
+    ],
     linkopts =
         select({
             ":windows": [],
@@ -501,7 +502,7 @@ cc_library(
     deps = [
         ":IlmThread",
         ":OpenEXRCore",
-        "@imath//:Imath",
+        "@imath",
     ],
 )
 

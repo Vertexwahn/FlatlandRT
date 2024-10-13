@@ -34,9 +34,10 @@ steps:
   #  displayName: "Install Cppcheck"
 
   - script: |
-      curl -L -o cppcheck.tar.gz https://github.com/danmar/cppcheck/archive/refs/tags/2.15.0.tar.gz
+      CPP_CHECK_VERSION=2.14.0
+      curl -L -o cppcheck.tar.gz https://github.com/danmar/cppcheck/archive/refs/tags/${CPP_CHECK_VERSION}.tar.gz
       tar xzf cppcheck.tar.gz
-      cd cppcheck-2.15.0
+      cd cppcheck-${CPP_CHECK_VERSION}
       cmake -S . -B build
       cmake --build build
       sudo cmake --install build

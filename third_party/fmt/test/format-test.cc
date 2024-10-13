@@ -2030,6 +2030,8 @@ enum big_enum : unsigned long long { big_enum_value = 5000000000ULL };
 auto format_as(big_enum e) -> unsigned long long { return e; }
 
 TEST(format_test, strong_enum) {
+  auto arg = fmt::basic_format_arg<fmt::context>(big_enum_value);
+  EXPECT_EQ(arg.type(), fmt::detail::type::ulong_long_type);
   EXPECT_EQ(fmt::format("{}", big_enum_value), "5000000000");
 }
 #endif
@@ -2514,7 +2516,7 @@ TEST(format_test, writer) {
 }
 
 #if FMT_USE_BITINT
-FMT_CLANG_PRAGMA(diagnostic ignored "-Wbit-int-extension")
+FMT_PRAGMA_CLANG(diagnostic ignored "-Wbit-int-extension")
 
 TEST(format_test, bitint) {
   using fmt::detail::bitint;

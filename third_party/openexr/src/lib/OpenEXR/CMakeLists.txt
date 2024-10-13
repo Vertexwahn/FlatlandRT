@@ -11,7 +11,6 @@ openexr_define_library(OpenEXR
     ImfCompression.h
     ImfCompressor.h
     ImfDwaCompressor.h
-    ImfDwaCompressorSimd.h
     ImfFastHuf.h
     ImfInputPartData.h
     ImfInputStreamMutex.h
@@ -30,8 +29,6 @@ openexr_define_library(OpenEXR
     ImfTiledMisc.h
     ImfZip.h
     ImfZipCompressor.h
-    b44ExpLogTable.h
-    dwaLookups.h
     ImfAcesFile.cpp
     ImfAttribute.cpp
     ImfB44Compressor.cpp
@@ -44,6 +41,8 @@ openexr_define_library(OpenEXR
     ImfCompressionAttribute.cpp
     ImfCompressor.cpp
     ImfCompression.cpp
+    ImfContext.cpp
+    ImfContextInit.cpp
     ImfConvert.cpp
     ImfCRgbaFile.cpp
     ImfDeepCompositing.cpp
@@ -137,6 +136,8 @@ openexr_define_library(OpenEXR
     ImfCompression.h
     ImfCompressionAttribute.h
     ImfCompressor.h
+    ImfContext.h
+    ImfContextInit.h
     ImfConvert.h
     ImfCRgbaFile.h
     ImfDeepCompositing.h
