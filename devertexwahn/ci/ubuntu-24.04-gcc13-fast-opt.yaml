@@ -39,27 +39,27 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel run --config=gcc11  -- //tools/compiler_information
+      bazel run --config=gcc13  -- //tools/compiler_information
     displayName: "Show compiler information"
 
   - script: |
       cd devertexwahn
-      bazel build --config=gcc11  -- //...
+      bazel build --config=gcc13  -- //...
     displayName: "Bazel build gcc11-fastbuild"
 
   - script: |
      cd devertexwahn
-     bazel test --config=gcc11  -- //...
+     bazel test --config=gcc13  -- //...
     displayName: "Bazel test gcc11-fastbuild"
 
   - script: |
       cd devertexwahn
-      bazel build --config=gcc11  --compilation_mode=opt -- //...    
+      bazel build --config=gcc13  --compilation_mode=opt -- //...    
     displayName: "Bazel build gcc11-opt"
 
   - script: |
       cd devertexwahn
-      bazel test --config=gcc11  --compilation_mode=opt -- //...    
+      bazel test --config=gcc13  --compilation_mode=opt -- //...    
     displayName: "Bazel test gcc11-opt"
 
   - script: |

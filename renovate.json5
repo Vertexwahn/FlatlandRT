@@ -1,0 +1,34 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "ignorePaths": [
+    ".buildkite",
+    ".github",
+    "archive",
+    "assets",
+    "bazel_demos",
+    "build_tools",
+    "dvpe",
+    "infrastructure",
+    "literature",
+    "mirror",
+    "modernizer",
+    "motivation",
+    "photos",
+    "resume",
+    "third_party",
+    "wiki",
+    "zero_ray"
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": "\\.bazelversion",
+      "matchStrings": [
+        "(?<currentValue>[0-9]+.[0-9]+.[0-9]+)"
+      ],
+      "depNameTemplate": "bazelbuild/bazel",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
+}

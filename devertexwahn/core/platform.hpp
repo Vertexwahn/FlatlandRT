@@ -10,6 +10,7 @@
 #include "core/namespace.hpp"
 
 #include "boost/predef.h"
+#include "boost/predef/other/endian.h"
 
 #include <string_view>
 
@@ -23,6 +24,18 @@
 
 #if BOOST_OS_LINUX
 #define DE_VERTEXWAHN_OS_LINUX
+#endif
+
+#if BOOST_ENDIAN_BIG_BYTE
+#define DE_VERTEXWAHN_BIG_ENDIAN 1
+#else
+#define DE_VERTEXWAHN_BIG_ENDIAN 0
+#endif
+
+#if BOOST_ENDIAN_LITTLE_BYTE
+#define DE_VERTEXWAHN_LITTLE_ENDIAN 1
+#else
+#define DE_VERTEXWAHN_LITTLE_ENDIAN 0
 #endif
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE

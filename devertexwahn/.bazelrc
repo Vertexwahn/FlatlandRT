@@ -83,6 +83,13 @@ build:gcc11_cpp14 --cxxopt=-std=c++14
 build:gcc11_cpp14 --cxxopt=-Wall
 build:gc11_cpp14 --define compiler=gcc11_cpp14
 
+# GCC 13
+build:gcc13 --cxxopt=-std=c++20
+build:gcc13 --cxxopt=-Wall
+build:gcc13 --define compiler=gcc13
+build:gcc13 --cxxopt=-fpermissive # Needed for fmt
+build:gcc13 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
+
 # Clang 14.0.0 (config is used on Ubuntu)
 build:clang14 --cxxopt=-std=c++20
 #build:clang14 --cxxopt=-mavx

@@ -161,6 +161,8 @@ TEST(Image, try_to_store_image4f_with_invalid_extension) {
 
 TEST(Image, WhenTryToLoadNonExistingFile_ThenThrowException) {
     EXPECT_THROW(load_image_asImage4f("non_existing_file.png"), std::runtime_error);
+    EXPECT_THROW(load_image_asImage4f("non_existing_file.bmp"), std::runtime_error);
+    EXPECT_THROW(load_image_asImage3b("non_existing_file.gif"), std::runtime_error);
 }
 
 TEST(Image, load_image_asImage4f) {
