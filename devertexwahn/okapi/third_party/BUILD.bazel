@@ -3,20 +3,3 @@
     SPDX-License-Identifier: Apache-2.0
 """
 
-cc_binary(
-    name = "metal_test",
-    srcs = ["metal_test.cpp"],
-    linkopts = [
-        "-framework Metal",
-        "-framework MetalKit",
-        "-framework AppKit",
-        "-framework Foundation",
-        "-framework QuartzCore",
-    ],
-    target_compatible_with = [
-        "@platforms//os:macos",
-    ],
-    deps = [
-        "@metal-cpp//:metal_headers",
-    ],
-)
