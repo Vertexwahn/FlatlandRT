@@ -29,7 +29,7 @@ bazel_dep(name = "libjpeg_turbo", version = "2.1.4")
 bazel_dep(name = "libpng", version = "1.6.43")
 bazel_dep(name = "libwebp", version = "1.4.0")
 bazel_dep(name = "nasm", version = "2.14.02")
-bazel_dep(name = "nlohmann_json", version = "3.11.3")
+bazel_dep(name = "nlohmann_json", version = "3.11.3.bcr.1")
 bazel_dep(name = "openexr", version = "3.2.4")
 bazel_dep(name = "pcg", version = "0.98.1")
 bazel_dep(name = "platforms", version = "0.0.10")
@@ -137,7 +137,7 @@ git_override(
     remote = "https://github.com/bazel-contrib/toolchains_llvm.git",
 )
 
-bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
+bazel_dep(name = "rules_foreign_cc", version = "0.12.0")
 
 # Configure and register the toolchain.
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
