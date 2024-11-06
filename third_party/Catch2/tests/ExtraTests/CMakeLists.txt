@@ -8,7 +8,6 @@ project( Catch2ExtraTests LANGUAGES CXX )
 
 message( STATUS "Extra tests included" )
 
-
 add_test(
   NAME TestShardingIntegration
   COMMAND ${PYTHON_EXECUTABLE} ${CATCH_DIR}/tests/TestScripts/testSharding.py $<TARGET_FILE:SelfTest>

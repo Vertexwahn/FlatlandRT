@@ -8,6 +8,8 @@ else()
   set(NOT_SUBPROJECT OFF)
 endif()
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 option(CATCH_INSTALL_DOCS "Install documentation alongside library" ON)
 option(CATCH_INSTALL_EXTRAS "Install extras (CMake scripts, debugger helpers) alongside library" ON)
 option(CATCH_DEVELOPMENT_BUILD "Build tests, enable warnings, enable Werror, etc" OFF)
@@ -40,7 +42,6 @@ project(Catch2
   # HOMEPAGE_URL "https://github.com/catchorg/Catch2"
   DESCRIPTION "A modern, C++-native, unit test framework."
 )
-
 
 # Provide path for scripts. We first add path to the scripts we don't use,
 # but projects including us might, and set the path up to parent scope.
@@ -86,18 +87,22 @@ if (BUILD_TESTING AND CATCH_BUILD_TESTING AND NOT_SUBPROJECT)
     if (NOT PYTHONINTERP_FOUND)
         message(FATAL_ERROR "Python not found, but required for tests")
     endif()
+    set(CMAKE_FOLDER "tests")
     add_subdirectory(tests)
 endif()
 
 if(CATCH_BUILD_EXAMPLES)
+    set(CMAKE_FOLDER "Examples")
     add_subdirectory(examples)
 endif()
 
 if(CATCH_BUILD_EXTRA_TESTS)
+    set(CMAKE_FOLDER "tests/ExtraTests")
     add_subdirectory(tests/ExtraTests)
 endif()
 
 if(CATCH_BUILD_FUZZERS)
+    set(CMAKE_FOLDER "fuzzing")
     add_subdirectory(fuzzing)
 endif()
 

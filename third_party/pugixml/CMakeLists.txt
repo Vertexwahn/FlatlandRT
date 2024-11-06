@@ -32,7 +32,7 @@ set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
 separate_arguments(PUGIXML_BUILD_DEFINES)
 
 # Technically not needed for this file. This is builtin CMAKE global variable.
-option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF) 
+option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 
 # Expose option to build PUGIXML as static as well when the global BUILD_SHARED_LIBS variable is set
 cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
@@ -55,7 +55,8 @@ set(PUGIXML_PUBLIC_DEFINITIONS
   $<$<BOOL:${PUGIXML_COMPACT}>:PUGIXML_COMPACT>
   $<$<BOOL:${PUGIXML_NO_XPATH}>:PUGIXML_NO_XPATH>
   $<$<BOOL:${PUGIXML_NO_STL}>:PUGIXML_NO_STL>
-  $<$<BOOL:${PUGIXML_NO_EXCEPTIONS}>:PUGIXML_NO_EXCEPTIONS>)
+  $<$<BOOL:${PUGIXML_NO_EXCEPTIONS}>:PUGIXML_NO_EXCEPTIONS>
+)
 
 # This is used to backport a CMake 3.15 feature, but is also forwards compatible
 if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
@@ -63,11 +64,13 @@ if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
     MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<BOOL:${PUGIXML_STATIC_CRT}>>:DLL>)
 endif()
 
-if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
+# Set the default C++ standard to C++17 if not set; CMake will automatically downgrade this if the compiler does not support it
+# When CMAKE_CXX_STANDARD_REQUIRED is set, we fall back to C++11 to avoid breaking older compilers
+if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED AND NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMAKE_VERSION VERSION_LESS 3.8)
 
-if (NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+elseif (NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 11)
 endif()
 
