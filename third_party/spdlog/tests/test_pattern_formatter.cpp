@@ -501,6 +501,7 @@ TEST_CASE("override need_localtime", "[pattern_formatter]") {
     }
 }
 
+#ifndef SPDLOG_NO_TLS
 TEST_CASE("mdc formatter test-1", "[pattern_formatter]") {
     spdlog::mdc::put("mdc_key_1", "mdc_value_1");
     spdlog::mdc::put("mdc_key_2", "mdc_value_2");
@@ -628,3 +629,4 @@ TEST_CASE("mdc empty", "[pattern_formatter]") {
 
     SECTION("Tear down") { spdlog::mdc::clear(); }
 }
+#endif

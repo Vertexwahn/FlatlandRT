@@ -105,9 +105,9 @@ TEST_CASE("clone-logger", "[clone]") {
 }
 
 TEST_CASE("clone async", "[clone]") {
-    using spdlog::sinks::test_sink_st;
+    using spdlog::sinks::test_sink_mt;
     spdlog::init_thread_pool(4, 1);
-    auto test_sink = std::make_shared<test_sink_st>();
+    auto test_sink = std::make_shared<test_sink_mt>();
     auto logger = std::make_shared<spdlog::async_logger>("orig", test_sink, spdlog::thread_pool());
     logger->set_pattern("%v");
     auto cloned = logger->clone("clone");
@@ -167,3 +167,21 @@ TEST_CASE("default logger API", "[default logger]") {
     spdlog::drop_all();
     spdlog::set_pattern("%v");
 }
+
+#if (defined(SPDLOG_WCHAR_TO_UTF8_SUPPORT) || defined(SPDLOG_WCHAR_FILENAMES)) && defined(_WIN32)
+TEST_CASE("utf8 to utf16 conversion using windows api", "[windows utf]") {
+    spdlog::wmemory_buf_t buffer;
+
+    spdlog::details::os::utf8_to_wstrbuf("", buffer);
+    REQUIRE(std::wstring(buffer.data(), buffer.size()) == std::wstring(L""));
+
+    spdlog::details::os::utf8_to_wstrbuf("abc", buffer);
+    REQUIRE(std::wstring(buffer.data(), buffer.size()) == std::wstring(L"abc"));
+
+    spdlog::details::os::utf8_to_wstrbuf("\xc3\x28", buffer); // Invalid UTF-8 sequence.
+    REQUIRE(std::wstring(buffer.data(), buffer.size()) == std::wstring(L"\xfffd("));
+
+    spdlog::details::os::utf8_to_wstrbuf("\xe3\x81\xad\xe3\x81\x93", buffer); // "Neko" in hiragana.
+    REQUIRE(std::wstring(buffer.data(), buffer.size()) == std::wstring(L"\x306d\x3053"));
+}
+#endif
