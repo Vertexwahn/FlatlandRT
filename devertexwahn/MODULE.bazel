@@ -71,10 +71,10 @@ local_path_override(
     path = "../third_party/Catch2",
 )
 
-#local_path_override(
-#    module_name = "fmt",
-#    path = "../third_party/fmt",
-#)
+local_path_override(
+    module_name = "fmt",
+    path = "../third_party/fmt",
+)
 
 local_path_override(
     module_name = "imath",
