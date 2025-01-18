@@ -1,0 +1,65 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# GCC11 on Ubuntu 24.04
+# Make sure that Bazel query works
+
+steps:
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+      cd devertexwahn
+      bazel version
+    displayName: "Show Bazel version"
+
+  - script: |
+      gcc --version
+    displayName: "Show GCC version"
+
+
+  - script: |
+      cd devertexwahn
+      bazel run --config=gcc13  -- //tools/compiler_feature_dump
+    displayName: "Compiler feature dump"
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+     cd devertexwahn
+     bazel query //...
+    displayName: "Bazel query"  
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+     cd devertexwahn
+     bazel cquery --config=gcc13 //...
+    displayName: "Bazel cquery"  
+
+  - script: |
+      df
+    displayName: 'Show disk space'
