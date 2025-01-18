@@ -45,7 +45,6 @@ steps:
   - script: |
       cd devertexwahn
       bazel test --config=gcc13 --compilation_mode=opt  --cache_test_results=no --runs_per_test=20 -- //core/...
-      bazel test --config=gcc13 --compilation_mode=opt  --cache_test_results=no --runs_per_test=20 -- //okapi/...
     displayName: "Bazel build gcc11-fastbuild"
 
   - script: |

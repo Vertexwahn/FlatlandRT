@@ -48,12 +48,12 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel build --config=gcc11  --compilation_mode=dbg -- //... -//okapi/...
+      bazel build --config=gcc11  --compilation_mode=dbg -- //... 
     displayName: "Bazel build gcc11-dbg (part 1)"
 
   - script: |
      cd devertexwahn
-     bazel test --config=gcc11  --compilation_mode=dbg -- //... -//okapi/...
+     bazel test --config=gcc11  --compilation_mode=dbg -- //... 
     displayName: "Bazel test gcc11-dbg (part 1)"
 
   - script: |
