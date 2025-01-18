@@ -13,7 +13,7 @@
 #include "imaging/color.hpp"
 
 #include "core/object.hpp"
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

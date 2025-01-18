@@ -7,7 +7,7 @@
 #ifndef De_Vertexwahn_Imaging_image_quality_assessment_a66e6fdf_0ace_4c78_b168_b24aa87d3475_h
 #define De_Vertexwahn_Imaging_image_quality_assessment_a66e6fdf_0ace_4c78_b168_b24aa87d3475_h
 
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 #include "imaging/image.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE

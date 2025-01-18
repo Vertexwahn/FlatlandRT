@@ -10,14 +10,14 @@ add_library(flatland.core SHARED
         logging.hpp
         namespace.hpp
         non_copyable.hpp
-    object.cpp
+        object.cpp
         object.hpp
         object_factory.hpp
-    object_factory.cpp
-    property_set.cpp
+        object_factory.cpp
+        property_set.cpp
         property_set.hpp
-    reference_counted.h
-    timer.cpp
+        reference_counted.hpp
+        timer.cpp
         timer.hpp
 )
 

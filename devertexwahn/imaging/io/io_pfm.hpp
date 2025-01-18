@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2023-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -8,7 +8,7 @@
 #define De_Vertexwahn_Core_pfm_98f3ed1f_5b8d_49de_8ce2_c28374e1c292_h
 
 #include "core/namespace.hpp"
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 
 #include "imaging/image.hpp"
 

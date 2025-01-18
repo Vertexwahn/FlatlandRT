@@ -6,6 +6,10 @@
 # VS2019 on Windows Server 2019
 # Make sure we can build with VS2019 in all different compilation modes
 steps:
+  - script: |
+      systeminfo
+    displayName: "Show system information"
+
   - checkout: self
     clean: true
     fetchDepth: 1
@@ -20,8 +24,13 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel --output_base=C:/bazel_output_base run --config=vs2019  -- //tools/compiler_information
-    displayName: "Show compiler information"
+      bazel --output_base=C:/bazel_output_base run --config=vs2019  -- //tools/compiler_feature_dump
+    displayName: "Compiler feature dump"
+
+  - script: |
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base run --config=vs2019  -- //tools/cpu_info:cpu_info
+    displayName: "Show CPU information"
 
   # fastbuild
   - script: |

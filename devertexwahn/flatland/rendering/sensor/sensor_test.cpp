@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 #include "flatland/rendering/sensor/sensor.h"
 
 #include "gmock/gmock.h"

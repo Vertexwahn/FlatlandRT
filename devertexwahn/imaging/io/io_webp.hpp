@@ -9,7 +9,7 @@
 
 #include "imaging/image.hpp"
 
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 
 #include <string_view>
 

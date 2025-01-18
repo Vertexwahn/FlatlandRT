@@ -1,0 +1,19 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2024 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+cc_binary(
+    name = "cpu_info",
+    srcs = ["cpu_info.cpp"],
+    linkopts = select({
+        "@platforms//os:linux": [
+            "-pthread", # Only needed on Ubuntu 20.04 (not needed with Ubuntu 22.04 or 24.04)
+        ],
+        "//conditions:default": [],
+    }),
+    deps = [
+        "//core:logging",
+        "@cpuinfo",
+    ],
+)

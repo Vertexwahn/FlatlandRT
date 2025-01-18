@@ -3,13 +3,64 @@
     SPDX-License-Identifier: Apache-2.0
 """
 
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "filesystem",
+    hdrs = ["filesystem.hpp"],
+    features = ["parse_headers"],
+    visibility = ["//visibility:public"],
+    deps = ["//core:namespace"],
+)
+
+cc_library(
+    name = "format",
+    hdrs = ["format.hpp"],
+    features = ["parse_headers"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core:namespace",
+        "//core/stl:string",
+        "@fmt",
+    ],
+)
+
+cc_library(
+    name = "memory",
+    hdrs = ["memory.hpp"],
+    features = ["parse_headers"],
+    visibility = ["//visibility:public"],
+    deps = ["//core:namespace"],
+)
+
+cc_library(
+    name = "span",
+    hdrs = ["span.hpp"],
+    features = ["parse_headers"],
+    visibility = ["//visibility:public"],
+    deps = ["//core:namespace"],
+)
+
 cc_library(
     name = "string",
-    hdrs = [
-        "string.hpp",
-    ],
-    features = [
-        "parse_headers",
-    ],
+    hdrs = ["string.hpp"],
+    features = ["parse_headers"],
     visibility = ["//visibility:public"],
+    deps = ["//core:namespace"],
+)
+
+cc_library(
+    name = "string_view",
+    hdrs = ["string_view.hpp"],
+    features = ["parse_headers"],
+    visibility = ["//visibility:public"],
+    deps = ["//core:namespace"],
+)
+
+cc_library(
+    name = "vector",
+    hdrs = ["vector.hpp"],
+    features = ["parse_headers"],
+    visibility = ["//visibility:public"],
+    deps = ["//core:namespace"],
 )

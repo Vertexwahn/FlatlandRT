@@ -20,4 +20,3 @@ def okapi_deps():
         path = "../third_party/bazel_clang_tidy-4884c32e09c1ea9ac96b3f08c3004f3ac4c3fe39",
     )
 
-

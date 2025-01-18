@@ -7,7 +7,7 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
-std::string Object::to_string() const {
+string Object::to_string() const {
     return "An object. Implement the to_string method to improve this description.";
 }
 

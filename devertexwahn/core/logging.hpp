@@ -38,8 +38,8 @@
 */
 
 #pragma once
-#ifndef De_Vertexwahn_Core_Logging_6d12aed9_2efe_4003_9708_91e52ca2e8b7_h
-#define De_Vertexwahn_Core_Logging_6d12aed9_2efe_4003_9708_91e52ca2e8b7_h
+#ifndef De_Vertexwahn_Core_Logging_6d12aed9_2efe_4003_9708_91e52ca2e8b7_hpp
+#define De_Vertexwahn_Core_Logging_6d12aed9_2efe_4003_9708_91e52ca2e8b7_hpp
 
 #include "spdlog/spdlog.h"
 
@@ -151,4 +151,4 @@ void log_flush() noexcept;
     } while (false)
 
 
-#endif // end define De_Vertexwahn_Core_Logging_6d12aed9_2efe_4003_9708_91e52ca2e8b7_h
+#endif // end define De_Vertexwahn_Core_Logging_6d12aed9_2efe_4003_9708_91e52ca2e8b7_hpp

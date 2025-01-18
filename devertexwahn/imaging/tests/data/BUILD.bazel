@@ -10,8 +10,8 @@ package(
 filegroup(
     name = "reference_images",
     srcs = [
-        "red_square_quality100.jpg",
         "RGBA.png",
-		"bay.png",
+        "bay.png",
+        "red_square_quality100.jpg",
     ],
 )

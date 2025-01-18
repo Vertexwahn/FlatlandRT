@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,7 +7,7 @@
 #ifndef De_Vertexwahn_Imaging_io_png_a17ff2bc_adf7_432f_a1ec_3dbd77af587d_h
 #define De_Vertexwahn_Imaging_io_png_a17ff2bc_adf7_432f_a1ec_3dbd77af587d_h
 
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 #include "imaging/image.hpp"
 
 #include <string_view>

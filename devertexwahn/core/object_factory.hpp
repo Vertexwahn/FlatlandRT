@@ -9,7 +9,7 @@
 
 #include "core/namespace.hpp"
 #include "core/object.hpp"
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 
 #include <exception>
 #include <functional>

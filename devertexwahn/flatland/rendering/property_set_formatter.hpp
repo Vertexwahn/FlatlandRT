@@ -8,7 +8,7 @@
 #define De_Vertexwahn_Flatland_PopertySet_formatter_a272aef3_074e_4168_ae05_64383371db33_h
 
 #include "core/object.hpp"
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 #include "imaging/color.hpp"
 #include "math/transform.hpp"
 #include "math/util.hpp"

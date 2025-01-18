@@ -39,8 +39,8 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel run --config=gcc11  -- //tools/compiler_information
-    displayName: "Show compiler information"
+      bazel run --config=gcc11  -- //tools/compiler_feature_dump
+    displayName: "Compiler feature dump"
 
   - script: |
       cd devertexwahn

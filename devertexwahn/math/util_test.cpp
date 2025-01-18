@@ -45,3 +45,18 @@ TEST(Util, max_3_args) {
     EXPECT_THAT(max(3.f, 2.f, 1.f), 3.f);
     EXPECT_THAT(max(3.0, 2.0, 1.0), 3.0);
 }
+
+TEST(Util, next_pow2) {
+    EXPECT_THAT(next_pow2(1u), 1);
+    EXPECT_THAT(next_pow2(2u), 2);
+    EXPECT_THAT(next_pow2(3u), 4);
+    EXPECT_THAT(next_pow2(4u), 4);
+    EXPECT_THAT(next_pow2(5u), 8);
+    EXPECT_THAT(next_pow2(6u), 8);
+    EXPECT_THAT(next_pow2(7u), 8);
+    EXPECT_THAT(next_pow2(8u), 8);
+    EXPECT_THAT(next_pow2(9u), 16);
+    EXPECT_THAT(next_pow2(10u), 16);
+    EXPECT_THAT(next_pow2(100u), 128);
+    EXPECT_THAT(next_pow2(1000u), 1024);
+}

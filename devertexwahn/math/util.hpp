@@ -12,6 +12,7 @@
 #include "boost/predef.h"
 
 #include <algorithm>
+#include <bit>
 #include <cassert>
 #include <cmath>
 
@@ -22,30 +23,6 @@
 #endif
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
-
-#if BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(10,0,0) // GCC9 does not support std::numbers::pi with
-template<typename T>
-constexpr T pi_v = static_cast<T>(3.141592653589793238462643383279502884L);
-template<typename T>
-constexpr T inv_pi_v = static_cast<T>(0.318309886183790671537767526745028724L);
-#else
-template<typename ScalarType>
-constexpr ScalarType pi_v = std::numbers::pi_v<ScalarType>;
-template<typename ScalarType>
-constexpr ScalarType inv_pi_v = std::numbers::inv_pi_v<ScalarType>;
-#endif
-
-inline constexpr float pif = pi_v<float>;
-inline constexpr float pi_over_2f = pi_v<float> / 2.f;
-inline constexpr float pi_over_4f = pi_v<float> / 4.f;
-inline constexpr float inv_pif = inv_pi_v<float>;
-inline constexpr float inv_2_pif = 1.f / (2.f * pi_v<float>);
-
-inline constexpr double pi = pi_v<double>;
-inline constexpr double pi_over_2 = pi_v<double> / 2.0;
-inline constexpr double pi_over_4 = pi_v<double> / 4.0;
-inline constexpr double inv_pid = inv_pi_v<double>;
-inline constexpr double inv_2_pid = 1.0 / 2.0 * pi_v<double>;
 
 template <typename ScalarType>
 ScalarType degree_to_radian(const ScalarType value) {
@@ -94,6 +71,73 @@ template< typename T, typename ... Args>
 const T &
 max(const T &a, const T &b, const Args &... args) {
     return std::max(b > a ? b : a, args ...);
+}
+
+// The following function next_pow2 has been copied from https://github.com/LuisaGroup/LuisaCompute
+// and is licensed under the following license:
+/*
+    BSD 3-Clause License
+
+    Copyright (c) 2023, LuisaGroup
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, this
+       list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
+       and/or other materials provided with the distribution.
+
+    3. Neither the name of the copyright holder nor the names of its
+       contributors may be used to endorse or promote products derived from
+       this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+/**
+ * @brief Find next 2^n of v
+ *
+ * @tparam uint32 or uint64
+ * @param v input number
+ * @return same as v
+ */
+template<typename T, std::enable_if_t<std::is_unsigned_v<T> && (sizeof(T) == 4u || sizeof(T) == 8u), int> = 0>
+[[nodiscard]] constexpr auto next_pow2(T v) noexcept {
+#if BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(10,0,0) // GCC9.4 has __cpp_lib_int_pow2 defined, but has no std::bit_ceil function
+    v--;
+    v |= v >> 1u;
+    v |= v >> 2u;
+    v |= v >> 4u;
+    v |= v >> 8u;
+    v |= v >> 16u;
+    if constexpr (sizeof(T) == 8u) { v |= v >> 32u; }
+    return v + 1u;
+#else
+    #ifdef __cpp_lib_int_pow2
+            return std::bit_ceil(v);
+    #else
+        v--;
+        v |= v >> 1u;
+        v |= v >> 2u;
+        v |= v >> 4u;
+        v |= v >> 8u;
+        v |= v >> 16u;
+        if constexpr (sizeof(T) == 8u) { v |= v >> 32u; }
+        return v + 1u;
+    #endif
+#endif
 }
 
 DE_VERTEXWAHN_END_NAMESPACE

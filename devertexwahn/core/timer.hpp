@@ -1,11 +1,11 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
-#ifndef De_Vertexwahn_Core_Timer_28bff3a5_999c_4dc8_b1ea_c921f00f5f56_h
-#define De_Vertexwahn_Core_Timer_28bff3a5_999c_4dc8_b1ea_c921f00f5f56_h
+#ifndef De_Vertexwahn_Core_Timer_28bff3a5_999c_4dc8_b1ea_c921f00f5f56_hpp
+#define De_Vertexwahn_Core_Timer_28bff3a5_999c_4dc8_b1ea_c921f00f5f56_hpp
 
 #include "core/namespace.hpp"
 
@@ -15,15 +15,24 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 class Timer {
 public:
-    Timer();
+    Timer() noexcept;
 
-    void reset();
-
+    /*
+     * @brief Elapsed seconds since timer object was created or reset via reset()
+     */
     [[nodiscard]]
-    double elapsed_seconds() const;
+    double elapsed_seconds() const noexcept;
 
+    /*
+     * @brief Elapsed milliseconds since timer object was created or reset via reset()
+     */
     [[nodiscard]]
-    double elapsed_milliseconds() const;
+    double elapsed_milliseconds() const noexcept;
+
+    /*
+     *  @brief Reset timer to 0
+     */
+    void reset() noexcept;
 
 private:
     using clock = std::chrono::high_resolution_clock;
@@ -34,4 +43,4 @@ private:
 
 DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define De_Vertexwahn_Core_Timer_28bff3a5_999c_4dc8_b1ea_c921f00f5f56_h
+#endif // end define De_Vertexwahn_Core_Timer_28bff3a5_999c_4dc8_b1ea_c921f00f5f56_hpp

@@ -1,5 +1,5 @@
 """
-    SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
@@ -8,7 +8,7 @@ import sys
 import uuid
 
 TEXT_HEADER = """/*
- *  SPDX-FileCopyrightText: Copyright 2024 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 """
@@ -31,10 +31,10 @@ def main(argv):
     print(TEXT_HEADER)
 
     print("#pragma once")
-    print("#ifndef De_Vertexwahn_Core_" + class_name + "_" + str_uuid + "_h")
-    print("#define De_Vertexwahn_Core_" + class_name + "_" + str_uuid + "_h")
+    print("#ifndef De_Vertexwahn_Core_" + class_name + "_" + str_uuid + "_hpp")
+    print("#define De_Vertexwahn_Core_" + class_name + "_" + str_uuid + "_hpp")
     print("")
-    print("#include \"core/namespace.h\"")
+    print("#include \"core/namespace.hpp\"")
     print("")
     print("DE_VERTEXWAHN_BEGIN_NAMESPACE")
     print("")
@@ -54,7 +54,7 @@ def main(argv):
     print("DE_VERTEXWAHN_END_NAMESPACE")
     print("")
 
-    print("#endif // end define De_Vertexwahn_Core_" + class_name + "_" + str_uuid + "_h")
+    print("#endif // end define De_Vertexwahn_Core_" + class_name + "_" + str_uuid + "_hpp")
 
 
 if __name__ == "__main__":

@@ -67,3 +67,14 @@ TEST(Matrix44f, translation_with_scalars) {
             0.f, 0.f, 0.f, 1.f;
     EXPECT_THAT(result, expected_result);
 }
+
+TEST(Matrix44f, identity_matrix) {
+    Matrix44f result = identity_matrix<float>();
+
+    Matrix44f expected_result;
+    expected_result << 1.f, 0.f, 0.f, 0.f,
+                       0.f, 1.f, 0.f, 0.f,
+                       0.f, 0.f, 1.f, 0.f,
+                       0.f, 0.f, 0.f, 1.f;
+    EXPECT_THAT(result, expected_result);
+}

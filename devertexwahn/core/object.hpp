@@ -10,7 +10,7 @@
 #include "core/namespace.hpp"
 #include "core/non_copyable.hpp"
 
-#include <string>
+#include "core/stl/string.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
@@ -21,7 +21,7 @@ public:
     virtual ~Object() = default;
 
     [[nodiscard]]
-    virtual std::string to_string() const;
+    virtual string to_string() const;
 };
 
 DE_VERTEXWAHN_END_NAMESPACE

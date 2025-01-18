@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.5...3.30)
 
 # Policy configuration; this *MUST* be specified before project is defined
 if(POLICY CMP0091)
     cmake_policy(SET CMP0091 NEW) # Enables use of MSVC_RUNTIME_LIBRARY
 endif()
 
-project(pugixml VERSION 1.14 LANGUAGES CXX)
+project(pugixml VERSION 1.15 LANGUAGES CXX)
 
 include(CMakePackageConfigHelpers)
 include(CMakeDependentOption)
@@ -49,6 +49,10 @@ option(PUGIXML_NO_XPATH "Disable XPath" OFF)
 option(PUGIXML_NO_STL "Disable STL" OFF)
 option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
 mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS)
+
+if (APPLE)
+  option(PUGIXML_BUILD_APPLE_FRAMEWORK "Build as Apple Frameworks" OFF)
+endif()
 
 set(PUGIXML_PUBLIC_DEFINITIONS
   $<$<BOOL:${PUGIXML_WCHAR_MODE}>:PUGIXML_WCHAR_MODE>
@@ -174,6 +178,16 @@ set_target_properties(${libs}
     EXCLUDE_FROM_ALL OFF)
 set(install-targets pugixml ${libs})
 
+if (PUGIXML_BUILD_APPLE_FRAMEWORK)
+  set_target_properties(${libs} PROPERTIES
+    FRAMEWORK TRUE
+    FRAMEWORK_VERSION ${PROJECT_VERSION}
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER com.zeux.pugixml
+    MACOSX_FRAMEWORK_IDENTIFIER com.zeux.pugixml
+    MACOSX_FRAMEWORK_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR})
+endif()
+
 configure_package_config_file(
   "${PROJECT_SOURCE_DIR}/scripts/pugixml-config.cmake.in"
   "${PROJECT_BINARY_DIR}/pugixml-config.cmake"
@@ -234,7 +248,8 @@ if(PUGIXML_INSTALL)
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${PUGIXML_RUNTIME_COMPONENT}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_LIBRARY_COMPONENT} ${namelink-component}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir})
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir}
+    FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT runtime OPTIONAL)
 
   install(EXPORT pugixml-targets
     NAMESPACE pugixml::

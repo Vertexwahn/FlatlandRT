@@ -6,7 +6,7 @@
 #pragma once
 
 #include "core/object_factory.hpp"
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 #include "core/exception.hpp"
 #include "flatland/rendering/scene/scene.hpp"
 

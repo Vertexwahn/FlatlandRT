@@ -3,6 +3,8 @@
     SPDX-License-Identifier: Apache-2.0
 """
 
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
 cc_test(
     name = "boost_algorithm_test",
     size = "small",
@@ -10,7 +12,7 @@ cc_test(
         "boost_algorithm_test.cpp",
     ],
     deps = [
-        "@boost.algorithm//:algorithm",
+        "@boost.algorithm//:boost.algorithm",
         "@googletest//:gtest_main",
     ],
 )
@@ -22,7 +24,7 @@ cc_test(
         "boost_predef_test.cpp",
     ],
     deps = [
-        "@boost.predef//:predef",
+        "@boost.predef//:boost.predef",
         "@googletest//:gtest_main",
     ],
 )

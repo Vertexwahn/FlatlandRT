@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef De_Vertexwahn_Math_geometry_fba52631_f901_4d31_9fb1_06925a0a0967_h
-#define De_Vertexwahn_Math_geometry_fba52631_f901_4d31_9fb1_06925a0a0967_h
+#ifndef De_Vertexwahn_Math_Geometry_fba52631_f901_4d31_9fb1_06925a0a0967_h
+#define De_Vertexwahn_Math_Geometry_fba52631_f901_4d31_9fb1_06925a0a0967_h
 
 #include "math/point.hpp"
 
@@ -138,4 +138,4 @@ void load_obj2d(std::string_view filename,
 
 DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define De_Vertexwahn_Math_geometry_fba52631_f901_4d31_9fb1_06925a0a0967_h
+#endif // end define De_Vertexwahn_Math_Geometry_fba52631_f901_4d31_9fb1_06925a0a0967_h

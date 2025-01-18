@@ -1,5 +1,10 @@
 /*
-    This file conatinas a macro taken from Mitsuba 3 - it is available under the following license:
+ *  SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-License-Identifier: BSD-3-Clause-LBNL
+ */
+
+/*
+    This file contains a macro taken from Mitsuba 3 - it is available under the following license:
 
     Copyright (c) 2017 Wenzel Jakob <wenzel.jakob@epfl.ch>, All rights reserved.
 
@@ -43,7 +48,7 @@
 #ifndef De_Vertexwahn_Core_Namespace_8a369bea_97f7_4913_9129_a00f6529dbf2_h
 #define De_Vertexwahn_Core_Namespace_8a369bea_97f7_4913_9129_a00f6529dbf2_h
 
-// Taken from Mitsuba 3
+// Copied from Mitsuba 3
 // https://github.com/mitsuba-renderer/mitsuba3/blob/master/include/mitsuba/core/platform.h
 #if !defined(NAMESPACE_BEGIN)
 #  define NAMESPACE_BEGIN(name) namespace name {

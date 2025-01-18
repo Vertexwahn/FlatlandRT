@@ -3,6 +3,8 @@
     SPDX-License-Identifier: Apache-2.0
 """
 
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -11,6 +13,8 @@ cc_library(
     hdrs = ["exception.hpp"],
     deps = [
         ":namespace",
+        "//core/stl:string",
+        "//core/stl:string_view",
         "@boost.predef",
     ],
 )
@@ -22,6 +26,13 @@ cc_test(
     deps = [
         ":exception",
         "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "intrin",
+    hdrs = [
+        "intrin.hpp",
     ],
 )
 
@@ -103,6 +114,7 @@ cc_library(
     deps = [
         ":namespace",
         ":non_copyable",
+        "//core/stl:string",
     ],
 )
 
@@ -224,7 +236,7 @@ cc_test(
 cc_library(
     name = "reference_counted",
     hdrs = [
-        "reference_counted.h",
+        "reference_counted.hpp",
     ],
     visibility = ["//visibility:public"],
     deps = [":namespace"],
@@ -240,6 +252,14 @@ cc_test(
         "//core:reference_counted",
         "@googletest//:gtest_main",
     ],
+)
+
+cc_library(
+    name = "spin_mutex",
+    hdrs = [
+        "spin_mutex.hpp",
+    ],
+    deps = [":intrin"],
 )
 
 cc_library(

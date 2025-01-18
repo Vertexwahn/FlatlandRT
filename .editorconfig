@@ -5,6 +5,16 @@ root = true
 [*.{h,cc,cpp}]
 indent_style = space
 
+[*.{java}]
+indent_style = space
+
+[{go.mod,go.sum,*.go}]
+indent_style = tab
+indent_size = 4
+
+[Dockerfile]
+indent_size = 4
+
 [*]
 end_of_line = lf
 insert_final_newline = true

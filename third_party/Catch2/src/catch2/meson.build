@@ -16,6 +16,7 @@ configure_file(
   format: 'cmake@',
   install_dir: get_option('includedir') / 'catch2',
   configuration: conf_data,
+  install: get_option('install')
 )
 
 fs = import('fs')
@@ -339,7 +340,9 @@ foreach file : headers
     endif
   endforeach
 
-  install_headers(file, subdir: join_paths(include_subdir, folder))
+  if get_option('install')
+    install_headers(file, subdir: join_paths(include_subdir, folder))
+  endif
 endforeach
 
 catch2_dependencies = []
@@ -356,7 +359,7 @@ catch2 = static_library(
   sources,
   dependencies: catch2_dependencies,
   include_directories: '..',
-  install: true,
+  install: get_option('install'),
 )
 
 catch2_dep = declare_dependency(
@@ -364,19 +367,21 @@ catch2_dep = declare_dependency(
   include_directories: '..',
 )
 
-pkg.generate(
-  catch2,
-  filebase: 'catch2',
-  description: 'A modern, C++-native, test framework for C++14 and above',
-  url: 'https://github.com/catchorg/Catch2',
-)
+if get_option('install')
+  pkg.generate(
+    catch2,
+    filebase: 'catch2',
+    description: 'A modern, C++-native, test framework for C++14 and above',
+    url: 'https://github.com/catchorg/Catch2',
+  )
+endif
 
 catch2_with_main = static_library(
   'Catch2Main',
   'internal/catch_main.cpp',
   link_with: catch2,
   include_directories: '..',
-  install: true,
+  install: get_option('install'),
 )
 
 catch2_with_main_dep = declare_dependency(
@@ -384,9 +389,11 @@ catch2_with_main_dep = declare_dependency(
   include_directories: '..',
 )
 
-pkg.generate(
-  catch2_with_main,
-  filebase: 'catch2-with-main',
-  description: 'A modern, C++-native, test framework for C++14 and above (links in default main)',
-  requires: 'catch2 = ' + meson.project_version(),
-)
+if get_option('install')
+  pkg.generate(
+    catch2_with_main,
+    filebase: 'catch2-with-main',
+    description: 'A modern, C++-native, test framework for C++14 and above (links in default main)',
+    requires: 'catch2 = ' + meson.project_version(),
+  )
+endif

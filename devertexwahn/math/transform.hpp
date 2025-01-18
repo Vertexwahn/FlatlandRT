@@ -263,7 +263,7 @@ Transform44Type<ScalarType> look_at(const Point3<ScalarType> &origin,
                  right.z(), corrected_up.z(), forward.z(), origin.z(),
                  ScalarType{0.0}, ScalarType{0.0}, ScalarType{0.0}, ScalarType{1.0};
 
-    return Transform44Type<ScalarType>{(transform).inverse()};
+    return Transform44Type<ScalarType>{transform.inverse()};
 }
 
 template <typename ScalarType>

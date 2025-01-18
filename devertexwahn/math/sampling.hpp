@@ -7,9 +7,11 @@
 #ifndef De_Vertexwahn_Math_warping_50c70bb0_0a28_43db_a7c7_03aaec4146cd_h
 #define De_Vertexwahn_Math_warping_50c70bb0_0a28_43db_a7c7_03aaec4146cd_h
 
+#include "math/constants.hpp"
 #include "math/point.hpp"
 #include "math/util.hpp"
 #include "math/vector.hpp"
+
 #include "core/namespace.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE

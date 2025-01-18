@@ -1,0 +1,53 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# GCC13 on Ubuntu 24.04
+# Try to detect flaky tests
+
+steps:
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+      cd devertexwahn
+      bazel version
+    displayName: "Show Bazel version"
+
+  - script: |
+      gcc --version
+    displayName: "Show GCC version"
+
+
+  - script: |
+      cd devertexwahn
+      bazel run --config=gcc13  -- //tools/compiler_feature_dump
+    displayName: "Compiler feature dump"
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=gcc13 --compilation_mode=opt  --cache_test_results=no --runs_per_test=20 -- //core/...
+      bazel test --config=gcc13 --compilation_mode=opt  --cache_test_results=no --runs_per_test=20 -- //okapi/...
+    displayName: "Bazel build gcc11-fastbuild"
+
+  - script: |
+      df
+    displayName: 'Show disk space'

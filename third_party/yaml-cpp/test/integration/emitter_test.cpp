@@ -46,6 +46,26 @@ TEST_F(EmitterTest, SimpleScalar) {
   ExpectEmit("Hello, World!");
 }
 
+TEST_F(EmitterTest, SimpleStdStringScalar) {
+  out << std::string("Hello, std string");
+
+  ExpectEmit("Hello, std string");
+}
+
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
+TEST_F(EmitterTest, SimpleStdStringViewScalar) {
+  out << std::string_view("Hello, std string view");
+
+  ExpectEmit("Hello, std string view");
+}
+
+TEST_F(EmitterTest, UnterminatedStdStringViewScalar) {
+  out << std::string_view("HelloUnterminated", 5);
+
+  ExpectEmit("Hello");
+}
+#endif
+
 TEST_F(EmitterTest, SimpleQuotedScalar) {
   Node n(Load("\"test\""));
   out << n;
@@ -627,6 +647,17 @@ TEST_F(EmitterTest, LocalTagWithScalar) {
   out << LocalTag("foo") << "bar";
 
   ExpectEmit("!foo bar");
+}
+
+TEST_F(EmitterTest, LocalTagRetainedAfterLoadingNode) {
+  Node n = Node("hello");
+  out << LocalTag("foo") << n;
+  std::string expected = "!foo hello";
+  ExpectEmit(expected);
+  Node yamlNode = Load(out.c_str());
+  Emitter emitter;
+  emitter << yamlNode;
+  EXPECT_EQ(expected, emitter.c_str());
 }
 
 TEST_F(EmitterTest, ComplexDoc) {

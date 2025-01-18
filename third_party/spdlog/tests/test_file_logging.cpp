@@ -45,6 +45,26 @@ TEST_CASE("flush_on", "[flush_on]") {
                                     default_eol, default_eol, default_eol));
 }
 
+TEST_CASE("simple_file_logger", "[truncate]") {
+    prepare_logdir();
+    const spdlog::filename_t filename = SPDLOG_FILENAME_T(SIMPLE_LOG);
+    const bool truncate = true;
+    const auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename, truncate);
+    const auto logger = std::make_shared<spdlog::logger>("simple_file_logger", sink);
+
+    logger->info("Test message {}", 3.14);
+    logger->info("Test message {}", 2.71);
+    logger->flush();
+    REQUIRE(count_lines(SIMPLE_LOG) == 2);
+    
+    sink->truncate();
+    REQUIRE(count_lines(SIMPLE_LOG) == 0);
+
+    logger->info("Test message {}", 6.28);
+    logger->flush();
+    REQUIRE(count_lines(SIMPLE_LOG) == 1);
+}
+
 TEST_CASE("rotating_file_logger1", "[rotating_logger]") {
     prepare_logdir();
     size_t max_size = 1024 * 10;
@@ -100,4 +120,24 @@ TEST_CASE("rotating_file_logger3", "[rotating_logger]") {
     spdlog::filename_t basename = SPDLOG_FILENAME_T(ROTATING_LOG);
     REQUIRE_THROWS_AS(spdlog::rotating_logger_mt("logger", basename, max_size, 0),
                       spdlog::spdlog_ex);
+}
+
+// test on-demand rotation of logs
+TEST_CASE("rotating_file_logger4", "[rotating_logger]") {
+    prepare_logdir();
+    size_t max_size = 1024 * 10;
+    spdlog::filename_t basename = SPDLOG_FILENAME_T(ROTATING_LOG);
+    auto sink = std::make_shared<spdlog::sinks::rotating_file_sink_st>(basename, max_size, 2);
+    auto logger = std::make_shared<spdlog::logger>("rotating_sink_logger", sink);
+
+    logger->info("Test message - pre-rotation");
+    logger->flush();
+
+    sink->rotate_now();
+
+    logger->info("Test message - post-rotation");
+    logger->flush();
+
+    REQUIRE(get_filesize(ROTATING_LOG) > 0);
+    REQUIRE(get_filesize(ROTATING_LOG ".1") > 0);
 }

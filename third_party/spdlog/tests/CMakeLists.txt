@@ -48,7 +48,8 @@ set(SPDLOG_UTESTS_SOURCES
     test_cfg.cpp
     test_time_point.cpp
     test_stopwatch.cpp
-    test_circular_q.cpp)
+    test_circular_q.cpp
+    test_bin_to_hex.cpp)
 
 if(NOT SPDLOG_NO_EXCEPTIONS)
     list(APPEND SPDLOG_UTESTS_SOURCES test_errors.cpp)
@@ -56,10 +57,6 @@ endif()
 
 if(systemd_FOUND)
     list(APPEND SPDLOG_UTESTS_SOURCES test_systemd.cpp)
-endif()
-
-if(NOT SPDLOG_USE_STD_FORMAT)
-    list(APPEND SPDLOG_UTESTS_SOURCES test_bin_to_hex.cpp)
 endif()
 
 enable_testing()

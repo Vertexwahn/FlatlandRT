@@ -9,18 +9,25 @@
 
 jobs:
   - job: MacOSAppleClang14Ventura
-    displayName: "Apple Clang14 on macOS 13 (Ventura)"
+    displayName: "Apple Clang15 on macOS 13 (Ventura)"
     pool:
       vmImage: 'macOS-13'
     steps:
-      - template: devertexwahn/ci/macOS-13-apple-clang14.yaml
+      - template: devertexwahn/ci/macOS-13-apple-clang15.yaml
 
   - job: MacOSAppleClang14Sonoma
-    displayName: "Apple Clang14 on macOS 14 (Sonoma)"
+    displayName: "Apple Clang15 on macOS 14 (Sonoma)"
     pool:
       vmImage: 'macOS-14'
     steps:
-      - template: devertexwahn/ci/macOS-14-apple-clang14.yaml
+      - template: devertexwahn/ci/macOS-14-apple-clang15.yaml
+
+  - job: MacOSAppleClang14Sequoia
+    displayName: "Apple Clang16 on macOS 15 (Sequoia)"
+    pool:
+      vmImage: 'macOS-15'
+    steps:
+      - template: devertexwahn/ci/macOS-15-apple-clang16.yaml
 
 
   #- job: Ubuntu20Clang14
@@ -30,40 +37,12 @@ jobs:
   #  steps:
   #    - template: devertexwahn/ci/ubuntu-20.04-clang14.yaml
 
-  - job: Ubuntu20GCC9Fast
-    displayName: "GCC9 fastbuild on Ubuntu 20.04"
+  - job: Ubuntu24BazelQuery
+    displayName: "Bazel query on Ubuntu 24.04"
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-20.04-gcc9-fast.yaml
-  
-  - job: Ubuntu20GCC9Opt
-    displayName: "GCC9 opt on Ubuntu 20.04"
-    pool:
-      vmImage: 'ubuntu-20.04'
-    steps:
-      - template: devertexwahn/ci/ubuntu-20.04-gcc9-opt.yaml
-
-  - job: Ubuntu20GCC9DebugPart1
-    displayName: "GCC9 debug on Ubuntu 20.04 (Part 1)"
-    pool:
-      vmImage: 'ubuntu-20.04'
-    steps:
-      - template: devertexwahn/ci/ubuntu-20.04-gcc9-dbg-part1.yaml
-
-  - job: Ubuntu20GCC9DebugPart2
-    displayName: "GCC9 debug on Ubuntu 20.04 (Part 2)"
-    pool:
-      vmImage: 'ubuntu-20.04'
-    steps:
-      - template: devertexwahn/ci/ubuntu-20.04-gcc9-dbg-part2.yaml
-
-  - job: Ubuntu22BazelQuery
-    displayName: "Bazel query on Ubuntu 22.04"
-    pool:
-      vmImage: 'ubuntu-22.04'
-    steps:
-      - template: devertexwahn/ci/ubuntu-22.04-bazel-query.yaml
+      - template: devertexwahn/ci/ubuntu-24.04-bazel-query.yaml
 
   - job: Ubuntu22Clang16
     displayName: "Clang16 on Ubuntu 22.04"
@@ -72,12 +51,12 @@ jobs:
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-clang16.yaml
 
-  - job: Ubuntu22Coverage
-    displayName: "Coverage with LCOV/GCC11 on Ubuntu 22.04"
+  - job: Ubuntu24Coverage
+    displayName: "Coverage with LCOV/GCC13 on Ubuntu 24.04"
     pool:
-      vmImage: 'ubuntu-22.04'
+      vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-22.04-coverage.yaml
+      - template: devertexwahn/ci/ubuntu-24.04-coverage.yaml
 
 
   - job: Ubuntu22Cppcheck
@@ -87,12 +66,12 @@ jobs:
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-cppcheck.yaml
 
-  - job: Ubuntu22Bzlmod
-    displayName: "Bzlmod on Ubuntu 22.04"
-    pool:
-      vmImage: 'ubuntu-22.04'
-    steps:
-      - template: devertexwahn/ci/ubuntu-22.04-gcc11-bzlmod.yaml
+  #- job: Ubuntu24Bzlmod
+  #  displayName: "Bzlmod GCC 13 on Ubuntu 24.04"
+  #  pool:
+  #    vmImage: 'ubuntu-24.04'
+  #  steps:
+  #    - template: devertexwahn/ci/ubuntu-24.04-gcc13-bzlmod.yaml
 
   - job: Ubuntu22GCC11
     displayName: "GCC11 fastbuild opt on Ubuntu 22.04"
@@ -100,6 +79,13 @@ jobs:
       vmImage: 'ubuntu-22.04'
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-gcc11-fast-opt.yaml
+
+  - job: Ubuntu24GCC13FlakyTests
+    displayName: "GCC13 detect flaky tests on Ubuntu 24.04"
+    pool:
+      vmImage: 'ubuntu-24.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-24.04-gcc13-flaky-test-detection.yaml
 
   - job: Ubuntu24GCC13
     displayName: "GCC13 fastbuild opt on Ubuntu 24.04"
@@ -114,6 +100,13 @@ jobs:
       vmImage: 'ubuntu-22.04'
     steps:
       - template: devertexwahn/ci/ubuntu-22.04-gcc11-dbg-part1.yaml
+
+  - job: Ubuntu24GCC13DebugPart1
+    displayName: "GCC13 dbg on Ubuntu 24.04 (Part 1)"
+    pool:
+      vmImage: 'ubuntu-24.04'
+    steps:
+      - template: devertexwahn/ci/ubuntu-24.04-gcc13-dbg-part1.yaml
 
   
   # Visual Studio 2019

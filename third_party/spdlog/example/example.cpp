@@ -281,7 +281,7 @@ struct fmt::formatter<my_type> : fmt::formatter<std::string> {
 template <>
 struct std::formatter<my_type> : std::formatter<std::string> {
     auto format(my_type my, format_context &ctx) const -> decltype(ctx.out()) {
-        return format_to(ctx.out(), "[my_type i={}]", my.i);
+        return std::format_to(ctx.out(), "[my_type i={}]", my.i);
     }
 };
 #endif

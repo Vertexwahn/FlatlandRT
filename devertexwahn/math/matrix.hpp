@@ -230,6 +230,11 @@ Matrix<ScalarType, 4, 4> orthographic_projection_matrix_RH(
     return m;
 }
 
+template <typename ScalarType>
+Matrix<ScalarType, 4, 4> identity_matrix() {
+    return Eigen::Matrix<ScalarType, 4, 4>::Identity();
+}
+
 DE_VERTEXWAHN_END_NAMESPACE
 
 #endif // end define De_Vertexwahn_Math_Matrix_3b0aa566_7e67_433d_8fb6_075c84a4a70e_h

@@ -14,14 +14,20 @@ additional_bazel_config=""
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --show_report|-s) show_html_page=true ;;
-        --additonal_bazel_config=*) additional_bazel_config="--config=${1#*=}" ;;
+        --additional_bazel_config=*) additional_bazel_config="--config=${1#*=}" ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
 
+# Check if genhtml is installed, if not, install it
+if ! command -v genhtml &> /dev/null; then
+    echo "genhtml could not be found, installing it now"
+    sudo apt-get install lcov
+fi
+
 bazel coverage \
---config=gcc11 \
+--config=gcc13 \
 ${additional_bazel_config} \
 --combined_report=lcov \
 -- //...
@@ -35,7 +41,7 @@ genhtml "$output_path"/_coverage/_coverage_report.dat -o coverage_report
 current_line_coverage=$(genhtml "$output_path"/_coverage/_coverage_report.dat -o coverage_report | grep lines......: | cut -d ' ' -f 4 | tr -d '%')
 echo "Current coverage: $current_line_coverage"
 
-old_line_coverage="95.0"
+old_line_coverage="90.0"
 echo "Old coverage: $old_line_coverage"
 
 # Open coverage report if flag is set

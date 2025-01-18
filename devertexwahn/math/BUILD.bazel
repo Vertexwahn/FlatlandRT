@@ -28,6 +28,16 @@ cc_test(
 )
 
 cc_library(
+    name = "constants",
+    srcs = ["constants.hpp"],
+    deps = [
+        "//core:namespace",
+        #"@boost//:predef",
+        "@boost.predef",
+    ],
+)
+
+cc_library(
     name = "frame",
     hdrs = ["frame.hpp"],
     deps = [
@@ -233,6 +243,7 @@ cc_library(
     hdrs = ["sampling.hpp"],
     deps = [
         "//core:namespace",
+        "//math:constants",
         "//math:normal",
         "//math:point",
         "//math:vector",

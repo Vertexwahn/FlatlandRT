@@ -1,0 +1,65 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# GCC 13 on Ubuntu 24.04
+# Make sure we can build with GCC13 in all different compilation modes
+
+steps:
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+    
+
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+      cd devertexwahn
+      bazel version
+    displayName: "Show Bazel version"
+
+  - script: |
+      gcc --version
+    displayName: "Show GCC version"
+
+
+  - script: |
+      cd devertexwahn
+      bazel run --config=gcc13  --compilation_mode=dbg -- //tools/compiler_feature_dump
+    displayName: "Compiler feature dump"
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+      cd devertexwahn
+      bazel build --config=gcc13  --compilation_mode=dbg -- //... -//okapi/...
+    displayName: "Bazel build gcc13-dbg (part 1)"
+
+  - script: |
+     cd devertexwahn
+     bazel test --config=gcc13  --compilation_mode=dbg -- //... -//okapi/...
+    displayName: "Bazel test gcc13-dbg (part 1)"
+
+  - script: |
+      df
+    displayName: 'Show disk space'
+
+  - script: |
+      df
+    displayName: 'Show disk space'

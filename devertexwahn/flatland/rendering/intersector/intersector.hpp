@@ -8,7 +8,7 @@
 #define De_Vertexwahn_Flatland_Rendering_Intersector_fa38b1e4_1fd0_4ac7_b5c0_116ac6d531c8_h
 
 #include "core/object.hpp"
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 #include "math/ray.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE

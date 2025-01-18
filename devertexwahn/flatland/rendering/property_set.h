@@ -18,7 +18,7 @@
 #include "core/namespace.hpp"
 #include "core/object.hpp"
 #include "core/property_set.hpp"
-#include "core/reference_counted.h"
+#include "core/reference_counted.hpp"
 
 #include <string>
 #include <variant>

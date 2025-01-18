@@ -2,6 +2,7 @@
 
 # Release notes
 **Contents**<br>
+[3.8.0](#380)<br>
 [3.7.1](#371)<br>
 [3.7.0](#370)<br>
 [3.6.0](#360)<br>
@@ -63,6 +64,31 @@
 [2.0.1](#201)<br>
 [Older versions](#older-versions)<br>
 [Even Older versions](#even-older-versions)<br>
+
+
+## 3.8.0
+
+### Improvements
+* Added `std::initializer_list` overloads for `(Unordered)RangeEquals` matcher (#2915, #2919)
+* Added explicit casts to silence GCC's `Wconversion` (#2875)
+* Made the use of `builtin_constant_p` tricks in assertion macros configurable (#2925)
+  * It is used to prod GCC-like compilers into providing warnings for the asserted expressions, but the compilers miscompile it annoyingly often.
+* Cleaned out Clang-Tidy's `performance-enum-size` warnings
+* Added support for using `from_range` generator with iterators with `value_type = const T` (#2926)
+  * This is not correct `value_type` typedef, but it is used in the wild and the change does not make the code meaningfully worse.
+
+### Fixes
+* Fixed crash when stringifying pre-1970 (epoch) dates on Windows (#2944)
+
+### Miscellaneous
+* Fixes and improvements for `catch_discover_tests` CMake helper
+  * Removed redundant `CTEST_FILE` param when creating the indirection file for `PRE_TEST` discovery mode (#2936)
+  * Rewrote the test discovery logic to use output from the JSON reporter
+    * This means that `catch_discover_tests` now requires CMake 3.19 or newer
+  * Added `ADD_TAGS_AS_LABELS` option. If specified, each CTest test will be labeled with corrensponding Catch2's test tag
+* Bumped up the minimum required CMake version to build Catch2 to 3.16
+* Meson build now provides option to avoid installing Catch2
+* Bazel build is moved to Bzlmod.
 
 
 ## 3.7.1

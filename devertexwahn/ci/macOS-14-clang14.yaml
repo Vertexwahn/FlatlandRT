@@ -38,8 +38,8 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel run --config=macos  -- //tools/compiler_information
-    displayName: "Show compiler information"
+      bazel run --config=macos  -- //tools/compiler_feature_dump
+    displayName: "Compiler feature dump"
 
   # fastbuild
   - script: |

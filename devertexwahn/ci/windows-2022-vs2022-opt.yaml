@@ -6,6 +6,10 @@
 # VS2022 on Windows Server 2022
 # Make sure we can build with VS2022 in all different compilation modes
 steps:
+  - script: |
+      systeminfo
+    displayName: "Show system information"
+
   - checkout: self
     clean: true
     fetchDepth: 1
@@ -21,8 +25,13 @@ steps:
     
   - script: |
       cd devertexwahn
-      bazel --output_base=C:/bazel_output_base run --config=vs2022  --compilation_mode=opt -- //tools/compiler_information
-    displayName: "Show compiler information"
+      bazel --output_base=C:/bazel_output_base run --config=vs2022  --compilation_mode=opt -- //tools/compiler_feature_dump
+    displayName: "Compiler feature dump"
+
+  - script: |
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base run --config=vs2022  --compilation_mode=opt -- //tools/cpu_info:cpu_info
+    displayName: "Show CPU information"
 
   - pwsh: |
       get-volume

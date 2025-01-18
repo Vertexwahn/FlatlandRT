@@ -4,8 +4,8 @@
  */
 
 #pragma once
-#ifndef De_Vertexwahn_Core_platform_4de99014_aad1_4976_9f27_4cd4afe72bdc_h
-#define De_Vertexwahn_Core_platform_4de99014_aad1_4976_9f27_4cd4afe72bdc_h
+#ifndef De_Vertexwahn_Core_Platform_4de99014_aad1_4976_9f27_4cd4afe72bdc_h
+#define De_Vertexwahn_Core_Platform_4de99014_aad1_4976_9f27_4cd4afe72bdc_h
 
 #include "core/namespace.hpp"
 
@@ -44,4 +44,4 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 DE_VERTEXWAHN_END_NAMESPACE
 
-#endif // end define De_Vertexwahn_Core_platform_4de99014_aad1_4976_9f27_4cd4afe72bdc_h
+#endif // end define De_Vertexwahn_Core_Platform_4de99014_aad1_4976_9f27_4cd4afe72bdc_h
