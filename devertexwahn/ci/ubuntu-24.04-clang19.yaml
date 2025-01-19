@@ -32,6 +32,11 @@ steps:
       bazel version
     displayName: "Show Bazel version"
 
+  - script: |
+      sudo apt-get update
+      sudo apt-get -y install libncurses6 # needed by Clang
+    displayName: "Install libncurses6"
+
 
   - script: |
       cd devertexwahn
