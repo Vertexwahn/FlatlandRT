@@ -46,34 +46,34 @@ steps:
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=clang19  -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
-    displayName: 'Bazel build clang14-fastbuild'
+      bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel build clang19-fastbuild'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang19  -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
-    displayName: 'Bazel test clang14-fastbuild'
+      bazel test --config=clang19  -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel test clang19-fastbuild'
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=clang19  --compilation_mode=dbg -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
-    displayName: 'Bazel build clang14-dbg'
+      bazel build --config=clang19  --compilation_mode=dbg -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel build clang19-dbg'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang19  --compilation_mode=dbg -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
-    displayName: 'Bazel test clang14-dbg'
+      bazel test --config=clang19  --compilation_mode=dbg -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel test clang19-dbg'
 
   - script: |
       cd devertexwahn
-      bazel build --config=clang19  --compilation_mode=opt -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
-    displayName: 'Bazel build clang14-opt'
+      bazel build --config=clang19  --compilation_mode=opt -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel build clang19-opt'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang19  --compilation_mode=opt -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
-    displayName: 'Bazel test clang14-opt'
+      bazel test --config=clang19  --compilation_mode=opt -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel test clang194-opt'
 
   - script: |
       df
