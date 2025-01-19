@@ -9,6 +9,7 @@ This file documents the commit hash of each library if it is not given in the fi
 
 ```text
 abseil-cpp-3735766b3bd68522c8f291675df3fddb4bc3c70d
+bazel_clang_tidy-db677011c7363509a288a9fb3bf0a50830bbf791
 bazel-skylib-505e1bc3aaae8375f857637f78bf6b3dd953862a
 bazel-toolchain-795d76fd03e0b17c0961f0981a8512a00cba4fa2
 boringssl-7841caede5264d76d32cfd8de693f37554358001

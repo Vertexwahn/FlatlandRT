@@ -12,6 +12,7 @@ module(
 
 bazel_dep(name = "abseil-cpp", version = "20240722.0.bcr.2")
 bazel_dep(name = "apple_support", version = "1.17.1")
+bazel_dep(name = "bazel_clang_tidy")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "boost.algorithm", version = "1.83.0.bcr.1")
 bazel_dep(name = "boost.asio", version = "1.83.0.bcr.2")
@@ -72,6 +73,11 @@ local_path_override(
 local_path_override(
     module_name = "catch2",
     path = "../third_party/Catch2",
+)
+
+local_path_override(
+    module_name = "bazel_clang_tidy",
+    path = "../third_party/bazel_clang_tidy",
 )
 
 local_path_override(
