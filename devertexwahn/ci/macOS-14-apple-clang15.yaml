@@ -8,7 +8,7 @@
 steps:
   - script: |
       df -h
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - checkout: self
     clean: true
@@ -18,7 +18,7 @@ steps:
 
   - script: |
       df -h
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - script: |
       sw_vers

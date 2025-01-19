@@ -13,7 +13,7 @@ bazel run --config=gcc11 //tools/compiler_feature_dump
 ```
 
 ```shell
-bazel run --config=clang16 //tools/compiler_feature_dump
+bazel run --config=clang19 //tools/compiler_feature_dump
 ```
 
 ## macOS

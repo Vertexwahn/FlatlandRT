@@ -9,7 +9,7 @@
 steps:
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - checkout: self
     clean: true
@@ -25,7 +25,7 @@ steps:
 
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - script: |
       cd devertexwahn
@@ -44,7 +44,7 @@ steps:
 
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - script: |
      cd devertexwahn
@@ -53,7 +53,7 @@ steps:
 
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - script: |
      cd devertexwahn
@@ -62,4 +62,4 @@ steps:
 
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"

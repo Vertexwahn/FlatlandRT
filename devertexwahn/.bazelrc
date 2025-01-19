@@ -108,17 +108,17 @@ build:clang14 --cxxopt=-mwaitpkg
 build:clang14 --define compiler=clang14
 
 # Clang 16.0.0 (config is used on Ubuntu)
-build:clang16 --cxxopt=-std=c++20
-#build:clang16 --cxxopt=-mavx
-#build:clang16 --cxxopt=-mavx2
-#build:clang16 --cxxopt=-msse4.2
-#build:clang16 --cxxopt=-Werror
-build:clang16 --incompatible_enable_cc_toolchain_resolution
+build:clang19 --cxxopt=-std=c++20
+#build:clang19 --cxxopt=-mavx
+#build:clang19 --cxxopt=-mavx2
+#build:clang19 --cxxopt=-msse4.2
+#build:clang19 --cxxopt=-Werror
+build:clang19 --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
 # Tell Bazel to pass the right flags for llvm-ar, not libtool. Only needed if you are building on darwin.
 # See https://github.com/bazelbuild/bazel/blob/5c75d0acec21459bbb13520817e3806e1507e907/tools/cpp/unix_cc_toolchain_config.bzl#L1000-L1024
-build:clang16 --features=-libtool
-build:clang16 --cxxopt=-mwaitpkg
-build:clang16 --define compiler=clang14
+build:clang19 --features=-libtool
+build:clang19 --cxxopt=-mwaitpkg
+build:clang19 --define compiler=clang19
 
 # MinGW
 build:mingw --cxxopt=-std=c++2a
@@ -171,7 +171,7 @@ build:optimized build --copt=-O3
 # More details here: https://github.com/storypku/bazel_iwyu/pull/12
 #build:iwyu --@bazel_iwyu//:iwyu_mappings=@my_repo//tools:iwyu_mappings
 build:iwyu --config=gcc11
-#build:iwyu --config=clang16
+#build:iwyu --config=clang19
 build:iwyu --aspects @bazel_iwyu//bazel/iwyu:iwyu.bzl%iwyu_aspect
 build:iwyu --output_groups=report
 build:iwyu --build_tag_filters=-no-iwyu # To include everything except the rules tagged with "no-iwyu"

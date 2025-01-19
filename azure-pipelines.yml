@@ -44,12 +44,12 @@ jobs:
     steps:
       - template: devertexwahn/ci/ubuntu-24.04-bazel-query.yaml
 
-  - job: Ubuntu22Clang16
-    displayName: "Clang16 on Ubuntu 22.04"
+  - job: Ubuntu22Clang19
+    displayName: "Clang19 on Ubuntu 24.04"
     pool:
-      vmImage: 'ubuntu-22.04'
+      vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-22.04-clang16.yaml
+      - template: devertexwahn/ci/ubuntu-24.04-clang19.yaml
 
   - job: Ubuntu24Coverage
     displayName: "Coverage with LCOV/GCC13 on Ubuntu 24.04"

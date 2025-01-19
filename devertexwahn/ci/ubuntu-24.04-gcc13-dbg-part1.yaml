@@ -1,5 +1,5 @@
 #
-#   SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
+#   SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
 #   SPDX-License-Identifier: Apache-2.0
 #
 
@@ -9,7 +9,7 @@
 steps:
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - checkout: self
     clean: true
@@ -25,7 +25,7 @@ steps:
 
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - script: |
       cd devertexwahn
@@ -44,7 +44,7 @@ steps:
 
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - script: |
       cd devertexwahn
@@ -58,8 +58,8 @@ steps:
 
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"

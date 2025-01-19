@@ -9,7 +9,7 @@
 steps:
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   - checkout: self
     clean: true
@@ -25,7 +25,7 @@ steps:
 
   - script: |
       df
-    displayName: 'Show disk space'
+    displayName: "Show disk space"
 
   # Note: apt-get cannot be used to install Cppcheck since it has only an old version that give some false positives
   #- script: |
