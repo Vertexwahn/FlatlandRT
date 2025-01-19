@@ -1,0 +1,80 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# Clang 19 on Ubuntu 24.04
+# Make sure we can build with Clang 16 in all different compilation modes
+
+steps:
+  - script: |
+      df
+    displayName: "Show disk space"
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
+
+  - script: |
+      df
+    displayName: "Show disk space"
+
+  - script: |
+      cd devertexwahn
+      bazel version
+    displayName: "Show Bazel version"
+
+  - script: |
+      sudo apt-get update
+      sudo apt-get -y install libncurses5 # needed by Clang
+    displayName: "Install libncurses5"
+
+
+  - script: |
+      cd devertexwahn
+      bazel run --config=clang19  --compilation_mode=dbg -- //tools/compiler_feature_dump
+    displayName: "Compiler feature dump"
+
+  # fastbuild
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang19  -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel build clang14-fastbuild'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang19  -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel test clang14-fastbuild'
+
+  # dbg
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang19  --compilation_mode=dbg -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel build clang14-dbg'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang19  --compilation_mode=dbg -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel test clang14-dbg'
+
+  - script: |
+      cd devertexwahn
+      bazel build --config=clang19  --compilation_mode=opt -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel build clang14-opt'
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=clang19  --compilation_mode=opt -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
+    displayName: 'Bazel test clang14-opt'
+
+  - script: |
+      df
+    displayName: "Show disk space"
