@@ -151,7 +151,15 @@ bazel run --config=asan --compilation_mode=opt //flatland/cli:flatland.cli --  $
 #### Clang Tidy
 
 ```shell
-bazel build --config=clang-tidy //flatland/core/...
+bazel build --config=clang-tidy //core:object
+```
+
+or
+
+```shell
+bazel build //core:object \
+  --aspects @bazel_clang_tidy//clang_tidy:clang_tidy.bzl%clang_tidy_aspect \
+  --output_groups=report
 ```
 
 ### Building with Windows

@@ -163,8 +163,6 @@ build:asan --linkopt -fsanitize=address
 # clang-tidy
 build:clang-tidy --aspects @bazel_clang_tidy//clang_tidy:clang_tidy.bzl%clang_tidy_aspect
 build:clang-tidy --output_groups=report
-build:clang-tidy --@bazel_clang_tidy//:clang_tidy_config=//:clang_tidy_config2
-build:clang-tidy --cxxopt=-std=c++17
 
 # Optimized build
 build:optimized build --copt=-O3
