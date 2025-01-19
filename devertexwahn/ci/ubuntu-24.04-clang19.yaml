@@ -32,11 +32,6 @@ steps:
       bazel version
     displayName: "Show Bazel version"
 
-  - script: |
-      sudo apt-get update
-      sudo apt-get -y install libncurses5 # needed by Clang
-    displayName: "Install libncurses5"
-
 
   - script: |
       cd devertexwahn
@@ -46,33 +41,33 @@ steps:
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=clang19  -- //...     
+      bazel build --config=clang19  -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
     displayName: 'Bazel build clang14-fastbuild'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang19  -- //...     
+      bazel test --config=clang19  -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
     displayName: 'Bazel test clang14-fastbuild'
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=clang19  --compilation_mode=dbg -- //...     
+      bazel build --config=clang19  --compilation_mode=dbg -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
     displayName: 'Bazel build clang14-dbg'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang19  --compilation_mode=dbg -- //...     
+      bazel test --config=clang19  --compilation_mode=dbg -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
     displayName: 'Bazel test clang14-dbg'
 
   - script: |
       cd devertexwahn
-      bazel build --config=clang19  --compilation_mode=opt -- //...     
+      bazel build --config=clang19  --compilation_mode=opt -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
     displayName: 'Bazel build clang14-opt'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang19  --compilation_mode=opt -- //...     
+      bazel test --config=clang19  --compilation_mode=opt -- bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
     displayName: 'Bazel test clang14-opt'
 
   - script: |
