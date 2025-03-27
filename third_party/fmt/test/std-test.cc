@@ -13,13 +13,17 @@
 #include <vector>
 
 #include "fmt/os.h"  // fmt::system_category
-#include "fmt/ranges.h"
 #include "gtest-extra.h"  // StartsWith
 
 #ifdef __cpp_lib_filesystem
 TEST(std_test, path) {
   using std::filesystem::path;
   EXPECT_EQ(fmt::format("{}", path("/usr/bin")), "/usr/bin");
+
+  // see #4303
+  const path p = "/usr/bin";
+  EXPECT_EQ(fmt::format("{}", p), "/usr/bin");
+
   EXPECT_EQ(fmt::format("{:?}", path("/usr/bin")), "\"/usr/bin\"");
   EXPECT_EQ(fmt::format("{:8}", path("foo")), "foo     ");
 
@@ -43,6 +47,9 @@ TEST(std_test, path) {
   EXPECT_EQ(fmt::format("{:?}", path(L"\xd800")), "\"\\ud800\"");
 #  endif
 }
+
+// Intentionally delayed include to test #4303
+#include "fmt/ranges.h"
 
 // Test ambiguity problem described in #2954.
 TEST(ranges_std_test, format_vector_path) {
@@ -376,11 +383,12 @@ TEST(std_test, format_atomic) {
 
 #ifdef __cpp_lib_atomic_flag_test
 TEST(std_test, format_atomic_flag) {
-  std::atomic_flag f = ATOMIC_FLAG_INIT;
+  std::atomic_flag f;
   (void)f.test_and_set();
   EXPECT_EQ(fmt::format("{}", f), "true");
 
-  const std::atomic_flag cf = ATOMIC_FLAG_INIT;
+  f.clear();
+  const std::atomic_flag& cf = f;
   EXPECT_EQ(fmt::format("{}", cf), "false");
 }
 #endif  // __cpp_lib_atomic_flag_test

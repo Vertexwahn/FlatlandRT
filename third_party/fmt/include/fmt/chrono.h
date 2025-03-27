@@ -574,7 +574,7 @@ inline auto localtime(std::time_t time) -> std::tm {
 #if FMT_USE_LOCAL_TIME
 template <typename Duration,
           FMT_ENABLE_IF(detail::has_current_zone<Duration>())>
-inline auto localtime(std::chrono::local_time<Duration> time) -> std::tm {
+FMT_DEPRECATED inline auto localtime(std::chrono::local_time<Duration> time) -> std::tm {
   using namespace std::chrono;
   using namespace fmt_detail;
   return localtime(detail::to_time_t(current_zone()->to_sys<Duration>(time)));
@@ -2320,15 +2320,20 @@ struct formatter<local_time<Duration>, Char> : formatter<std::tm, Char> {
   template <typename FormatContext>
   auto format(local_time<Duration> val, FormatContext& ctx) const
       -> decltype(ctx.out()) {
+    auto time_since_epoch = val.time_since_epoch();
+    auto seconds_since_epoch =
+        detail::duration_cast<std::chrono::seconds>(time_since_epoch);
+    // Use gmtime to prevent time conversion since local_time has an
+    // unspecified time zone.
+    auto t = gmtime(seconds_since_epoch.count());
     using period = typename Duration::period;
     if (period::num == 1 && period::den == 1 &&
         !std::is_floating_point<typename Duration::rep>::value) {
-      return formatter<std::tm, Char>::format(localtime(val), ctx);
+      return formatter<std::tm, Char>::format(t, ctx);
     }
-    auto epoch = val.time_since_epoch();
-    auto subsecs = detail::duration_cast<Duration>(
-        epoch - detail::duration_cast<std::chrono::seconds>(epoch));
-    return formatter<std::tm, Char>::do_format(localtime(val), ctx, &subsecs);
+    auto subsecs =
+        detail::duration_cast<Duration>(time_since_epoch - seconds_since_epoch);
+    return formatter<std::tm, Char>::do_format(t, ctx, &subsecs);
   }
 };
 

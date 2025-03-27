@@ -1,6 +1,81 @@
-# 11.1.3 - TBD
+# 11.1.5 - TBD
+
+- Fixed compilation with GCC 15 and C++20 modules enabled
+  (https://github.com/fmtlib/fmt/pull/4347). Thanks @tkhyn.
+
+- Worked around an ABI issue in spdlog
+  (https://github.com/fmtlib/fmt/issues/4385).
+
+- Fixed handling of named arguments in format specs
+  (https://github.com/fmtlib/fmt/issues/4360,
+  https://github.com/fmtlib/fmt/pull/4361). Thanks @dinomight.
+
+- Added error reporting for duplicate named arguments
+  (https://github.com/fmtlib/fmt/pull/4367). Thanks @dinomight.
+
+- Fixed formatting of `long` with `FMT_BUILTIN_TYPES=0`.
+
+- Optimized `text_style` using bit packing
+  (https://github.com/fmtlib/fmt/pull/4363). Thanks @LocalSpook.
+
+# 11.1.4 - 2025-02-26
+
+- Fixed ABI compatibility with earlier 11.x versions on Windows
+  (https://github.com/fmtlib/fmt/issues/4359).
+
+- Improved the logic of switching between fixed and exponential format for
+  `float` (https://github.com/fmtlib/fmt/issues/3649).
+
+- Moved `is_compiled_string` to the public API
+  (https://github.com/fmtlib/fmt/issues/4342). Thanks @SwooshyCueb.
+
+- Simplified implementation of `operator""_cf`
+  (https://github.com/fmtlib/fmt/pull/4349). Thanks @LocalSpook.
+
+- Fixed `__builtin_strlen` detection (https://github.com/fmtlib/fmt/pull/4329).
+  Thanks @LocalSpook.
+
+- Fixed handling of BMI paths with the Ninja generator
+  (https://github.com/fmtlib/fmt/pull/4344). Thanks @tkhyn.
+
+- Fixed gcc 8.3 compile errors (https://github.com/fmtlib/fmt/issues/4331,
+  https://github.com/fmtlib/fmt/pull/4336). Thanks @sergiud.
+
+- Fixed a bogus MSVC warning (https://github.com/fmtlib/fmt/pull/4356).
+  Thanks @dinomight.
+
+# 11.1.3 - 2025-01-25
 
 - Fixed compilation on GCC 9.4 (https://github.com/fmtlib/fmt/issues/4313).
+
+- Worked around an internal compiler error when using C++20 modules with GCC
+  14.2 and earlier (https://github.com/fmtlib/fmt/issues/4295).
+
+- Worked around a bug in GCC 6 (https://github.com/fmtlib/fmt/issues/4318).
+
+- Fixed an issue caused by instantiating `formatter<const T>`
+  (https://github.com/fmtlib/fmt/issues/4303,
+  https://github.com/fmtlib/fmt/pull/4325). Thanks @timsong-cpp.
+
+- Fixed formatting into `std::ostreambuf_iterator` when using format string
+  compilation (https://github.com/fmtlib/fmt/issues/4309,
+  https://github.com/fmtlib/fmt/pull/4312). Thanks @phprus.
+
+- Restored a constraint on the map formatter so that it correctly reports as
+  unformattable when the element is (https://github.com/fmtlib/fmt/pull/4326).
+  Thanks @timsong-cpp.
+
+- Reduced the size of format specs (https://github.com/fmtlib/fmt/issues/4298).
+
+- Readded `args()` to `fmt::format_context`
+  (https://github.com/fmtlib/fmt/issues/4307,
+  https://github.com/fmtlib/fmt/pull/4310). Thanks @Erroneous1.
+
+- Fixed a bogus MSVC warning (https://github.com/fmtlib/fmt/issues/4314,
+  https://github.com/fmtlib/fmt/pull/4322). Thanks @ZehMatt.
+
+- Fixed a pedantic mode error in the CMake config
+  (https://github.com/fmtlib/fmt/pull/4327). Thanks @rlalik.
 
 # 11.1.2 - 2025-01-12
 

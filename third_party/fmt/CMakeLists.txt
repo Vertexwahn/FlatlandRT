@@ -27,7 +27,13 @@ endfunction()
 # DEPRECATED! Should be merged into add_module_library.
 function(enable_module target)
   if (MSVC)
-    set(BMI ${CMAKE_CURRENT_BINARY_DIR}/${target}.ifc)
+    if(CMAKE_GENERATOR STREQUAL "Ninja")
+      # Ninja dyndep expects the .ifc output to be located in a specific relative path
+      file(RELATIVE_PATH BMI_DIR "${CMAKE_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}.dir")
+    else()
+      set(BMI_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+    endif()
+    file(TO_NATIVE_PATH "${BMI_DIR}/${target}.ifc" BMI)
     target_compile_options(${target}
       PRIVATE /interface /ifcOutput ${BMI}
       INTERFACE /reference fmt=${BMI})
@@ -293,6 +299,7 @@ function(add_headers VAR)
 endfunction()
 
 # Define the fmt library, its includes and the needed defines.
+set(FMT_HEADERS)
 add_headers(FMT_HEADERS args.h base.h chrono.h color.h compile.h core.h format.h
                         format-inl.h os.h ostream.h printf.h ranges.h std.h
                         xchar.h)
