@@ -36,6 +36,7 @@ see example [CMakeLists.txt](https://github.com/gabime/spdlog/blob/v1.x/example/
 * Gentoo: `emerge dev-libs/spdlog`
 * Arch Linux: `pacman -S spdlog`
 * openSUSE: `sudo zypper in spdlog-devel`
+* ALT Linux: `apt-get install libspdlog-devel`
 * vcpkg: `vcpkg install spdlog`
 * conan: `conan install --requires=spdlog/[*]`
 * conda: `conda install -c conda-forge spdlog`
@@ -387,6 +388,9 @@ void android_example()
 int main (int argc, char *argv[])
 {
     spdlog::cfg::load_env_levels();
+    // or specify the env variable name:
+    // MYAPP_LEVEL=info,mylogger=trace && ./example
+    // spdlog::cfg::load_env_levels("MYAPP_LEVEL");
     // or from the command line:
     // ./example SPDLOG_LEVEL=info,mylogger=trace
     // #include "spdlog/cfg/argv.h" // for loading levels from argv

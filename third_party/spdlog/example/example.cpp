@@ -148,6 +148,9 @@ void load_levels_example() {
     // Set the log level to "info" and mylogger to "trace":
     // SPDLOG_LEVEL=info,mylogger=trace && ./example
     spdlog::cfg::load_env_levels();
+    // or specify the env variable name:
+    // MYAPP_LEVEL=info,mylogger=trace && ./example
+    // spdlog::cfg::load_env_levels("MYAPP_LEVEL");
     // or from command line:
     // ./example SPDLOG_LEVEL=info,mylogger=trace
     // #include "spdlog/cfg/argv.h" // for loading levels from argv
