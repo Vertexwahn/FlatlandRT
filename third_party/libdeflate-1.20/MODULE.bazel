@@ -1,5 +1,0 @@
-module(
-    name = "libdeflate",
-    version = "1.20",
-    compatibility_level = 1,
-)

@@ -30,7 +30,7 @@ bazel_dep(name = "hypothesis")
 bazel_dep(name = "imath", version = "3.1.12")
 bazel_dep(name = "libdeflate", version = "1.23")
 bazel_dep(name = "libjpeg_turbo", version = "2.1.4")
-bazel_dep(name = "libpng", version = "1.6.45")
+bazel_dep(name = "libpng", version = "1.6.47.bcr.1")
 bazel_dep(name = "libwebp", version = "1.5.0")
 bazel_dep(name = "nasm", version = "2.14.02")
 bazel_dep(name = "nlohmann_json", version = "3.11.3.bcr.1")
@@ -42,7 +42,7 @@ bazel_dep(name = "rules_cc", version = "0.1.1")
 bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_pkg", version = "1.0.1")
 bazel_dep(name = "rules_python", version = "0.40.0")
-bazel_dep(name = "spdlog", version = "1.15.1")
+bazel_dep(name = "spdlog", version = "1.15.2")
 bazel_dep(name = "xtensor")
 bazel_dep(name = "xtl")
 bazel_dep(name = "yaml-cpp", version = "0.8.0")
@@ -97,8 +97,18 @@ local_path_override(
 )
 
 local_path_override(
+    module_name = "libdeflate",
+    path = "../third_party/libdeflate-1.23",
+)
+
+local_path_override(
     module_name = "libpng",
     path = "../third_party/libpng-1.6.47",
+)
+
+local_path_override(
+    module_name = "libwebp",
+    path = "../third_party/libwebp-1.5.0",
 )
 
 local_path_override(

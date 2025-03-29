@@ -131,7 +131,7 @@ jobs:
     steps:
       - template: devertexwahn/ci/windows-2019-vs2019-opt.yaml
 
-  # Visual Studio 2022
+  # Visual Studio 2022 on Windows Server 2022
   - job: VisualStudio2022_WindowsServer2022_Dbg
     displayName: "VS2022 dbg on Windows Server 2022"
     pool:
@@ -153,7 +153,7 @@ jobs:
     steps:
       - template: devertexwahn/ci/windows-2022-vs2022-opt.yaml
 
-  # Visual Studio 2025
+  # Visual Studio 2022 on Windows Server 2025
   - job: VisualStudio2022_WindowsServer2025_Dbg
     displayName: "VS2022 dbg on Windows Server 2025"
     pool:
