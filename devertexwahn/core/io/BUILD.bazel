@@ -1,0 +1,41 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+cc_library(
+    name = "file_stream",
+    srcs = ["file_stream.cpp"],
+    hdrs = ["file_stream.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":stream",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "file_stream_test",
+    srcs = ["file_stream_test.cpp"],
+    data = [
+        "test_data/test_big_endian.dat",
+        "test_data/test_little_endian.dat",
+    ],
+    deps = [
+        ":file_stream",
+        ":stream",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "stream",
+    srcs = ["stream.cpp"],
+    hdrs = ["stream.hpp"],
+    deps = [
+        "//core:namespace",
+        "//core:platform",
+    ],
+)
