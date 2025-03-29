@@ -63,16 +63,16 @@ bazel --output_base=C:/bazel_output_base  run --config=vs2022 //flatland/cli:fla
 
 For more hints on how to use Bazel on Windows have a look at the [Bazel on Windows](https://docs.google.com/document/d/17YIqUdffxpwcKP-0whHM6TFELN8VohTpjiiEIbbRfts/edit?usp=sharing) document.
 
-*Render a scene with Ubuntu 20.04:*
-
-```shell
-bazel run --config=gcc9 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
-```
-
 *Render a scene with Ubuntu 22.04:*
 
 ```shell
 bazel run --config=gcc11 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
+```
+
+*Render a scene with Ubuntu 24.04:*
+
+```shell
+bazel run --config=gcc13 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
 *Render a scene with macOS 11/12/13:*
@@ -88,14 +88,14 @@ bazel run --config=macos //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/
 #### Command line (bash/zsh)
 
 ```shell
-# Run all tests using GCC 9.3
-bazel test --config=gcc9 //...
-# Build all targets uing GCC 9.3
-bazel build --config=gcc9 //... 
 # Run all tests using GCC 11
 bazel test --config=gcc11 //...
 # Build all targets uing GCC 11
 bazel build --config=gcc11 //...
+# Run all tests using GCC 13
+bazel test --config=gcc13 //...
+# Build all targets uing GCC 13
+bazel build --config=gcc13 //...
 # Run all tests using Clang 14
 bazel test --config=clang14 //...
 # Build all targets uing Clang 14
@@ -107,7 +107,7 @@ bazel build --config=clang14 //...
 There is a Bazel plug-in for CLion.
 It can be downloaded from [here](https://plugins.jetbrains.com/author/4bb31785-ad06-4671-8e26-266aadc184bd).
 
-You can use the following `.bazelproject` file:
+You can use the following `.bazelproject` file, e.g.:
 
 ```yaml
 directories:
@@ -122,7 +122,7 @@ additional_languages:
   python
 
 build_flags:
-  --config=gcc11
+  --config=gcc13
 ```
 
 #### Code coverage
