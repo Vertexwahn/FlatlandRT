@@ -13,8 +13,8 @@
 # Bazel 8 migration
 #-------------------------------------------------------------------------------------
 
-# common --enable_workspace # Todo: does break Qt build -> Migrate rules_qt first to Bazel 8
-# common --incompatible_disallow_empty_glob=false  # TODO: Get rid of this - Set empty globs allowed policy explicitly where needed
+#common --enable_workspace # Todo: breaks running Qt applications -> Migrate rules_qt first to Bazel 8
+#common --incompatible_disallow_empty_glob=false  # TODO: Get rid of this - Set empty globs allowed policy explicitly where needed
 
 #-------------------------------------------------------------------------------------
 # Bzlmod
@@ -29,6 +29,8 @@ common --registry=https://bcr.bazel.build
 #-------------------------------------------------------------------------------------
 # C++ compiler settings
 #-------------------------------------------------------------------------------------
+
+build --@boost.asio//:ssl=boringssl
 
 # macOS (e.g. Clang 14.0.0)
 build:macos --cxxopt=-std=c++2b  # see https://clang.llvm.org/cxx_status.html
@@ -56,19 +58,6 @@ build:clang14_macos --define compiler=clang14_macos
 
 # Todo: Add apple_debug config
 # https://github.com/RobotLocomotion/drake/search?q=apple_debug
-
-# GCC 9.3
-build:gcc9 --cxxopt=-std=c++2a
-build:gcc9 --cxxopt=-Wall
-build:gcc9 --define compiler=gcc9
-build:gcc9 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
-#build:gcc9 --cxxopt=-Werror # blocked by googletest
-##build:gcc9 --cxxopt=-Wextra
-
-build:remote_gcc9 --cxxopt=-Wall
-build:remote_gcc9 --cxxopt=-Werror
-build:remote_gcc9 --define compiler=remote_gcc9
-##build:remote_gcc9 --cxxopt=-Wextra
 
 # GCC 11.4
 #build:gcc11 --cxxopt=-std=c++23 # blocked by emsdk
@@ -107,24 +96,15 @@ build:clang14 --features=-libtool
 build:clang14 --cxxopt=-mwaitpkg
 build:clang14 --define compiler=clang14
 
-# Clang 16.0.0 (config is used on Ubuntu)
+# Clang 19 (config is used on Ubuntu)
 build:clang19 --cxxopt=-std=c++20
-#build:clang19 --cxxopt=-mavx
-#build:clang19 --cxxopt=-mavx2
-#build:clang19 --cxxopt=-msse4.2
-#build:clang19 --cxxopt=-Werror
+
 build:clang19 --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
 # Tell Bazel to pass the right flags for llvm-ar, not libtool. Only needed if you are building on darwin.
 # See https://github.com/bazelbuild/bazel/blob/5c75d0acec21459bbb13520817e3806e1507e907/tools/cpp/unix_cc_toolchain_config.bzl#L1000-L1024
 build:clang19 --features=-libtool
 build:clang19 --cxxopt=-mwaitpkg
 build:clang19 --define compiler=clang19
-
-# MinGW
-build:mingw --cxxopt=-std=c++2a
-#build:mingw --cxxopt=-Wall
-#build:mingw --cxxopt=-Werror
-#build:mingw --cxxopt=-Wextra
 
 # Visual Studio 2019
 #build:vs2019 --copt=-DNOGDI
@@ -177,5 +157,8 @@ build:iwyu --output_groups=report
 build:iwyu --build_tag_filters=-no-iwyu # To include everything except the rules tagged with "no-iwyu"
 build:iwyu --@bazel_iwyu//:iwyu_opts=--verbose=3,--no_fwd_decls,--cxx17ns,--max_line_length=127
 
-try-import %workspace%/.bazelrc.remote_cache
-try-import %workspace%/.bazelrc.build_meta
+# Emscripten
+build:emscripten --features=exceptions
+
+try-import %workspace%/bazel/bazelrc/.bazelrc.remote_cache
+try-import %workspace%/bazel/bazelrc/.bazelrc.build_meta

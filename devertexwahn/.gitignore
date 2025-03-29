@@ -2,3 +2,6 @@
 # based on the name of the directory bazel is cloned into.
 /bazel-*
 MODULE.bazel.lock
+
+# cppcheck
+/cppcheck-build-dir
