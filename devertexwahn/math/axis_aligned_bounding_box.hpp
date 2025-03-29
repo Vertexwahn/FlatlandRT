@@ -2,7 +2,7 @@
  *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  *
- *  This source file contains source code copied from pbrt-v3
+ *  This source file contains source code copied from pbrt-v4
  *  SPDX-FileCopyrightText: 1998-2016 Matt Pharr, Greg Humphreys, and Wenzel Jakob.
  *  SPDX-License-Identifier: BSD-2-Clause
  */
