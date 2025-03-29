@@ -1,6 +1,14 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-License-Identifier:  Apache-2.0
+ *
+ *  This source file contains source code copied from pbrt-v4 (https://github.com/mmp/pbrt-v4)
+ *  A copy of the original license can be found [here](/third_party/image_synthesis/pvrt-v4/LICENSE.txt).
+ *  SPDX-FileCopyrightText: 1998-2020 Matt Pharr, Greg Humphreys, and Wenzel Jakob.
  *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  SPDX-FileCopyrightText: Copyright (c) 2023, LuisaGroup
+ *  SPDX-License-Identifier: BSD-3-Clause
  */
 
 #pragma once
@@ -15,14 +23,55 @@
 #include <bit>
 #include <cassert>
 #include <cmath>
-
-#if BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(10,0,0) // GCC9 does not support #include <numbers>
-// do nothing...
-#else
 #include <numbers>
-#endif
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
+
+using std::lerp;
+using std::clamp;
+
+// the following function was copied from pbrt-v4 and slightly modified
+template <typename T, typename U, typename V>
+inline constexpr T PbrtClamp(T val, U low, V high) {
+    if (val < low)
+        return T(low);
+    else if (val > high)
+        return T(high);
+    else
+        return val;
+}
+
+// the following function was copied from pbrt-v4 and slightly modified
+template <typename Predicate>
+inline size_t FindInterval(size_t sz, const Predicate &pred) {
+    using ssize_t = std::make_signed_t<size_t>;
+    ssize_t size = (ssize_t)sz - 2, first = 1;
+    while (size > 0) {
+        // Evaluate predicate at midpoint and update _first_ and _size_
+        size_t half = (size_t)size >> 1, middle = first + half;
+        bool predResult = pred(middle);
+        first = predResult ? middle + 1 : first;
+        size = predResult ? size - (half + 1) : half;
+    }
+    return (size_t)PbrtClamp((ssize_t)first - 1, 0, sz - 2);
+}
+
+// the following function was copied from pbrt-v4 and slightly modified
+template <typename ScalarType>
+inline constexpr ScalarType sqr(ScalarType value) {
+    return value * value;
+}
+
+// TODO: Remove this in favour of std::clamp
+template <typename T, typename U, typename V>
+inline constexpr T clamp(T val, U low, V high) {
+    if (val < low)
+        return T(low);
+    else if (val > high)
+        return T(high);
+    else
+        return val;
+}
 
 template <typename ScalarType>
 ScalarType degree_to_radian(const ScalarType value) {
@@ -115,7 +164,9 @@ max(const T &a, const T &b, const Args &... args) {
  */
 template<typename T, std::enable_if_t<std::is_unsigned_v<T> && (sizeof(T) == 4u || sizeof(T) == 8u), int> = 0>
 [[nodiscard]] constexpr auto next_pow2(T v) noexcept {
-#if BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(10,0,0) // GCC9.4 has __cpp_lib_int_pow2 defined, but has no std::bit_ceil function
+#ifdef __cpp_lib_int_pow2
+    return std::bit_ceil(v);
+#else
     v--;
     v |= v >> 1u;
     v |= v >> 2u;
@@ -124,19 +175,6 @@ template<typename T, std::enable_if_t<std::is_unsigned_v<T> && (sizeof(T) == 4u 
     v |= v >> 16u;
     if constexpr (sizeof(T) == 8u) { v |= v >> 32u; }
     return v + 1u;
-#else
-    #ifdef __cpp_lib_int_pow2
-            return std::bit_ceil(v);
-    #else
-        v--;
-        v |= v >> 1u;
-        v |= v >> 2u;
-        v |= v >> 4u;
-        v |= v >> 8u;
-        v |= v >> 16u;
-        if constexpr (sizeof(T) == 8u) { v |= v >> 32u; }
-        return v + 1u;
-    #endif
 #endif
 }
 

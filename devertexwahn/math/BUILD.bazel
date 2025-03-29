@@ -1,13 +1,14 @@
 """
-    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
-package(default_visibility = ["//visibility:public"])
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
     name = "axis_aligned_bounding_box",
     hdrs = ["axis_aligned_bounding_box.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":point",
         ":vector",
@@ -30,16 +31,16 @@ cc_test(
 cc_library(
     name = "constants",
     srcs = ["constants.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
-        #"@boost//:predef",
-        "@boost.predef",
     ],
 )
 
 cc_library(
     name = "frame",
     hdrs = ["frame.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":normal",
         ":vector",
@@ -64,6 +65,7 @@ cc_library(
         "geometry.inc",
     ],
     hdrs = ["geometry.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":point",
         #"@boost//:algorithm",
@@ -91,6 +93,7 @@ cc_test(
 cc_library(
     name = "intersection",
     hdrs = ["intersection.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":normal",
         ":point",
@@ -113,6 +116,7 @@ cc_test(
 cc_library(
     name = "matrix",
     hdrs = ["matrix.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "@eigen",
@@ -134,6 +138,7 @@ cc_test(
 cc_library(
     name = "normal",
     hdrs = ["normal.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "@eigen",
@@ -155,6 +160,7 @@ cc_test(
 cc_library(
     name = "point",
     hdrs = ["point.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "@eigen",
@@ -176,6 +182,7 @@ cc_test(
 cc_library(
     name = "quaternion",
     hdrs = ["quaternion.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "@eigen",
@@ -196,6 +203,7 @@ cc_library(
     hdrs = [
         "ray.hpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":point",
         ":vector",
@@ -218,6 +226,7 @@ cc_library(
     name = "refract",
     srcs = ["refract.cpp"],
     hdrs = ["refract.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":normal",
         ":vector",
@@ -241,6 +250,7 @@ cc_test(
 cc_library(
     name = "sampling",
     hdrs = ["sampling.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "//math:constants",
@@ -267,6 +277,7 @@ cc_test(
 cc_library(
     name = "tensor",
     hdrs = ["tensor.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "@xtensor",
@@ -286,6 +297,7 @@ cc_test(
 cc_library(
     name = "transform",
     hdrs = ["transform.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":matrix",
         ":normal",
@@ -311,6 +323,7 @@ cc_test(
 cc_library(
     name = "util",
     hdrs = ["util.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         #"@boost//:predef",
@@ -334,6 +347,7 @@ cc_test(
 cc_library(
     name = "vector",
     hdrs = ["vector.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "@eigen",
