@@ -1,15 +1,13 @@
 """
-    SPDX-FileCopyrightText: Copyright 2024 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2024-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
+
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 cc_binary(
     name = "compiler_feature_dump",
     srcs = [
         "main.cpp",
-    ],
-    deps = [
-        "@boost.predef//:boost.predef",
-        "@fmt",
     ],
 )
