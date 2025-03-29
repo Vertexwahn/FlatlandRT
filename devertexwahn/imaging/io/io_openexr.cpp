@@ -93,7 +93,7 @@ Image3f load_image_openexr(std::string_view filename) {
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            Color3f color{rPixels[y][x], gPixels[y][x], bPixels[y][x]};
+            ColorRGB3f color{rPixels[y][x], gPixels[y][x], bPixels[y][x]};
             img.set_pixel(x, y, color);
         }
     }

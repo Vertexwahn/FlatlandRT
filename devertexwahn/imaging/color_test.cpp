@@ -10,7 +10,7 @@
 using namespace de_vertexwahn;
 
 TEST(Color3f, Color3f_ctor) {
-    Color3f c{1.f, 2.f, 3.f};
+    ColorRGB3f c{1.f, 2.f, 3.f};
 
     EXPECT_THAT(c.red(), 1.f);
     EXPECT_THAT(c.green(), 2.f);
@@ -18,7 +18,7 @@ TEST(Color3f, Color3f_ctor) {
 }
 
 TEST(Color3f, Color3f_data) {
-    Color3f c{1.f, 2.f, 3.f};
+    ColorRGB3f c{1.f, 2.f, 3.f};
 
     EXPECT_THAT(c.data()[0], 1.f);
     EXPECT_THAT(c.data()[1], 2.f);
@@ -26,7 +26,7 @@ TEST(Color3f, Color3f_data) {
 }
 
 TEST(Color3f, GivenSingleColor_WhenComparedToItself_ThenEqual) {
-    Color3f c{1.f, 2.f, 3.f};
+    ColorRGB3f c{1.f, 2.f, 3.f};
 
     bool equal = (c == c);
 
@@ -34,8 +34,8 @@ TEST(Color3f, GivenSingleColor_WhenComparedToItself_ThenEqual) {
 }
 
 TEST(Color3f, GivenIdenticalColors_WhenCompared_ThenEqual) {
-    Color3f c1{1.f, 2.f, 3.f};
-    Color3f c2{1.f, 2.f, 3.f};
+    ColorRGB3f c1{1.f, 2.f, 3.f};
+    ColorRGB3f c2{1.f, 2.f, 3.f};
 
     bool equal = (c1 == c2);
 
@@ -43,8 +43,8 @@ TEST(Color3f, GivenIdenticalColors_WhenCompared_ThenEqual) {
 }
 
 TEST(Color3f, GivenDifferentColors_WhenCompared_ThenUnEqual) {
-    Color3f c1{1.f, 2.f, 3.f};
-    Color3f c2{3.f, 2.f, 1.f};
+    ColorRGB3f c1{1.f, 2.f, 3.f};
+    ColorRGB3f c2{3.f, 2.f, 1.f};
 
     bool unequal = !(c1 == c2);
 
@@ -52,8 +52,8 @@ TEST(Color3f, GivenDifferentColors_WhenCompared_ThenUnEqual) {
 }
 
 TEST(Color3f, assignment) {
-    Color3f c1{1.f, 2.f, 3.f};
-    Color3f c2;
+    ColorRGB3f c1{1.f, 2.f, 3.f};
+    ColorRGB3f c2;
 
     c2 = c1;
 
@@ -63,7 +63,7 @@ TEST(Color3f, assignment) {
 }
 
 TEST(Color3f, ostream) {
-    Color3f c{1.f, 2.f, 3.f};
+    ColorRGB3f c{1.f, 2.f, 3.f};
     std::stringstream ss;
     ss << c;
 
@@ -86,13 +86,13 @@ TEST(Color3f, self_assignment) {
 */
 
 TEST(Color3f, self_getSize) {
-    Color3f c;
+    ColorRGB3f c;
 
     EXPECT_THAT(c.size(), 3u);
 }
 
 TEST(Color3f, clamp) {
-    Color3f c1{2.0f, -1.0f, 1.0f};
+    ColorRGB3f c1{2.0f, -1.0f, 1.0f};
     c1.clamp();
 
     EXPECT_THAT(c1.red(), 1.0f);
@@ -101,23 +101,23 @@ TEST(Color3f, clamp) {
 }
 
 TEST(Color3f, hasnans) {
-    Color3f a{0.f, 0.f, 0.f};
-    Color3f b{0.f, NAN, 0.f};
+    ColorRGB3f a{0.f, 0.f, 0.f};
+    ColorRGB3f b{0.f, NAN, 0.f};
     EXPECT_THAT(a.has_nans(), false);
     EXPECT_THAT(b.has_nans(), true);
 }
 
 TEST(Color3f, multiply) {
-    Color3f a{.5f};
-    Color3f b{.5f};
+    ColorRGB3f a{.5f};
+    ColorRGB3f b{.5f};
 
-    Color3f c = a.cwiseProduct(b);
+    ColorRGB3f c = a.cwiseProduct(b);
 
     EXPECT_THAT(c.red(), 0.25f);
     EXPECT_THAT(c.green(), 0.25f);
     EXPECT_THAT(c.blue(), 0.25f);
 
-    Color3f d = a * b;
+    ColorRGB3f d = a * b;
 
     EXPECT_THAT(d.red(), 0.25f);
     EXPECT_THAT(d.green(), 0.25f);
@@ -125,18 +125,18 @@ TEST(Color3f, multiply) {
 }
 
 TEST(Color3f, to_string) {
-    Color3f c{.5f, .6f, .7f};
+    ColorRGB3f c{.5f, .6f, .7f};
     EXPECT_THAT(c.to_string(), "0.5, 0.6, 0.7");
 }
 
 TEST(Color3f, hot_to_cold_color_ramp) {
-    Color3f cold = hot_to_cold_color_ramp(.0f, .0f, 1.f);
+    ColorRGB3f cold = hot_to_cold_color_ramp(.0f, .0f, 1.f);
 
     EXPECT_THAT(cold.red(), 0.0f);
     EXPECT_THAT(cold.green(), 0.0f);
     EXPECT_THAT(cold.blue(), 1.0f);
 
-    Color3f hot = hot_to_cold_color_ramp(1.f, .0f, 1.f);
+    ColorRGB3f hot = hot_to_cold_color_ramp(1.f, .0f, 1.f);
 
     EXPECT_THAT(hot.red(), 1.0f);
     EXPECT_THAT(hot.green(), 0.0f);

@@ -10,7 +10,7 @@
 using namespace de_vertexwahn;
 
 TEST(fmtFormatter, Color3f) {
-    Color3f c{1.f, 0.f, 1.f};
+    ColorRGB3f c{1.f, 0.f, 1.f};
     std::string str = fmt::format("{}", c);
     EXPECT_THAT(str, "(1, 0, 1)");
 }

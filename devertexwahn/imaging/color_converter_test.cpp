@@ -11,17 +11,17 @@
 using namespace de_vertexwahn;
 
 TEST(ColorConverter, convert_Color4f_to_Color4b) {
-    Color4f color{1.f, 0.f, 0.f, 1.f};
+    ColorRGBA4f color{1.f, 0.f, 0.f, 1.f};
 
-    Color4b converted_color = ColorConverter::convertTo<Color4b>(color);
+    ColorRGBA4b converted_color = ColorConverter::convertTo<ColorRGBA4b>(color);
 
-    EXPECT_THAT(converted_color, (Color4b{255, 0, 0, 255}));
+    EXPECT_THAT(converted_color, (ColorRGBA4b{255, 0, 0, 255}));
 }
 
 TEST(ColorConverter, convert_Color4b_to_Color3f) {
-    Color4b color{255, 0, 0, 255};
+    ColorRGBA4b color{255, 0, 0, 255};
 
-    Color3f converted_color = ColorConverter::convertTo<Color3f>(color);
+    ColorRGB3f converted_color = ColorConverter::convertTo<ColorRGB3f>(color);
 
-    EXPECT_THAT(converted_color, (Color3f{1.f, 0, 0}));
+    EXPECT_THAT(converted_color, (ColorRGB3f{1.f, 0, 0}));
 }

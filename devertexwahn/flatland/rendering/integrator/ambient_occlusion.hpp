@@ -17,7 +17,7 @@ template<typename ScalarType, unsigned int Dimension>
 class AmbientOcclusion : public IntegratorType<ScalarType, Dimension> {
 public:
     using Base = IntegratorType<ScalarType, Dimension>;
-    using Color = ColorType<ScalarType, 3>;
+    using Color = ColorTypeRGB<ScalarType, 3>;
     using Scalar = ScalarType;
     using Vector = VectorType<ScalarType, Dimension>;
     using Point = PointType<ScalarType, Dimension>;
@@ -26,7 +26,7 @@ public:
     using Sampler = SamplerType<ScalarType>;
 
     AmbientOcclusion(const PropertySet& ps) : IntegratorType<ScalarType, Dimension>(ps) {
-        background_color_ = ps.get_property<Color3f>("background_color", Color3f{Scalar{0.0}, Scalar{0.0}, Scalar{0.0}});
+        background_color_ = ps.get_property<ColorRGB3f>("background_color", ColorRGB3f{Scalar{0.0}, Scalar{0.0}, Scalar{0.0}});
         use_random_sampling_ = ps.get_property<bool>("random_sampling", false);
         sample_count_ = ps.get_property<int>("sample_count", 10);
     }

@@ -27,7 +27,7 @@ ReferenceCounted<Scene2f> load_scene2f(std::string_view filename);
 
 Point2f convert_csv_to_point2f(const std::string& csv);
 Point3f convert_csv_to_point3f(const std::string& csv);
-Color3f convert_csv_to_color3f(const std::string& csv);
+ColorRGB3f convert_csv_to_color3f(const std::string& csv);
 Vector3f convert_csv_to_vector3f(const std::string& csv);
 
 template <unsigned int Dimension>

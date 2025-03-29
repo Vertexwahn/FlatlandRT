@@ -19,7 +19,7 @@ public:
 
     virtual ~PathSpecularTransmission();
 
-    Color3f trace(const Scene2f *scene, Sampler *sampler, Ray2f &ray, const int depth) const override;
+    ColorRGB3f trace(const Scene2f *scene, Sampler *sampler, Ray2f &ray, const int depth) const override;
 
 private:
     int max_depth{};

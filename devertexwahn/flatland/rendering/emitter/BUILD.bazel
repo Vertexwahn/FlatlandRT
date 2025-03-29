@@ -1,0 +1,29 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+cc_library(
+    name = "emitter",
+    hdrs = ["emitter.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core:namespace",
+        "//core:object",
+        "//core:property_set",
+        "//imaging:color",
+        "//math:ray",
+    ],
+)
+
+cc_test(
+    name = "emitter_test",
+    size = "small",
+    srcs = ["emitter_test.cpp"],
+    deps = [
+        ":emitter",
+        "@googletest//:gtest_main",
+    ],
+)

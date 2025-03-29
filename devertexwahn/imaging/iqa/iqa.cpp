@@ -12,8 +12,8 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 bool are_equal(const Image3f &a, const Image3f &b) {
     for (int y = 0; y < a.height(); ++y) {
         for (int x = 0; x < a.width(); ++x) {
-            Color3f c = a.get_pixel(x, y);
-            Color3f ref_c = b.get_pixel(x, y);
+            ColorRGB3f c = a.get_pixel(x, y);
+            ColorRGB3f ref_c = b.get_pixel(x, y);
 
             if (c != ref_c) {
                 return false;
@@ -28,8 +28,8 @@ bool are_equal(const Image3f &a, const Image3f &b) {
 bool are_equal(const Image3b &a, const Image3b &b) {
     for (int y = 0; y < a.height(); ++y) {
         for (int x = 0; x < a.width(); ++x) {
-            Color3b c = a.get_pixel(x, y);
-            Color3b ref_c = b.get_pixel(x, y);
+            ColorRGB3b c = a.get_pixel(x, y);
+            ColorRGB3b ref_c = b.get_pixel(x, y);
 
             if (c != ref_c) {
                 return false;

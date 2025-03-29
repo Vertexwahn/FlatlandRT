@@ -13,10 +13,10 @@ using namespace de_vertexwahn;
 
 TEST(store_pfm, expect_valid_header) {
     Image3f generated_image{2, 2};
-    generated_image.set_pixel(0, 0, Color3f{1.f, 0.f, 0.f});
-    generated_image.set_pixel(1, 0, Color3f{0.f, 1.f, 0.f});
-    generated_image.set_pixel(0, 1, Color3f{0.f, 0.f, 1.f});
-    generated_image.set_pixel(1, 1, Color3f{1.f, 1.f, 1.f});
+    generated_image.set_pixel(0, 0, ColorRGB3f{1.f, 0.f, 0.f});
+    generated_image.set_pixel(1, 0, ColorRGB3f{0.f, 1.f, 0.f});
+    generated_image.set_pixel(0, 1, ColorRGB3f{0.f, 0.f, 1.f});
+    generated_image.set_pixel(1, 1, ColorRGB3f{1.f, 1.f, 1.f});
 
     std::string filename = "test.pfm";
 
@@ -32,7 +32,7 @@ TEST(store_pfm, expect_valid_header) {
 
 TEST(round_trip_pfm, one_pixel) {
     Image3f generated_image{1, 1};
-    generated_image.set_pixel(0, 0, Color3f{1.f, 0.f, 0.f});
+    generated_image.set_pixel(0, 0, ColorRGB3f{1.f, 0.f, 0.f});
     store_pfm("test.pfm", generated_image);
 
     auto loaded_image = load_image_pfm("test.pfm");
@@ -47,19 +47,19 @@ TEST(round_trip_pfm, four_pixel) {
     EXPECT_THAT(generated_image.width(), 2);
     EXPECT_THAT(generated_image.height(), 2);
 
-    generated_image.set_pixel(0, 0, Color3f{1.f, 0.f, 0.f});
-    generated_image.set_pixel(1, 0, Color3f{0.f, 1.f, 0.f});
-    generated_image.set_pixel(0, 1, Color3f{0.f, 0.f, 1.f});
-    generated_image.set_pixel(1, 1, Color3f{1.f, 1.f, 1.f});
+    generated_image.set_pixel(0, 0, ColorRGB3f{1.f, 0.f, 0.f});
+    generated_image.set_pixel(1, 0, ColorRGB3f{0.f, 1.f, 0.f});
+    generated_image.set_pixel(0, 1, ColorRGB3f{0.f, 0.f, 1.f});
+    generated_image.set_pixel(1, 1, ColorRGB3f{1.f, 1.f, 1.f});
 
     store_pfm("test.pfm", generated_image);
 
     auto loaded_image = load_image_pfm("test.pfm");
 
-    EXPECT_THAT(loaded_image->get_pixel(0, 0), (Color3f{1.f, 0.f, 0.f}));
-    EXPECT_THAT(loaded_image->get_pixel(1, 0), (Color3f{0.f, 1.f, 0.f}));
-    EXPECT_THAT(loaded_image->get_pixel(0, 1), (Color3f{0.f, 0.f, 1.f}));
-    EXPECT_THAT(loaded_image->get_pixel(1, 1), (Color3f{1.f, 1.f, 1.f}));
+    EXPECT_THAT(loaded_image->get_pixel(0, 0), (ColorRGB3f{1.f, 0.f, 0.f}));
+    EXPECT_THAT(loaded_image->get_pixel(1, 0), (ColorRGB3f{0.f, 1.f, 0.f}));
+    EXPECT_THAT(loaded_image->get_pixel(0, 1), (ColorRGB3f{0.f, 0.f, 1.f}));
+    EXPECT_THAT(loaded_image->get_pixel(1, 1), (ColorRGB3f{1.f, 1.f, 1.f}));
 }
 
 TEST(load_image_pfm, given_PFM_with_no_content) {
@@ -193,7 +193,7 @@ TEST(load_image_pfm, big_endian) {
         file << "PF" << std::endl;
         file << 1 << " " << 1 << std::endl;
         file << "1.0" << std::endl;
-        Color3f color{1.f, .5f, .1f};
+        ColorRGB3f color{1.f, .5f, .1f};
         // this does not work - only on a big endian machine
         // todo: fix this in a way that bytes are written in big endian style
         file.write((char*) &color, sizeof(color));

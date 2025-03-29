@@ -5,7 +5,7 @@
 
 #include "core/object_factory.hpp"
 #include "flatland/rendering/integrator/integrator.hpp"
-#include "flatland/rendering/scene/shape/disk.hpp"
+#include "flatland/rendering/shape/disk.hpp"
 
 using namespace de_vertexwahn;
 
@@ -25,7 +25,7 @@ class MockIntegrator : public IntegratorType<float, 2> {
 public:
     explicit MockIntegrator(const PropertySet &ps) : IntegratorType<float, 2>(ps) {}
 
-    MOCK_METHOD(Color3f, trace, (const Scene *scene, Sampler *sampler, Ray &ray, const int depth), (const, override));
+    MOCK_METHOD(ColorRGB3f, trace, (const Scene *scene, Sampler *sampler, Ray &ray, const int depth), (const, override));
 };
 
 // This test has only the job to increase the line test coverage to 100%
@@ -41,7 +41,7 @@ TEST(MockIntegrator, trace) {
 
     EXPECT_CALL(*integrator.get(), trace(_, _, _, _))
             .Times(1)
-            .WillOnce(Return(Color3f(1.0f, 1.0f, 1.0f)));
+            .WillOnce(Return(ColorRGB3f(1.0f, 1.0f, 1.0f)));
 
     Ray2f ray{{0.f, 0.f}, {1.f, 0.f}, 0.f, 1.f};
     integrator->trace(nullptr, nullptr, ray, 1);

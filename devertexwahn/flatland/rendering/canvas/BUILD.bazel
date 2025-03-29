@@ -5,20 +5,19 @@
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "label",
     hdrs = ["label.hpp"],
-    deps = [],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
     name = "svg_canvas",
     hdrs = ["svg_canvas.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":label",
-        "//flatland/rendering/scene/shape",
+        "//flatland/rendering/shape",
         "//math:axis_aligned_bounding_box",
     ],
 )

@@ -32,7 +32,7 @@ using VariantType = std::variant<
         double,
         char,
         std::string,
-        Color3f,
+        ColorRGB3f,
         ReferenceCounted<Object>,
         Point2f,
         Point3f,

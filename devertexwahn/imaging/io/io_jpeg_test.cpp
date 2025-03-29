@@ -46,7 +46,7 @@ TEST(Image, store_jpeg) {
 
     for(int x = 0; x < image.width(); ++x) {
         for(int y = 0; y < image.height(); ++y) {
-            image.set_pixel(x, y, Color4b{255, 0, 0, 255});
+            image.set_pixel(x, y, ColorRGBA4b{255, 0, 0, 255});
         }
     }
 
@@ -63,7 +63,7 @@ TEST(Image, store_jpeg2) {
 
     for(int x = 0; x < image.width(); ++x) {
         for(int y = 0; y < image.height(); ++y) {
-            image.set_pixel(x, y, Color3f{1.f, 0.f, 0.f});
+            image.set_pixel(x, y, ColorRGB3f{1.f, 0.f, 0.f});
         }
     }
 

@@ -37,7 +37,7 @@ Image3f load_image_jpeg(const char* filename) {
     while (cinfo.output_scanline < cinfo.output_height) {
         (void) jpeg_read_scanlines(&cinfo, buffer, 1);
         for(int x = 0; x < cinfo.output_width; ++x) {
-            image.set_pixel(x, cinfo.output_scanline - 1, Color3f(buffer[0][x * 3] / 255.f, buffer[0][x * 3 + 1] / 255.f, buffer[0][x * 3 + 2] / 255.f));
+            image.set_pixel(x, cinfo.output_scanline - 1, ColorRGB3f(buffer[0][x * 3] / 255.f, buffer[0][x * 3 + 1] / 255.f, buffer[0][x * 3 + 2] / 255.f));
         }
     }
 

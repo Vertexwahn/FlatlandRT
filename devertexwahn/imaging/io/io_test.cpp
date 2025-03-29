@@ -73,7 +73,7 @@ TEST(Image, GivenTestImage3f_WhenStoreImageAsPng_ExpectCorectColorValues) {
 
     for (int y = 0; y < image.height(); ++y) {
         for (int x = 0; x < image.width(); ++x) {
-            image.set_pixel(x, y, Color3f{1.f, 0.f, 0.f});
+            image.set_pixel(x, y, ColorRGB3f{1.f, 0.f, 0.f});
         }
     }
 
@@ -88,9 +88,9 @@ TEST(Image, GivenTestImage3f_WhenStoreImageAsPng_ExpectCorectColorValues) {
 
     for (int y = 0; y < image.height(); ++y) {
         for (int x = 0; x < image.width(); ++x) {
-            Color3f c = image.get_pixel(x, y);
-            Color3f ref_c = ref_image.get_pixel(x, y);
-            EXPECT_THAT(ref_c, (Color3f{1.f, 0.f, 0.f}));
+            ColorRGB3f c = image.get_pixel(x, y);
+            ColorRGB3f ref_c = ref_image.get_pixel(x, y);
+            EXPECT_THAT(ref_c, (ColorRGB3f{1.f, 0.f, 0.f}));
             EXPECT_THAT(ref_c, c);
         }
     }
@@ -102,7 +102,7 @@ TEST(Image3b, GivenTestImage3f_WhenStoreImageAsPng_ExpectCorectColorValues) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            image->set_pixel(x, y, Color3b{255, 128, 0});
+            image->set_pixel(x, y, ColorRGB3b{255, 128, 0});
         }
     }
 
@@ -117,9 +117,9 @@ TEST(Image3b, GivenTestImage3f_WhenStoreImageAsPng_ExpectCorectColorValues) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            Color3b c = image->get_pixel(x, y);
-            Color3b ref_c = ref_image.get_pixel(x, y);
-            EXPECT_THAT(ref_c, (Color3b{255, 128, 0}));
+            ColorRGB3b c = image->get_pixel(x, y);
+            ColorRGB3b ref_c = ref_image.get_pixel(x, y);
+            EXPECT_THAT(ref_c, (ColorRGB3b{255, 128, 0}));
             EXPECT_THAT(ref_c, c);
         }
     }
@@ -171,7 +171,7 @@ TEST(Image, load_image_asImage4f) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            image->set_pixel(x, y, Color3b{255, 128, 0});
+            image->set_pixel(x, y, ColorRGB3b{255, 128, 0});
         }
     }
 
@@ -179,5 +179,5 @@ TEST(Image, load_image_asImage4f) {
     store_image("test.png", image);
 
     auto img = load_image_asImage4f("test.png");
-    EXPECT_THAT(img.get_pixel(0,0), (Color4f{1.f, 0.501960814f, 0.f, 1.f}));
+    EXPECT_THAT(img.get_pixel(0,0), (ColorRGBA4f{1.f, 0.501960814f, 0.f, 1.f}));
 }

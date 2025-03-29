@@ -33,8 +33,8 @@ TEST(BxDF, WhenADefaultInitalized_ThenDefaultMaterialValues) {
     bsdf_sample.wo = Vector2f{0.f, 1.f};
     MediumEvent2f me{};
 
-    EXPECT_THAT(bsdf.sample(bsdf_sample, Point2f{0.f, 0.f}), Color3f(0.f));
-    EXPECT_THAT(bsdf.evaluate(bsdf_sample), Color3f{0.f});
+    EXPECT_THAT(bsdf.sample(bsdf_sample, Point2f{0.f, 0.f}), ColorRGB3f(0.f));
+    EXPECT_THAT(bsdf.evaluate(bsdf_sample), ColorRGB3f{0.f});
     //EXPECT_THAT(bsdf.refraction_index(), 1.f);
     //EXPECT_THAT(bsdf.interface_interaction_type(), InterfaceInteraction::SpecularTransmission);
 }

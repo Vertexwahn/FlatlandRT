@@ -31,11 +31,11 @@ TEST(AmbientOcclusion2, TestBackgroundColor) {
     IndependentSampler sampler{ps_sampler};
 
     PropertySet ps;
-    ps.add_property("background_color", Color3f{1.f, .5f, .1f});
+    ps.add_property("background_color", ColorRGB3f{1.f, .5f, .1f});
 
     // Act
     AmbientOcclusion2f aoi{ps};
-    Color3f color = aoi.trace(&scene, &sampler, ray, 1);
+    ColorRGB3f color = aoi.trace(&scene, &sampler, ray, 1);
 
     // Assert
     EXPECT_THAT(color.red(), 1.f);
@@ -56,7 +56,7 @@ TEST(AmbientOcclusion2, AmbientOcclusion_render) {
 
     // Act
     auto ray = scene->sensor()->generate_ray(Point2f{0.f, 0.f});
-    Color3f color = integrator->trace(scene.get(), sampler.get(), ray, 5);
+    ColorRGB3f color = integrator->trace(scene.get(), sampler.get(), ray, 5);
 
     render(integrator.get(), canvas, scene.get());
 

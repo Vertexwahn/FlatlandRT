@@ -9,7 +9,7 @@
 #include "math/transform.hpp"
 #include "math/util.hpp"
 #include "math/sampling.hpp"
-#include "flatland/rendering/scene/shape/polygon.hpp"
+#include "flatland/rendering/shape/polygon.hpp"
 
 #include <iostream>
 
@@ -51,9 +51,9 @@ int main() {
     auto near_polygon = make_reference_counted<Polygon2f>(transform, &points2[0], point_count);
 
     PropertySet ps;
-    ps.add_property("stroke_color", Color3f(0.f, 0.682f, 0.937f));
+    ps.add_property("stroke_color", ColorRGB3f(0.f, 0.682f, 0.937f));
     ps.add_property("stroke_width", 3.f);
-    ps.add_property("fill_color", Color3f(1.f, 1.f, 1.f));
+    ps.add_property("fill_color", ColorRGB3f(1.f, 1.f, 1.f));
     ps.add_property("refraction_index", 1.f);
     ps.add_property("reflection_index", 0.f);
     auto material = make_reference_counted<SvgMaterial>(ps);

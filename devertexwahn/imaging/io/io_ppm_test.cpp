@@ -17,7 +17,7 @@ TEST(Image, storeLoadOpenPPM) {
 
     for (int y = 0; y < image.height(); ++y) {
         for (int x = 0; x < image.width(); ++x) {
-            image.set_pixel(x, y, Color4b{255, 128, 0, 255});
+            image.set_pixel(x, y, ColorRGBA4b{255, 128, 0, 255});
         }
     }
 

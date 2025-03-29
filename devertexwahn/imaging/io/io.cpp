@@ -43,8 +43,8 @@ ReferenceCounted<Image4b> convert_to_Image4b(const Image3b* image) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            Color3b c = image->get_pixel(x, y);
-            Color4b converted_color = ColorConverter::convertTo<Color4b>(c);
+            ColorRGB3b c = image->get_pixel(x, y);
+            ColorRGBA4b converted_color = ColorConverter::convertTo<ColorRGBA4b>(c);
             converted_image->set_pixel(x,y,converted_color);
         }
     }
@@ -124,8 +124,8 @@ ReferenceCounted<Image3b> convert_to_Image3b(const Image4b* image) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            Color4b c = image->get_pixel(x, y);
-            auto converted_color = ColorConverter::convertTo<Color3b>(c);
+            ColorRGBA4b c = image->get_pixel(x, y);
+            auto converted_color = ColorConverter::convertTo<ColorRGB3b>(c);
             converted_image->set_pixel(x,y,converted_color);
         }
     }
@@ -157,8 +157,8 @@ Image4f load_image_asImage4f(std::string_view filename) {
 
         for (int y = 0; y < image->height(); ++y) {
             for (int x = 0; x < image->width(); ++x) {
-                Color4b c = image->get_pixel(x, y);
-                auto converted_color = ColorConverter::convertTo<Color4f>(c);
+                ColorRGBA4b c = image->get_pixel(x, y);
+                auto converted_color = ColorConverter::convertTo<ColorRGBA4f>(c);
                 converted_image.set_pixel(x,y,converted_color);
             }
         }

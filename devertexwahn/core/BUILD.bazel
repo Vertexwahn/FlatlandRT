@@ -1,16 +1,15 @@
 """
-    SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "exception",
     srcs = ["exception.cpp"],
     hdrs = ["exception.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":namespace",
         "//core/stl:string",
@@ -23,6 +22,7 @@ cc_test(
     name = "exception_test",
     size = "small",
     srcs = ["exception_test.cpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":exception",
         "@googletest//:gtest_main",
@@ -34,6 +34,7 @@ cc_library(
     hdrs = [
         "intrin.hpp",
     ],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -44,6 +45,7 @@ cc_library(
     hdrs = [
         "logging.hpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         "@spdlog",
     ],
@@ -52,6 +54,7 @@ cc_library(
 cc_test(
     name = "logging_test",
     srcs = ["logging_test.cpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":logging",
         ":platform",
@@ -64,6 +67,7 @@ cc_test(
     name = "logging_test_env_info",
     srcs = ["logging_test_env.cpp"],
     env = {"DE_VERTEXWAHN_LOG_LEVEL": "info"},
+    visibility = ["//visibility:public"],
     deps = [
         ":logging",
         ":platform",
@@ -76,6 +80,7 @@ cc_test(
     name = "logging_test_env_warning",
     srcs = ["logging_test_env.cpp"],
     env = {"DE_VERTEXWAHN_LOG_LEVEL": "warning"},
+    visibility = ["//visibility:public"],
     deps = [
         ":logging",
         ":platform",
@@ -89,6 +94,7 @@ cc_library(
     hdrs = [
         "namespace.hpp",
     ],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -96,10 +102,10 @@ cc_library(
     hdrs = [
         "non_copyable.hpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":namespace",
         "@boost.core",
-        #"@boost//:core",
     ],
 )
 
@@ -111,6 +117,7 @@ cc_library(
     hdrs = [
         "object.hpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":namespace",
         ":non_copyable",
@@ -123,6 +130,7 @@ cc_test(
     srcs = [
         "object_test.cpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":object",
         "@googletest//:gtest_main",
@@ -137,6 +145,7 @@ cc_library(
     hdrs = [
         "object_factory.hpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":object",
         ":property_set",
@@ -150,10 +159,11 @@ cc_test(
     srcs = [
         "object_factory_test.cpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":object_factory",
         "//flatland/rendering/integrator",
-        "//flatland/rendering/scene/shape:disk",
+        "//flatland/rendering/shape:disk",
         "@googletest//:gtest_main",
     ],
 )
@@ -174,6 +184,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
+    visibility = ["//visibility:public"],
     deps = [
         ":logging",
         ":namespace",
@@ -194,6 +205,7 @@ cc_test(
         "@platforms//os:linux": ["-Wl,-rpath,bazel-bin"],
         "//conditions:default": [],
     }),
+    visibility = ["//visibility:public"],
     deps = [
         ":platform",
         "@googletest//:gtest_main",
@@ -203,6 +215,7 @@ cc_test(
 cc_library(
     name = "platform_test_library",
     srcs = ["platform_test_library.cpp"],
+    visibility = ["//visibility:public"],
     #linkopts = ["-ldl"],
     alwayslink = True,
 )
@@ -215,6 +228,7 @@ cc_library(
     hdrs = [
         "property_set.hpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "@fmt",
@@ -227,6 +241,7 @@ cc_test(
     srcs = [
         "property_set_test.cpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:property_set",
         "@googletest//:gtest_main",
@@ -248,6 +263,7 @@ cc_test(
     srcs = [
         "reference_counted_test.cpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:reference_counted",
         "@googletest//:gtest_main",
@@ -259,6 +275,7 @@ cc_library(
     hdrs = [
         "spin_mutex.hpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [":intrin"],
 )
 
@@ -280,8 +297,9 @@ cc_test(
     srcs = [
         "timer_test.cpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
-        "//core:timer",
+        ":timer",
         "@googletest//:gtest_main",
     ],
 )

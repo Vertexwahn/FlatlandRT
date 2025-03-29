@@ -19,23 +19,23 @@
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 template<typename ScalarType, unsigned int Dimension>
-struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
+struct ColorTypeRGB : public Eigen::Matrix<ScalarType, Dimension, 1> {
     using Base = Eigen::Matrix<ScalarType, Dimension, 1>;
     using Scalar = ScalarType;
 
-    ColorType() : Base() {}
+    ColorTypeRGB() : Base() {}
 
-    ColorType(const ScalarType red, const ScalarType green, const ScalarType blue) : Base(red, green, blue) {}
+    ColorTypeRGB(const ScalarType red, const ScalarType green, const ScalarType blue) : Base(red, green, blue) {}
 
-    ColorType(const ScalarType red, const ScalarType green, const ScalarType blue, const ScalarType alpha) : Base(
+    ColorTypeRGB(const ScalarType red, const ScalarType green, const ScalarType blue, const ScalarType alpha) : Base(
             red, green, blue, alpha) {}
 
-    explicit ColorType(const ScalarType value) {
+    explicit ColorTypeRGB(const ScalarType value) {
         *this = Base::Constant(value);
     }
 
     template<typename Derived>
-    ColorType(const Eigen::MatrixBase <Derived> &src) : Base(src) {
+    ColorTypeRGB(const Eigen::MatrixBase <Derived> &src) : Base(src) {
     }
 
     using Base::operator=;
@@ -80,11 +80,11 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
         return (*this)[3];
     }
 
-    const ColorType<Scalar,3> rgb() const {
-        return ColorType<Scalar,3>{red(), green(), blue()};
+    const ColorTypeRGB<Scalar,3> rgb() const {
+        return ColorTypeRGB<Scalar,3>{red(), green(), blue()};
     }
 
-    ColorType &clamp(const ScalarType min = ScalarType{0}, const ScalarType max = ScalarType{1}) {
+    ColorTypeRGB &clamp(const ScalarType min = ScalarType{0}, const ScalarType max = ScalarType{1}) {
         for (long int i = 0; i < Base::size(); ++i) {
             (*this)[i] = std::clamp((*this)[i], min, max);
         }
@@ -109,16 +109,16 @@ struct ColorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
 };
 
 template<typename ScalarType>
-struct ColorType<ScalarType, 1> : public Eigen::Matrix<ScalarType, 1, 1> {
+struct ColorTypeRGB<ScalarType, 1> : public Eigen::Matrix<ScalarType, 1, 1> {
     using Base = Eigen::Matrix<ScalarType, 1, 1>;
     using Scalar = ScalarType;
 
-    ColorType() : Base() {}
+    ColorTypeRGB() : Base() {}
 
-    explicit ColorType(const ScalarType grayvalue) : Base(grayvalue) {}
+    explicit ColorTypeRGB(const ScalarType grayvalue) : Base(grayvalue) {}
 
     template<typename Derived>
-    ColorType(const Eigen::MatrixBase <Derived> &src) : Base(src) {
+    ColorTypeRGB(const Eigen::MatrixBase <Derived> &src) : Base(src) {
     }
 
     using Base::operator=;
@@ -131,7 +131,7 @@ struct ColorType<ScalarType, 1> : public Eigen::Matrix<ScalarType, 1, 1> {
         return Base::x();
     }
 
-    ColorType &clamp(const ScalarType min = ScalarType{0}, const ScalarType max = ScalarType{1}) {
+    ColorTypeRGB &clamp(const ScalarType min = ScalarType{0}, const ScalarType max = ScalarType{1}) {
         for (long int i = 0; i < Base::size(); ++i) {
             (*this)[i] = std::clamp((*this)[i], min, max);
         }
@@ -156,9 +156,9 @@ struct ColorType<ScalarType, 1> : public Eigen::Matrix<ScalarType, 1, 1> {
 };
 
 template<typename ScalarType, unsigned int Dimension>
-inline ColorType<ScalarType, Dimension> operator*(const ColorType<ScalarType, Dimension>& lhs, const ColorType<ScalarType, Dimension>& rhs)
+inline ColorTypeRGB<ScalarType, Dimension> operator*(const ColorTypeRGB<ScalarType, Dimension>& lhs, const ColorTypeRGB<ScalarType, Dimension>& rhs)
 {
-    ColorType<ScalarType, Dimension> result;
+    ColorTypeRGB<ScalarType, Dimension> result;
 
     for (size_t i = 0; i < Dimension; ++i)
         result[i] = lhs[i] * rhs[i];
@@ -167,9 +167,9 @@ inline ColorType<ScalarType, Dimension> operator*(const ColorType<ScalarType, Di
 }
 
 template<typename ScalarType, unsigned int Dimension>
-inline ColorType<ScalarType, Dimension> operator*(const ColorType<ScalarType, Dimension>& lhs, const ScalarType rhs)
+inline ColorTypeRGB<ScalarType, Dimension> operator*(const ColorTypeRGB<ScalarType, Dimension>& lhs, const ScalarType rhs)
 {
-    ColorType<ScalarType, Dimension> result;
+    ColorTypeRGB<ScalarType, Dimension> result;
 
     for (size_t i = 0; i < Dimension; ++i)
         result[i] = lhs[i] * rhs;
@@ -178,35 +178,46 @@ inline ColorType<ScalarType, Dimension> operator*(const ColorType<ScalarType, Di
 }
 
 template<typename ScalarType>
-struct ColorConstants3 {
+struct ColorRGBConstants3 {
     using Scalar = ScalarType;
-    static constexpr ColorType<ScalarType, 3> Black{Scalar{0.0}, Scalar{0.0}, Scalar{0.0}};
-    static constexpr ColorType<ScalarType, 3> White{Scalar{1.0}, Scalar{1.0}, Scalar{1.0}};
+    static constexpr ColorTypeRGB<ScalarType, 3> Black{Scalar{0.0}, Scalar{0.0}, Scalar{0.0}};
+    static constexpr ColorTypeRGB<ScalarType, 3> White{Scalar{1.0}, Scalar{1.0}, Scalar{1.0}};
 };
 
-using ColorConstants3f = ColorConstants3<float>;
-using ColorConstants3d = ColorConstants3<double>;
+using ColorRGBConstants3f = ColorRGBConstants3<float>;
+using ColorRGBConstants3d = ColorRGBConstants3<double>;
 
 template<typename ScalarType>
-using Color1 = ColorType<ScalarType, 1>;
+using ColorGrayscale = ColorTypeRGB<ScalarType, 1>;
 template<typename ScalarType>
-using Color3 = ColorType<ScalarType, 3>;
+using ColorRGB = ColorTypeRGB<ScalarType, 3>;
 template<typename ScalarType>
-using Color4 = ColorType<ScalarType, 4>;
+using ColorRGBA = ColorTypeRGB<ScalarType, 4>;
 
-using Color1b = Color1<std::uint8_t>;
-using Color1f = Color1<float>;
-using Color1d = Color1<double>;
+using Color1b = ColorGrayscale<std::uint8_t>;
+using Color1f = ColorGrayscale<float>;
+using Color1d = ColorGrayscale<double>;
 
-using Color3b = Color3<std::uint8_t>;
-using Color3f = Color3<float>;
-using Color3d = Color3<double>;
+using ColorRGB3b = ColorRGB<std::uint8_t>;
+using ColorRGB3f = ColorRGB<float>;
+using ColorRGB3d = ColorRGB<double>;
 
-using Color4b = Color4<std::uint8_t>;
-using Color4f = Color4<float>;
-using Color4d = Color4<double>;
+using ColorRGBA4b = ColorRGBA<std::uint8_t>;
+using ColorRGBA4f = ColorRGBA<float>;
+using ColorRGBA4d = ColorRGBA<double>;
 
-Color3f hot_to_cold_color_ramp(float v, float vmin, float vmax); // Todo: Move this to color_ramp.h
+ColorRGB3f hot_to_cold_color_ramp(float v, float vmin, float vmax); // Todo: Move this to color_ramp.h
+
+template<typename ScalarType>
+struct ColorXYZ  : public Eigen::Matrix<ScalarType, 3, 1> {
+    using Base = Eigen::Matrix<ScalarType, 3, 1>;
+    using Scalar = ScalarType;
+
+    ColorXYZ() : Base() {}
+    ColorXYZ(const ScalarType x, const ScalarType y, const ScalarType z) : Base(x, y, z) {}
+};
+
+using ColorXYZ3f = ColorXYZ<float>;
 
 DE_VERTEXWAHN_END_NAMESPACE
 

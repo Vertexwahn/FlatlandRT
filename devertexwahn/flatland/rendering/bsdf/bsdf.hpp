@@ -8,7 +8,7 @@
 #define De_Vertexwahn_Flatland_Rendering_BSDF_11d72dcc_a416_4530_b706_b1e69711c5c5_h
 
 #include "flatland/rendering/property_set.h"
-#include "flatland/rendering/scene/shape/medium_event.hpp"
+#include "flatland/rendering/shape/medium_event.hpp"
 
 #include "imaging/color.hpp"
 
@@ -47,7 +47,7 @@ public:
     using Scalar = ScalarType;
     using Point2 = PointType<ScalarType, 2>;
     using Vector = VectorType<ScalarType, Dimension>;
-    using Color = ColorType<ScalarType, 3>;
+    using Color = ColorTypeRGB<ScalarType, 3>;
     using BSDFSample = BSDFSampleType<ScalarType, Dimension>;
     using MediumEvent = MediumEventType<ScalarType, Dimension>;
 

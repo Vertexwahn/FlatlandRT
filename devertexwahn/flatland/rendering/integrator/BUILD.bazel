@@ -1,15 +1,14 @@
 """
-    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "ambient_occlusion",
     hdrs = ["ambient_occlusion.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "//flatland/rendering/integrator",
@@ -35,6 +34,7 @@ cc_test(
 cc_library(
     name = "integrator",
     srcs = ["integrator.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:logging",
         "//core:object",
@@ -47,6 +47,7 @@ cc_library(
 cc_library(
     name = "path_mirror_reflection",
     hdrs = ["path_mirror_reflection.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//flatland/rendering/integrator",
         "//math:refract",
@@ -72,6 +73,7 @@ cc_library(
     name = "path_specular_transmission",
     srcs = ["path_specular_transmission.cpp"],
     hdrs = ["path_specular_transmission.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//flatland/rendering/scene",
         "//math:refract",

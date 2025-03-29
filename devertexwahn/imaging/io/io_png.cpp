@@ -122,7 +122,7 @@ ReferenceCounted<Image4b> load_image_png_as_Image4b(std::string_view filename) {
     auto image = make_reference_counted<Image4b>(width, height);
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++) {
-                Color4b color{
+                ColorRGBA4b color{
                     row_pointers[y][x * 4 + 0],
                     row_pointers[y][x * 4 + 1],
                     row_pointers[y][x * 4 + 2],
@@ -146,8 +146,8 @@ ReferenceCounted<Image3f> convert_to_Image3f(const Image4b* image) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            Color4b c = image->get_pixel(x, y);
-            Color3f converted_color = ColorConverter::convertTo<Color3f>(c);
+            ColorRGBA4b c = image->get_pixel(x, y);
+            ColorRGB3f converted_color = ColorConverter::convertTo<ColorRGB3f>(c);
             converted_image->set_pixel(x,y,converted_color);
         }
     }
@@ -160,8 +160,8 @@ ReferenceCounted<Image4f> convert_to_Image4f(const Image4b* image) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            Color4b c = image->get_pixel(x, y);
-            Color4f converted_color = ColorConverter::convertTo<Color4f>(c);
+            ColorRGBA4b c = image->get_pixel(x, y);
+            ColorRGBA4f converted_color = ColorConverter::convertTo<ColorRGBA4f>(c);
             converted_image->set_pixel(x,y,converted_color);
         }
     }
@@ -236,7 +236,7 @@ bool store_png(const char *filename, const Image4b &image) {
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            Color4b c = image.get_pixel(x, y).clamp(0, 255);
+            ColorRGBA4b c = image.get_pixel(x, y).clamp(0, 255);
             row[x * 4 + 0] = c.red();
             row[x * 4 + 1] = c.green();
             row[x * 4 + 2] = c.blue();

@@ -10,8 +10,8 @@
 #include "math/axis_aligned_bounding_box.hpp"
 #include "math/util.hpp"
 #include "flatland/rendering/intersector/intersector.hpp"
-#include "flatland/rendering/scene/shape/polygon.hpp"
-#include "flatland/rendering/scene/shape/triangle_mesh.hpp"
+#include "flatland/rendering/shape/polygon.hpp"
+#include "flatland/rendering/shape/triangle_mesh.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

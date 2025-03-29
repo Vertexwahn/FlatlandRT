@@ -14,9 +14,9 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 class SvgMaterial : public BSDF2f {
 public:
     SvgMaterial(const PropertySet &ps) : BSDF2f(ps) {
-        stroke_color_ = ps.get_property<Color3f>("stroke_color", Color3f{0.f, 0.f, 0.f});
+        stroke_color_ = ps.get_property<ColorRGB3f>("stroke_color", ColorRGB3f{0.f, 0.f, 0.f});
         stroke_width_ = ps.get_property<float>("stroke_width", 1.f);
-        fill_color_ = ps.get_property<Color3f>("fill_color", Color3f{1.f, 1.f, 1.f});
+        fill_color_ = ps.get_property<ColorRGB3f>("fill_color", ColorRGB3f{1.f, 1.f, 1.f});
 
         std::string interface_interaction = ps.get_property<std::string>("interface_interaction",
                                                                          "specular_transmission");
@@ -25,24 +25,24 @@ public:
     }
 
     [[nodiscard]]
-    Color3f stroke_color() const;
+    ColorRGB3f stroke_color() const;
 
     [[nodiscard]]
     float stroke_width() const;
 
     [[nodiscard]]
-    Color3f fill_color() const;
+    ColorRGB3f fill_color() const;
 
     [[nodiscard]]
-    Color3f sample(BSDFSample2f& sample, const Point2& sample_point) const override;
+    ColorRGB3f sample(BSDFSample2f& sample, const Point2& sample_point) const override;
     [[nodiscard]]
     float pdf(const BSDFSample2f& sample) const override { return 0.f; };
     [[nodiscard]]
-    Color3f evaluate(const BSDFSample2f& sample) const override;
+    ColorRGB3f evaluate(const BSDFSample2f& sample) const override;
 
 private:
-    Color3f stroke_color_{0.f, 0.f, 0.f};
-    Color3f fill_color_{1.f, 1.f, 1.f};
+    ColorRGB3f stroke_color_{0.f, 0.f, 0.f};
+    ColorRGB3f fill_color_{1.f, 1.f, 1.f};
     float stroke_width_{1.f};
 };
 

@@ -1,0 +1,151 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+cc_library(
+    name = "disk",
+    srcs = ["disk.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flatland/rendering:property_set",
+        "//flatland/rendering/shape",
+        "//math:intersection",
+    ],
+)
+
+cc_test(
+    name = "disk_test",
+    size = "small",
+    srcs = [
+        "disk_test.cpp",
+    ],
+    deps = [
+        ":disk",
+        "//math:refract",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "medium_event",
+    hdrs = ["medium_event.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//math:frame",
+    ],
+)
+
+cc_library(
+    name = "polygon",
+    hdrs = ["polygon.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flatland/rendering/shape",
+        "//math:geometry",
+        "//math:intersection",
+    ],
+)
+
+cc_test(
+    name = "polygon_test",
+    size = "small",
+    srcs = [
+        "polygon_test.cpp",
+    ],
+    deps = [
+        ":polygon",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "rectangle",
+    hdrs = ["rectangle.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flatland/rendering/shape",
+        "//math:geometry",
+        "//math:intersection",
+    ],
+)
+
+cc_test(
+    name = "rectangle_test",
+    size = "small",
+    srcs = [
+        "rectangle_test.cpp",
+    ],
+    deps = [
+        ":rectangle",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "rectangle_test_via_catch2",
+    size = "small",
+    timeout = "short",
+    srcs = [
+        "rectangle_test_via_catch2.cpp",
+    ],
+    defines = ["CATCH_CONFIG_MAIN"],
+    deps = [
+        ":rectangle",
+        "@catch2//:catch2_main",
+    ],
+)
+
+cc_library(
+    name = "shape",
+    hdrs = ["shape.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flatland/rendering/emitter:emitter",
+        ":medium_event",
+        "//core:object",
+        "//flatland/rendering/bsdf:svg_material",
+        "//math:axis_aligned_bounding_box",
+        "//math:frame",
+    ],
+)
+
+cc_test(
+    name = "shape_test",
+    size = "small",
+    srcs = [
+        "shape_test.cpp",
+    ],
+    deps = [
+        "//flatland/rendering/shape",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "triangle_mesh",
+    hdrs = ["triangle_mesh.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core:logging",
+        "//flatland/rendering/shape",
+        "//math:axis_aligned_bounding_box",
+        "//math:geometry",
+        "//math:intersection",
+    ],
+)
+
+cc_test(
+    name = "triangle_mesh_test",
+    size = "small",
+    srcs = [
+        "triangle_mesh_test.cpp",
+    ],
+    data = ["//flatland/scenes/terrain:scenes"],
+    deps = [
+        ":triangle_mesh",
+        "@googletest//:gtest_main",
+    ],
+)

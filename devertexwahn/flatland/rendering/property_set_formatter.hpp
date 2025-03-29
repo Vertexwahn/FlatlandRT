@@ -86,11 +86,11 @@ struct fmt::formatter<de_vertexwahn::Point2d> {
 };
 
 template<>
-struct fmt::formatter<de_vertexwahn::Color3f> {
+struct fmt::formatter<de_vertexwahn::ColorRGB3f> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     template<typename FormatContext>
-    auto format(const de_vertexwahn::Color3f &c, FormatContext &ctx) const {
+    auto format(const de_vertexwahn::ColorRGB3f &c, FormatContext &ctx) const {
         return fmt::format_to(ctx.out(), "({}, {}, {})", c.red(), c.green(), c.blue());
     }
 };

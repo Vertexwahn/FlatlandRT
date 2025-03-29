@@ -18,13 +18,13 @@ PathSpecularTransmission::PathSpecularTransmission(const PropertySet &ps) : Inte
 PathSpecularTransmission::~PathSpecularTransmission() {
 }
 
-Color3f PathSpecularTransmission::trace(
+ColorRGB3f PathSpecularTransmission::trace(
         const Scene2f *scene,
         Sampler *sampler,
         Ray2f &ray,
         const int depth) const {
     if (depth > max_depth)
-        return Color3f{0.f, 0.f, 0.f}; //ColorConstants3f::Black;
+        return ColorRGB3f{0.f, 0.f, 0.f}; //ColorConstants3f::Black;
 
     MediumEvent2f me;
     bool hit = scene->intersect(ray, me);
@@ -49,7 +49,7 @@ Color3f PathSpecularTransmission::trace(
         std::cout << "Valid refraction: " << valid << std::endl;
         assert(valid);
         if (!valid)
-            return Color3f{0.f, 0.f, 0.f};
+            return ColorRGB3f{0.f, 0.f, 0.f};
 
         refracted_direction.normalize();
 
@@ -62,7 +62,7 @@ Color3f PathSpecularTransmission::trace(
 
     canvas_->add(ray);
 
-    return Color3f{0.f, 0.f, 0.f};
+    return ColorRGB3f{0.f, 0.f, 0.f};
 }
 
 DE_VERTEXWAHN_END_NAMESPACE

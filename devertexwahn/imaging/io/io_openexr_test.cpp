@@ -15,7 +15,7 @@ TEST(Image, storeLoadOpenEXR) {
 
     for (int y = 0; y < image.height(); ++y) {
         for (int x = 0; x < image.width(); ++x) {
-            image.set_pixel(x, y, Color3f{1.f, 0.f, 0.f});
+            image.set_pixel(x, y, ColorRGB3f{1.f, 0.f, 0.f});
         }
     }
 
@@ -30,9 +30,9 @@ TEST(Image, storeLoadOpenEXR) {
 
     for (int y = 0; y < image.height(); ++y) {
         for (int x = 0; x < image.width(); ++x) {
-            Color3f c = image.get_pixel(x, y);
-            Color3f ref_c = ref_image.get_pixel(x, y);
-            EXPECT_THAT(ref_c, (Color3f{1.f, 0.f, 0.f}));
+            ColorRGB3f c = image.get_pixel(x, y);
+            ColorRGB3f ref_c = ref_image.get_pixel(x, y);
+            EXPECT_THAT(ref_c, (ColorRGB3f{1.f, 0.f, 0.f}));
             EXPECT_THAT(ref_c, c);
         }
     }
@@ -44,7 +44,7 @@ TEST(Image, storeLoadOpenEXR2) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            image->set_pixel(x, y, Color3f{1.f, 0.f, 0.f});
+            image->set_pixel(x, y, ColorRGB3f{1.f, 0.f, 0.f});
         }
     }
 
@@ -59,9 +59,9 @@ TEST(Image, storeLoadOpenEXR2) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            Color3f c = image->get_pixel(x, y);
-            Color3f ref_c = ref_image.get_pixel(x, y);
-            EXPECT_THAT(ref_c, (Color3f{1.f, 0.f, 0.f}));
+            ColorRGB3f c = image->get_pixel(x, y);
+            ColorRGB3f ref_c = ref_image.get_pixel(x, y);
+            EXPECT_THAT(ref_c, (ColorRGB3f{1.f, 0.f, 0.f}));
             EXPECT_THAT(ref_c, c);
         }
     }

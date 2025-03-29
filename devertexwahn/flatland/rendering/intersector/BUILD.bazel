@@ -1,15 +1,14 @@
 """
-    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "brute_force_intersector",
     hdrs = ["brute_force_intersector.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":intersector",
         "//core:logging",
@@ -20,6 +19,7 @@ cc_library(
 cc_library(
     name = "intersector",
     hdrs = ["intersector.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:object",
         "//core:reference_counted",
@@ -31,11 +31,12 @@ cc_library(
     name = "quadtree_intersector",
     srcs = ["quadtree_intersector.cpp"],
     hdrs = ["quadtree_intersector.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":intersector",
         "//core:logging",
-        "//flatland/rendering/scene/shape:polygon",
-        "//flatland/rendering/scene/shape:triangle_mesh",
+        "//flatland/rendering/shape:polygon",
+        "//flatland/rendering/shape:triangle_mesh",
         "//math:axis_aligned_bounding_box",
         "//math:util",
     ],

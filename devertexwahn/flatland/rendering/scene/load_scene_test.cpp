@@ -4,8 +4,8 @@
  */
 
 #include "flatland/rendering/scene/load_scene.hpp"
-#include "flatland/rendering/scene/shape/rectangle.hpp"
-#include "flatland/rendering/scene/shape/disk.hpp"
+#include "flatland/rendering/shape/rectangle.hpp"
+#include "flatland/rendering/shape/disk.hpp"
 
 #include "gmock/gmock.h"
 

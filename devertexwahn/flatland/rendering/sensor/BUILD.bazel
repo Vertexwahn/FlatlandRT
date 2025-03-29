@@ -5,11 +5,10 @@
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "sensor",
-    hdrs = ["sensor.h"],
+    hdrs = ["sensor.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "//core:object",

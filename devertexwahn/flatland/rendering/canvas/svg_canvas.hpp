@@ -10,7 +10,7 @@
 #include "math/axis_aligned_bounding_box.hpp"
 #include "math/ray.hpp"
 #include "flatland/rendering/canvas/label.hpp"
-#include "flatland/rendering/scene/shape/shape.hpp"
+#include "flatland/rendering/shape/shape.hpp"
 
 #include <cstdint>
 #include <fstream>

@@ -254,11 +254,11 @@ private:
 };
 
 using Image1b = Image<Color1b, uint8_t, 1>;
-using Image3b = Image<Color3b, uint8_t, 3>;
-using Image4b = Image<Color4b, uint8_t, 4>;
+using Image3b = Image<ColorRGB3b, uint8_t, 3>;
+using Image4b = Image<ColorRGBA4b, uint8_t, 4>;
 using Image1f = Image<Color1f, float, 1>;
-using Image3f = Image<Color3f, float, 3>;
-using Image4f = Image<Color4f, float, 4>;
+using Image3f = Image<ColorRGB3f, float, 3>;
+using Image4f = Image<ColorRGBA4f, float, 4>;
 
 DE_VERTEXWAHN_END_NAMESPACE
 

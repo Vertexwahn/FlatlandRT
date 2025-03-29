@@ -1,20 +1,19 @@
 """
-    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "bsdf",
     hdrs = ["bsdf.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:object",
         "//core:reference_counted",
         "//flatland/rendering:property_set",
-        "//flatland/rendering/scene/shape:medium_event",
+        "//flatland/rendering/shape:medium_event",
         "//imaging:color",
     ],
 )
@@ -35,6 +34,7 @@ cc_library(
     name = "svg_material",
     srcs = ["svg_material.cpp"],
     hdrs = ["svg_material.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":bsdf",
     ],

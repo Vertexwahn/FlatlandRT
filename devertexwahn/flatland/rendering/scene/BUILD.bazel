@@ -5,12 +5,11 @@
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "load_scene",
     srcs = ["load_scene.cpp"],
     hdrs = ["load_scene.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:exception",
         "//core:object_factory",
@@ -20,9 +19,9 @@ cc_library(
         "//flatland/rendering/intersector:brute_force_intersector",
         "//flatland/rendering/intersector:quadtree_intersector",
         "//flatland/rendering/scene",
-        "//flatland/rendering/scene/shape:disk",
-        "//flatland/rendering/scene/shape:rectangle",
-        "//flatland/rendering/scene/shape:triangle_mesh",
+        "//flatland/rendering/shape:disk",
+        "//flatland/rendering/shape:rectangle",
+        "//flatland/rendering/shape:triangle_mesh",
         "@pugixml",
     ],
 )
@@ -30,12 +29,14 @@ cc_library(
 cc_library(
     name = "scene",
     hdrs = ["scene.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//flatland/rendering:sampler",
         "//flatland/rendering/canvas:label",
+        "//flatland/rendering/emitter:emitter",
         "//flatland/rendering/integrator",
         "//flatland/rendering/intersector",
-        "//flatland/rendering/scene/shape",
+        "//flatland/rendering/shape",
         "//flatland/rendering/sensor",
     ],
 )

@@ -57,10 +57,10 @@ TEST(PropertySet, Point3f) {
 TEST(PropertySet, Color3f) {
     PropertySet ps;
 
-    auto c = Color3f(1.f, 1.f, 1.f);
+    auto c = ColorRGB3f(1.f, 1.f, 1.f);
     ps.add_property("c", c);
 
-    EXPECT_THAT(ps.get_property<Color3f>("c"), c);
+    EXPECT_THAT(ps.get_property<ColorRGB3f>("c"), c);
 }
 
 TEST(PropertySet, ObjectProperty) {

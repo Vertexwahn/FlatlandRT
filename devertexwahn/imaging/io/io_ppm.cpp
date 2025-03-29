@@ -18,7 +18,7 @@ void store_ppm(std::string_view filename, const Image4b &image) {
 
     for (int y = 0; y < image.height(); ++y) {
         for (int x = 0; x < image.width(); ++x) {
-            Color4b color = image.get_pixel(x, y);
+            ColorRGBA4b color = image.get_pixel(x, y);
             int ir = color.red();
             int ig = color.green();
             int ib = color.blue();

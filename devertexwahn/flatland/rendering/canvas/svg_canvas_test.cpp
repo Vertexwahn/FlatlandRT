@@ -7,8 +7,8 @@
 
 #include "math/refract.hpp"
 #include "flatland/rendering/canvas/svg_canvas.hpp"
-#include "flatland/rendering/scene/shape/disk.hpp"
-#include "flatland/rendering/scene/shape/rectangle.hpp"
+#include "flatland/rendering/shape/disk.hpp"
+#include "flatland/rendering/shape/rectangle.hpp"
 
 #include "gmock/gmock.h"
 
@@ -112,9 +112,9 @@ TEST(SvgCanvas, GivenRectangle_WhenAssigningMaterial_ExpectSpecificFillAndBoderC
 
     // Act
     PropertySet ps_mat;
-    ps_mat.add_property("stroke_color", Color3f{0.f, 0.682f, 0.937f});
+    ps_mat.add_property("stroke_color", ColorRGB3f{0.f, 0.682f, 0.937f});
     ps_mat.add_property("stroke_width", 3.f);
-    ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
+    ps_mat.add_property("fill_color", ColorRGB3f{1.f, 1.f, 1.f});
     ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
     rect.set_bsdf(blue_material);
 
@@ -131,9 +131,9 @@ TEST(SvgCanvas, When_DiskWithRedMaterial_Then_ExpectCicleWithRedFillAndBoderColo
     SvgCanvas2f sc{800, 600};
 
     PropertySet ps_mat;
-    ps_mat.add_property("stroke_color", Color3f{0.f, 0.682f, 0.937f});
+    ps_mat.add_property("stroke_color", ColorRGB3f{0.f, 0.682f, 0.937f});
     ps_mat.add_property("stroke_width", 3.f);
-    ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
+    ps_mat.add_property("fill_color", ColorRGB3f{1.f, 1.f, 1.f});
     ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
 
     PropertySet ps;
@@ -176,9 +176,9 @@ TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor) {
     Rectangle2f rect(ps);
 
     PropertySet ps_mat;
-    ps_mat.add_property("stroke_color", Color3f{0.f, 0.682f, 0.937f});
+    ps_mat.add_property("stroke_color", ColorRGB3f{0.f, 0.682f, 0.937f});
     ps_mat.add_property("stroke_width", 3.f);
-    ps_mat.add_property("fill_color", Color3f{1.f, 1.f, 1.f});
+    ps_mat.add_property("fill_color", ColorRGB3f{1.f, 1.f, 1.f});
     ReferenceCounted<SvgMaterial> blue_material = make_reference_counted<SvgMaterial>(ps_mat);
 
     rect.set_bsdf(blue_material);

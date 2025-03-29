@@ -193,7 +193,7 @@ ReferenceCounted<Image3f> load_image_pfm(std::string_view filename) {
 
     for (int y = 0; y < image->height(); ++y) {
         for (int x = 0; x < image->width(); ++x) {
-            Color3f color{
+            ColorRGB3f color{
                 floatFromPfmSample(pfmBuffer[(y * image->width() + x) * 3 + 0], pfmHeader.endian),
                 floatFromPfmSample(pfmBuffer[(y * image->width() + x) * 3 + 1], pfmHeader.endian),
                 floatFromPfmSample(pfmBuffer[(y * image->width() + x) * 3 + 2], pfmHeader.endian),

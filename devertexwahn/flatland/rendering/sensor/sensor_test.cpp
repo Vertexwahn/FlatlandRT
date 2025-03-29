@@ -4,7 +4,7 @@
  */
 
 #include "core/reference_counted.hpp"
-#include "flatland/rendering/sensor/sensor.h"
+#include "flatland/rendering/sensor/sensor.hpp"
 
 #include "gmock/gmock.h"
 

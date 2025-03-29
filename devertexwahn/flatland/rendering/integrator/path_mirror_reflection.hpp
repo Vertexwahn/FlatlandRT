@@ -23,7 +23,7 @@ template<typename ScalarType>
 class PathMirrorReflection2 final : public IntegratorType<ScalarType, 2> {
 public:
     using Base = IntegratorType<ScalarType, 2>;
-    using Color = ColorType<ScalarType, 3>;
+    using Color = ColorTypeRGB<ScalarType, 3>;
     using Scalar = ScalarType;
     using Sampler = SamplerType<ScalarType>;
 

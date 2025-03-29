@@ -8,11 +8,12 @@
 #define De_Vertexwahn_Flatland_Scene_501ee1a7_47a6_4ed2_b9db_f31ba90ccc08_h
 
 #include "flatland/rendering/canvas/label.hpp"
+#include "flatland/rendering/emitter/emitter.hpp"
 #include "flatland/rendering/integrator/integrator.hpp"
 #include "flatland/rendering/intersector/intersector.hpp"
-#include "flatland/rendering/scene/shape/shape.hpp"
 #include "flatland/rendering/sampler.hpp"
-#include "flatland/rendering/sensor/sensor.h"
+#include "flatland/rendering/shape/shape.hpp"
+#include "flatland/rendering/sensor/sensor.hpp"
 
 #include <cassert>
 
@@ -30,6 +31,7 @@ public:
     using Label = LabelType2<ScalarType>;
     using Scalar = ScalarType;
     using Intersector = IntersectorType<ScalarType, Dimension>;
+    using Emitter = EmitterType<ScalarType, Dimension>;
 
     SceneType() = default;
 
@@ -43,6 +45,7 @@ public:
         return shapes_;
     }
 
+    [[nodiscard]]
     size_t shape_count() const { return shapes_.size(); }
 
     bool intersect(const Ray &ray, MediumEvent &me) const {
@@ -114,6 +117,10 @@ public:
         return intersector_;
     }
 
+    void set_environment(ReferenceCounted<Emitter> environment_environment) {
+        environment_emitter_ = environment_environment;
+    }
+
 private:
     std::vector<Label> annotations_;
     std::vector<ReferenceCounted<Shape>> shapes_;
@@ -121,6 +128,7 @@ private:
     ReferenceCounted<Integrator> integrator_;
     ReferenceCounted<Sampler> sampler_;
     ReferenceCounted<Intersector> intersector_;
+    ReferenceCounted<Emitter> environment_emitter_;
 };
 
 template<typename ScalarType>

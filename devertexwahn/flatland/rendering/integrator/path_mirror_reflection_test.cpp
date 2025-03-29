@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -31,7 +31,6 @@ TEST(PathMirrorReflection, GivenSceneWithMirror_WhenRayHitsMirror_ExpectReflecti
     EXPECT_FLOAT_EQ(sc->rays()[1].direction.x(), sqrt(.5f));
     EXPECT_FLOAT_EQ(sc->rays()[1].direction.y(), -sqrt(.5f));
 }
-
 
 TEST(PathMirrorReflection2, trace) {
     PropertySet ps;

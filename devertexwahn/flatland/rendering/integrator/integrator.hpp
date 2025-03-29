@@ -61,7 +61,7 @@ public:
         return { };
     }
 
-    virtual Color3<ScalarType> trace(
+    virtual ColorRGB<ScalarType> trace(
             const Scene *scene,
             Sampler* sampler,
             Ray &ray,
@@ -88,7 +88,7 @@ public:
         canvas_ = canvas;
     }
 
-    virtual Color3<ScalarType> trace(
+    virtual ColorRGB<ScalarType> trace(
             const Scene *scene,
             Sampler* sampler,
             Ray &ray,
