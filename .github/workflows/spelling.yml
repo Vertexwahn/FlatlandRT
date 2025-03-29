@@ -5,9 +5,9 @@ on:
   push: {}
 
 jobs:
-  codespell_ubuntu22:
-    name: Codespell on Linux Ubuntu 22.04
-    runs-on: ubuntu-22.04
+  codespell_ubuntu24:
+    name: Codespell on Linux Ubuntu 24.04
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
