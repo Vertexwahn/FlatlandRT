@@ -40,7 +40,7 @@ bazel_dep(name = "platforms", version = "0.0.11")
 bazel_dep(name = "pugixml", version = "1.15")
 bazel_dep(name = "rules_cc", version = "0.1.1")
 bazel_dep(name = "rules_license", version = "1.0.0")
-bazel_dep(name = "rules_pkg", version = "1.0.1")
+bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "rules_python", version = "0.40.0")
 bazel_dep(name = "spdlog", version = "1.15.2")
 bazel_dep(name = "xtensor")
@@ -139,6 +139,11 @@ local_path_override(
 local_path_override(
     module_name = "xtl",
     path = "../third_party/xtl",
+)
+
+local_path_override(
+    module_name = "rules_pkg",
+    path = "../third_party/rules_pkg-1.1.0",
 )
 
 local_path_override(
