@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -32,6 +32,7 @@ struct VectorType : public Eigen::Matrix<ScalarType, Dimension, 1> {
 
     using Base::operator=;
 
+    [[nodiscard]]
     bool has_nans() const {
         for (size_t i=0; i<Dimension; ++i) {
             if(std::isnan(this->coeff(i))) {
