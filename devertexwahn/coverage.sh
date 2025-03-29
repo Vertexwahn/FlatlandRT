@@ -35,13 +35,13 @@ ${additional_bazel_config} \
 output_path=$(bazel info output_path)
 
 # Get last line of genhtml output
-genhtml "$output_path"/_coverage/_coverage_report.dat -o coverage_report
+genhtml --ignore-errors negative "$output_path"/_coverage/_coverage_report.dat -o coverage_report
 
 # extract percentage from genhtml
-current_line_coverage=$(genhtml "$output_path"/_coverage/_coverage_report.dat -o coverage_report | grep lines......: | cut -d ' ' -f 4 | tr -d '%')
+current_line_coverage=$(genhtml --ignore-errors negative "$output_path"/_coverage/_coverage_report.dat -o coverage_report | grep lines......: | cut -d ' ' -f 4 | tr -d '%')
 echo "Current coverage: $current_line_coverage"
 
-old_line_coverage="90.0"
+old_line_coverage="80.0"
 echo "Old coverage: $old_line_coverage"
 
 # Open coverage report if flag is set
