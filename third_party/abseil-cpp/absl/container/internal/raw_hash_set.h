@@ -451,7 +451,9 @@ class PerTableSeed {
   // The number of bits in the seed.
   // It is big enough to ensure non-determinism of iteration order.
   // We store the seed inside a uint64_t together with size and other metadata.
-  static constexpr size_t kBitCount = 19;
+  // Using 16 bits allows us to save one `and` instruction in H1 (we use movzwl
+  // instead of movq+and).
+  static constexpr size_t kBitCount = 16;
 
   // Returns the seed for the table. Only the lowest kBitCount are non zero.
   size_t seed() const { return seed_; }
@@ -1487,17 +1489,6 @@ extern template FindInfo find_first_non_full(const CommonFields&, size_t);
 // Non-inlined version of find_first_non_full for use in less
 // performance critical routines.
 FindInfo find_first_non_full_outofline(const CommonFields&, size_t);
-
-// Sets `ctrl` to `{kEmpty, kSentinel, ..., kEmpty}`, marking the entire
-// array as marked as empty.
-inline void ResetCtrl(CommonFields& common, size_t slot_size) {
-  const size_t capacity = common.capacity();
-  ctrl_t* ctrl = common.control();
-  std::memset(ctrl, static_cast<int8_t>(ctrl_t::kEmpty),
-              capacity + 1 + NumClonedBytes());
-  ctrl[capacity] = ctrl_t::kSentinel;
-  SanitizerPoisonMemoryRegion(common.slot_array(), slot_size * capacity);
-}
 
 // Sets sanitizer poisoning for slot corresponding to control byte being set.
 inline void DoSanitizeOnSetCtrl(const CommonFields& c, size_t i, ctrl_t h,
