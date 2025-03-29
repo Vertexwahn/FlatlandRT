@@ -1,0 +1,45 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# VS2022 on Windows Server 2025
+# Make sure we can build with VS2022 in all different compilation modes
+steps:
+  - script: |
+      systeminfo
+    displayName: "Show system information"
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+  - script: |
+      cd devertexwahn
+      bazel version
+    displayName: "Show Bazel version"
+
+
+
+  - script: |
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base run --config=vs2022  --compilation_mode=dbg -- //tools/compiler_feature_dump
+    displayName: "Compiler feature dump"
+
+  - script: |
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base run --config=vs2022  --compilation_mode=dbg -- //tools/cpu_info:cpu_info
+    displayName: "Show CPU information"
+
+  # dbg
+  - script: |    
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base build --config=vs2022  --compilation_mode=dbg -- //...
+    displayName: "Bazel build vs2022-dbg"
+
+  - script: |    
+      cd devertexwahn
+      bazel --output_base=C:/bazel_output_base test --config=vs2022  --compilation_mode=dbg -- //... 
+    displayName: "Bazel test vs2022-dbg"
