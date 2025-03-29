@@ -38,40 +38,42 @@ steps:
       clang --version
     displayName: "Show Clang version"
 
+
   - script: |
       cd devertexwahn
       bazel run --config=macos  -- //tools/compiler_feature_dump
     displayName: "Compiler feature dump"
 
+
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=macos  -- //...     #
+      bazel build --config=macos  -- //...    #
     displayName: "Bazel build macos-fastbuild"
 
   - script: |
       cd devertexwahn
-      bazel test --config=macos  -- //...     #
+      bazel test --config=macos  -- //...    #
     displayName: "Bazel test macos-fastbuild"
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=macos  --compilation_mode=dbg -- //...     #
+      bazel build --config=macos  --compilation_mode=dbg -- //...    #
     displayName: "Bazel build macos-dbg"
 
   - script: |
       cd devertexwahn
-      bazel test --config=macos  --compilation_mode=dbg -- //...     #
+      bazel test --config=macos  --compilation_mode=dbg -- //...    #
     displayName: "Bazel test macos-dbg"
 
   # opt
   - script: |
       cd devertexwahn
-      bazel build --config=macos  --compilation_mode=opt -- //...     #
+      bazel build --config=macos  --compilation_mode=opt -- //...    #
     displayName: "Bazel build macos-opt"
 
   - script: |
       cd devertexwahn
-      bazel test --config=macos  --compilation_mode=opt -- //...     #
+      bazel test --config=macos  --compilation_mode=opt -- //...    #
     displayName: "Bazel test macos-opt"

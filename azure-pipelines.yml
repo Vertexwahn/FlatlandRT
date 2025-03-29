@@ -59,12 +59,12 @@ jobs:
       - template: devertexwahn/ci/ubuntu-24.04-coverage.yaml
 
 
-  - job: Ubuntu22Cppcheck
-    displayName: "Cppcheck on Ubuntu 22.04"
-    pool:
-      vmImage: 'ubuntu-22.04'
-    steps:
-      - template: devertexwahn/ci/ubuntu-22.04-cppcheck.yaml
+  #- job: Ubuntu24Cppcheck
+  #  displayName: "Cppcheck on Ubuntu 24.04"
+  #  pool:
+  #    vmImage: 'ubuntu-24.04'
+  #  steps:
+  #    - template: devertexwahn/ci/ubuntu-24.04-cppcheck.yaml
 
   #- job: Ubuntu24Bzlmod
   #  displayName: "Bzlmod GCC 13 on Ubuntu 24.04"
@@ -132,23 +132,45 @@ jobs:
       - template: devertexwahn/ci/windows-2019-vs2019-opt.yaml
 
   # Visual Studio 2022
-  - job: VisualStudio2022Dbg
+  - job: VisualStudio2022_WindowsServer2022_Dbg
     displayName: "VS2022 dbg on Windows Server 2022"
     pool:
       vmImage: 'windows-2022'
     steps:
       - template: devertexwahn/ci/windows-2022-vs2022-dbg.yaml
 
-  - job: VisualStudio2022Fastbuild
+  - job: VisualStudio2022_WindowsServer2022_Fastbuild
     displayName: "VS2022 fastbuild on Windows Server 2022"
     pool:
       vmImage: 'windows-2022'
     steps:
       - template: devertexwahn/ci/windows-2022-vs2022-fastbuild.yaml
 
-  - job: VisualStudio2022Opt
+  - job: VisualStudio2022_WindowsServer2022_Opt
     displayName: "VS2022 opt on Windows Server 2022"
     pool:
       vmImage: 'windows-2022'
     steps:
       - template: devertexwahn/ci/windows-2022-vs2022-opt.yaml
+
+  # Visual Studio 2025
+  - job: VisualStudio2022_WindowsServer2025_Dbg
+    displayName: "VS2022 dbg on Windows Server 2025"
+    pool:
+      vmImage: 'windows-2025'
+    steps:
+      - template: devertexwahn/ci/windows-2025-vs2022-dbg.yaml
+
+  - job: VisualStudio2022_WindowsServer2025_Fastbuild
+    displayName: "VS2022 fastbuild on Windows Server 2025"
+    pool:
+      vmImage: 'windows-2025'
+    steps:
+      - template: devertexwahn/ci/windows-2025-vs2022-fastbuild.yaml
+
+  - job: VisualStudio2022_WindowsServer2025_Opt
+    displayName: "VS2022 opt on Windows Server 2025"
+    pool:
+      vmImage: 'windows-2025'
+    steps:
+      - template: devertexwahn/ci/windows-2025-vs2022-opt.yaml

@@ -41,6 +41,7 @@ steps:
       bazel run --config=macos  -- //tools/compiler_feature_dump
     displayName: "Compiler feature dump"
 
+  
   # fastbuild
   - script: |
       cd devertexwahn

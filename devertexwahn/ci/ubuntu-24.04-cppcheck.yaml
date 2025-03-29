@@ -1,0 +1,80 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# GCC13 on Ubuntu 24.04
+# cppcheck
+
+# This jobs does currently not work.
+# cppcheck complains about unknown defines/macros.
+# It seems that provided a compile_commands.json could fix this.
+# Unfortunately, generation a compile_commands.json is not trivial with Bazel.
+# Tried https://github.com/kiron1/bazel-compile-commands 2320733c9d4f675dae4ecde59101ad3a97f5a135 but did not work for me
+# Bear https://github.com/rizsotto/Bear seems also not to work.
+# There are workaround but that needs some time to invest.
+# Tried https://github.com/hedronvision/bazel-compile-commands-extractor at 4f28899228fb3ad0126897876f147ca15026151e but does also not work out of the box
+
+steps:
+  - script: |
+      df
+    displayName: "Show disk space"
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
+
+  - script: |
+      df
+    displayName: "Show disk space"
+
+  # Note: apt-get cannot be used to install Cppcheck since it has only an old version that give some false positives
+  #- script: |
+  #    sudo apt-get update
+  #    sudo apt-get install cppcheck
+  #  displayName: "Install Cppcheck"
+
+  - script: |
+      CPP_CHECK_VERSION=2.16.0
+      curl -L -o cppcheck.tar.gz https://github.com/danmar/cppcheck/archive/refs/tags/${CPP_CHECK_VERSION}.tar.gz
+      tar xzf cppcheck.tar.gz
+      cd cppcheck-${CPP_CHECK_VERSION}
+      cmake -S . -B build
+      cmake --build build
+      sudo cmake --install build
+    displayName: "Install Cppcheck"
+
+  - script: |
+      cd devertexwahn
+      cppcheck --version
+    displayName: "Show Cppcheck version"
+
+  - script: |
+      cd devertexwahn
+      #cppcheck --enable=all --error-exitcode=1 core
+      cppcheck --check-level=exhaustive --error-exitcode=1 core
+    displayName: "Cppcheck core"
+
+  - script: |
+      cd devertexwahn
+      cppcheck --check-level=exhaustive --error-exitcode=1 flatland
+    displayName: "Cppcheck flatland"
+
+  - script: |
+      cd devertexwahn
+      cppcheck --check-level=exhaustive --error-exitcode=1 imaging
+    displayName: "Cppcheck imaging"
+
+  - script: |
+      cd devertexwahn
+      cppcheck --check-level=exhaustive --error-exitcode=1 math
+    displayName: "Cppcheck math"
+

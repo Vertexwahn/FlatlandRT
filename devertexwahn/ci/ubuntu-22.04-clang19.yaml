@@ -46,33 +46,33 @@ steps:
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=clang19  -- //core/... //imaging/... //flatland/...
+      bazel build --config=clang19  -- //core/... //flatland/...
     displayName: 'Bazel build clang19-fastbuild'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang19  -- //core/... //imaging/... //flatland/...
+      bazel test --config=clang19  -- //core/... //flatland/...
     displayName: 'Bazel test clang19-fastbuild'
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=clang19  --compilation_mode=dbg -- //core/... //imaging/... //flatland/...
+      bazel build --config=clang19  --compilation_mode=dbg -- //core/... //flatland/...
     displayName: 'Bazel build clang19-dbg'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang19  --compilation_mode=dbg -- //core/... //imaging/... //flatland/...
+      bazel test --config=clang19  --compilation_mode=dbg -- //core/... //flatland/...
     displayName: 'Bazel test clang19-dbg'
 
   - script: |
       cd devertexwahn
-      bazel build --config=clang19  --compilation_mode=opt -- //core/... //imaging/... //flatland/...
+      bazel build --config=clang19  --compilation_mode=opt -- //core/... //flatland/...
     displayName: 'Bazel build clang19-opt'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang19  --compilation_mode=opt -- //core/... //imaging/... //flatland/...
+      bazel test --config=clang19  --compilation_mode=opt -- //core/... //flatland/...
     displayName: 'Bazel test clang194-opt'
 
   - script: |

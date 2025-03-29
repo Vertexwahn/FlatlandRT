@@ -20,12 +20,12 @@ steps:
 
 
   - script: |
-      lsb_release -a
-    displayName: "Show OS version"
-
-  - script: |
       df
     displayName: "Show disk space"
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
 
   - script: |
       cd devertexwahn
