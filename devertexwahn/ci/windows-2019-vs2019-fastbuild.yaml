@@ -42,3 +42,7 @@ steps:
       cd devertexwahn
       bazel --output_base=C:/bazel_output_base test --config=vs2019  -- //... 
     displayName: "Bazel test vs2019-fastbuild"
+
+  - pwsh: |
+      get-volume
+    displayName: "Check available memory"
