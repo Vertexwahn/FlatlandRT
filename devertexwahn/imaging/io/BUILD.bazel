@@ -1,14 +1,15 @@
 """
-    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
-package(default_visibility = ["//visibility:public"])
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
     name = "io_jpeg",
     srcs = ["io_jpeg.cpp"],
     hdrs = ["io_jpeg.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:reference_counted",
         "//imaging:image",
@@ -35,6 +36,7 @@ cc_library(
     name = "io",
     srcs = ["io.cpp"],
     hdrs = ["io.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":io_jpeg",
         ":io_openexr",
@@ -64,6 +66,7 @@ cc_library(
     name = "io_openexr",
     srcs = ["io_openexr.cpp"],
     hdrs = ["io_openexr.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:reference_counted",
         "//imaging:image",
@@ -87,6 +90,7 @@ cc_library(
     name = "io_pfm",
     srcs = ["io_pfm.cpp"],
     hdrs = ["io_pfm.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:logging",
         "//core:reference_counted",
@@ -108,6 +112,7 @@ cc_library(
     name = "io_png",
     srcs = ["io_png.cpp"],
     hdrs = ["io_png.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:logging",
         "//core:reference_counted",
@@ -134,6 +139,7 @@ cc_library(
     name = "io_ppm",
     srcs = ["io_ppm.cpp"],
     hdrs = ["io_ppm.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:reference_counted",
         "//imaging:image",
@@ -154,6 +160,7 @@ cc_library(
     name = "io_webp",
     srcs = ["io_webp.cpp"],
     hdrs = ["io_webp.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:reference_counted",
         "//imaging:image",

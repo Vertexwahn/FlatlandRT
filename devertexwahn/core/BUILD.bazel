@@ -14,7 +14,6 @@ cc_library(
         ":namespace",
         "//core/stl:string",
         "//core/stl:string_view",
-        "@boost.predef",
     ],
 )
 

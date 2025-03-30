@@ -1,14 +1,15 @@
 """
-    SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
-package(default_visibility = ["//visibility:public"])
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
     name = "color",
     srcs = ["color.cpp"],
     hdrs = ["color.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "//math:util",
@@ -31,6 +32,7 @@ cc_test(
 cc_library(
     name = "color_converter",
     hdrs = ["color_converter.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":color",
         "//core:namespace",
@@ -51,6 +53,7 @@ cc_library(
     name = "image",
     srcs = ["image.cpp"],
     hdrs = ["image.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":color",
         "//math:point",

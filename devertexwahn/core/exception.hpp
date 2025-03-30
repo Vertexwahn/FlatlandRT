@@ -11,8 +11,6 @@
 #include "core/stl/string.hpp"
 #include "core/stl/string_view.hpp"
 
-#include "boost/predef.h"
-
 #include <exception>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
@@ -21,13 +19,8 @@ class Exception : public std::exception {
 public:
     explicit Exception(std::string_view message);
 
-    #if BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(10,0,0) // GCC9 does not support nodiscard with
-    [[nodiscard]]
-    const char *what() const noexcept override;
-    #else
     [[nodiscard("Returns the reason for the exception")]]
     const char *what() const noexcept override;
-    #endif
 
     ~Exception() override;
 
