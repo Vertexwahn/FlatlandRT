@@ -38,42 +38,67 @@ steps:
       clang --version
     displayName: "Show Clang version"
 
+  # BEGIN-EXCLUDE-FROM-FLATLAND
+  - script: |
+      brew install qt@6
+      brew link qt@6
+    displayName: "Install dependencies"
+
+  - script: |
+      /usr/local/opt/qt@6/share/qt/libexec/uic --version # rules_qt6 depend on the availability of uic on exactly this path
+    displayName: "Show Qt uic version"
+  # END-EXCLUDE-FROM-FLATLAND
+
 
   - script: |
       cd devertexwahn
-      bazel run --config=macos  -- //tools/compiler_feature_dump
+      bazel run --config=macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //tools/compiler_feature_dump
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Compiler feature dump"
 
 
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=macos  -- //...    #
+      bazel build --config=macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...    #
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel build macos-fastbuild"
 
   - script: |
       cd devertexwahn
-      bazel test --config=macos  -- //...    #
+      bazel test --config=macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...    #
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel test macos-fastbuild"
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=macos  --compilation_mode=dbg -- //...    #
+      bazel build --config=macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=dbg -- //...    #
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel build macos-dbg"
 
   - script: |
       cd devertexwahn
-      bazel test --config=macos  --compilation_mode=dbg -- //...    #
+      bazel test --config=macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=dbg -- //...    #
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel test macos-dbg"
 
   # opt
   - script: |
       cd devertexwahn
-      bazel build --config=macos  --compilation_mode=opt -- //...    #
+      bazel build --config=macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //...    #
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel build macos-opt"
 
   - script: |
       cd devertexwahn
-      bazel test --config=macos  --compilation_mode=opt -- //...    #
+      bazel test --config=macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //...    #
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel test macos-opt"

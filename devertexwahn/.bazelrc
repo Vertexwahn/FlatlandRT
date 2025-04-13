@@ -82,6 +82,7 @@ build:gcc13 --cxxopt=-Wall
 build:gcc13 --define compiler=gcc13
 build:gcc13 --cxxopt=-fpermissive # Needed for fmt
 build:gcc13 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
+build:gcc13 --@rules_cuda//cuda:copts=-allow-unsupported-compiler
 
 # Clang 14.0.0 (config is used on Ubuntu)
 build:clang14 --cxxopt=-std=c++20

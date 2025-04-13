@@ -39,7 +39,9 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel run --config=gcc13  --compilation_mode=dbg -- //tools/compiler_feature_dump
+      bazel run --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=dbg -- //tools/compiler_feature_dump
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Compiler feature dump"
 
   - script: |
@@ -48,7 +50,9 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel build --config=gcc13  --compilation_mode=dbg -- //okapi/...
+      bazel build --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=dbg -- //okapi/...
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel build gcc13-dbg (part 2)"
 
   - script: |
@@ -57,7 +61,9 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel test --config=gcc13  --compilation_mode=dbg -- //okapi/...
+      bazel test --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=dbg -- //okapi/...
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel test gcc13-dbg (part 2)"
 
   - script: |

@@ -20,6 +20,12 @@ steps:
       df -h
     displayName: "Show disk space"
 
+  # BEGIN-EXCLUDE-FROM-FLATLAND
+  - script: |
+      brew install qt@6
+      brew link qt@6
+    displayName: "Install dependencies"
+  # END-EXCLUDE-FROM-FLATLAND
 
   - script: |
       sw_vers
@@ -38,39 +44,53 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel run --config=macos  -- //tools/compiler_feature_dump
+      bazel run --config=macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //tools/compiler_feature_dump
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Compiler feature dump"
 
   
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=clang14_macos  -- //... 
+      bazel build --config=clang14_macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //... 
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel build clang14-fastbuild"
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14_macos  -- //...   
+      bazel test --config=clang14_macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...   
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel test clang14-fastbuild"
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=clang14_macos  --compilation_mode=dbg -- //... 
+      bazel build --config=clang14_macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=dbg -- //... 
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: 'Bazel build clang14-dbg'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14_macos  --compilation_mode=dbg -- //...    
+      bazel test --config=clang14_macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=dbg -- //...    
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: 'Bazel test clang14-dbg'
 
   # opt
   - script: |
       cd devertexwahn
-      bazel build --config=clang14_macos  --compilation_mode=opt -- //... 
+      bazel build --config=clang14_macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //... 
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: 'Bazel build clang14-opt'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14_macos  --compilation_mode=opt -- //...   
+      bazel test --config=clang14_macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //...   
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: 'Bazel test clang14-opt'

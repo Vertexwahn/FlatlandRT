@@ -22,25 +22,33 @@ steps:
     displayName: "Show Bazel version"
 
 
-  - script: |
+  - powershell: |
       cd devertexwahn
-      bazel --output_base=C:/bazel_output_base run --config=vs2019  -- //tools/compiler_feature_dump
+      bazel --output_base=C:/bazel_output_base run --config=vs2019 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=$env:BUILDBUDDY_API_KEY -- //tools/compiler_feature_dump
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Compiler feature dump"
 
-  - script: |
+  - powershell: |
       cd devertexwahn
-      bazel --output_base=C:/bazel_output_base run --config=vs2019  -- //tools/cpu_info:cpu_info
+      bazel --output_base=C:/bazel_output_base run --config=vs2019 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=$env:BUILDBUDDY_API_KEY -- //tools/cpu_info:cpu_info
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Show CPU information"
 
   # fastbuild
-  - script: |
+  - powershell: |
       cd devertexwahn
-      bazel --output_base=C:/bazel_output_base build --config=vs2019  -- //...
+      bazel --output_base=C:/bazel_output_base build --config=vs2019 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=$env:BUILDBUDDY_API_KEY -- //...
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel build vs2019-fastbuild"
 
-  - script: |
+  - powershell: |
       cd devertexwahn
-      bazel --output_base=C:/bazel_output_base test --config=vs2019  -- //... 
+      bazel --output_base=C:/bazel_output_base test --config=vs2019 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=$env:BUILDBUDDY_API_KEY -- //... 
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel test vs2019-fastbuild"
 
   - pwsh: |

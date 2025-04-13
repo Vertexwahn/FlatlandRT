@@ -35,23 +35,31 @@ steps:
   # fastbuild
   - script: |
       cd devertexwahn
-      bazel build --config=clang14  -- //...     
+      bazel build --config=clang14 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...     
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: 'Bazel build clang14-fastbuild'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14   -- //...     
+      bazel test --config=clang14  --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...     
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: 'Bazel test clang14-fastbuild'
 
   # dbg
   - script: |
       cd devertexwahn
-      bazel build --config=clang14  --compilation_mode=dbg -- //...     
+      bazel build --config=clang14 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=dbg -- //...     
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: 'Bazel build clang14-dbg'
 
   - script: |
       cd devertexwahn
-      bazel test --config=clang14  --compilation_mode=dbg -- //...     
+      bazel test --config=clang14 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=dbg -- //...     
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: 'Bazel test clang14-dbg'
 
   - script: |
