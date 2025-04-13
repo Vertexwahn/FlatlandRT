@@ -103,7 +103,7 @@ void FileStream::read(void *p, size_t size) {
 
     if (unlikely(!m_file->good())) {
         bool eof = m_file->eof();
-        size_t gcount = m_file->gcount();
+        //size_t gcount = m_file->gcount();
         m_file->clear();
         if (eof) {
             throw std::runtime_error("I/O error while attempting to read");

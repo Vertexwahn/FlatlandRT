@@ -5,8 +5,6 @@
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "fresnel",
     srcs = ["fresnel.hpp"],
@@ -14,6 +12,7 @@ cc_library(
         "//core:namespace",
         "//math:vector",
     ],
+    visibility = ["//visibility:public"],
 )
 
 cc_test(
@@ -43,6 +42,7 @@ cc_library(
         "//math:point",
         "//math:transform",
     ],
+    visibility = ["//visibility:public"],
 )
 
 cc_test(
@@ -91,6 +91,7 @@ cc_library(
         "//math:point",
         "@pcg",
     ],
+    visibility = ["//visibility:public"],
 )
 
 cc_test(

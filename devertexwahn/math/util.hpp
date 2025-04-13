@@ -27,7 +27,9 @@
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
+#ifndef EMSCRIPTEN
 using std::lerp;
+#endif
 using std::clamp;
 
 // the following function was copied from pbrt-v4 and slightly modified
