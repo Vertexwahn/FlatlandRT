@@ -1,0 +1,11 @@
+load("//ape/cosmos:basenames.bzl", "BASENAMES")
+load("@toolchain_utils//toolchain/info:defs.bzl", "toolchain_info")
+
+[
+    toolchain_info(
+        name = basename,
+        target = "//ape:{}".format(basename),
+        visibility = ["//visibility:public"],
+    )
+    for basename in BASENAMES
+]

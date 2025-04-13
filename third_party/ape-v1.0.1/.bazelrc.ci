@@ -1,0 +1,64 @@
+# Declare all run commands that are loaded
+common --announce_rc
+
+# Use relative paths where possible for concise CI output
+common --attempt_to_print_relative_paths
+
+# Prevent progress bars or similar
+common --curses=no
+
+# CI "terminals" support colour
+common --color=yes
+
+# Output timestamps for each command to aid debugging of CI runtime
+common --show_timestamps
+
+# Do not wrap any output
+common --terminal_columns=0
+
+# Output as much information in the CI log about failures as possible
+build --verbose_failures
+
+# Noisy logs but allows debugging CI run failures
+test --test_output=errors
+
+# Output as much information when a test exceeds a timeout
+test --test_verbose_timeout_warnings
+
+# Validate that the lockfile is correct
+common --lockfile_mode=${CI_LOCKFILE_MODE}
+
+# These locations are cached on the CI
+build:local --disk_cache=${CI_PROJECT_DIR}/.cache/bazel/disk
+build:local --repository_cache=${CI_PROJECT_DIR}/.cache/bazel/repo
+
+# Use remote cache/execution for our builds
+build:remote --remote_executor=${CI_REMOTE_EXECUTOR}
+build:remote --remote_cache=${CI_REMOTE_CACHE}
+build:remote --remote_timeout=3600
+build:remote --remote_header=${CI_REMOTE_HEADER}
+build:remote --experimental_remote_cache_compression
+build:remote --jobs=${CI_REMOTE_JOBS}
+
+# Upload results to the Build Event Service
+build:remote --bes_results_url=${CI_BES_RESULTS_URL}
+build:remote --bes_backend=${CI_BES_BACKEND}
+
+# Add build metadata
+build:remote --build_metadata=REPO_URL=${CI_PROJECT_URL}
+build:remote --build_metadata=BRANCH_NAME=${CI_COMMIT_REF_NAME}
+build:remote --build_metadata=COMMIT_SHA=${CI_COMMIT_SHA}
+build:remote --build_metadata=HOST=${CI_SERVER_HOST}
+build:remote --build_metadata=ROLE=CI
+build:remote --build_metadata=USER=gitlab-ci
+
+# Provide detailed timing information to the remote executor
+build:remote --noslim_profile
+build:remote --experimental_profile_include_target_label
+build:remote --experimental_profile_include_primary_output
+
+# Eliminate duplicate references in the Build Event Stream
+build:remote --nolegacy_important_outputs
+
+# Describe remote executors
+build:remote --extra_execution_platforms=@toolchain_utils//toolchain/platform:amd64-linux-gnu

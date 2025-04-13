@@ -1,0 +1,10 @@
+exports_files(
+    {{exports}},
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "binary",
+    actual = "{{binary}}",
+    visibility = ["//visibility:public"],
+)

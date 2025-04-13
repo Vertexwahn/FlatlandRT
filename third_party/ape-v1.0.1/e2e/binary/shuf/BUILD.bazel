@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `shuf`
+
+build_test(
+    name = "shuf",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:shuf"],
+    visibility = ["//:__subpackages__"],
+)

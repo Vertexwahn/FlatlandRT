@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `install`
+
+build_test(
+    name = "install",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:install"],
+    visibility = ["//:__subpackages__"],
+)

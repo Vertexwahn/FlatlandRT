@@ -1,0 +1,13 @@
+load("@ape//ape/cosmos:basenames.bzl", "BASENAMES")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# Validate that `export` extension entrypoints are available for each module
+build_test(
+    name = "coverage",
+    size = "small",
+    targets = [
+        "@{}//:entrypoint".format(basename)
+        for basename in BASENAMES
+        if not (basename.startswith("assimilate") or basename.startswith("ape"))
+    ],
+)

@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `rmdir`
+
+build_test(
+    name = "rmdir",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:rmdir"],
+    visibility = ["//:__subpackages__"],
+)

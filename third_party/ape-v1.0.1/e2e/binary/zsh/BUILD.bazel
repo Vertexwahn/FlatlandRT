@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `zsh`
+
+build_test(
+    name = "zsh",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:zsh"],
+    visibility = ["//:__subpackages__"],
+)

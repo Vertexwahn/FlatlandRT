@@ -1,0 +1,38 @@
+load("@ape//ape/cosmos/lock:defs.bzl", "ape_cosmos_lock")
+
+# `bazel run` any of these targets to generate the lockfile
+
+ape_cosmos_lock(
+    name = "4.0.2",
+    out = "4.0.2.json",
+    tags = ["manual"],
+    version = "4.0.2",
+)
+
+ape_cosmos_lock(
+    name = "3.9.2",
+    out = "3.9.2.json",
+    tags = ["manual"],
+    version = "3.9.2",
+)
+
+ape_cosmos_lock(
+    name = "3.7.1",
+    out = "3.7.1.json",
+    tags = ["manual"],
+    version = "3.7.1",
+)
+
+ape_cosmos_lock(
+    name = "3.3.1",
+    out = "3.3.1.json",
+    tags = ["manual"],
+    version = "3.3.1",
+)
+
+ape_cosmos_lock(
+    name = "3.2.4",
+    out = "3.2.4.json",
+    tags = ["manual"],
+    version = "3.2.4",
+)

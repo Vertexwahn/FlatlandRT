@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `clang-format`
+
+build_test(
+    name = "clang-format",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:clang-format"],
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `rm`
+
+build_test(
+    name = "rm",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:rm"],
+    visibility = ["//:__subpackages__"],
+)

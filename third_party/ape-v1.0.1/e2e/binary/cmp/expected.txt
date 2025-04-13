@@ -1,0 +1,1 @@
+binary/cmp/a.txt binary/cmp/b.txt differ: char 13, line 1

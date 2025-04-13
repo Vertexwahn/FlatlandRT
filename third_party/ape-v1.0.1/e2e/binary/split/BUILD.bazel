@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `split`
+
+build_test(
+    name = "split",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:split"],
+    visibility = ["//:__subpackages__"],
+)

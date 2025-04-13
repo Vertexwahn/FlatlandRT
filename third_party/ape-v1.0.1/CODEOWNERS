@@ -1,0 +1,56 @@
+* @matthew.clarkson
+
+[Shell] @matthew.clarkson
+*.sh
+
+[Batch] @matthew.clarkson
+*.bat
+
+[JavaScript] @matthew.clarkson
+*.js
+*.mjs
+
+[C] @matthew.clarkson
+*.c
+*.h
+
+[C++] @matthew.clarkson
+*.cpp
+*.hpp
+*.cc
+*.hh
+
+[Rust] @matthew.clarkson
+*.rs
+
+[Documentation] @matthew.clarkson
+*.md
+
+[Licensing] @matthew.clarkson
+/.reuse/dep5
+/LICENSES/*
+
+[Configuration] @matthew.clarkson
+.editorconfig
+
+[CI] @matthew.clarkson
+.gitlab-ci.yml
+
+[Release] @matthew.clarkson
+/.releaserc.yaml
+
+[Node] @matthew.clarkson
+/package.json
+/.npmrc
+
+[Branding] @matthew.clarkson
+/icon.svg
+
+[Bazel] @matthew.clarkson
+/.bazelrc
+/.bazelrc.ci
+/.bazelignore
+/.bazelversion
+*.bazel
+*.bzl
+WORKSPACE

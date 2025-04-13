@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `whoami`
+
+build_test(
+    name = "whoami",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:whoami"],
+    visibility = ["//:__subpackages__"],
+)

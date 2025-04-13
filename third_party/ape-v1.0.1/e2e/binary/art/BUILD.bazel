@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `art`
+
+build_test(
+    name = "art",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:art"],
+    visibility = ["//:__subpackages__"],
+)

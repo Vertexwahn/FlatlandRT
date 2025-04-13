@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "devDependencies": {
+    "@bazel/bazelisk": "^1",
+    "@semantic-release/bzlmod": "^1",
+    "@semantic-release/changelog": "^6",
+    "@semantic-release/commit-analyzer": "^11",
+    "@semantic-release/config-gitlab-bzlmod": "^1",
+    "@semantic-release/config-release-channels": "^1",
+    "@semantic-release/error": "^4",
+    "@semantic-release/exec": "^6",
+    "@semantic-release/git": "^10",
+    "@semantic-release/gitlab": "^12.1",
+    "@semantic-release/release-notes-generator": "^12",
+    "debug": "^4",
+    "semantic-release": "^22"
+  }
+}

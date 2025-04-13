@@ -1,0 +1,6 @@
+repo(
+    default_package_metadata = [
+        "//:package_info",
+        "//:license",
+    ],
+)

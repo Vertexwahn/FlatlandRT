@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `wc`
+
+build_test(
+    name = "wc",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:wc"],
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,31 @@
+CMD = """
+$(location @ape//ape:curl) \
+  --netrc \
+  --silent \
+  --show-error \
+  --fail \
+  --location \
+  --retry 3 \
+  --retry-delay 1 \
+  --upload-file '$<' \
+  --header 'Accepts: application/json' \
+  --output '$@' \
+  '{{url}}'
+"""
+
+genrule(
+    name = "{{name}}",
+    srcs = ["{{target}}"],
+    outs = ["{{name}}.json"],
+    cmd_bash = CMD,
+    cmd_bat = CMD,
+    message = "Uploading `{{name}}`",
+    tags = [
+        "manual",
+        "no-cache",
+        "no-remote-exec",
+        "requires-network",
+    ],
+    tools = ["@ape//ape:curl"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,1 @@
+2575863747 6621 binary/cksum/fixture.txt

@@ -1,0 +1,11 @@
+1c1,4
+< Hello, world!
+---
+> Hello, world?
+> 
+> This is text.
+> 
+5c8
+< This is some other text.
+---
+> This is more text.

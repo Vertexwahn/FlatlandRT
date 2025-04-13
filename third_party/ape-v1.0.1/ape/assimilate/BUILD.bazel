@@ -1,0 +1,12 @@
+load("//ape/cosmos:basenames.bzl", "BASENAMES")
+load("//ape/assimilate:defs.bzl", "ape_assimilate")
+
+[
+    ape_assimilate(
+        name = basename,
+        src = "@aliases//{}".format(basename),
+        tags = ["manual"],
+        visibility = ["//:__subpackages__"],
+    )
+    for basename in BASENAMES
+]

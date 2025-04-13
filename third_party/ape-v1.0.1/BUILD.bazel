@@ -1,0 +1,19 @@
+load("@rules_license//rules:license.bzl", "license")
+load("@rules_license//rules:package_info.bzl", "package_info")
+
+licenses(["notice"])
+
+license(
+    name = "license",
+    license_kinds = [
+        "@rules_license//licenses/spdx:MIT",
+    ],
+    license_text = "LICENSE.md",
+    visibility = ["//:__subpackages__"],
+)
+
+# TODO: switch to `current_module_package_info` when released in `rules_license`
+package_info(
+    name = "package_info",
+    visibility = ["//:__subpackages__"],
+)

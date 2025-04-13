@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `ttyinfo`
+
+build_test(
+    name = "ttyinfo",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:ttyinfo"],
+    visibility = ["//:__subpackages__"],
+)

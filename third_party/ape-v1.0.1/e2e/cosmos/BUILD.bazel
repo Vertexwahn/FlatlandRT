@@ -1,0 +1,17 @@
+load("@ape//ape/cosmos/lock:defs.bzl", "ape_cosmos_lock")
+
+# Test that we can have the same lockfile as the base module and it doesn't break anythin
+ape_cosmos_lock(
+    name = "3.3.1",
+    out = "3.3.1.json",
+    tags = ["manual"],
+    version = "3.3.1",
+)
+
+# Add an older version that the base module does not define to test that.
+ape_cosmos_lock(
+    name = "3.1.3",
+    out = "3.1.3.json",
+    tags = ["manual"],
+    version = "3.1.3",
+)

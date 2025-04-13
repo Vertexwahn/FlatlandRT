@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `dash`
+
+build_test(
+    name = "dash",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:dash"],
+    visibility = ["//:__subpackages__"],
+)

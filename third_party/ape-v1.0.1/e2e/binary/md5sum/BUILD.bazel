@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `md5sum`
+
+build_test(
+    name = "md5sum",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:md5sum"],
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `tclsh8.6`
+
+build_test(
+    name = "tclsh8.6",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:tclsh8.6"],
+    visibility = ["//:__subpackages__"],
+)

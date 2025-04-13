@@ -1,0 +1,17 @@
+include:
+  - component: "${CI_SERVER_HOST}/ci/component/bazelisk/ruleset@v1.2.0"
+    inputs:
+      oses:
+        - linux
+        - windows
+        - macos
+      versions:
+        - 7.4.0
+        - 7.x
+        - 8.x
+        - last_rc
+
+default:
+  tags:
+    - arm64
+    - linux

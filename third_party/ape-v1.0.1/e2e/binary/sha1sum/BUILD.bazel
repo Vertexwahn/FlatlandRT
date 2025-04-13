@@ -1,0 +1,32 @@
+load("@rules_python_pytest//python_pytest:defs.bzl", "py_pytest_test")
+load("@bazel_skylib//rules:native_binary.bzl", "native_test")
+
+py_pytest_test(
+    name = "pytest",
+    size = "small",
+    srcs = ["digest.py"],
+    data = [
+        "expected.txt",
+        "fixture.txt",
+        "@ape//ape:sha1sum",
+    ],
+    deps = [
+        "//binary:pytest",
+    ],
+)
+
+native_test(
+    name = "version",
+    size = "small",
+    src = "@ape//ape:sha1sum",
+    args = ["--version"],
+)
+
+test_suite(
+    name = "sha1sum",
+    tests = [
+        "pytest",
+        "version",
+    ],
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,22 @@
+load("@rules_python_pytest//python_pytest:defs.bzl", "py_pytest_test")
+
+py_pytest_test(
+    name = "pytest",
+    size = "small",
+    srcs = ["serve.py"],
+    data = [
+        "expected.html",
+        "@ape//ape:greenbean",
+    ],
+    deps = [
+        "//binary:pytest",
+    ],
+)
+
+test_suite(
+    name = "greenbean",
+    tests = [
+        ":pytest",
+    ],
+    visibility = ["//:__subpackages__"],
+)

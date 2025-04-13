@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `unbourne`
+
+build_test(
+    name = "unbourne",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:unbourne"],
+    visibility = ["//:__subpackages__"],
+)

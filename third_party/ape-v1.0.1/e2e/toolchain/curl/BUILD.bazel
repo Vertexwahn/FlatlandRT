@@ -1,0 +1,25 @@
+load("@ape//ape/toolchain:defs.bzl", "ape_toolchain")
+load("@toolchain_utils//toolchain/test:defs.bzl", "toolchain_test")
+
+toolchain_type(
+    name = "type",
+    visibility = ["//visibility:public"],
+)
+
+ape_toolchain(
+    name = "ape",
+    toolchain = "@ape//ape/toolchain/info:curl",
+    toolchain_type = ":type",
+)
+
+alias(
+    name = "resolved",
+    actual = "@resolved-curl",
+)
+
+toolchain_test(
+    name = "test",
+    size = "small",
+    args = ["--version"],
+    toolchains = [":resolved"],
+)

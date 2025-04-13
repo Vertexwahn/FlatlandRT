@@ -1,0 +1,72 @@
+module(
+    name = "e2e",
+    bazel_compatibility = [
+        ">=7.0.0",
+    ],
+)
+
+bazel_dep(name = "platforms", version = "0.0.11")
+bazel_dep(name = "bazel_skylib", version = "1.5.0")
+bazel_dep(name = "rules_shell", version = "0.3.0")
+
+bazel_dep(name = "rules_python", version = "1.0.0", dev_dependency = True)
+bazel_dep(name = "hermetic_cc_toolchain", version = "3.1.0", dev_dependency = True)
+
+# TODO: one day this may be merged into `rules_python`
+bazel_dep(name = "caseyduquettesc_rules_python_pytest", version = "1.1.1", repo_name = "rules_python_pytest")
+
+# TODO: switch to`@rules_python//python/uv:lock.bzl" when non-experimental
+bazel_dep(name = "rules_uv", version = "0.52.0", dev_dependency = True)
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    configure_coverage_tool = True,
+    # TODO: need hermetic `chmod`/`id`: https://github.com/bazelbuild/rules_python/pull/2024
+    ignore_root_user_error = True,
+    python_version = "3.13",
+)
+use_repo(python, py = "python_versions")
+
+# TODO: use `requirements_by_platform` with `@rules_python//uv:lock.bzl`
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "ape-e2e-pytest",
+    python_version = "3.13",
+    requirements_lock = "//pytest:requirements.txt",
+)
+use_repo(pip, pytest = "ape-e2e-pytest")
+
+bazel_dep(name = "toolchain_utils", version = "1.0.2")
+bazel_dep(name = "ape", version = "0.0.0")
+local_path_override(
+    module_name = "ape",
+    path = "..",
+)
+
+resolved = use_repo_rule("@toolchain_utils//toolchain/resolved:defs.bzl", "toolchain_resolved")
+
+resolved(
+    name = "resolved-curl",
+    toolchain_type = "//toolchain/curl:type",
+)
+
+resolved(
+    name = "resolved-install",
+    toolchain_type = "//toolchain/install:type",
+)
+
+register_toolchains("//toolchain/...")
+
+cosmos = use_extension("@ape//ape/cosmos:defs.bzl", "ape_cosmos")
+cosmos.use(
+    unversioned = True,
+)
+cosmos.download(
+    lock = "//cosmos:3.3.1.json",
+    version = "3.3.1",
+)
+cosmos.download(
+    lock = "//cosmos:3.1.3.json",
+    version = "3.1.3",
+)
+use_repo(cosmos, "art", "awk", "b2sum", "base32", "base64", "basename", "basenc", "bash", "bc", "berry", "blackholed", "brotli", "bzip2", "cat", "chcon", "chgrp", "chmod", "chown", "chroot", "cksum", "clang-format", "cmp", "comm", "cp", "cpuid", "csplit", "ctags", "curl", "cut", "dash", "datasette", "date", "dd", "df", "diff", "diff3", "dir", "dircolors", "dirname", "du", "echo", "emacs", "emacsclient", "env", "expand", "expr", "factor", "false", "find", "fmt", "fold", "git", "git-receive-pack", "git-shell", "git-upload-archive", "git-upload-pack", "gmake", "gperf", "greenbean", "grep", "groups", "gzip", "hangman", "head", "hello", "id", "install", "janet", "join", "jq", "kill", "less", "life", "link", "links", "llama", "ln", "locate", "logname", "ls", "lua", "lz4", "lzip", "make", "md5sum", "mkdir", "mkfifo", "mknod", "mktemp", "mktemper", "mv", "nano", "nesemu1", "nice", "ninja", "nl", "nohup", "nproc", "numfmt", "od", "paste", "patch", "pathchk", "php", "pigz", "pinky", "pledge", "pr", "printenv", "printf", "printimage", "printvideo", "ptx", "pwd", "pypack1", "pypack2", "python", "qjs", "readlink", "realpath", "redbean", "rm", "rmdir", "romanize", "rsync", "runcon", "rusage", "scrapscript", "script", "sdiff", "sed", "seq", "sha1sum", "sha224sum", "sha256sum", "sha384sum", "sha512sum", "shred", "shuf", "sleep", "sort", "sox", "split", "sqlite3", "stat", "stty", "sum", "sync", "tac", "tail", "tar", "tclsh8.6", "tee", "test", "tidy", "timeout", "tmux", "touch", "tr", "tree", "true", "truncate", "tsort", "tty", "ttyinfo", "uname", "unbourne", "unexpand", "uniq", "unlink", "unzip", "uptime", "users", "vdir", "verynice", "vim", "wall", "wc", "wget", "who", "whoami", "whois", "xargs", "xz", "yes", "zip", "zsh", "zstd")

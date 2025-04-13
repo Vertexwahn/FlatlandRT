@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `join`
+
+build_test(
+    name = "join",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:join"],
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `datasette`
+
+build_test(
+    name = "datasette",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:datasette"],
+    visibility = ["//:__subpackages__"],
+)

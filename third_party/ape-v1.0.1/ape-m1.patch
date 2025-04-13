@@ -1,0 +1,97 @@
+--- a/ape-m1.c	2025-02-10 16:59:25
++++ b/ape-m1.c	2025-02-11 13:48:53
+@@ -325,6 +325,66 @@
+     return tail - arg0;
+   }
+   return 0;
++}
++
++static ssize_t WalkToIndirect(const char *restrict path, char *restrict const buf, size_t bufsiz) {
++  char linkname[MAXPATHLEN + 1], a[MAXPATHLEN + 1], b[MAXPATHLEN + 1];
++  size_t s;
++  ssize_t ss;
++  const char *filepath = path;
++  char *p, *buffer = a;
++  a[0] = '\0';
++  b[0] = '\0';
++  do {
++    ss = readlink(filepath, linkname, sizeof(linkname));
++    if (ss == -1) {
++      if (errno != EINVAL)
++        return -errno;
++
++      filepath = filepath == a ? b : a;
++
++      if (filepath[0] == '\0')
++        return 0;
++
++      s = StrLen(filepath);
++      if (s >= bufsiz)
++        return s + 1;
++
++      if(strlcpy(buf, filepath, bufsiz) >= bufsiz)
++        return -EOVERFLOW;
++
++      return 0;
++    }
++    linkname[ss] = '\0';
++
++    if (linkname[0] == '/') {
++      if (strlcpy(buffer, linkname, sizeof(a)) >= sizeof(a))
++        return -EOVERFLOW;
++      goto flip;
++    }
++
++    s = strlcpy(buffer, filepath, sizeof(a));
++    if (s >= sizeof(a))
++      return -EOVERFLOW;
++
++    for (p = &buffer[s]; p != buffer; --p) {
++      if (*p == '/') {
++        *(++p) = '\0';
++        break;
++      }
++    }
++
++    if (strlcat(buffer, linkname, sizeof(a)) >= sizeof(a))
++      return -EOVERFLOW;
++
++flip:
++    filepath = buffer;
++    buffer = buffer == a ? b : a;
++  } while (true);
++
++  return -ENOSYS;
+ }
+ 
+ static void Perror(const char *thing, long rc, const char *reason) {
+@@ -941,7 +997,8 @@
+   struct ApeLoader *M;
+   long *sp, *sp2, *auxv;
+   union ElfEhdrBuf *ebuf;
+-  char *p, *pe, *exe, *prog, *execfn;
++  char *p, *pe, *exe, *prog, *execfn, *buffer;
++  ssize_t s;
+ 
+   /* allocate loader memory in program's arg block */
+   n = sizeof(struct ApeLoader);
+@@ -1019,6 +1076,19 @@
+     execfn = prog;
+   }
+ 
++  /* walk symlink chain to possible indirect */
++  if ((s = WalkToIndirect(prog, prog, StrLen(prog) + 1))) {
++    if (s < 0)
++      Pexit(prog, s, "failed to walk symlinks");
++
++    buffer = __builtin_alloca(s);
++
++    if ((s = WalkToIndirect(prog, buffer, s)))
++      Pexit(prog, s, "failed to perform allocated symlink walk");
++
++    prog = buffer;
++  }
++
+   /* sneak the system five abi back out of args */
+   sp = (long *)(argv - 1);
+   auxv = (long *)(envp + i + 1);

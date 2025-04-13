@@ -1,0 +1,3 @@
+visibility("public")
+
+{{name}} = {{value}}

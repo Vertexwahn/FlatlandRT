@@ -1,0 +1,10 @@
+load("@rules_uv//uv:pip.bzl", "pip_compile")
+
+# TODO: switch to `@rules_python//python/uv:lock.bzl` when released
+pip_compile(
+    name = "lock",
+    requirements_in = ":requirements.in",
+    requirements_txt = ":requirements.txt",
+    tags = ["manual"],
+    universal = True,
+)

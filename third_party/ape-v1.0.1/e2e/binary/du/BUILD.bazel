@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `du`
+
+build_test(
+    name = "du",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:du"],
+    visibility = ["//:__subpackages__"],
+)

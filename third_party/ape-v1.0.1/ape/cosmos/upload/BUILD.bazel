@@ -1,0 +1,6 @@
+# TODO: add version uploads aliases here
+
+alias(
+    name = "upload",
+    actual = "@upload",
+)

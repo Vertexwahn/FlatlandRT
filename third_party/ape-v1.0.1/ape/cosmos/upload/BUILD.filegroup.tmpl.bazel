@@ -1,0 +1,6 @@
+filegroup(
+    name = "{{name}}",
+    srcs = {{srcs}},
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)

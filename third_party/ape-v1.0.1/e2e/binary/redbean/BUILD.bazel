@@ -1,0 +1,21 @@
+load("@rules_python_pytest//python_pytest:defs.bzl", "py_pytest_test")
+
+py_pytest_test(
+    name = "pytest",
+    size = "small",
+    srcs = ["serve.py"],
+    data = [
+        "@ape//ape:redbean",
+    ],
+    deps = [
+        "//binary:pytest",
+    ],
+)
+
+test_suite(
+    name = "redbean",
+    tests = [
+        ":pytest",
+    ],
+    visibility = ["//:__subpackages__"],
+)

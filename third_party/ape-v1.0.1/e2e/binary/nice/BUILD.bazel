@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `nice`
+
+build_test(
+    name = "nice",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:nice"],
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,31 @@
+# Use pre-release registry. Remove when available in BCR
+common --registry https://bcr.bazel.build
+common --registry=https://gitlab.arm.com/bazel/toolchain_utils/-/releases/v1.0.2/downloads
+common --registry=https://gitlab.arm.com/bazel/download_utils/-/releases/v1.0.1/downloads
+
+# Enable hermetic `rules_python`
+common --@rules_python//python/config_settings:bootstrap_impl=script
+
+# Build cache
+build --experimental_guard_against_concurrent_changes
+
+# Disable `WORKSPACE`
+build --noenable_workspace
+
+# Prevent `PATH` and `LD_LIBRARY_PATH` leaking into action enviroment
+build --incompatible_strict_action_env
+
+# Prevent symlink forest under `.runfiles/wsname/external/repo`
+build --nolegacy_external_runfiles
+
+# Avoid building all targets when testing
+test --build_tests_only
+
+# Print relative paths where possible to reduce noise
+common --attempt_to_print_relative_paths
+
+# Disable warning transitive module versions
+common --check_direct_dependencies=off
+
+# User-specific .bazelrc
+try-import %workspace%/.bazelrc.user

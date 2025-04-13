@@ -1,0 +1,12 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load(":defs.bzl", "install")
+
+install(
+    name = "install",
+    src = ":fixture.txt",
+)
+
+build_test(
+    name = "test",
+    targets = [":install"],
+)

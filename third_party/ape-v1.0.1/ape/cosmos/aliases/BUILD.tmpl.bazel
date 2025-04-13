@@ -1,0 +1,5 @@
+alias(
+    name = "{{name}}",
+    actual = "{{actual}}",
+    visibility = ["//visibility:public"],
+)

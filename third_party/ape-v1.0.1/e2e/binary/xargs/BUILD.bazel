@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `xargs`
+
+build_test(
+    name = "xargs",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:xargs"],
+    visibility = ["//:__subpackages__"],
+)

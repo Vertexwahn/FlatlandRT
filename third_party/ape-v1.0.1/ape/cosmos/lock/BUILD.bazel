@@ -1,0 +1,18 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
+py_library(
+    name = "python",
+    srcs = [
+        "cli.py",
+        "download.py",
+        "integrity.py",
+    ],
+    deps = ["@rules_python//python/runfiles"],
+)
+
+py_binary(
+    name = "lock",
+    srcs = ["__main__.py"],
+    main = "__main__.py",
+    deps = [":python"],
+)

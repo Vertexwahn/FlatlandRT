@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `yes`
+
+build_test(
+    name = "yes",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:yes"],
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,10 @@
+This is the end of the first file!
+
+Hello, world!
+
+This is the start of the first file!
+This is the end of the second file!
+
+Hello, universe!
+
+This is the start of the second file!

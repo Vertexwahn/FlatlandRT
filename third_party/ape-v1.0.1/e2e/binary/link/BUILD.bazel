@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `link`
+
+build_test(
+    name = "link",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:link"],
+    visibility = ["//:__subpackages__"],
+)

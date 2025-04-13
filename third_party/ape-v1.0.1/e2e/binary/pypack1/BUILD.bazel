@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `pypack1`
+
+build_test(
+    name = "pypack1",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:pypack1"],
+    visibility = ["//:__subpackages__"],
+)

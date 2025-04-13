@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `git-upload-archive`
+
+build_test(
+    name = "git-upload-archive",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:git-upload-archive"],
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `tr`
+
+build_test(
+    name = "tr",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:tr"],
+    visibility = ["//:__subpackages__"],
+)

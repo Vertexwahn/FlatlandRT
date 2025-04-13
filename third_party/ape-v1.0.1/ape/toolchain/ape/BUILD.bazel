@@ -1,0 +1,58 @@
+load("@toolchain_utils//toolchain/info:defs.bzl", "toolchain_info")
+load("@toolchain_utils//toolchain/test:defs.bzl", "toolchain_test")
+
+toolchain_type(
+    name = "type",
+    visibility = ["//visibility:public"],
+)
+
+[
+    (
+        toolchain_info(
+            name = "ape-{}-{}".format(cpu, os),
+            tags = ["manual"],
+            target = "{}//:binary".format(target),
+        ),
+        toolchain(
+            name = "{}-{}".format(cpu, os),
+            exec_compatible_with = (
+                "@toolchain_utils//toolchain/constraint/cpu:{}".format(cpu),
+                "@toolchain_utils//toolchain/constraint/os:{}".format(os),
+            ),
+            toolchain = ":ape-{}-{}".format(cpu, os),
+            toolchain_type = ":type",
+        ),
+    )
+    for cpu, os, target in (
+        ("amd64", "linux", "@ape-x86_64.elf"),
+        ("amd64", "windows", "@ape.pe"),
+        ("amd64", "macos", "@ape-x86_64.macho"),
+        ("amd64", "openbsd", "@ape-x86_64.elf"),
+        ("amd64", "netbsd", "@ape-x86_64.elf"),
+        ("amd64", "freebsd", "@ape-x86_64.elf"),
+        ("arm64", "linux", "@ape-arm64.elf"),
+        ("arm64", "macos", "@ape-arm64.macho"),
+        ("arm64", "freebsd", "@ape-arm64.elf"),
+    )
+]
+
+alias(
+    name = "resolved",
+    actual = "@resolved-ape",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)
+
+toolchain_test(
+    name = "ape",
+    size = "small",
+    status = 1,
+    stderr = "@toolchain_utils//toolchain/test:non-empty",
+    stdout = "@toolchain_utils//toolchain/test:empty",
+    # TODO: make `ape.pe` work like an actual launcher
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
+    toolchains = [":resolved"],
+)

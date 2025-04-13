@@ -1,0 +1,33 @@
+load("@rules_python_pytest//python_pytest:defs.bzl", "py_pytest_test")
+load("@bazel_skylib//rules:native_binary.bzl", "native_test")
+
+py_pytest_test(
+    name = "pytest",
+    size = "small",
+    srcs = ["concatenate.py"],
+    data = [
+        "a.txt",
+        "b.txt",
+        "expected.txt",
+        "@ape//ape:cat",
+    ],
+    deps = [
+        "//binary:pytest",
+    ],
+)
+
+native_test(
+    name = "version",
+    size = "small",
+    src = "@ape//ape:cat",
+    args = ["--version"],
+)
+
+test_suite(
+    name = "cat",
+    tests = [
+        "pytest",
+        "version",
+    ],
+    visibility = ["//:__subpackages__"],
+)

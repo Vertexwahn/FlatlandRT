@@ -1,0 +1,11 @@
+load("//ape/cosmos:basenames.bzl", "BASENAMES")
+
+[
+    alias(
+        name = basename,
+        actual = "//ape/assimilate:{}".format(basename),
+        tags = ["manual"],
+        visibility = ["//visibility:public"],
+    )
+    for basename in BASENAMES
+]

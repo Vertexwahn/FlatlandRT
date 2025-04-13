@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `rsync`
+
+build_test(
+    name = "rsync",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:rsync"],
+    visibility = ["//:__subpackages__"],
+)

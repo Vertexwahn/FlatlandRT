@@ -1,0 +1,11 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# TODO: write an _actual_ test for `tree`
+
+build_test(
+    name = "tree",
+    size = "small",
+    tags = ["stub"],
+    targets = ["@ape//ape:tree"],
+    visibility = ["//:__subpackages__"],
+)

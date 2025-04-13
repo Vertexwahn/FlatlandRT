@@ -1,0 +1,23 @@
+====
+1:1c
+  Hello, world!
+2:1c
+  Hello, world?
+3:1c
+  Hello, Earth!
+====
+1:3c
+  This is some text.
+2:3c
+  This is text.
+3:3c
+  This is some words.
+====2
+1:5c
+3:5c
+  This is some other text.
+2:5,8c
+  
+  This is some text.
+  
+  This is more text.

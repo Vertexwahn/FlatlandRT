@@ -1,0 +1,1 @@
+3457a8cafccfaba3724d3fe26b52aadf8cdbaa67b2eab96697314f58  binary/sha224sum/fixture.txt

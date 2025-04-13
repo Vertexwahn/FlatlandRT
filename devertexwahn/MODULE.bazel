@@ -15,6 +15,7 @@ module(
 bazel_dep(name = "apple_support", version = "1.20.0")
 
 bazel_dep(name = "abseil-cpp", version = "20250127.1")
+bazel_dep(name = "ape", version = "1.0.1")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "boost.algorithm", version = "1.87.0")
 bazel_dep(name = "boost.asio", version = "1.87.0.bcr.1")
@@ -64,6 +65,11 @@ bazel_dep(name = "googletest", version = "1.16.0", dev_dependency = True)
 local_path_override(
     module_name = "abseil-cpp",
     path = "../third_party/abseil-cpp",
+)
+
+local_path_override(
+    module_name = "ape",
+    path = "../third_party/ape-v1.0.1",
 )
 
 local_path_override(
