@@ -8,13 +8,6 @@
 
 
 jobs:
-  - job: MacOSAppleClang14Ventura
-    displayName: "Apple Clang15 on macOS 13 (Ventura)"
-    pool:
-      vmImage: 'macOS-13'
-    steps:
-      - template: devertexwahn/ci/macOS-13-apple-clang15.yaml
-
   - job: MacOSAppleClang14Sonoma
     displayName: "Apple Clang15 on macOS 14 (Sonoma)"
     pool:
@@ -108,28 +101,6 @@ jobs:
     steps:
       - template: devertexwahn/ci/ubuntu-24.04-gcc13-dbg-part1.yaml
 
-  
-  # Visual Studio 2019
-  - job: VisualStudio2019Dbg
-    displayName: "VS2019 dbg on Windows Server 2019"
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-      - template: devertexwahn/ci/windows-2019-vs2019-dbg.yaml
-
-  - job: VisualStudio2019Fastbuild
-    displayName: "VS2019 fastbuild on Windows Server 2019"
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-      - template: devertexwahn/ci/windows-2019-vs2019-fastbuild.yaml
-
-  - job: VisualStudio2019Opt
-    displayName: "VS2019 opt on Windows Server 2019"
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-      - template: devertexwahn/ci/windows-2019-vs2019-opt.yaml
 
   # Visual Studio 2022 on Windows Server 2022
   - job: VisualStudio2022_WindowsServer2022_Dbg

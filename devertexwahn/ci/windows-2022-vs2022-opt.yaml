@@ -53,9 +53,9 @@ steps:
       get-volume
     displayName: "Check available memory"
 
-  - powershell: |    
+  - bash: |    
       cd devertexwahn
-      bazel --output_base=C:/bazel_output_base test --config=vs2022 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=$env:BUILDBUDDY_API_KEY --compilation_mode=opt -- //... 
+      bazel --output_base=C:/bazel_output_base test --config=vs2022 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key="$BUILDBUDDY_API_KEY" --compilation_mode=opt -- //... 
     env:
       BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel test vs2022-opt"
