@@ -48,7 +48,7 @@ see example [CMakeLists.txt](example/CMakeLists.txt) on how to use.
 * Headers only or compiled
 * Feature-rich formatting, using the excellent [fmt](https://github.com/fmtlib/fmt) library.
 * Asynchronous mode (optional)
-* [Custom](https://github.com/gabime/spdlog/wiki/3.-Custom-formatting) formatting.
+* [Custom](https://github.com/gabime/spdlog/wiki/Custom-formatting) formatting.
 * Multi/Single threaded loggers.
 * Various log targets:
   * Rotating log files.
@@ -58,7 +58,7 @@ see example [CMakeLists.txt](example/CMakeLists.txt) on how to use.
   * Windows event log.
   * Windows debugger (```OutputDebugString(..)```).
   * Log to Qt widgets ([example](#log-to-qt-with-nice-colors)).
-  * Easily [extendable](https://github.com/gabime/spdlog/wiki/4.-Sinks#implementing-your-own-sink) with custom log targets.
+  * Easily [extendable](https://github.com/gabime/spdlog/wiki/Sinks#implementing-your-own-sink) with custom log targets.
 * Log filtering - log levels can be modified at runtime as well as compile time.
 * Support for loading log levels from argv or environment var.
 * [Backtrace](#backtrace-support) support - store debug messages in a ring buffer and display them later on demand.

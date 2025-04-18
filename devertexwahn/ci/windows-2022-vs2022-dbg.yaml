@@ -10,8 +10,6 @@ steps:
       Get-PSDrive
     displayName: "Show disk space"
 
-
-
   - script: |
       systeminfo
     displayName: "Show system information"
@@ -21,6 +19,7 @@ steps:
     fetchDepth: 1
     lfs: false
     submodules: false
+
 
   - script: |
       cd devertexwahn

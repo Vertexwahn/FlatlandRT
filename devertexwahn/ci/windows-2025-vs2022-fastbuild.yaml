@@ -16,6 +16,7 @@ steps:
     lfs: false
     submodules: false
 
+
   - script: |
       cd devertexwahn
       bazel version
