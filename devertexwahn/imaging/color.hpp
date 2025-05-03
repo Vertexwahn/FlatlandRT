@@ -40,46 +40,55 @@ struct ColorTypeRGB : public Eigen::Matrix<ScalarType, Dimension, 1> {
 
     using Base::operator=;
 
+    [[nodiscard]]
     Scalar &red() {
         static_assert(Dimension > 0);
         return Base::x();
     }
 
+    [[nodiscard]]
     Scalar &green() {
         static_assert(Dimension > 1);
         return Base::y();
     }
 
+    [[nodiscard]]
     Scalar &blue() {
         static_assert(Dimension > 2);
         return Base::z();
     }
 
+    [[nodiscard]]
     Scalar &alpha() {
         static_assert(Dimension > 3);
         return (*this)[3];
     }
 
+    [[nodiscard]]
     const Scalar &red() const {
         static_assert(Dimension > 0);
         return Base::x();
     }
 
+    [[nodiscard]]
     const Scalar &green() const {
         static_assert(Dimension > 1);
         return Base::y();
     }
 
+    [[nodiscard]]
     const Scalar &blue() const {
         static_assert(Dimension > 2);
         return Base::z();
     }
 
+    [[nodiscard]]
     const Scalar &alpha() const {
         static_assert(Dimension > 3);
         return (*this)[3];
     }
 
+    [[nodiscard]]
     const ColorTypeRGB<Scalar,3> rgb() const {
         return ColorTypeRGB<Scalar,3>{red(), green(), blue()};
     }

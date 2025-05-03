@@ -20,12 +20,6 @@ steps:
       df -h
     displayName: "Show disk space"
 
-  # BEGIN-EXCLUDE-FROM-FLATLAND
-  - script: |
-      brew install qt@6
-      brew link qt@6
-    displayName: "Install dependencies"
-  # END-EXCLUDE-FROM-FLATLAND
 
   - script: |
       sw_vers

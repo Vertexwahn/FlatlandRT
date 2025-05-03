@@ -28,6 +28,7 @@ struct NormalType : public Eigen::Matrix<ScalarType, Dimension, 1> {
 
     using Base::operator=;
 
+    [[nodiscard]]
     bool has_nans() const {
         for (size_t i=0; i<Dimension; ++i) {
             if(std::isnan(this->coeff(i))) {

@@ -165,7 +165,7 @@ function(catch_discover_tests TARGET)
     ${ARGN}
   )
 
-  if (${CMAKE_VERSION} VERSION_LESS "3.19")
+  if(${CMAKE_VERSION} VERSION_LESS "3.19")
     message(FATAL_ERROR "This script requires JSON support from CMake version 3.19 or greater.")
   endif()
 
@@ -187,7 +187,7 @@ function(catch_discover_tests TARGET)
     endif()
     set(_DISCOVERY_MODE ${CMAKE_CATCH_DISCOVER_TESTS_DISCOVERY_MODE})
   endif()
-  if (NOT _DISCOVERY_MODE MATCHES "^(POST_BUILD|PRE_TEST)$")
+  if(NOT _DISCOVERY_MODE MATCHES "^(POST_BUILD|PRE_TEST)$")
     message(FATAL_ERROR "Unknown DISCOVERY_MODE: ${_DISCOVERY_MODE}")
   endif()
 
@@ -204,7 +204,7 @@ function(catch_discover_tests TARGET)
     TARGET ${TARGET}
     PROPERTY CROSSCOMPILING_EMULATOR
   )
-  if (NOT _SKIP_IS_FAILURE)
+  if(NOT _SKIP_IS_FAILURE)
     set(_PROPERTIES ${_PROPERTIES} SKIP_RETURN_CODE 4)
   endif()
 

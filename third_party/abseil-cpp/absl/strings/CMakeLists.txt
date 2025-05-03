@@ -545,6 +545,7 @@ absl_cc_test(
   COPTS
     ${ABSL_TEST_COPTS}
   DEPS
+    absl::random_random
     absl::str_format
     absl::str_format_internal
     absl::strings
@@ -998,6 +999,7 @@ absl_cc_library(
     absl::span
     absl::strings
     absl::type_traits
+    absl::weakly_mixed_integer
   PUBLIC
 )
 

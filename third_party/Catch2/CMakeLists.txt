@@ -26,12 +26,11 @@ cmake_dependent_option(CATCH_BUILD_SURROGATES "Enable generating and building su
 cmake_dependent_option(CATCH_ENABLE_CONFIGURE_TESTS "Enable CMake configuration tests. WARNING: VERY EXPENSIVE" OFF "CATCH_DEVELOPMENT_BUILD" OFF)
 cmake_dependent_option(CATCH_ENABLE_CMAKE_HELPER_TESTS "Enable CMake helper tests. WARNING: VERY EXPENSIVE" OFF "CATCH_DEVELOPMENT_BUILD" OFF)
 
-
 # Catch2's build breaks if done in-tree. You probably should not build
 # things in tree anyway, but we can allow projects that include Catch2
 # as a subproject to build in-tree as long as it is not in our tree.
-if (CMAKE_BINARY_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    message(FATAL_ERROR "Building in-source is not supported! Create a build dir and remove ${CMAKE_SOURCE_DIR}/CMakeCache.txt")
+if(CMAKE_BINARY_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  message(FATAL_ERROR "Building in-source is not supported! Create a build dir and remove ${CMAKE_SOURCE_DIR}/CMakeCache.txt")
 endif()
 
 project(Catch2
@@ -46,7 +45,7 @@ project(Catch2
 # Then we also add path that we use to configure the project, but is of
 # no use to top level projects.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/extras")
-if (NOT NOT_SUBPROJECT)
+if(NOT NOT_SUBPROJECT)
   set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" PARENT_SCOPE)
 endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
@@ -67,9 +66,8 @@ set(CATCH_CMAKE_CONFIG_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Catch2")
 # are built during these tests, so this is required here, before
 # the subdirectories are added.
 if(CATCH_TEST_USE_WMAIN)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:wmainCRTStartup")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:wmainCRTStartup")
 endif()
-
 
 # Basic paths
 set(CATCH_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -80,119 +78,117 @@ set(SELF_TEST_DIR ${CATCH_DIR}/tests/SelfTest)
 add_subdirectory(src)
 
 # Build tests only if requested
-if (BUILD_TESTING AND CATCH_BUILD_TESTING AND NOT_SUBPROJECT)
-    find_package(PythonInterp 3 REQUIRED)
-    if (NOT PYTHONINTERP_FOUND)
-        message(FATAL_ERROR "Python not found, but required for tests")
-    endif()
-    set(CMAKE_FOLDER "tests")
-    add_subdirectory(tests)
+if(BUILD_TESTING AND CATCH_BUILD_TESTING AND NOT_SUBPROJECT)
+  find_package(PythonInterp 3 REQUIRED)
+  if(NOT PYTHONINTERP_FOUND)
+    message(FATAL_ERROR "Python not found, but required for tests")
+  endif()
+  set(CMAKE_FOLDER "tests")
+  add_subdirectory(tests)
 endif()
 
 if(CATCH_BUILD_EXAMPLES)
-    set(CMAKE_FOLDER "Examples")
-    add_subdirectory(examples)
+  set(CMAKE_FOLDER "Examples")
+  add_subdirectory(examples)
 endif()
 
 if(CATCH_BUILD_EXTRA_TESTS)
-    set(CMAKE_FOLDER "tests/ExtraTests")
-    add_subdirectory(tests/ExtraTests)
+  set(CMAKE_FOLDER "tests/ExtraTests")
+  add_subdirectory(tests/ExtraTests)
 endif()
 
 if(CATCH_BUILD_FUZZERS)
-    set(CMAKE_FOLDER "fuzzing")
-    add_subdirectory(fuzzing)
+  set(CMAKE_FOLDER "fuzzing")
+  add_subdirectory(fuzzing)
 endif()
 
-if (CATCH_DEVELOPMENT_BUILD)
-    add_warnings_to_targets("${CATCH_WARNING_TARGETS}")
+if(CATCH_DEVELOPMENT_BUILD)
+  add_warnings_to_targets("${CATCH_WARNING_TARGETS}")
 endif()
 
 # Only perform the installation steps when Catch is not being used as
 # a subproject via `add_subdirectory`, or the destinations will break,
 # see https://github.com/catchorg/Catch2/issues/1373
-if (NOT_SUBPROJECT)
-    configure_package_config_file(
-        ${CMAKE_CURRENT_LIST_DIR}/CMake/Catch2Config.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/Catch2Config.cmake
-        INSTALL_DESTINATION
-          ${CATCH_CMAKE_CONFIG_DESTINATION}
-    )
+if(NOT_SUBPROJECT)
+  configure_package_config_file(
+    ${CMAKE_CURRENT_LIST_DIR}/CMake/Catch2Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Catch2Config.cmake
+    INSTALL_DESTINATION
+      ${CATCH_CMAKE_CONFIG_DESTINATION}
+  )
 
-    write_basic_package_version_file(
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/Catch2ConfigVersion.cmake"
+    COMPATIBILITY
+      SameMajorVersion
+  )
+
+  install(
+    FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/Catch2Config.cmake"
       "${CMAKE_CURRENT_BINARY_DIR}/Catch2ConfigVersion.cmake"
-      COMPATIBILITY
-        SameMajorVersion
-    )
+    DESTINATION
+      ${CATCH_CMAKE_CONFIG_DESTINATION}
+  )
 
+  # Install documentation
+  if(CATCH_INSTALL_DOCS)
+    install(
+      DIRECTORY
+        docs/
+      DESTINATION
+        "${CMAKE_INSTALL_DOCDIR}"
+      PATTERN "doxygen" EXCLUDE
+    )
+  endif()
+
+  if(CATCH_INSTALL_EXTRAS)
+    # Install CMake scripts
     install(
       FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/Catch2Config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/Catch2ConfigVersion.cmake"
+        "extras/ParseAndAddCatchTests.cmake"
+        "extras/Catch.cmake"
+        "extras/CatchAddTests.cmake"
+        "extras/CatchShardTests.cmake"
+        "extras/CatchShardTestsImpl.cmake"
       DESTINATION
         ${CATCH_CMAKE_CONFIG_DESTINATION}
     )
 
-    # Install documentation
-    if(CATCH_INSTALL_DOCS)
-      install(
-        DIRECTORY
-          docs/
-        DESTINATION
-          "${CMAKE_INSTALL_DOCDIR}"
-        PATTERN "doxygen" EXCLUDE
-      )
-    endif()
-
-    if(CATCH_INSTALL_EXTRAS)
-        # Install CMake scripts
-        install(
-          FILES
-            "extras/ParseAndAddCatchTests.cmake"
-            "extras/Catch.cmake"
-            "extras/CatchAddTests.cmake"
-            "extras/CatchShardTests.cmake"
-            "extras/CatchShardTestsImpl.cmake"
-          DESTINATION
-            ${CATCH_CMAKE_CONFIG_DESTINATION}
-        )
-    
-        # Install debugger helpers
-        install(
-          FILES
-            "extras/gdbinit"
-            "extras/lldbinit"
-          DESTINATION
-            ${CMAKE_INSTALL_DATAROOTDIR}/Catch2
-        )
-    endif()
-
-    ## Provide some pkg-config integration
-    set(PKGCONFIG_INSTALL_DIR
-        "${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig"
-        CACHE PATH "Path where catch2.pc is installed"
-    )
-    configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/CMake/catch2.pc.in
-      ${CMAKE_CURRENT_BINARY_DIR}/catch2.pc
-      @ONLY
-    )
-    configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/CMake/catch2-with-main.pc.in
-      ${CMAKE_CURRENT_BINARY_DIR}/catch2-with-main.pc
-      @ONLY
-    )
+    # Install debugger helpers
     install(
       FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/catch2.pc"
-        "${CMAKE_CURRENT_BINARY_DIR}/catch2-with-main.pc"
+        "extras/gdbinit"
+        "extras/lldbinit"
       DESTINATION
-        ${PKGCONFIG_INSTALL_DIR}
+        ${CMAKE_INSTALL_DATAROOTDIR}/Catch2
     )
+  endif()
 
-    set(CPACK_PACKAGE_CONTACT "https://github.com/catchorg/Catch2/")
+  ## Provide some pkg-config integration
+  set(PKGCONFIG_INSTALL_DIR
+    "${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig"
+    CACHE PATH "Path where catch2.pc is installed"
+  )
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/CMake/catch2.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/catch2.pc
+    @ONLY
+  )
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/CMake/catch2-with-main.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/catch2-with-main.pc
+    @ONLY
+  )
+  install(
+    FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/catch2.pc"
+      "${CMAKE_CURRENT_BINARY_DIR}/catch2-with-main.pc"
+    DESTINATION
+      ${PKGCONFIG_INSTALL_DIR}
+  )
 
+  set(CPACK_PACKAGE_CONTACT "https://github.com/catchorg/Catch2/")
 
-    include( CPack )
-
+  include(CPack)
 endif()

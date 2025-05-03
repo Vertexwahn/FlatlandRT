@@ -11,7 +11,6 @@
 #include <catch2/internal/catch_context.hpp>
 #include <catch2/internal/catch_polyfills.hpp>
 
-#include <cmath>
 #include <iomanip>
 
 namespace Catch {

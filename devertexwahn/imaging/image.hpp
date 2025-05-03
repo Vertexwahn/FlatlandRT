@@ -129,10 +129,12 @@ public:
 
     // todo: should return const ColorChannelType*
     //const ColorChannelType* data() const {
+    [[nodiscard]]
     ColorChannelType* data() const {
         return data_;
     }
 
+    [[nodiscard]]
     ColorChannelType* data() {
         return data_;
     }

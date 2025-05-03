@@ -33,7 +33,7 @@ common --registry=https://bcr.bazel.build
 build --@boost.asio//:ssl=boringssl
 
 # macOS (e.g. Clang 14.0.0)
-build:macos --cxxopt=-std=c++2b  # see https://clang.llvm.org/cxx_status.html
+build:macos --cxxopt=-std=c++20  # see https://clang.llvm.org/cxx_status.html
 build:macos --cxxopt=-Wall  # Turn on all warnings
 #build:macos --sandbox_block_path=/usr/local # This will fix okapi.cli but break okapi.ui - Note: Workaround for https://github.com/bazelbuild/bazel/issues/10472 - compile error with boringssl
 build:macos --define compiler=macos

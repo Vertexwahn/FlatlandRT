@@ -20,7 +20,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <iosfwd>
 
 namespace Catch {
 

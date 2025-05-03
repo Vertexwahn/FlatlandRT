@@ -93,7 +93,7 @@
   * Removed redundant `CTEST_FILE` param when creating the indirection file for `PRE_TEST` discovery mode (#2936)
   * Rewrote the test discovery logic to use output from the JSON reporter
     * This means that `catch_discover_tests` now requires CMake 3.19 or newer
-  * Added `ADD_TAGS_AS_LABELS` option. If specified, each CTest test will be labeled with corrensponding Catch2's test tag
+  * Added `ADD_TAGS_AS_LABELS` option. If specified, each CTest test will be labeled with corresponding Catch2's test tag
 * Bumped up the minimum required CMake version to build Catch2 to 3.16
 * Meson build now provides option to avoid installing Catch2
 * Bazel build is moved to Bzlmod.
@@ -175,7 +175,7 @@
 ### Improvements
 * Reintroduced support for GCC 5 and 6 (#2836)
   * As with VS2017, if they start causing trouble again, they will be dropped again.
-* Added workaround for targetting newest MacOS (Sonoma) using GCC (#2837, #2839)
+* Added workaround for targeting newest MacOS (Sonoma) using GCC (#2837, #2839)
 * `CATCH_CONFIG_DEFAULT_REPORTER` can now be an arbitrary reporter spec
   * Previously it could only be a plain reporter name, so it was impossible to compile in custom arguments to the reporter.
 * Improved performance of generating 64bit random integers by 20+%
