@@ -37,14 +37,14 @@ build:macos --cxxopt=-std=c++20  # see https://clang.llvm.org/cxx_status.html
 build:macos --cxxopt=-Wall  # Turn on all warnings
 #build:macos --sandbox_block_path=/usr/local # This will fix okapi.cli but break okapi.ui - Note: Workaround for https://github.com/bazelbuild/bazel/issues/10472 - compile error with boringssl
 build:macos --define compiler=macos
-build:macos --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
+#build:macos --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
 #build:macos --cxxopt=-Werror # Commented out because of Embree
 #build:macos --cxxopt=-Wextra
 #build:macos --spawn_strategy=local
 
 # macOS Intel (config used in CI jobs)
 build:clang14_macos --cxxopt=-std=c++20
-build:clang14_macos --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
+#build:clang14_macos --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
 build:clang14_macos --cxxopt=-mwaitpkg
 build:clang14_macos --define compiler=clang14_macos
 
@@ -65,7 +65,7 @@ build:gcc11 --cxxopt=-std=c++20
 build:gcc11 --cxxopt=-Wall
 build:gcc11 --define compiler=gcc11
 build:gcc11 --cxxopt=-fpermissive # Needed for fmt
-build:gcc11 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
+#build:gcc11 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
 #build:gcc11 --cxxopt=-Werror
 #build:gcc11 --cxxopt=-Wno-volatile # blocked by emsdk
 ##build:gcc11 --cxxopt=-Wextra
@@ -81,7 +81,7 @@ build:gcc13 --cxxopt=-std=c++23
 build:gcc13 --cxxopt=-Wall
 build:gcc13 --define compiler=gcc13
 build:gcc13 --cxxopt=-fpermissive # Needed for fmt
-build:gcc13 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
+#build:gcc13 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
 #build:gcc13 --@rules_cuda//cuda:copts=-allow-unsupported-compiler
 
 # Clang 14.0.0 (config is used on Ubuntu)
@@ -148,6 +148,7 @@ build:iwyu --@bazel_iwyu//:iwyu_opts=--verbose=3,--no_fwd_decls,--cxx17ns,--max_
 
 # Emscripten
 build:emscripten --features=exceptions
+build:emscripten --incompatible_enable_cc_toolchain_resolution
 
 try-import %workspace%/bazel/bazelrc/.bazelrc.remote_cache
 try-import %workspace%/bazel/bazelrc/.bazelrc.build_meta

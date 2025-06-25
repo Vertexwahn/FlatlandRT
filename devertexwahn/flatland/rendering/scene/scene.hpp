@@ -117,6 +117,11 @@ public:
         return intersector_;
     }
 
+    [[nodiscard]]
+    bool has_environment_emitter() const {
+        return environment_emitter_ != nullptr;
+    }
+
     void set_environment(ReferenceCounted<Emitter> environment_environment) {
         environment_emitter_ = environment_environment;
     }

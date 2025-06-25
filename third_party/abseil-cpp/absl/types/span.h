@@ -202,10 +202,11 @@ class ABSL_ATTRIBUTE_VIEW Span {
  public:
   using element_type = T;
   using value_type = absl::remove_cv_t<T>;
-  // TODO(b/316099902) - pointer should be Nullable<T*>, but this makes it hard
-  // to recognize foreach loops as safe.
-  using pointer = T*;
-  using const_pointer = const T*;
+  // TODO(b/316099902) - pointer should be absl_nullable, but this makes it hard
+  // to recognize foreach loops as safe. absl_nullability_unknown is currently
+  // used to suppress -Wnullability-completeness warnings.
+  using pointer = T* absl_nullability_unknown;
+  using const_pointer = const T* absl_nullability_unknown;
   using reference = T&;
   using const_reference = const T&;
   using iterator = pointer;
@@ -498,8 +499,7 @@ class ABSL_ATTRIBUTE_VIEW Span {
   // Support for absl::Hash.
   template <typename H>
   friend H AbslHashValue(H h, Span v) {
-    return H::combine(H::combine_contiguous(std::move(h), v.data(), v.size()),
-                      hash_internal::WeaklyMixedInteger{v.size()});
+    return H::combine_contiguous(std::move(h), v.data(), v.size());
   }
 
  private:

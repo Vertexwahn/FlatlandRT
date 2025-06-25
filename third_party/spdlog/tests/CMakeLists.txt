@@ -19,9 +19,9 @@ if(Catch2_FOUND)
 else()
     message(STATUS "Bundled version of Catch will be downloaded and used.")
     include(FetchContent)
-    FetchContent_Declare(Catch2
-            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-            GIT_TAG 53d0d913a422d356b23dd927547febdf69ee9081 # v3.5.0
+    FetchContent_Declare(
+        Catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG 53d0d913a422d356b23dd927547febdf69ee9081 # v3.5.0
     )
     FetchContent_MakeAvailable(Catch2)
 endif()
@@ -71,9 +71,9 @@ function(spdlog_prepare_test test_target spdlog_lib)
     target_link_libraries(${test_target} PRIVATE Catch2::Catch2WithMain)
     if(SPDLOG_SANITIZE_ADDRESS)
         spdlog_enable_addr_sanitizer(${test_target})
-    elseif (SPDLOG_SANITIZE_THREAD)
+    elseif(SPDLOG_SANITIZE_THREAD)
         spdlog_enable_thread_sanitizer(${test_target})
-    endif ()
+    endif()
     add_test(NAME ${test_target} COMMAND ${test_target})
     set_tests_properties(${test_target} PROPERTIES RUN_SERIAL ON)
 endfunction()

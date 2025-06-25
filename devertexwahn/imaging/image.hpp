@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2024 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,63 +12,52 @@
 #include "math/point.hpp"
 #include "math/vector.hpp"
 
+#include <memory>
+
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
+/**
+ *  \brief Used to represent images with a specific width and height.
+ *
+ *  Data storage is assumed to be interleaved (not planar).
+ */
 template <typename ColorType, typename ColorChannelType, int ColorChannelCount>
 class Image {
 public:
+    /// Create an image of specified size and fill it with black color
     Image(const int width, const int height) : width_(width), height_(height) {
-        const int data_size = width_ * height_ * ColorChannelCount;
-        data_ = new ColorChannelType[data_size];
-
-        // make it black
-        for (int i = 0; i < data_size; ++i) {
-            data_[i] = 0;
-        }
+        reserve_memory();
+        fill_black();
     }
 
-    Image(const int width, const int height, ColorType initial_color) : width_(width), height_(height) {
-        const int data_size = width_ * height_ * ColorChannelCount;
-        data_ = new ColorChannelType[data_size];
-
-        for(int i = 0; i < width_ * height_; ++i) {
-            for(int k = 0; k < ColorChannelCount; k++) {
-                data_[i*ColorChannelCount+k] = initial_color[k];
-            }
-        }
-    }
-
+    /// Create an image of the specified size and fill it with black color
     Image(const Vector2i& size) : width_(size.x()), height_(size.y()) {
-        const int data_size = width_ * height_ * ColorChannelCount;
-        data_ = new ColorChannelType[data_size];
-
-        // make it black
-        for (int i = 0; i < data_size; ++i) {
-            data_[i] = 0;
-        }
+        reserve_memory();
+        fill_black();
     }
 
+    /// Create an image of specified size and fill it with the specified color
+    Image(const int width, const int height, const ColorType& initial_color) :
+    width_(width), height_(height) {
+        reserve_memory();
+        fill(initial_color);
+    }
+
+    /// Create an image of specified size and fill it with the specified color
     Image(const int width, const int height, const ColorChannelType* data) :
         width_(width), height_(height) {
-        const int data_size = width_ * height_ * ColorChannelCount;
-        data_ = new ColorChannelType[data_size];
+        assert(data); // data should be not nullptr
 
-        // make it black
-        for (int i = 0; i < data_size; ++i) {
-            data_[i] = data[i];
-        }
+        reserve_memory();
+        fill(data);
     }
 
     Image(const Image& src) {
         width_ = src.width_;
         height_ = src.height_;
-        int size = width_ * height_ * ColorChannelCount;
-        data_ = new ColorChannelType[size];
 
-        // todo use std::copy
-        for (int i = 0; i < size; ++i) {
-            data_[i] = src.data_[i];
-        }
+        reserve_memory();
+        fill(src.data_.get());
     }
 
     Image& operator=(const Image& src) {
@@ -78,65 +67,88 @@ public:
 
         width_ = src.width_;
         height_ = src.height_;
-        const int data_size = width_ * height_ * ColorChannelCount;
 
-        assert(data_);
-        delete [] data_;
-
-        data_ = new ColorChannelType[data_size];
-
-        for (int i = 0; i < data_size; ++i) {
-            data_[i] = src.data_[i];
-        }
+        reserve_memory();
+        fill(src.data_.get());
 
         return *this;
     }
 
-    virtual ~Image() {
-        assert(data_);
-        delete[] data_;
+    Image(Image&& src) {
+        width_ = src.width_;
+        height_ = src.height_;
+        data_size_ = src.data_size_;
+        data_ = std::move(src.data_);
+        assert(src.data_ == nullptr); // guaranteed to be nullptr after move
     }
 
-    void resize(const int width, const int height) {
-        if (data_) {
-            delete[] data_;
+    Image& operator=(Image&& src) noexcept {
+        width_ = src.width_;
+        height_ = src.height_;
+        data_size_ = src.data_size_;
+        data_ = std::move(src.data_);
+        assert(src.data_ == nullptr); // guaranteed to be nullptr after move
+        return *this;
+    }
+
+    bool operator==(const Image& other) const {
+        if (width_ != other.width_ || height_ != other.height_) {
+            return false;
         }
 
+        for (int x = 0; x < this->width_; x++) {
+            for (int y = 0; y < this->height_; y++) {
+                if (this->get_pixel(x, y) != other.get_pixel(x, y))
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool operator!=(const Image& other) const {
+        return !(this->operator==(other));
+    }
+
+    virtual ~Image() = default;
+
+    void resize(const int width, const int height) {
         width_ = width;
         height_ = height;
-        data_ = new ColorChannelType[width_ * height_  * ColorChannelCount];
+
+        reserve_memory();
     }
 
     [[nodiscard]]
-    int width() const {
+    int width() const noexcept {
         return width_;
     }
 
     [[nodiscard]]
-    int height() const {
+    int height() const noexcept {
         return height_;
     }
 
     [[nodiscard]]
-    Vector2i size() const {
+    Vector2i size() const noexcept {
         return Vector2i{width_, height_};
     };
 
     [[nodiscard]]
-    const bool check_bounds(const int x, const int y) const {
-        return x >= 0 && x < width() && y >= 0 && y < height();
+    bool check_bounds(const int x, const int y) const noexcept {
+        return x >= 0 && x < width_ && y >= 0 && y < height_;
     }
 
     // todo: should return const ColorChannelType*
     //const ColorChannelType* data() const {
     [[nodiscard]]
     ColorChannelType* data() const {
-        return data_;
+        return data_.get();
     }
 
     [[nodiscard]]
     ColorChannelType* data() {
-        return data_;
+        return data_.get();
     }
 
     /*
@@ -180,9 +192,25 @@ public:
         set_pixel(x, height_ - y - 1, color);
     }
 
+    /// Set all pixel of image to black (zero / "0") color
+    void fill_black() {
+        assert(data_);
+
+        // todo: use memset or something more modern
+        //std::fill(data_.get(), data_.get() + width_ * height_ * ColorChannelCount, ColorType{0});
+
+        // make it black
+        for (int i = 0; i < data_size_; ++i) {
+            data_[i] = 0;
+        }
+    }
+
+    /*
+        Sets the whole image to a given color.
+    */
     void fill(const ColorType& color) {
-        for (int x = 0; x < this->width(); x++) {
-            for (int y = 0; y < this->height(); y++) {
+        for (int x = 0; x < width_; x++) {
+            for (int y = 0; y < height_; y++) {
                 set_pixel(x, y, color);
             }
         }
@@ -201,6 +229,7 @@ public:
         v
         y+
     */
+    [[nodiscard]]
     ColorType get_pixel(const int x, const int y) const {
         assert(check_bounds(x, y));
 
@@ -212,31 +241,46 @@ public:
         return color;
     }
 
+    [[nodiscard]]
     ColorType get_pixel(const Point2i& position) const {
         return get_pixel(position.x(), position.y());
     }
 
-    bool operator==(const Image& other) const {
-        if (this->width() != other.width() || this->height() != other.height()) {
-            return false;
-        }
-
-        for (int x = 0; x < this->width(); x++) {
-            for (int y = 0; y < this->height(); y++) {
-                if (this->get_pixel(x, y) != other.get_pixel(x, y))
-                    return false;
-            }
-        }
-
-        return true;
-    }
-
-    bool operator!=(const Image& other) const {
-        return !(this->operator==(other));
-    }
-
 private:
+    /**
+     *  \brief Reserve memory for the image data according to the current values
+     *  of <tt>width_</tt> and <tt>height_</tt>
+     */
+    void reserve_memory() {
+        assert(width_ >= 0); // expecting a non-negative width
+        assert(height_ >= 0); // excepting a non-negate height
+
+        // memory size need to be allocated for the image data
+        data_size_ = width_ * height_ * ColorChannelCount;
+        assert(data_size_ >= 0); // expecting a non-negative size
+        data_ = std::make_unique<ColorChannelType[]>(data_size_);
+
+        assert(data_); // data should be not nullptr after allocation
+    }
+
+
+
+    void fill(const ColorChannelType* data) {
+        assert(data); // should not be nullptr
+        assert(data_); // should not be nullptr
+
+        // todo use std::copy
+
+        // copy data
+        for (int i = 0; i < data_size_; ++i) {
+            data_[i] = data[i];
+        }
+    }
+private:
+    /// Width of image in pixels
     int width_ = 0;
+
+    /// Height of image in pixels
     int height_ = 0;
 
     /*
@@ -252,7 +296,15 @@ private:
         v
         y+
     */
-    ColorChannelType* data_ = nullptr;
+    std::unique_ptr<ColorChannelType[]> data_;
+
+    /**
+     * \brief  Size of array referenced by data_.
+     *
+     * Computed by, i.e. widht_ * height_ * ColorChannelCount
+     * Updated by the reserve_memory member function
+     */
+    int data_size_ = 0; // Size of array stored in data, i.e. widht_ * height_ * ColorChannelCount
 };
 
 using Image1b = Image<Color1b, uint8_t, 1>;

@@ -421,3 +421,24 @@ TEST(compile_time_formatting_test, multibyte_fill) {
   EXPECT_EQ("жж42", test_format<8>(FMT_COMPILE("{:ж>4}"), 42));
 }
 #endif
+
+#if FMT_USE_CONSTEXPR_STRING
+
+TEST(compile_test, constexpr_format) {
+  {
+    constexpr auto result = []() {
+      return fmt::format(FMT_COMPILE("{}"), 42) == "42";
+    }();
+    EXPECT_TRUE(result);
+  }
+
+  {
+    // Test with a larger string to avoid small string optimization.
+    constexpr auto result = []() {
+      return fmt::format(FMT_COMPILE("{:100}"), ' ') == std::string(100, ' ');
+    }();
+    EXPECT_TRUE(result);
+  }
+}
+
+#endif  // FMT_USE_CONSTEXPR_STRING

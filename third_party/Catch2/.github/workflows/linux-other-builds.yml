@@ -79,8 +79,6 @@ jobs:
         sudo apt-get install -y ninja-build ${{matrix.other_pkgs}}
 
     - name: Configure build
-      # Note: $GITHUB_WORKSPACE is distinct from ${{runner.workspace}}.
-      #       This is important
       run: |
         cmake --preset basic-tests -GNinja \
               -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
@@ -106,8 +104,6 @@ jobs:
         sudo apt-get install -y ninja-build clang-15 clang-tidy-15
 
     - name: Configure
-      # Note: $GITHUB_WORKSPACE is distinct from ${{runner.workspace}}.
-      #       This is important
       run: |
         clangtidy="clang-tidy-15;-use-color"
         # Use a dummy compiler/linker/ar/ranlib to effectively disable the

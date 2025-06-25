@@ -481,6 +481,12 @@ TEST(memory_buffer_test, max_size_allocator_overflow) {
   EXPECT_THROW(buffer.resize(161), std::exception);
 }
 
+TEST(memory_buffer_test, back_insert_iterator) {
+  fmt::memory_buffer buf;
+  using iterator = decltype(std::back_inserter(buf));
+  EXPECT_TRUE(fmt::detail::is_back_insert_iterator<iterator>::value);
+}
+
 TEST(format_test, digits2_alignment) {
   auto p =
       fmt::detail::bit_cast<fmt::detail::uintptr_t>(fmt::detail::digits2(0));
@@ -552,6 +558,10 @@ TEST(format_test, arg_errors) {
                    format_error, "argument not found");
 }
 
+TEST(format_test, display_width_precision) {
+  EXPECT_EQ(fmt::format("{:.5}", "🐱🐱🐱"), "🐱🐱");
+}
+
 template <int N> struct test_format {
   template <typename... T>
   static auto format(fmt::string_view fmt, const T&... args) -> std::string {
@@ -583,7 +593,8 @@ TEST(format_test, named_arg) {
                                  fmt::arg("A_", "A"), fmt::arg("_1", 1)));
   EXPECT_EQ(fmt::format("{0:{width}}", -42, fmt::arg("width", 4)), " -42");
   EXPECT_EQ(fmt::format("{value:{width}}", fmt::arg("value", -42),
-      fmt::arg("width", 4)), " -42");
+                        fmt::arg("width", 4)),
+            " -42");
   EXPECT_EQ("st",
             fmt::format("{0:.{precision}}", "str", fmt::arg("precision", 2)));
   EXPECT_EQ(fmt::format("{} {two}", 1, fmt::arg("two", 2)), "1 2");
@@ -601,8 +612,9 @@ TEST(format_test, named_arg) {
   EXPECT_THROW_MSG((void)fmt::format(runtime("{a} {}"), fmt::arg("a", 2), 42),
                    format_error,
                    "cannot switch from manual to automatic argument indexing");
-  EXPECT_THROW_MSG((void)fmt::format("{a}", fmt::arg("a", 1),
-      fmt::arg("a", 10)), format_error, "duplicate named arg");
+  EXPECT_THROW_MSG(
+      (void)fmt::format("{a}", fmt::arg("a", 1), fmt::arg("a", 10)),
+      format_error, "duplicate named arg");
 }
 
 TEST(format_test, auto_arg_index) {
@@ -1083,9 +1095,6 @@ TEST(format_test, precision) {
   EXPECT_THROW_MSG(
       (void)fmt::format(runtime("{0:.2f}"), reinterpret_cast<void*>(0xcafe)),
       format_error, "invalid format specifier");
-  EXPECT_THROW_MSG((void)fmt::format(runtime("{:.{}e}"), 42.0,
-                                     fmt::detail::max_value<int>()),
-                   format_error, "number is too big");
   EXPECT_THROW_MSG(
       (void)fmt::format("{:.2147483646f}", -2.2121295195081227E+304),
       format_error, "number is too big");
@@ -1095,6 +1104,32 @@ TEST(format_test, precision) {
   EXPECT_EQ(fmt::format("{0:.2}", "str"), "st");
   EXPECT_EQ(fmt::format("{0:.5}", "вожыкі"), "вожык");
   EXPECT_EQ(fmt::format("{0:.6}", "123456\xad"), "123456");
+}
+
+TEST(format_test, large_precision) {
+  // Iterator used to abort the actual output.
+  struct throwing_iterator {
+    auto operator=(char) -> throwing_iterator& {
+      throw std::runtime_error("aborted");
+      return *this;
+    }
+    auto operator*() -> throwing_iterator& { return *this; }
+    auto operator++() -> throwing_iterator& { return *this; }
+    auto operator++(int) -> throwing_iterator { return *this; }
+  };
+  auto it = throwing_iterator();
+
+  EXPECT_THROW_MSG(fmt::format_to(it, fmt::runtime("{:#.{}}"), 1.0,
+                                  fmt::detail::max_value<int>()),
+                   std::runtime_error, "aborted");
+
+  EXPECT_THROW_MSG(fmt::format_to(it, fmt::runtime("{:#.{}e}"), 1.0,
+                                  fmt::detail::max_value<int>() - 1),
+                   std::runtime_error, "aborted");
+
+  EXPECT_THROW_MSG((void)fmt::format(fmt::runtime("{:.{}e}"), 42.0,
+                                     fmt::detail::max_value<int>()),
+                   format_error, "number is too big");
 }
 
 TEST(format_test, utf8_precision) {
@@ -1938,8 +1973,8 @@ TEST(format_test, unpacked_args) {
 
 constexpr char with_null[3] = {'{', '}', '\0'};
 constexpr char no_null[2] = {'{', '}'};
-static constexpr const char static_with_null[3] = {'{', '}', '\0'};
-static constexpr const char static_no_null[2] = {'{', '}'};
+static constexpr char static_with_null[3] = {'{', '}', '\0'};
+static constexpr char static_no_null[2] = {'{', '}'};
 
 TEST(format_test, compile_time_string) {
   EXPECT_EQ(fmt::format(FMT_STRING("foo")), "foo");

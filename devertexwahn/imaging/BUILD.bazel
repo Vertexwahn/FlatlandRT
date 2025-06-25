@@ -51,7 +51,6 @@ cc_test(
 
 cc_library(
     name = "image",
-    srcs = ["image.cpp"],
     hdrs = ["image.hpp"],
     visibility = ["//visibility:public"],
     deps = [

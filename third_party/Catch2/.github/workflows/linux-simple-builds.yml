@@ -10,8 +10,6 @@ jobs:
       fail-fast: false
       matrix:
         cxx:
-          - g++-7
-          - g++-8
           - g++-9
           - g++-10
           - g++-11
@@ -28,10 +26,6 @@ jobs:
         build_type: [Debug, Release]
         std: [14]
         include:
-          - cxx: g++-7
-            other_pkgs: g++-7
-          - cxx: g++-8
-            other_pkgs: g++-8
           - cxx: g++-9
             other_pkgs: g++-9
           - cxx: g++-10
@@ -98,8 +92,6 @@ jobs:
         sudo apt-get install -y ninja-build ${{matrix.other_pkgs}}
 
     - name: Configure
-      # Note: $GITHUB_WORKSPACE is distinct from ${{runner.workspace}}.
-      #       This is important
       run: |
         cmake --preset basic-tests -GNinja \
               -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \

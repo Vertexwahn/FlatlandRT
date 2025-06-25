@@ -56,7 +56,7 @@ TEST_CASE("simple_file_logger", "[truncate]") {
     logger->info("Test message {}", 2.71);
     logger->flush();
     REQUIRE(count_lines(SIMPLE_LOG) == 2);
-    
+
     sink->truncate();
     REQUIRE(count_lines(SIMPLE_LOG) == 0);
 
@@ -94,14 +94,11 @@ TEST_CASE("rotating_file_logger2", "[rotating_logger]") {
         // next logger can rename the first output file.
         spdlog::drop(logger->name());
     }
-
     auto logger = spdlog::rotating_logger_mt("logger", basename, max_size, 2, true);
     for (int i = 0; i < 10; ++i) {
         logger->info("Test message {}", i);
     }
-
     logger->flush();
-
     require_message_count(ROTATING_LOG, 10);
 
     for (int i = 0; i < 1000; i++) {
@@ -140,4 +137,51 @@ TEST_CASE("rotating_file_logger4", "[rotating_logger]") {
 
     REQUIRE(get_filesize(ROTATING_LOG) > 0);
     REQUIRE(get_filesize(ROTATING_LOG ".1") > 0);
+}
+
+// test changing the max size of the rotating file sink
+TEST_CASE("rotating_file_logger5", "[rotating_logger]") {
+    prepare_logdir();
+    size_t max_size = 5 * 1024;
+    size_t max_files = 2;
+    spdlog::filename_t basename = SPDLOG_FILENAME_T(ROTATING_LOG);
+    auto sink =
+        std::make_shared<spdlog::sinks::rotating_file_sink_st>(basename, max_size, max_files);
+    auto logger = std::make_shared<spdlog::logger>("rotating_sink_logger", sink);
+    logger->set_pattern("%v");
+
+    REQUIRE(sink->get_max_size() == max_size);
+    REQUIRE(sink->get_max_files() == max_files);
+    max_size = 7 * 1024;
+    max_files = 3;
+
+    sink->set_max_size(max_size);
+    sink->set_max_files(max_files);
+    REQUIRE(sink->get_max_size() == max_size);
+    REQUIRE(sink->get_max_files() == max_files);
+
+    const auto message = std::string(200, 'x');
+    assert(message.size() < max_size);
+    const auto n_messages = max_files * max_size / message.size();
+    for (size_t i = 0; i < n_messages; ++i) {
+        logger->info(message);
+    }
+    logger.reset();  // force flush and close the file
+
+    // validate that the files were rotated correctly with the new max size and max files
+    for (size_t i = 0; i <= max_files; i++) {
+        // calc filenames
+        // e.g. rotating_log, rotating_log.0 rotating_log.1, rotating_log.2, etc.
+        std::ostringstream oss;
+        oss << ROTATING_LOG;
+        if (i > 0) {
+            oss << '.' << i;
+        }
+        const auto filename = oss.str();
+        const auto filesize = get_filesize(filename);
+        REQUIRE(filesize <= max_size);
+        if (i > 0) {
+            REQUIRE(filesize >= max_size - message.size() - 2);
+        }
+    }
 }

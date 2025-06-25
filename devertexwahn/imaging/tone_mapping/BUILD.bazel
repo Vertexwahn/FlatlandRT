@@ -1,0 +1,43 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+
+cc_binary(
+    name = "tone_mapper",
+    srcs = ["tone_mapper.cpp"],
+    deps = [
+        ":tone_mapping",
+        "//core:logging",
+        "//imaging/io",
+        "//imaging/io:io_openexr",
+        "@boost.program_options//:boost.program_options",
+    ],
+)
+
+cc_library(
+    name = "tone_mapping",
+    srcs = ["tone_mapping.cpp"],
+    hdrs = ["tone_mapping.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core:namespace",
+        "//imaging:color",
+        "//imaging:image",
+        "//math:vector",
+    ],
+)
+
+cc_test(
+    name = "tone_mapping_test",
+    size = "small",
+    srcs = [
+        "tone_mapping_test.cpp",
+    ],
+    deps = [
+        ":tone_mapping",
+        "@googletest//:gtest_main",
+    ],
+)

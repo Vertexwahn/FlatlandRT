@@ -57,6 +57,15 @@ void store_image(std::string_view filename, ReferenceCounted<Image3b> image) {
     store_image(filename, image4b);
 }
 
+void store_image(std::string_view filename, const Image3b &image) {
+    if (boost::ends_with(filename, ".png")) {
+        store_png(filename.data(), image);
+    } else {
+        throw std::runtime_error("Invalid file extension");
+    }
+}
+
+
 void store_image(std::string_view filename, const Image4b &image) {
     if (boost::ends_with(filename, ".ppm")) {
         store_ppm(filename.data(), image);

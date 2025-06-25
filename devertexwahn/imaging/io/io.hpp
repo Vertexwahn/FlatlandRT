@@ -19,6 +19,7 @@ void store_image(std::string_view filename, ReferenceCounted<Image3b> image);
 void store_image(std::string_view filename, ReferenceCounted<Image4b> image);
 
 void store_image(std::string_view filename, const Image3f &image);
+void store_image(std::string_view filename, const Image3b &image);
 void store_image(std::string_view filename, const Image4b &image);
 
 Image3f load_image(std::string_view filename);

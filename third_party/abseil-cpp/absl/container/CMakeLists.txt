@@ -469,6 +469,7 @@ absl_cc_library(
     ${ABSL_DEFAULT_COPTS}
   DEPS
     absl::config
+    absl::hash
     absl::memory
     absl::type_traits
     absl::utility
@@ -583,6 +584,7 @@ absl_cc_library(
   COPTS
     ${ABSL_DEFAULT_COPTS}
   DEPS
+    absl::container_memory
     absl::common_policy_traits
     absl::meta
   PUBLIC
@@ -761,6 +763,19 @@ absl_cc_library(
     absl::endian
 )
 
+absl_cc_test(
+  NAME
+    hashtable_control_bytes_test
+  SRCS
+    "internal/hashtable_control_bytes_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  DEPS
+    absl::config
+    absl::hashtable_control_bytes
+    GTest::gmock_main
+)
+
 # Internal-only target, do not depend on directly.
 absl_cc_library(
   NAME
@@ -772,6 +787,7 @@ absl_cc_library(
   COPTS
     ${ABSL_DEFAULT_COPTS}
   DEPS
+    absl::base
     absl::bits
     absl::common_policy_traits
     absl::compressed_tuple

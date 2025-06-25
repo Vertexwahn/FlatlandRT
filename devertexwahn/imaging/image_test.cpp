@@ -244,3 +244,15 @@ TEST(Image, storeLoadPNG) {
         }
     }
 }
+
+TEST(Image, fill_black) {
+    // Arrange
+    Image3f image{2, 2};
+
+    image.fill_black();
+
+    EXPECT_THAT(image.get_pixel(0,0), (ColorRGB3f{0.f, 0.f, 0.f}));
+    EXPECT_THAT(image.get_pixel(1,0), (ColorRGB3f{0.f, 0.f, 0.f}));
+    EXPECT_THAT(image.get_pixel(0,1), (ColorRGB3f{0.f, 0.f, 0.f}));
+    EXPECT_THAT(image.get_pixel(1,1), (ColorRGB3f{0.f, 0.f, 0.f}));
+}
