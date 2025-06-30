@@ -126,6 +126,11 @@ public:
         environment_emitter_ = environment_environment;
     }
 
+    [[nodiscard]]
+    ReferenceCounted<Emitter> environment_emitter() {
+        return environment_emitter_;
+    }
+
 private:
     std::vector<Label> annotations_;
     std::vector<ReferenceCounted<Shape>> shapes_;
