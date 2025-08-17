@@ -215,7 +215,7 @@ if(MSVC)
   add_executable(WindowsHeader ${TESTS_DIR}/X90-WindowsHeaderInclusion.cpp)
   target_link_libraries(WindowsHeader Catch2WithMain)
   add_test(NAME WindowsHeader COMMAND WindowsHeader -r compact)
-  list(APPEND CATCH_WARNING_TARGETS ${EXTRA_TEST_BINARIES} WindowsHeader)
+  list(APPEND CATCH_TEST_TARGETS ${EXTRA_TEST_BINARIES} WindowsHeader)
 endif()
 
 add_executable(PartialTestCaseEvents ${TESTS_DIR}/X21-PartialTestCaseEvents.cpp)
@@ -502,8 +502,8 @@ set(EXTRA_TEST_BINARIES
 # Notice that we are modifying EXTRA_TEST_BINARIES destructively, do not
 # use it after this point!
 list(FILTER EXTRA_TEST_BINARIES EXCLUDE REGEX "DisabledExceptions.*")
-list(APPEND CATCH_WARNING_TARGETS ${EXTRA_TEST_BINARIES})
-set(CATCH_WARNING_TARGETS ${CATCH_WARNING_TARGETS} PARENT_SCOPE)
+list(APPEND CATCH_TEST_TARGETS ${EXTRA_TEST_BINARIES})
+set(CATCH_TEST_TARGETS ${CATCH_TEST_TARGETS} PARENT_SCOPE)
 
 # This sets up a one-off executable that compiles against the amalgamated
 # files, and then runs it for a super simple check that the amalgamated

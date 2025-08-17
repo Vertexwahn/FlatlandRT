@@ -58,6 +58,7 @@ set(IMPL_HEADERS
   ${SOURCES_DIR}/catch_template_test_macros.hpp
   ${SOURCES_DIR}/catch_test_case_info.hpp
   ${SOURCES_DIR}/catch_test_macros.hpp
+  ${SOURCES_DIR}/catch_test_run_info.hpp
   ${SOURCES_DIR}/catch_test_spec.hpp
   ${SOURCES_DIR}/catch_timer.hpp
   ${SOURCES_DIR}/catch_tostring.hpp
@@ -84,6 +85,7 @@ set(IMPL_HEADERS
   ${SOURCES_DIR}/internal/catch_debug_console.hpp
   ${SOURCES_DIR}/internal/catch_debugger.hpp
   ${SOURCES_DIR}/internal/catch_decomposer.hpp
+  ${SOURCES_DIR}/internal/catch_deprecation_macro.hpp
   ${SOURCES_DIR}/internal/catch_enforce.hpp
   ${SOURCES_DIR}/internal/catch_enum_values_registry.hpp
   ${SOURCES_DIR}/internal/catch_errno_guard.hpp
@@ -135,15 +137,16 @@ set(IMPL_HEADERS
   ${SOURCES_DIR}/internal/catch_test_failure_exception.hpp
   ${SOURCES_DIR}/internal/catch_test_macro_impl.hpp
   ${SOURCES_DIR}/internal/catch_test_registry.hpp
-  ${SOURCES_DIR}/internal/catch_test_run_info.hpp
   ${SOURCES_DIR}/internal/catch_test_spec_parser.hpp
   ${SOURCES_DIR}/internal/catch_textflow.hpp
+  ${SOURCES_DIR}/internal/catch_thread_support.hpp
   ${SOURCES_DIR}/internal/catch_to_string.hpp
   ${SOURCES_DIR}/internal/catch_uncaught_exceptions.hpp
   ${SOURCES_DIR}/internal/catch_uniform_floating_point_distribution.hpp
   ${SOURCES_DIR}/internal/catch_uniform_integer_distribution.hpp
   ${SOURCES_DIR}/internal/catch_unique_name.hpp
   ${SOURCES_DIR}/internal/catch_unique_ptr.hpp
+  ${SOURCES_DIR}/internal/catch_unreachable.hpp
   ${SOURCES_DIR}/internal/catch_void_type.hpp
   ${SOURCES_DIR}/internal/catch_wildcard_pattern.hpp
   ${SOURCES_DIR}/internal/catch_windows_h_proxy.hpp
@@ -450,8 +453,8 @@ if(CATCH_BUILD_EXAMPLES OR CATCH_BUILD_EXTRA_TESTS)
   target_compile_features(Catch2_buildall_interface INTERFACE cxx_std_14)
 endif()
 
-list(APPEND CATCH_WARNING_TARGETS Catch2 Catch2WithMain)
-set(CATCH_WARNING_TARGETS ${CATCH_WARNING_TARGETS} PARENT_SCOPE)
+list(APPEND CATCH_IMPL_TARGETS Catch2 Catch2WithMain)
+set(CATCH_IMPL_TARGETS ${CATCH_IMPL_TARGETS} PARENT_SCOPE)
 
 # We still do not support building dynamic library with hidden visibility
 # so we want to check & warn users if they do this. However, we won't abort

@@ -1,11 +1,14 @@
 load("//:bzl_library.bzl", "bzl_library")
-load(":copy_file_private.bzl", "is_windows")
+load(":copy_common.bzl", "is_windows")
 
 package(default_applicable_licenses = ["//:license"])
 
 licenses(["notice"])
 
-is_windows(name = "is_windows")
+is_windows(
+    name = "is_windows",
+    visibility = ["//visibility:public"],
+)
 
 bzl_library(
     name = "bzl_library",

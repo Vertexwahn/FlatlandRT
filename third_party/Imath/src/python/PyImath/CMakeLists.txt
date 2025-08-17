@@ -133,7 +133,7 @@ endif()
 target_include_directories(${PYIMATH_LIBRARY}
      PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include/${PYIMATH_LIBRARY}>
+        $<INSTALL_INTERFACE:include/${PYIMATH_OUTPUT_SUBDIR}>
         ${Python3_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS}
 )
@@ -214,11 +214,11 @@ if (IMATH_INSTALL)
     #
   
     set(PYTHON_INSTALL_DIR "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages")
-    message(STATUS "installing ${PYIMATH_MODULE} module to ${PYTHON_INSTALL_DIR}")
+    message(STATUS "installing ${PYIMATH_MODULE_NAME} module to ${PYTHON_INSTALL_DIR}")
 
   else()
 
-    message(STATUS "installing ${PYIMATH_MODULE} module to ${PYTHON_INSTALL_DIR} (set externally)")
+    message(STATUS "installing ${PYIMATH_MODULE_NAME} module to ${PYTHON_INSTALL_DIR} (set externally)")
   
   endif()
   
@@ -289,10 +289,26 @@ if (IMATH_INSTALL)
     set(exec_prefix "\${prefix}")
     set(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
     set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+    string(TOUPPER "${CMAKE_BUILD_TYPE}" uppercase_CMAKE_BUILD_TYPE)
+    set(lib_suffix "${IMATH_LIB_SUFFIX}${CMAKE_${uppercase_CMAKE_BUILD_TYPE}_POSTFIX}")
+    set(pylib_suffix "${PYIMATH_LIB_SUFFIX}${CMAKE_${uppercase_CMAKE_BUILD_TYPE}_POSTFIX}")
+
+    # boost lib/dir
+    set(BOOST_PYTHON_LOCATION ${Boost_PYTHON_LIBRARY_RELEASE})
+    get_filename_component(boost_libdir "${BOOST_PYTHON_LOCATION}" DIRECTORY)
+    get_filename_component(boost_libname "${BOOST_PYTHON_LOCATION}" NAME_WE)
+    string(REGEX REPLACE "^lib" "" boost_libname "${boost_libname}")
+
+    # python lib/dir
+    get_filename_component(python_libdir "${Python3_LIBRARIES}" DIRECTORY)
+    set(python_libname "python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}")
+
     string(REPLACE ".in" "" pcout ${pcinfile})
     configure_file(${pcinfile} ${CMAKE_CURRENT_BINARY_DIR}/${pcout} @ONLY)
+
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${pcout} DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-    message(STATUS "generating ${pcout}") 
+
+    message(STATUS "generating ${pcout}")
   else()
     message(STATUS "pkg-config generation disabled for PyImath")
   endif()

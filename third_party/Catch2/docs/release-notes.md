@@ -2,6 +2,8 @@
 
 # Release notes
 **Contents**<br>
+[3.9.1](#391)<br>
+[3.9.0](#390)<br>
 [3.8.1](#381)<br>
 [3.8.0](#380)<br>
 [3.7.1](#371)<br>
@@ -65,6 +67,58 @@
 [2.0.1](#201)<br>
 [Older versions](#older-versions)<br>
 [Even Older versions](#even-older-versions)<br>
+
+
+## 3.9.1
+
+### Fixes
+* Fixed bad error reporting for multiple nested assertions (#1292)
+* Fixed W4702 (unreachable code) in the polyfill for std::unreachable (#3007)
+* Fixed decomposition of assertions comparing enum-backed bitfields (#3001)
+* Fixed StringMaker specialization for `time_point<system_clock>` with non-default duration type (#2685)
+
+### Improvements
+* Exceptions thrown during stringification of decomposed expression no longer fail the assertion (#2980)
+* The selection logic for `CATCH_TRAP` prefers `__builtin_debugtrap` on all platforms when Catch2 is compiled with Clang
+
+
+## 3.9.0
+
+### Improvements
+* **Added experimental opt-in support for thread safe assertions**
+  * Read the documentation for full details
+* **The default test run order has been changed to random**
+* Passing assertions are significantly faster when the reporter does not ask for `assertionEnded` events on passing assertions.
+  * This is the default behaviour of e.g. Console or Compact reporter
+  * Simple `REQUIRE(true)` is 60% faster in Release and 80% faster in Debug build configuration
+  * Simple `REQUIRE_NOTHROW` is 230% faster in Release and 430% faster in Debug build configuration
+  * Simple `REQUIRE_THROWS` is ~3% faster in Release and 20% faster in Debug build configuration (throwing introduces enough overhead that the optimizations inside Catch2 are mostly irrelevant)
+* Small (2-5%) improvement if the reporter asks for `assertionEnded` events for passing assertions.
+* The exit code constants are part of the Session API. (#2955, #2976)
+* Suppressed unsigned integer overflow checking in locations with intended overflow (#2965)
+* Reporters flush output after writing metadata, e.g. rng seed (#2964)
+* Added unreachable after `FAIL` and `SKIP` macros (#2941)
+  * This allows the compiler to understand that the execution does not continue past the macro, and avoids warnings.
+* Added fast path for `assertionStarting` event when no reporter requires it
+  * For backwards compatibility, this fast path is opt-in
+  * A reporter can opt in by changing its `ReporterPreferences::shouldReportAllAssertionStarts`
+* Improved last seen source location tracking to be more precise
+  * This is used when reporting unexpected exceptions from tests
+
+### Fixes
+* Fixed formatting of tags with more than 100 tests in the default `--list-tags` output (#2963)
+* Fixed Clang-Tidy's `readability-static-accessed-through-instance` in tests
+* Fixed most of Clang-Tidy's `cppcoreguidelines-avoid-non-const-global-variables` (#2582)
+* The lifetime of scoped messages now strictly obeys their scope (#1759, #2019, #2959)
+  * Previously Catch2 would try to keep them around during unexpected exception, to provide helpful context.
+  * The amount of surprises the irregularities caused was not worth the occasional utility provided.
+* `TEMPLATE_TEST_CASE_SIG` can handle signatures consisting of only types (#2680, #2995)
+* Moved `catch_test_run_info.hpp` up from `internal/` subfolder into the main one (#2972)
+
+### Miscellaneous
+* pkg-config files are now generated at install time (#2979)
+  * This fixes missing debug suffix in library names
+  * This fixes install prefix mismatch between build config and actuall installation
 
 
 ## 3.8.1

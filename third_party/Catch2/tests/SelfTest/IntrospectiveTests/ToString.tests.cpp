@@ -103,18 +103,39 @@ TEST_CASE( "#2944 - Stringifying dates before 1970 should not crash", "[.approva
     using Catch::Matchers::Equals;
     using Days = std::chrono::duration<int32_t, std::ratio<86400>>;
     using SysDays = std::chrono::time_point<std::chrono::system_clock, Days>;
-    Catch::StringMaker<std::chrono::system_clock::time_point> sm;
+    using SM = Catch::StringMaker<std::chrono::system_clock::time_point>;
 
     // Check simple date first
     const SysDays post1970{ Days{ 1 } };
-    auto converted_post = sm.convert( post1970 );
+    auto converted_post = SM::convert( post1970 );
     REQUIRE( converted_post == "1970-01-02T00:00:00Z" );
 
     const SysDays pre1970{ Days{ -1 } };
-    auto converted_pre = sm.convert( pre1970 );
+    auto converted_pre = SM::convert( pre1970 );
     REQUIRE_THAT(
         converted_pre,
         Equals( "1969-12-31T00:00:00Z" ) ||
             Equals( "gmtime from provided timepoint has failed. This "
                     "happens e.g. with pre-1970 dates using Microsoft libc" ) );
+}
+
+namespace {
+    struct ThrowsOnStringification {
+        friend bool operator==( ThrowsOnStringification,
+                                ThrowsOnStringification ) {
+            return true;
+        }
+    };
+}
+
+template <>
+struct Catch::StringMaker<ThrowsOnStringification> {
+    static std::string convert(ThrowsOnStringification) {
+        throw std::runtime_error( "Invalid" );
+    }
+};
+
+TEST_CASE( "Exception thrown inside stringify does not fail the test", "[toString]" ) {
+    ThrowsOnStringification tos;
+    CHECK( tos == tos );
 }

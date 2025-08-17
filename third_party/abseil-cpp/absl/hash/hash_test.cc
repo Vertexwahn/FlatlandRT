@@ -192,8 +192,9 @@ TEST(HashValueTest, PointerAlignment) {
     constexpr size_t kMask = (1 << (kLog2NumValues + 7)) - 1;
     size_t stuck_bits = (~bits_or | bits_and) & kMask;
     int stuck_bit_count = absl::popcount(stuck_bits);
-    // Test that there are at most 4 stuck bits.
-    EXPECT_LE(stuck_bit_count, 4) << "0x" << std::hex << stuck_bits;
+    size_t max_stuck_bits = 5;
+    EXPECT_LE(stuck_bit_count, max_stuck_bits)
+        << "0x" << std::hex << stuck_bits;
 
     total_stuck_bit_count += stuck_bit_count;
     ++test_count;
@@ -1239,14 +1240,33 @@ TEST(HashOf, DoubleSignCollision) {
   EXPECT_NE(absl::HashOf(-1.0), absl::HashOf(1.0));
 }
 
+// Test for collisions in short strings if PrecombineLengthMix is low quality.
+TEST(PrecombineLengthMix, ShortStringCollision) {
+  std::string s1 = "00";
+  std::string s2 = "000";
+  constexpr char kMinChar = 0;
+  constexpr char kMaxChar = 32;
+  for (s1[0] = kMinChar; s1[0] < kMaxChar; ++s1[0]) {
+    for (s1[1] = kMinChar; s1[1] < kMaxChar; ++s1[1]) {
+      for (s2[0] = kMinChar; s2[0] < kMaxChar; ++s2[0]) {
+        for (s2[1] = kMinChar; s2[1] < kMaxChar; ++s2[1]) {
+          for (s2[2] = kMinChar; s2[2] < kMaxChar; ++s2[2]) {
+            ASSERT_NE(absl::HashOf(s1), absl::HashOf(s2))
+                << "s1[0]: " << static_cast<int>(s1[0])
+                << "; s1[1]: " << static_cast<int>(s1[1])
+                << "; s2[0]: " << static_cast<int>(s2[0])
+                << "; s2[1]: " << static_cast<int>(s2[1])
+                << "; s2[2]: " << static_cast<int>(s2[2]);
+          }
+        }
+      }
+    }
+  }
+}
+
 // Test that we don't cause excessive collisions on the hash table for
 // doubles in the range [-1024, 1024]. See cl/773069881 for more information.
 TEST(SwisstableCollisions, DoubleRange) {
-#ifdef GOOGLE_UNSUPPORTED_OS_LOONIX
-  // TODO(b/424834054): make this test pass on Loonix.
-  GTEST_SKIP() << "Test fails on Loonix.";
-#endif
-
   absl::flat_hash_set<double> set;
   for (double t = -1024.0; t < 1024.0; t += 1.0) {
     set.insert(t);
@@ -1258,12 +1278,6 @@ TEST(SwisstableCollisions, DoubleRange) {
 // Test that for each pair of adjacent bytes in a string, if there's only
 // entropy in those two bytes, then we don't have excessive collisions.
 TEST(SwisstableCollisions, LowEntropyStrings) {
-  if (sizeof(size_t) < 8) {
-    // TODO(b/424834054): make this test pass on 32-bit platforms. We need to
-    // make 32-bit Mix() stronger.
-    GTEST_SKIP() << "Test fails on 32-bit platforms";
-  }
-
   constexpr char kMinChar = 0;
   constexpr char kMaxChar = 64;
   // These sizes cover the different hashing cases.
@@ -1278,7 +1292,7 @@ TEST(SwisstableCollisions, LowEntropyStrings) {
           set.insert(s);
           ASSERT_LT(HashtableDebugAccess<decltype(set)>::GetNumProbes(set, s),
                     64)
-              << size << " " << b;
+              << "size: " << size << "; bit: " << b;
         }
       }
     }

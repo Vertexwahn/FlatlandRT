@@ -16,16 +16,19 @@ set(PYBINDIMATH_LIBRARY PyBindImath)
 message(STATUS "Configuring pybindimath module and ${PYBINDIMATH_LIBRARY} library")
 
 set(PYBINDIMATH_SOURCES
-    PyBindImathFun.cpp
     PyBindImathBox.cpp
+    PyBindImathEuler.cpp
+    PyBindImathFrustum.cpp
+    PyBindImathFun.cpp
+    PyBindImathLine.cpp
+    PyBindImathMatrix.cpp
+    PyBindImathPlane.cpp
+    PyBindImathQuat.cpp
+    PyBindImathRandom.cpp
+    PyBindImathShear.cpp
     PyBindImathVec2.cpp
     PyBindImathVec3.cpp
     PyBindImathVec4.cpp
-    PyBindImathMatrix.cpp
-    PyBindImathPlane.cpp
-    PyBindImathLine.cpp
-    PyBindImathQuat.cpp
-    PyBindImathFrustum.cpp
 )
 
 set(PYBINDIMATH_HEADERS
@@ -74,7 +77,7 @@ endif()
 target_include_directories(${PYBINDIMATH_LIBRARY}
     PUBLIC
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-      $<INSTALL_INTERFACE:include/$PYBINDIMATH_LIBRARY>
+      $<INSTALL_INTERFACE:include/${PYBINDIMATH_OUTPUT_SUBDIR}>
 )
 
 target_compile_definitions(${PYBINDIMATH_LIBRARY} PRIVATE IMATH_EXPORTS)
@@ -126,11 +129,11 @@ if (IMATH_INSTALL)
     #
   
     set(PYTHON_INSTALL_DIR "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages")
-    message(STATUS "installing ${PYBINDIMATH_MODULE} to ${PYTHON_INSTALL_DIR}")
+    message(STATUS "installing ${PYBINDIMATH_MODULE_NAME} to ${PYTHON_INSTALL_DIR}")
 
   else()
 
-    message(STATUS "installing ${PYBINDIMATH_MODULE} to ${PYTHON_INSTALL_DIR} (set externally)")
+    message(STATUS "installing ${PYBINDIMATH_MODULE_NAME} to ${PYTHON_INSTALL_DIR} (set externally)")
   
   endif()
   

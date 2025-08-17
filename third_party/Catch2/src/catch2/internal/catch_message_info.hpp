@@ -8,6 +8,7 @@
 #ifndef CATCH_MESSAGE_INFO_HPP_INCLUDED
 #define CATCH_MESSAGE_INFO_HPP_INCLUDED
 
+#include <catch2/internal/catch_deprecation_macro.hpp>
 #include <catch2/internal/catch_result_type.hpp>
 #include <catch2/internal/catch_source_line_info.hpp>
 #include <catch2/internal/catch_stringref.hpp>
@@ -27,9 +28,11 @@ namespace Catch {
         ResultWas::OfType type;
         unsigned int sequence;
 
+        DEPRECATED( "Explicitly use the 'sequence' member instead" )
         bool operator == (MessageInfo const& other) const {
             return sequence == other.sequence;
         }
+        DEPRECATED( "Explicitly use the 'sequence' member instead" )
         bool operator < (MessageInfo const& other) const {
             return sequence < other.sequence;
         }

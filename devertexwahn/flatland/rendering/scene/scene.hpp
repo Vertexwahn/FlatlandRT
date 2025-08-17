@@ -127,7 +127,7 @@ public:
     }
 
     [[nodiscard]]
-    ReferenceCounted<Emitter> environment_emitter() {
+    ReferenceCounted<Emitter> environment_emitter() const {
         return environment_emitter_;
     }
 

@@ -9,11 +9,11 @@
 #define CATCH_INTERFACES_REPORTER_HPP_INCLUDED
 
 #include <catch2/catch_section_info.hpp>
+#include <catch2/catch_test_run_info.hpp>
 #include <catch2/catch_totals.hpp>
 #include <catch2/catch_assertion_result.hpp>
 #include <catch2/internal/catch_message_info.hpp>
 #include <catch2/internal/catch_stringref.hpp>
-#include <catch2/internal/catch_test_run_info.hpp>
 #include <catch2/internal/catch_unique_ptr.hpp>
 #include <catch2/benchmark/detail/catch_benchmark_stats.hpp>
 
@@ -115,6 +115,11 @@ namespace Catch {
         //! Catch2 should call `Reporter::assertionEnded` even for passing
         //! assertions
         bool shouldReportAllAssertions = false;
+        //! Catch2 should call `Reporter::assertionStarting` for all assertions
+        // Defaults to true for backwards compatibility, but none of our current
+        // reporters actually want this, and it enables a fast path in assertion
+        // handling.
+        bool shouldReportAllAssertionStarts = true;
     };
 
     /**

@@ -14,7 +14,7 @@
 #-------------------------------------------------------------------------------------
 
 #common --enable_workspace # Todo: breaks running Qt applications -> Migrate rules_qt first to Bazel 8
-#common --incompatible_disallow_empty_glob=false  # TODO: Get rid of this - Set empty globs allowed policy explicitly where needed
+common --incompatible_disallow_empty_glob=false  # TODO: Get rid of this - Set empty globs allowed policy explicitly where needed
 
 #-------------------------------------------------------------------------------------
 # Bzlmod

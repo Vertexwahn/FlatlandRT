@@ -662,5 +662,5 @@ foreach(reporterName # "Automake" - the simple .trs format does not support any 
   )
 endforeach()
 
-list(APPEND CATCH_WARNING_TARGETS SelfTest)
-set(CATCH_WARNING_TARGETS ${CATCH_WARNING_TARGETS} PARENT_SCOPE)
+list(APPEND CATCH_TEST_TARGETS SelfTest)
+set(CATCH_TEST_TARGETS ${CATCH_TEST_TARGETS} PARENT_SCOPE)

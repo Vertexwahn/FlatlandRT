@@ -17,13 +17,8 @@ shift
 touch $OUTPUT
 truncate -s 0 $OUTPUT
 
-# if $CONFIG is provided by some external workspace, we need to
-# place it in the current directory
-test -e .clang-tidy || ln -s -f $CONFIG .clang-tidy
-
 # Print output on failure only
 logfile="$(mktemp)"
-trap 'if (($?)); then cat "$logfile" 1>&2; fi; rm "$logfile"' EXIT
 
 # Prepend a flag-based disabling of a check that has a serious bug in
 # clang-tidy 16 when used with C++20. Bazel always violates this check and the
@@ -33,9 +28,19 @@ trap 'if (($?)); then cat "$logfile" 1>&2; fi; rm "$logfile"' EXIT
 # re-promoted to an error. See the clang-tidy bug here for details:
 # https://github.com/llvm/llvm-project/issues/61969
 set -- \
-  --verify-config \
   --checks=-clang-diagnostic-builtin-macro-redefined \
   --warnings-as-errors=-clang-diagnostic-builtin-macro-redefined \
    "$@"
 
-"${CLANG_TIDY_BIN}" "$@" >"$logfile" 2>&1
+if {
+  "${CLANG_TIDY_BIN}" --config-file=$CONFIG --quiet --verify-config &&
+  "${CLANG_TIDY_BIN}" --config-file=$CONFIG "$@"
+} >"$logfile" 2>&1; then
+    # Success - just remove the logfile
+    rm -f "$logfile"
+else
+    # Failure - print the log and exit with error
+    cat "$logfile" 1>&2
+    rm -f "$logfile"
+    exit 1
+fi
