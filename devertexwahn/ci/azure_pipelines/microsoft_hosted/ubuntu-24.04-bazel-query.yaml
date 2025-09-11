@@ -60,7 +60,7 @@ steps:
   - script: |
      cd devertexwahn
      # --incompatible_enable_cc_toolchain_resolution is needed for Emscripten
-     bazel cquery --config=gcc13 --incompatible_enable_cc_toolchain_resolution //...
+     bazel cquery --config=gcc13 //...
     displayName: "Bazel cquery"  
 
   - script: |

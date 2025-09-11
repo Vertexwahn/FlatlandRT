@@ -1,10 +1,10 @@
 #
-#   SPDX-FileCopyrightText: Copyright 2024 Julian Amann <dev@vertexwahn.de>
+#   SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
 #   SPDX-License-Identifier: Apache-2.0
 #
 
-# GCC13 on Ubuntu 24.04
-# Make sure we can build with GCC13 in all different compilation modes
+# GCC11 on Ubuntu 22.04
+# Make sure we can build with GCC11 in all different compilation modes
 
 steps:
   - script: |
@@ -22,7 +22,7 @@ steps:
   - script: |
       df
     displayName: "Show disk space"
-
+    
   - script: |
       lsb_release -a
     displayName: "Show OS version"
@@ -39,35 +39,35 @@ steps:
 
   - script: |
       cd devertexwahn
-      bazel run --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //tools/compiler_feature_dump
+      bazel run --config=gcc11 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //tools/compiler_feature_dump
     env:
       BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Compiler feature dump"
 
   - script: |
       cd devertexwahn
-      bazel build --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...
+      bazel build --config=gcc11 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...
     env:
       BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel build gcc11-fastbuild"
 
   - script: |
      cd devertexwahn
-     bazel test --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...
+     bazel test --config=gcc11 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...
     env:
       BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel test gcc11-fastbuild"
 
   - script: |
       cd devertexwahn
-      bazel build --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //...    
+      bazel build --config=gcc11 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //...    
     env:
       BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel build gcc11-opt"
 
   - script: |
       cd devertexwahn
-      bazel test --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //...    
+      bazel test --config=gcc11 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //...    
     env:
       BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
     displayName: "Bazel test gcc11-opt"

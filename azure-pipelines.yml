@@ -1,5 +1,5 @@
 #
-#   SPDX-FileCopyrightText: 2022-2024 Julian Amann <dev@vertexwahn.de>
+#   SPDX-FileCopyrightText: 2022-2025 Julian Amann <dev@vertexwahn.de>
 #   SPDX-License-Identifier: Apache-2.0
 #
 
@@ -8,19 +8,19 @@
 
 
 jobs:
-  - job: MacOSAppleClang14Sonoma
-    displayName: "Apple Clang15 on macOS 14 (Sonoma)"
-    pool:
-      vmImage: 'macOS-14'
-    steps:
-      - template: devertexwahn/ci/macOS-14-apple-clang15.yaml
+  #- job: MacOSAppleClang14Sonoma
+  #  displayName: "Apple Clang15 on macOS 14 (Sonoma)"
+  #  pool:
+  #    vmImage: 'macOS-14'
+  #  steps:
+  #    - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/macOS-14-apple-clang15.yaml
 
-  - job: MacOSAppleClang14Sequoia
-    displayName: "Apple Clang16 on macOS 15 (Sequoia)"
-    pool:
-      vmImage: 'macOS-15'
-    steps:
-      - template: devertexwahn/ci/macOS-15-apple-clang16.yaml
+  #- job: MacOSAppleClang14Sequoia
+  #  displayName: "Apple Clang16 on macOS 15 (Sequoia)"
+  #  pool:
+  #    vmImage: 'macOS-15'
+  #  steps:
+  #    - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/macOS-15-apple-clang16.yaml
 
 
   #- job: Ubuntu20Clang14
@@ -28,28 +28,28 @@ jobs:
   #  pool:
   #    vmImage: 'ubuntu-20.04'
   #  steps:
-  #    - template: devertexwahn/ci/ubuntu-20.04-clang14.yaml
+  #    - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-20.04-clang14.yaml
 
   - job: Ubuntu24BazelQuery
     displayName: "Bazel query on Ubuntu 24.04"
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-24.04-bazel-query.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-bazel-query.yaml
 
   - job: Ubuntu22Clang19
     displayName: "Clang19 on Ubuntu 22.04"
     pool:
       vmImage: 'ubuntu-22.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-22.04-clang19.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-22.04-clang19.yaml
 
   - job: Ubuntu24Coverage
     displayName: "Coverage with LCOV/GCC13 on Ubuntu 24.04"
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-24.04-coverage.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-coverage.yaml
 
 
   #- job: Ubuntu24Cppcheck
@@ -57,49 +57,42 @@ jobs:
   #  pool:
   #    vmImage: 'ubuntu-24.04'
   #  steps:
-  #    - template: devertexwahn/ci/ubuntu-24.04-cppcheck.yaml
-
-  #- job: Ubuntu24Bzlmod
-  #  displayName: "Bzlmod GCC 13 on Ubuntu 24.04"
-  #  pool:
-  #    vmImage: 'ubuntu-24.04'
-  #  steps:
-  #    - template: devertexwahn/ci/ubuntu-24.04-gcc13-bzlmod.yaml
+  #    - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-cppcheck.yaml
 
   - job: Ubuntu22GCC11
     displayName: "GCC11 fastbuild opt on Ubuntu 22.04"
     pool:
       vmImage: 'ubuntu-22.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-22.04-gcc11-fast-opt.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-22.04-gcc11-fast-opt.yaml
 
   - job: Ubuntu24GCC13FlakyTests
     displayName: "GCC13 detect flaky tests on Ubuntu 24.04"
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-24.04-gcc13-flaky-test-detection.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-gcc13-flaky-test-detection.yaml
 
   - job: Ubuntu24GCC13
     displayName: "GCC13 fastbuild opt on Ubuntu 24.04"
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-24.04-gcc13-fast-opt.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-gcc13-fast-opt.yaml
 
   - job: Ubuntu22GCC11DebugPart1
     displayName: "GCC11 dbg on Ubuntu 22.04 (Part 1)"
     pool:
       vmImage: 'ubuntu-22.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-22.04-gcc11-dbg-part1.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-22.04-gcc11-dbg-part1.yaml
 
   - job: Ubuntu24GCC13DebugPart1
     displayName: "GCC13 dbg on Ubuntu 24.04 (Part 1)"
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/ubuntu-24.04-gcc13-dbg-part1.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-gcc13-dbg-part1.yaml
 
 
   # Visual Studio 2022 on Windows Server 2022
@@ -108,21 +101,21 @@ jobs:
     pool:
       vmImage: 'windows-2022'
     steps:
-      - template: devertexwahn/ci/windows-2022-vs2022-dbg.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/windows-2022-vs2022-dbg.yaml
 
   - job: VisualStudio2022_WindowsServer2022_Fastbuild
     displayName: "VS2022 fastbuild on Windows Server 2022"
     pool:
       vmImage: 'windows-2022'
     steps:
-      - template: devertexwahn/ci/windows-2022-vs2022-fastbuild.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/windows-2022-vs2022-fastbuild.yaml
 
   - job: VisualStudio2022_WindowsServer2022_Opt
     displayName: "VS2022 opt on Windows Server 2022"
     pool:
       vmImage: 'windows-2022'
     steps:
-      - template: devertexwahn/ci/windows-2022-vs2022-opt.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/windows-2022-vs2022-opt.yaml
 
   # Visual Studio 2022 on Windows Server 2025
   - job: VisualStudio2022_WindowsServer2025_Dbg
@@ -130,18 +123,20 @@ jobs:
     pool:
       vmImage: 'windows-2025'
     steps:
-      - template: devertexwahn/ci/windows-2025-vs2022-dbg.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-dbg.yaml
 
   - job: VisualStudio2022_WindowsServer2025_Fastbuild
     displayName: "VS2022 fastbuild on Windows Server 2025"
     pool:
       vmImage: 'windows-2025'
     steps:
-      - template: devertexwahn/ci/windows-2025-vs2022-fastbuild.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-fastbuild.yaml
 
   - job: VisualStudio2022_WindowsServer2025_Opt
     displayName: "VS2022 opt on Windows Server 2025"
     pool:
       vmImage: 'windows-2025'
     steps:
-      - template: devertexwahn/ci/windows-2025-vs2022-opt.yaml
+      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-opt.yaml
+
+

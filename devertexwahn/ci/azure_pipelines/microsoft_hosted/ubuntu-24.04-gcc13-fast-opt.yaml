@@ -1,0 +1,78 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2024 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# GCC13 on Ubuntu 24.04
+# Make sure we can build with GCC13 in all different compilation modes
+
+steps:
+  - script: |
+      df
+    displayName: "Show disk space"
+
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    lfs: false
+    submodules: false
+
+
+
+  - script: |
+      df
+    displayName: "Show disk space"
+
+  - script: |
+      lsb_release -a
+    displayName: "Show OS version"
+
+  - script: |
+      cd devertexwahn
+      bazel version
+    displayName: "Show Bazel version"
+
+  - script: |
+      gcc --version
+    displayName: "Show GCC version"
+
+
+  - script: |
+      cd devertexwahn
+      bazel run --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //tools/compiler_feature_dump
+      #bazel run --config=gcc13 --config=buildbuddy_remote_cache2 -- //tools/compiler_feature_dump
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
+    displayName: "Compiler feature dump"
+
+  - script: |
+      cd devertexwahn
+      bazel build --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
+    displayName: "Bazel build gcc13-fastbuild"
+
+  - script: |
+     cd devertexwahn
+     bazel test --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
+    displayName: "Bazel test gcc13-fastbuild"
+
+  - script: |
+      cd devertexwahn
+      bazel build --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //...    
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
+    displayName: "Bazel build gcc13-opt"
+
+  - script: |
+      cd devertexwahn
+      bazel test --config=gcc13 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} --compilation_mode=opt -- //...    
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
+    displayName: "Bazel test gcc13-opt"
+
+  - script: |
+      df
+    displayName: "Show disk space"
