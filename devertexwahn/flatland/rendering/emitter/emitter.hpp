@@ -19,11 +19,16 @@ template <typename ScalarType, unsigned int Dimension>
 class EmitterType : public Object {
 public:
     using Ray = RayType<ScalarType, Dimension>;
+    using Spectrum = ColorTypeRGB<ScalarType, 3>;
 
     explicit EmitterType() = default;
     virtual ~EmitterType() {}
 
-    virtual ColorTypeRGB<ScalarType, 3> evaluate() const = 0;
+    virtual Spectrum evaluate() const = 0;
+
+    virtual Spectrum evaluate(const Ray &ray) const {
+        return evaluate();
+    }
 
     [[nodiscard]]
     virtual std::string to_string() const override {

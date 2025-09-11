@@ -3,6 +3,8 @@
     SPDX-License-Identifier: Apache-2.0
 """
 
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
 sh_test(
     name = "acceptance_test",
     size = "small",

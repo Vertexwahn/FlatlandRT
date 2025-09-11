@@ -16,7 +16,7 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 using string = std::string;
 using u16string = std::u16string_view;
 using u32string = std::u32string_view;
-using u8string = std::u8string_view;
+//using u8string = std::u8string_view;
 using wstring = std::wstring_view;
 
 DE_VERTEXWAHN_END_NAMESPACE

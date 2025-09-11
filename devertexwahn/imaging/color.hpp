@@ -101,6 +101,14 @@ struct ColorTypeRGB : public Eigen::Matrix<ScalarType, Dimension, 1> {
         return *this;
     }
 
+    ColorTypeRGB& clamp_negative() {
+        for (long int i = 0; i < Base::size(); ++i) {
+            (*this)[i] = std::max(Scalar{0}, (*this)[i]);
+        }
+
+        return *this;
+    }
+
     [[nodiscard]]
     bool has_nans() const {
         for (size_t i = 0; i < Dimension; ++i) {
