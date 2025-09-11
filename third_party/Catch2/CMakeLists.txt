@@ -34,7 +34,7 @@ if(CMAKE_BINARY_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 project(Catch2
-  VERSION 3.9.1 # CML version placeholder, don't delete
+  VERSION 3.10.0 # CML version placeholder, don't delete
   LANGUAGES CXX
   HOMEPAGE_URL "https://github.com/catchorg/Catch2"
   DESCRIPTION "A modern, C++-native, unit test framework."
@@ -195,17 +195,23 @@ if(NOT_SUBPROJECT)
        "set(include_dir \"${CMAKE_INSTALL_INCLUDEDIR}\")"
        "set(lib_dir \"${CMAKE_INSTALL_LIBDIR}\")"
        [[
+         message(STATUS "DESTDIR: $ENV{DESTDIR}")
+         set(DESTDIR_PREFIX "")
+         if (DEFINED ENV{DESTDIR})
+           set(DESTDIR_PREFIX "$ENV{DESTDIR}")
+         endif ()
+         message(STATUS "PREFIX: ${DESTDIR_PREFIX}")
          set(lib_name "$<TARGET_FILE_BASE_NAME:Catch2>")
          configure_file(
            "${impl_pc_file}"
-           "$ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/${install_pkgconfdir}/catch2.pc"
+           "${DESTDIR_PREFIX}${CMAKE_INSTALL_PREFIX}/${install_pkgconfdir}/catch2.pc"
            @ONLY
          )
 
          set(lib_name "$<TARGET_FILE_BASE_NAME:Catch2WithMain>")
          configure_file(
            "${main_pc_file}"
-           "$ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/${install_pkgconfdir}/catch2-with-main.pc"
+           "${DESTDIR_PREFIX}${CMAKE_INSTALL_PREFIX}/${install_pkgconfdir}/catch2-with-main.pc"
            @ONLY
          )
        ]]

@@ -32,8 +32,8 @@ common --registry=https://bcr.bazel.build
 
 build --@boost.asio//:ssl=boringssl
 
-# macOS (e.g. Clang 14.0.0)
-build:macos --cxxopt=-std=c++20  # see https://clang.llvm.org/cxx_status.html
+# macOS
+build:macos --cxxopt=-std=c++23  # see https://clang.llvm.org/cxx_status.html
 build:macos --cxxopt=-Wall  # Turn on all warnings
 #build:macos --sandbox_block_path=/usr/local # This will fix okapi.cli but break okapi.ui - Note: Workaround for https://github.com/bazelbuild/bazel/issues/10472 - compile error with boringssl
 build:macos --define compiler=macos
@@ -42,26 +42,8 @@ build:macos --define compiler=macos
 #build:macos --cxxopt=-Wextra
 #build:macos --spawn_strategy=local
 
-# macOS Intel (config used in CI jobs)
-build:clang14_macos --cxxopt=-std=c++20
-#build:clang14_macos --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
-build:clang14_macos --cxxopt=-mwaitpkg
-build:clang14_macos --define compiler=clang14_macos
-
-# not used anymore? Todo: Remove this config if it is not needed anymore
-## macOS M1 (config is used on local MacBook M1 Pro)
-#build:clang14_macos_m1 --cxxopt=-std=c++20
-#build:clang14_macos_m1 --incompatible_enable_cc_toolchain_resolution
-#build:clang14_macos_m1 --linkopt=-ld_classic # Workaround for Xcode 15 linker bug, see for instance https://github.com/godotengine/godot/pull/81968/files
-##build:clang14_macos_m1 --cxxopt=-mwaitpkg # lead to compilation issues on local M1 macBook
-#build:clang14_macos_m1 --define compiler=clang14_macos_m1
-
-# Todo: Add apple_debug config
-# https://github.com/RobotLocomotion/drake/search?q=apple_debug
-
 # GCC 11.4
-#build:gcc11 --cxxopt=-std=c++23 # blocked by emsdk
-build:gcc11 --cxxopt=-std=c++20
+build:gcc11 --cxxopt=-std=c++23
 build:gcc11 --cxxopt=-Wall
 build:gcc11 --define compiler=gcc11
 build:gcc11 --cxxopt=-fpermissive # Needed for fmt
@@ -71,10 +53,6 @@ build:gcc11 --cxxopt=-fpermissive # Needed for fmt
 ##build:gcc11 --cxxopt=-Wextra
 
 build:linux --config=gcc11
-
-build:gcc11_cpp14 --cxxopt=-std=c++14
-build:gcc11_cpp14 --cxxopt=-Wall
-build:gc11_cpp14 --define compiler=gcc11_cpp14
 
 # GCC 13
 build:gcc13 --cxxopt=-std=c++23

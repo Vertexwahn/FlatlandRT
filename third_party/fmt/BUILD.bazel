@@ -1,4 +1,19 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_license//rules:license.bzl", "license")
+
+package(
+    default_applicable_licenses = [":license"],
+)
+
+exports_files([
+    "LICENSE",
+])
+
+license(
+    name = "license",
+    license_kinds = ["@rules_license//licenses/spdx:MIT"],
+    license_text = "LICENSE",
+)
 
 cc_library(
     name = "fmt",
@@ -11,12 +26,10 @@ cc_library(
         "include/fmt/*.h",
     ]),
     copts = select({
-        "@platforms//os:windows": ["-utf-8"],
+        "@rules_cc//cc/compiler:msvc-cl": ["-utf-8"],
         "//conditions:default": [],
     }),
-    includes = [
-        "include",
-    ],
-    strip_include_prefix = "include",
+    includes = ["include"],
+    strip_include_prefix = "include",  # workaround: only needed on some macOS systems (see https://github.com/bazelbuild/bazel-central-registry/issues/1537)
     visibility = ["//visibility:public"],
 )

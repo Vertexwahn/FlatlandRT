@@ -57,7 +57,7 @@ namespace Catch {
         ScopedMessage( ScopedMessage&& old ) noexcept;
         ~ScopedMessage();
 
-        MessageInfo m_info;
+        unsigned int m_messageId;
         bool m_moved = false;
     };
 

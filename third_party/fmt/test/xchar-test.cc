@@ -74,6 +74,7 @@ TEST(xchar_test, format_explicitly_convertible_to_wstring_view) {
 TEST(xchar_test, format) {
   EXPECT_EQ(fmt::format(L"{}", 42), L"42");
   EXPECT_EQ(fmt::format(L"{}", 4.2), L"4.2");
+  EXPECT_EQ(fmt::format(L"{}", 1e100), L"1e+100");
   EXPECT_EQ(fmt::format(L"{}", L"abc"), L"abc");
   EXPECT_EQ(fmt::format(L"{}", L'z'), L"z");
   EXPECT_THROW(fmt::format(fmt::runtime(L"{:*\x343E}"), 42), fmt::format_error);
@@ -378,7 +379,7 @@ TEST(locale_test, int_formatter) {
   f.parse(parse_ctx);
   auto buf = fmt::memory_buffer();
   fmt::basic_format_context<fmt::appender, char> format_ctx(
-      fmt::appender(buf), {}, fmt::detail::locale_ref(loc));
+      fmt::appender(buf), {}, fmt::locale_ref(loc));
   f.format(12345, format_ctx);
   EXPECT_EQ(fmt::to_string(buf), "12,345");
 }

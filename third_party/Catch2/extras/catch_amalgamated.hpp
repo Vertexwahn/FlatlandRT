@@ -6,8 +6,8 @@
 
 // SPDX-License-Identifier: BSL-1.0
 
-//  Catch v3.9.1
-//  Generated: 2025-08-09 00:29:20.303175
+//  Catch v3.10.0
+//  Generated: 2025-08-24 16:18:04.055916
 //  ----------------------------------------------------------
 //  This file is an amalgamation of multiple different files.
 //  You probably shouldn't edit it directly.
@@ -3972,7 +3972,7 @@ namespace Catch {
             return sequence < other.sequence;
         }
     private:
-        static unsigned int globalCount;
+        static thread_local unsigned int globalCount;
     };
 
 } // end namespace Catch
@@ -7466,8 +7466,8 @@ namespace Catch {
 #define CATCH_VERSION_MACROS_HPP_INCLUDED
 
 #define CATCH_VERSION_MAJOR 3
-#define CATCH_VERSION_MINOR 9
-#define CATCH_VERSION_PATCH 1
+#define CATCH_VERSION_MINOR 10
+#define CATCH_VERSION_PATCH 0
 
 #endif // CATCH_VERSION_MACROS_HPP_INCLUDED
 
@@ -10773,9 +10773,6 @@ namespace Catch {
         Totals m_totals;
         Detail::AtomicCounts m_atomicAssertionCount;
         IEventListenerPtr m_reporter;
-        std::vector<MessageInfo> m_messages;
-        // Owners for the UNSCOPED_X information macro
-        std::vector<ScopedMessage> m_messageScopes;
         std::vector<SectionEndInfo> m_unfinishedSections;
         std::vector<ITracker*> m_activeSections;
         TrackerContext m_trackerContext;

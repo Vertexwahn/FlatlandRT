@@ -2,6 +2,7 @@
 
 # Release notes
 **Contents**<br>
+[3.10.0](#3100)<br>
 [3.9.1](#391)<br>
 [3.9.0](#390)<br>
 [3.8.1](#381)<br>
@@ -67,6 +68,19 @@
 [2.0.1](#201)<br>
 [Older versions](#older-versions)<br>
 [Even Older versions](#even-older-versions)<br>
+
+
+## 3.10.0
+
+### Fixes
+* pkg-config files will take `DESTDIR` env var into account when selecting install destination (#3006, #3019)
+* Changed `filter` to store the provided predicate by value (#3002, #3005)
+  * This is done to avoid dangling-by-default behaviour when `filter` is used inside `GENERATE_COPY`/`GENERATE_REF`.
+
+### Improvements
+* Escaping XML and JSON output is faster when the strings do not need escaping.
+  * The improvement starts at about 3x throughput, up to 10x for long strings.
+* Message macros (`INFO`, `CAPTURE`, `WARN`, `SUCCEED`, etc) are now thread safe.
 
 
 ## 3.9.1

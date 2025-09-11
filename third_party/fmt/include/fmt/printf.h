@@ -9,7 +9,7 @@
 #define FMT_PRINTF_H_
 
 #ifndef FMT_MODULE
-#  include <algorithm>  // std::max
+#  include <algorithm>  // std::find
 #  include <limits>     // std::numeric_limits
 #endif
 
@@ -46,7 +46,7 @@ template <typename Char> class basic_printf_context {
   auto out() -> basic_appender<Char> { return out_; }
   void advance_to(basic_appender<Char>) {}
 
-  auto locale() -> detail::locale_ref { return {}; }
+  auto locale() -> locale_ref { return {}; }
 
   auto arg(int id) const -> basic_format_arg<basic_printf_context> {
     return args_.get(id);
@@ -76,8 +76,7 @@ inline auto find<false, char>(const char* first, const char* last, char value,
 // signed and unsigned integers.
 template <bool IsSigned> struct int_checker {
   template <typename T> static auto fits_in_int(T value) -> bool {
-    unsigned max = to_unsigned(max_value<int>());
-    return value <= max;
+    return value <= to_unsigned(max_value<int>());
   }
   inline static auto fits_in_int(bool) -> bool { return true; }
 };
@@ -95,7 +94,7 @@ struct printf_precision_handler {
   auto operator()(T value) -> int {
     if (!int_checker<std::numeric_limits<T>::is_signed>::fits_in_int(value))
       report_error("number is too big");
-    return (std::max)(static_cast<int>(value), 0);
+    return max_of(static_cast<int>(value), 0);
   }
 
   template <typename T, FMT_ENABLE_IF(!std::is_integral<T>::value)>
