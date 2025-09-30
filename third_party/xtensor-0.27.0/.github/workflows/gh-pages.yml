@@ -1,0 +1,48 @@
+name: gh-pages
+
+on:
+  push:
+    branches:
+    - master
+
+defaults:
+  run:
+    shell: bash -l {0}
+
+jobs:
+
+  publish:
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+
+    - name: Basic GitHub action setup
+      uses: actions/checkout@v2
+
+    - name: Set mamba environment
+      uses: mamba-org/setup-micromamba@main
+      with:
+        environment-file: docs/ghp_environment.yml
+        environment-name: xtensor-doc
+        init-shell: bash
+        cache-downloads: true
+
+    - name: Run doxygen
+      working-directory: docs
+      run: doxygen
+
+    - name: Deploy to GitHub Pages
+      if: success()
+      uses: crazy-max/ghaction-github-pages@v2
+      with:
+        target_branch: gh-pages
+        build_dir: docs/html
+        jekyll: false
+        keep_history: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
