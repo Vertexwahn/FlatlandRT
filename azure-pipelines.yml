@@ -78,7 +78,7 @@ jobs:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-gcc13-fast-opt.yaml
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-gcc13-fast-opt.yaml
 
   - job: Ubuntu22GCC11DebugPart1
     displayName: "GCC11 dbg on Ubuntu 22.04 (Part 1)"
