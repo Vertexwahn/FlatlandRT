@@ -22,7 +22,7 @@ namespace Catch {
         m_messageId( builder.m_info.sequence ) {
         MessageInfo info( CATCH_MOVE( builder.m_info ) );
         info.message = builder.m_stream.str();
-        getResultCapture().pushScopedMessage( CATCH_MOVE(info) );
+        IResultCapture::pushScopedMessage( CATCH_MOVE( info ) );
     }
 
     ScopedMessage::ScopedMessage( ScopedMessage&& old ) noexcept:
@@ -31,15 +31,14 @@ namespace Catch {
     }
 
     ScopedMessage::~ScopedMessage() {
-        if ( !m_moved ) { getResultCapture().popScopedMessage( m_messageId ); }
+        if ( !m_moved ) { IResultCapture::popScopedMessage( m_messageId ); }
     }
 
 
     Capturer::Capturer( StringRef macroName,
                         SourceLineInfo const& lineInfo,
                         ResultWas::OfType resultType,
-                        StringRef names ):
-        m_resultCapture( getResultCapture() ) {
+                        StringRef names ) {
         auto trimmed = [&] (size_t start, size_t end) {
             while (names[start] == ',' || isspace(static_cast<unsigned char>(names[start]))) {
                 ++start;
@@ -101,14 +100,14 @@ namespace Catch {
     Capturer::~Capturer() {
         assert( m_captured == m_messages.size() );
         for (auto const& message : m_messages) {
-            m_resultCapture.popScopedMessage( message.sequence );
+            IResultCapture::popScopedMessage( message.sequence );
         }
     }
 
     void Capturer::captureValue( size_t index, std::string const& value ) {
         assert( index < m_messages.size() );
         m_messages[index].message += value;
-        m_resultCapture.pushScopedMessage( CATCH_MOVE(m_messages[index]) );
+        IResultCapture::pushScopedMessage( CATCH_MOVE( m_messages[index] ) );
         m_captured++;
     }
 

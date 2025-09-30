@@ -95,7 +95,7 @@ foreach(target DisabledExceptions-DefaultHandler DisabledExceptions-CustomHandle
   target_compile_options(${target}
     PUBLIC
       $<$<CXX_COMPILER_ID:MSVC>:/EHs-c-;/D_HAS_EXCEPTIONS=0>
-      $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:AppleClang>>:-fno-exceptions>
+      $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:QCC>,$<CXX_COMPILER_ID:AppleClang>>:-fno-exceptions>
   )
   target_link_libraries(${target} Catch2_buildall_interface)
 endforeach()
@@ -107,18 +107,6 @@ set_tests_properties(CATCH_CONFIG_DISABLE_EXCEPTIONS-1
   PROPERTIES
     PASS_REGULAR_EXPRESSION "assertions: 4 \| 2 passed \| 2 failed"
     FAIL_REGULAR_EXPRESSION "abort;terminate;fatal"
-)
-
-add_executable(BazelReporter ${TESTS_DIR}/X30-BazelReporter.cpp)
-target_compile_definitions(BazelReporter PRIVATE CATCH_CONFIG_BAZEL_SUPPORT)
-target_link_libraries(BazelReporter Catch2_buildall_interface)
-add_test(NAME CATCH_CONFIG_BAZEL_REPORTER-1
-  COMMAND
-  Python3::Interpreter "${CATCH_DIR}/tests/TestScripts/testBazelReporter.py" $<TARGET_FILE:BazelReporter> "${CMAKE_CURRENT_BINARY_DIR}"
-)
-set_tests_properties(CATCH_CONFIG_BAZEL_REPORTER-1
-  PROPERTIES
-    LABELS "uses-python"
 )
 
 # We must now test this works without the build flag.
@@ -428,6 +416,50 @@ set_tests_properties(Reporters::CrashInJunitReporter
     PASS_REGULAR_EXPRESSION "</testsuites>"
     LABELS "uses-signals"
 )
+
+
+add_executable(QuickExitInTest ${TESTS_DIR}/X40-QuickExit.cpp)
+target_link_libraries(QuickExitInTest PRIVATE Catch2::Catch2WithMain)
+add_test(
+  NAME BazelEnv::TEST_PREMATURE_EXIT_FILE
+  COMMAND
+    Python3::Interpreter
+    "${CATCH_DIR}/tests/TestScripts/testBazelExitGuardFile.py"
+    $<TARGET_FILE:QuickExitInTest>
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    "bazel"
+)
+set_tests_properties(BazelEnv::TEST_PREMATURE_EXIT_FILE
+  PROPERTIES
+    LABELS "uses-python"
+)
+add_test(
+  NAME PrematureExitGuardFileCanBeUsedFromCLI::CheckAfterCrash
+  COMMAND
+    Python3::Interpreter
+    "${CATCH_DIR}/tests/TestScripts/testBazelExitGuardFile.py"
+    $<TARGET_FILE:QuickExitInTest>
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    "cli"
+)
+set_tests_properties(PrematureExitGuardFileCanBeUsedFromCLI::CheckAfterCrash
+  PROPERTIES
+    LABELS "uses-python"
+)
+add_test(
+  NAME PrematureExitGuardFileCanBeUsedFromCLI::CheckWithoutCrash
+  COMMAND
+    Python3::Interpreter
+    "${CATCH_DIR}/tests/TestScripts/testBazelExitGuardFile.py"
+    $<TARGET_FILE:QuickExitInTest>
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    "no-crash"
+)
+set_tests_properties(PrematureExitGuardFileCanBeUsedFromCLI::CheckWithoutCrash
+  PROPERTIES
+    LABELS "uses-python"
+)
+
 
 add_executable(AssertionStartingEventGoesBeforeAssertionIsEvaluated
   X20-AssertionStartingEventGoesBeforeAssertionIsEvaluated.cpp

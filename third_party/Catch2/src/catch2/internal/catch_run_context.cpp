@@ -483,28 +483,6 @@ namespace Catch {
         m_reporter->benchmarkFailed( error );
     }
 
-    void RunContext::pushScopedMessage( MessageInfo&& message ) {
-        Detail::g_messages.push_back( CATCH_MOVE(message) );
-    }
-
-    void RunContext::popScopedMessage( unsigned int messageId ) {
-        // Note: On average, it would probably be better to look for the message
-        //       backwards. However, we do not expect to have to deal with more
-        //       messages than low single digits, so the optimization is tiny,
-        //       and we would have to hand-write the loop to avoid terrible
-        //       codegen of reverse iterators in debug mode.
-        Detail::g_messages.erase(
-            std::find_if( Detail::g_messages.begin(),
-                          Detail::g_messages.end(),
-                          [=]( MessageInfo const& msg ) {
-                              return msg.sequence == messageId;
-                          } ) );
-    }
-
-    void RunContext::emplaceUnscopedMessage( MessageBuilder&& builder ) {
-        Detail::g_messageScopes.emplace_back( CATCH_MOVE(builder) );
-    }
-
     std::string RunContext::getCurrentTestName() const {
         return m_activeTestCase
             ? m_activeTestCase->getTestCaseInfo().name
@@ -831,11 +809,26 @@ namespace Catch {
         }
     }
 
-    IResultCapture& getResultCapture() {
-        if (auto* capture = getCurrentContext().getResultCapture())
-            return *capture;
-        else
-            CATCH_INTERNAL_ERROR("No result capture instance");
+    void IResultCapture::pushScopedMessage( MessageInfo&& message ) {
+        Detail::g_messages.push_back( CATCH_MOVE( message ) );
+    }
+
+    void IResultCapture::popScopedMessage( unsigned int messageId ) {
+        // Note: On average, it would probably be better to look for the message
+        //       backwards. However, we do not expect to have to deal with more
+        //       messages than low single digits, so the optimization is tiny,
+        //       and we would have to hand-write the loop to avoid terrible
+        //       codegen of reverse iterators in debug mode.
+        Detail::g_messages.erase( std::find_if( Detail::g_messages.begin(),
+                                                Detail::g_messages.end(),
+                                                [=]( MessageInfo const& msg ) {
+                                                    return msg.sequence ==
+                                                           messageId;
+                                                } ) );
+    }
+
+    void IResultCapture::emplaceUnscopedMessage( MessageBuilder&& builder ) {
+        Detail::g_messageScopes.emplace_back( CATCH_MOVE( builder ) );
     }
 
     void seedRng(IConfig const& config) {

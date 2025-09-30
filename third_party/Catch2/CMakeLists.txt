@@ -20,6 +20,7 @@ cmake_dependent_option(CATCH_BUILD_TESTING "Build the SelfTest project" ON "CATC
 cmake_dependent_option(CATCH_BUILD_EXAMPLES "Build code examples" OFF "CATCH_DEVELOPMENT_BUILD" OFF)
 cmake_dependent_option(CATCH_BUILD_EXTRA_TESTS "Build extra tests" OFF "CATCH_DEVELOPMENT_BUILD" OFF)
 cmake_dependent_option(CATCH_BUILD_FUZZERS "Build fuzzers" OFF "CATCH_DEVELOPMENT_BUILD" OFF)
+cmake_dependent_option(CATCH_BUILD_BENCHMARKS "Build the benchmarks" OFF "CATCH_DEVELOPMENT_BUILD" OFF)
 cmake_dependent_option(CATCH_ENABLE_COVERAGE "Generate coverage for codecov.io" OFF "CATCH_DEVELOPMENT_BUILD" OFF)
 cmake_dependent_option(CATCH_ENABLE_WERROR "Enables Werror during build" ON "CATCH_DEVELOPMENT_BUILD" OFF)
 cmake_dependent_option(CATCH_BUILD_SURROGATES "Enable generating and building surrogate TUs for the main headers" OFF "CATCH_DEVELOPMENT_BUILD" OFF)
@@ -76,6 +77,11 @@ set(SELF_TEST_DIR ${CATCH_DIR}/tests/SelfTest)
 
 # We need to bring-in the variables defined there to this scope
 add_subdirectory(src)
+
+if (CATCH_BUILD_BENCHMARKS)
+  set(CMAKE_FOLDER "benchmarks")
+  add_subdirectory(benchmarks)
+endif()
 
 # Build tests only if requested
 if(BUILD_TESTING AND CATCH_BUILD_TESTING AND NOT_SUBPROJECT)

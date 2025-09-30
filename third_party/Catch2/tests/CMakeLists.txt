@@ -662,5 +662,38 @@ foreach(reporterName # "Automake" - the simple .trs format does not support any 
   )
 endforeach()
 
+add_test(NAME "Bazel::RngSeedEnvVar::JustEnv"
+  COMMAND
+    $<TARGET_FILE:SelfTest> "Factorials are computed"
+)
+set_tests_properties("Bazel::RngSeedEnvVar::JustEnv"
+  PROPERTIES
+    ENVIRONMENT "BAZEL_TEST=1;TEST_RANDOM_SEED=18181818"
+    PASS_REGULAR_EXPRESSION "Randomness seeded to: 18181818"
+)
+
+add_test(NAME "Bazel::RngSeedEnvVar::EnvHasPriorityOverCLI"
+  COMMAND
+    $<TARGET_FILE:SelfTest> "Factorials are computed"
+    --rng-seed 17171717
+)
+set_tests_properties("Bazel::RngSeedEnvVar::EnvHasPriorityOverCLI"
+  PROPERTIES
+    ENVIRONMENT "BAZEL_TEST=1;TEST_RANDOM_SEED=18181818"
+    PASS_REGULAR_EXPRESSION "Randomness seeded to: 18181818"
+)
+
+add_test(NAME "Bazel::RngSeedEnvVar::MalformedValueIsIgnored"
+  COMMAND
+    $<TARGET_FILE:SelfTest> "Factorials are computed"
+    --rng-seed 17171717
+)
+set_tests_properties("Bazel::RngSeedEnvVar::MalformedValueIsIgnored"
+  PROPERTIES
+    ENVIRONMENT "BAZEL_TEST=1;TEST_RANDOM_SEED=XOXOXOXO"
+    PASS_REGULAR_EXPRESSION "Randomness seeded to: 17171717"
+)
+
+
 list(APPEND CATCH_TEST_TARGETS SelfTest)
 set(CATCH_TEST_TARGETS ${CATCH_TEST_TARGETS} PARENT_SCOPE)

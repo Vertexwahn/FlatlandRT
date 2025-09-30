@@ -32,6 +32,7 @@
 [Test Sharding](#test-sharding)<br>
 [Allow running the binary without tests](#allow-running-the-binary-without-tests)<br>
 [Output verbosity](#output-verbosity)<br>
+[Create file to guard against silent early termination](#create-file-to-guard-against-silent-early-termination)<br>
 
 Catch works quite nicely without any command line options at all - but for those times when you want greater control the following options are available.
 Click one of the following links to take you straight to that option - or scroll on to browse the available options.
@@ -647,6 +648,21 @@ format cannot meaningfully change. In that case, the verbosity level is
 ignored.
 
 Verbosity defaults to _normal_.
+
+
+## Create file to guard against silent early termination
+<pre>--premature-exit-guard-file &lt;path&gt;</pre>
+
+> Introduced in Catch2 X.Y.Z
+
+Tells Catch2 to create an empty file at specified path before the tests
+start, and delete it after the tests finish. If the file is present after
+the process stops, it can be assumed that the testing binary exited
+prematurely, e.g. due to the OOM killer.
+
+All directories in the path must already exist. If this option is used
+and Catch2 cannot create the file (e.g. the location is not writable),
+the test run will fail.
 
 
 ---

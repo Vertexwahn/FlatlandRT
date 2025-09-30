@@ -6,11 +6,13 @@
 
 // SPDX-License-Identifier: BSL-1.0
 
+#include <catch2/benchmark/catch_benchmark.hpp>
+#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/internal/catch_enum_values_registry.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 #include <catch2/matchers/catch_matchers_vector.hpp>
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_template_test_macros.hpp>
 
 #include <chrono>
 
@@ -138,4 +140,27 @@ struct Catch::StringMaker<ThrowsOnStringification> {
 TEST_CASE( "Exception thrown inside stringify does not fail the test", "[toString]" ) {
     ThrowsOnStringification tos;
     CHECK( tos == tos );
+}
+
+TEST_CASE( "string escaping benchmark", "[toString][!benchmark]" ) {
+    const auto input_length = GENERATE( as<size_t>{}, 10, 100, 10'000, 100'000 );
+    std::string test_input( input_length, 'a' );
+    BENCHMARK( "no-escape string, no-escaping, len=" +
+               std::to_string( input_length ) ) {
+        return Catch::Detail::convertIntoString( test_input, false );
+    };
+    BENCHMARK( "no-escape string, escaping, len=" +
+               std::to_string( input_length ) ) {
+        return Catch::Detail::convertIntoString( test_input, true );
+    };
+
+    std::string escape_input( input_length, '\r' );
+    BENCHMARK( "full escape string, no-escaping, len=" +
+               std::to_string( input_length ) ) {
+        return Catch::Detail::convertIntoString( escape_input, false );
+    };
+    BENCHMARK( "full escape string, escaping, len=" +
+               std::to_string( input_length ) ) {
+        return Catch::Detail::convertIntoString( escape_input, true );
+    };
 }

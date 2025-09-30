@@ -1,8 +1,19 @@
-# 12.0.0 - TBD
+# 12.0.0 - 2025-09-17
 
 - Optimized the default floating point formatting
   (https://github.com/fmtlib/fmt/issues/3675,
-  https://github.com/fmtlib/fmt/issues/4516).
+  https://github.com/fmtlib/fmt/issues/4516). In particular, formatting a
+  `double` with format string compilation into a stack allocated buffer is
+  more than 60% faster in version 12.0 compared to 11.2 according to
+  [dtoa-benchmark](https://github.com/fmtlib/dtoa-benchmark):
+
+  ```
+  Function  Time (ns)  Speedup
+  fmt11        34.471    1.00x
+  fmt12        21.000    1.64x
+  ```
+
+  <img width="766" height="609" src="https://github.com/user-attachments/assets/d7d768ad-7543-468c-b0bb-449abf73b31b" />
 
 - Added `constexpr` support to `fmt::format`. For example:
 
@@ -16,6 +27,27 @@
   now works at compile time provided that `std::string` supports `constexpr`
   (https://github.com/fmtlib/fmt/issues/3403,
   https://github.com/fmtlib/fmt/pull/4456). Thanks @msvetkin.
+
+- Added `FMT_STATIC_FORMAT` that allows formatting into a string of the exact
+  required size at compile time.
+
+  For example:
+
+  ```c++
+  #include <fmt/compile.h>
+
+  constexpr auto s = FMT_STATIC_FORMAT("{}", 42);
+  ```
+
+  compiles to just
+
+  ```s
+  __ZL1s:
+        .asciiz "42"
+  ```
+
+  It can be accessed as a C string with `s.c_str()` or as a string view with
+  `s.str()`.
 
 - Improved C++20 module support
   (https://github.com/fmtlib/fmt/pull/4451,
@@ -53,12 +85,17 @@
   formatters (https://github.com/fmtlib/fmt/issues/4424,
   https://github.com/fmtlib/fmt/pull/4434). Thanks @jeremy-rifkin.
 
-- Removed deprecated `basic_format_args::parse_context_type` and
-  `basic_format_args::formatter_type` and similar aliases in context types.
+- Removed the following deprecated APIs:
 
-- Removed deprecated `has_formatter`. Use `is_formattable` instead.
+  - `has_formatter`: use `is_formattable` instead,
+  - `basic_format_args::parse_context_type`,
+    `basic_format_args::formatter_type` and similar aliases in context types,
+  - wide stream overload of `fmt::printf`,
+  - wide stream overloads of `fmt::print` that take text styles,
+  - `is_*char` traits,
+  - `fmt::localtime`.
 
-- Removed legacy `is_*char` traits.
+- Deprecated wide overloads of `fmt::fprintf` and `fmt::sprintf`.
 
 - Improved diagnostics for the incorrect usage of `fmt::ptr`
   (https://github.com/fmtlib/fmt/pull/4453). Thanks @TobiSchluter.
@@ -99,19 +136,27 @@
   overriden by users when exceptions are disabled
   (https://github.com/fmtlib/fmt/pull/4521). Thanks @HazardyKnusperkeks.
 
-- Various code improvements (https://github.com/fmtlib/fmt/pull/4445,
+- Improved master project detection and disabled install targets when using
+  {fmt} as a subproject by default (https://github.com/fmtlib/fmt/pull/4536).
+  Thanks @crueter.
+
+- Made various code improvements
+  (https://github.com/fmtlib/fmt/pull/4445,
   https://github.com/fmtlib/fmt/pull/4448,
   https://github.com/fmtlib/fmt/pull/4473,
   https://github.com/fmtlib/fmt/pull/4522).
   Thanks @localspook, @tchaikov and @way4sahil.
 
+- Added Conan instructions to the docs
+  (https://github.com/fmtlib/fmt/pull/4537). Thanks @uilianries.
+
+- Removed Bazel files to avoid issues with downstream packaging
+  (https://github.com/fmtlib/fmt/pull/4530). Thanks @mering.
+
 - Added more entries for generated files to `.gitignore`
   (https://github.com/fmtlib/fmt/pull/4355,
   https://github.com/fmtlib/fmt/pull/4512).
   Thanks @dinomight and @localspook.
-
-- Removed Bazel files to avoid issues with downstream packaging
-  (https://github.com/fmtlib/fmt/pull/4530). Thanks @mering.
 
 - Fixed various warnings and compilation issues
   (https://github.com/fmtlib/fmt/pull/4447,
