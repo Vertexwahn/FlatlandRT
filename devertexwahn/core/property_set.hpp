@@ -90,12 +90,14 @@ public:
     }
 
     template<typename ValueType>
-    void add_property(const std::string &name, const ValueType &value) {
+    PropertySetType<VariantType>& add_property(const std::string &name, const ValueType &value) {
         if (has_property(name)) {
             throw PropertyDoesAlreadyExistException(name, value);
         } else {
             property_name_to_value_[name] = value;
         }
+
+        return *this;
     }
 
     template<typename ValueType>

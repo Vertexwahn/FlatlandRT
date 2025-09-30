@@ -53,6 +53,17 @@ TEST(PropertySet, TestBasicTypes) {
     EXPECT_THAT(ps.get_property<std::string>("longer_variable_name"), "some_string");
 }
 
+TEST(PropertySet, multiple_additons) {
+    using VariantType = std::variant<int>;
+    using PropertySet = PropertySetType<VariantType>;
+
+    PropertySet ps;
+    ps.add_property("a", 1).add_property("b", 2);
+
+    EXPECT_THAT(ps.get_property<int>("a"), 1);
+    EXPECT_THAT(ps.get_property<int>("b"), 2);
+}
+
 TEST(PropertySet, When_PropertyDoesNotExist_Then_RaiseException) {
     using VariantType = std::variant<int>;
     using PropertySet = PropertySetType<VariantType>;
