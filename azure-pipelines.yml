@@ -123,20 +123,20 @@ jobs:
     pool:
       vmImage: 'windows-2025'
     steps:
-      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-dbg.yaml
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-dbg.yaml
 
   - job: VisualStudio2022_WindowsServer2025_Fastbuild
     displayName: "VS2022 fastbuild on Windows Server 2025"
     pool:
       vmImage: 'windows-2025'
     steps:
-      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-fastbuild.yaml
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-fastbuild.yaml
 
   - job: VisualStudio2022_WindowsServer2025_Opt
     displayName: "VS2022 opt on Windows Server 2025"
     pool:
       vmImage: 'windows-2025'
     steps:
-      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-opt.yaml
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-opt.yaml
 
 
