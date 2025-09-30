@@ -35,7 +35,7 @@ jobs:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-bazel-query.yaml
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-bazel-query.yaml
 
   - job: Ubuntu22Clang19
     displayName: "Clang19 on Ubuntu 22.04"
@@ -49,7 +49,7 @@ jobs:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-coverage.yaml
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-coverage.yaml
 
 
   #- job: Ubuntu24Cppcheck
@@ -64,14 +64,14 @@ jobs:
     pool:
       vmImage: 'ubuntu-22.04'
     steps:
-      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-22.04-gcc11-fast-opt.yaml
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-22.04-gcc11-fast-opt.yaml
 
   - job: Ubuntu24GCC13FlakyTests
     displayName: "GCC13 detect flaky tests on Ubuntu 24.04"
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-gcc13-flaky-test-detection.yaml
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-gcc13-flaky-test-detection.yaml
 
   - job: Ubuntu24GCC13
     displayName: "GCC13 fastbuild opt on Ubuntu 24.04"
@@ -92,7 +92,7 @@ jobs:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-      - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-gcc13-dbg-part1.yaml
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-gcc13-dbg-part1.yaml
 
 
   # Visual Studio 2022 on Windows Server 2022
