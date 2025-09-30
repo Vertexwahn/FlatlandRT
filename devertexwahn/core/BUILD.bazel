@@ -66,7 +66,6 @@ cc_test(
     name = "logging_test_env_info",
     srcs = ["logging_test_env.cpp"],
     env = {"DE_VERTEXWAHN_LOG_LEVEL": "info"},
-    visibility = ["//visibility:public"],
     deps = [
         ":logging",
         ":platform",
