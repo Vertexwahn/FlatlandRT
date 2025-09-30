@@ -13,14 +13,14 @@ jobs:
   #  pool:
   #    vmImage: 'macOS-14'
   #  steps:
-  #    - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/macOS-14-apple-clang15.yaml
+  #    - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/macOS-14-apple-clang15.yaml
 
   #- job: MacOSAppleClang14Sequoia
   #  displayName: "Apple Clang16 on macOS 15 (Sequoia)"
   #  pool:
   #    vmImage: 'macOS-15'
   #  steps:
-  #    - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/macOS-15-apple-clang16.yaml
+  #    - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/macOS-15-apple-clang16.yaml
 
 
   #- job: Ubuntu20Clang14
@@ -28,7 +28,7 @@ jobs:
   #  pool:
   #    vmImage: 'ubuntu-20.04'
   #  steps:
-  #    - template: devertexwahn/ci/azure_pipelines/microsoft_hosted/ubuntu-20.04-clang14.yaml
+  #    - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-20.04-clang14.yaml
 
   - job: Ubuntu24BazelQuery
     displayName: "Bazel query on Ubuntu 24.04"
@@ -37,12 +37,12 @@ jobs:
     steps:
       - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-24.04-bazel-query.yaml
 
-  - job: Ubuntu22Clang19
-    displayName: "Clang19 on Ubuntu 22.04"
-    pool:
-      vmImage: 'ubuntu-22.04'
-    steps:
-      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-22.04-clang19.yaml
+  #- job: Ubuntu22Clang19
+  #  displayName: "Clang19 on Ubuntu 22.04"
+  #  pool:
+  #    vmImage: 'ubuntu-22.04'
+  #  steps:
+  #    - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/ubuntu-22.04-clang19.yaml
 
   - job: Ubuntu24Coverage
     displayName: "Coverage with LCOV/GCC13 on Ubuntu 24.04"
