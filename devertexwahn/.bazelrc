@@ -3,24 +3,15 @@
 #   SPDX-License-Identifier: Apache-2.0
 #
 
-# Supported OS identifiers are linux, macos, windows, freebsd, and openbsd.
-# Ignored for now - details here: https://stackoverflow.com/questions/73873449/can-enable-platform-specific-config-be-ignored-or-overriden
-# build --enable_platform_specific_config
-
-#build --symlink_prefix=/ # Suppress symlink creation (to avoid untracked files issues with git)
-
 #-------------------------------------------------------------------------------------
 # Bazel 8 migration
 #-------------------------------------------------------------------------------------
 
-#common --enable_workspace # Todo: breaks running Qt applications -> Migrate rules_qt first to Bazel 8
 common --incompatible_disallow_empty_glob=false  # TODO: Get rid of this - Set empty globs allowed policy explicitly where needed
 
 #-------------------------------------------------------------------------------------
 # Bzlmod
 #-------------------------------------------------------------------------------------
-
-common --allow_yanked_versions=rules_cc@0.1.0
 
 #common --registry=file:///%workspace%/registry  # Does not work on Windows 11 + Bazel 6.5.0
 common --registry=https://bcr.bazel.build
@@ -75,16 +66,6 @@ build:clang14 --features=-libtool
 build:clang14 --cxxopt=-mwaitpkg
 build:clang14 --define compiler=clang14
 
-# Clang 19 (config is used on Ubuntu)
-build:clang19 --cxxopt=-std=c++20
-
-build:clang19 --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
-# Tell Bazel to pass the right flags for llvm-ar, not libtool. Only needed if you are building on darwin.
-# See https://github.com/bazelbuild/bazel/blob/5c75d0acec21459bbb13520817e3806e1507e907/tools/cpp/unix_cc_toolchain_config.bzl#L1000-L1024
-build:clang19 --features=-libtool
-build:clang19 --cxxopt=-mwaitpkg
-build:clang19 --define compiler=clang19
-
 # Visual Studio 2022
 #build:vs2022 --copt=-DNOGDI
 #build:vs2022 --host_copt=-DNOGDI
@@ -130,3 +111,20 @@ build:emscripten --incompatible_enable_cc_toolchain_resolution
 
 try-import %workspace%/bazel/bazelrc/.bazelrc.remote_cache
 try-import %workspace%/bazel/bazelrc/.bazelrc.build_meta
+
+# LLVM toolchain for Bazel
+
+build:llvm_toolchain --cxxopt=-std=c++20
+
+# LLVM toolchain on Ubuntu
+build:llvm_toolchain_ubuntu --config=llvm_toolchain
+build:llvm_toolchain_ubuntu --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
+build:llvm_toolchain_ubuntu --features=-libtool
+build:llvm_toolchain_ubuntu --cxxopt=-mwaitpkg
+build:llvm_toolchain_ubuntu --define compiler=clang19
+
+build:clang19 --config=llvm_toolchain_ubuntu
+
+# LLVM toolchain on macOS
+build:llvm_toolchain_macos --config=llvm_toolchain
+#build:llvm_toolchain_macos --extra_toolchains=@llvm_toolchain//:cc-toolchain-darwin
