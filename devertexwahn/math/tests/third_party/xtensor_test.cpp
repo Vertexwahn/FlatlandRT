@@ -3,9 +3,9 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "xtensor/xarray.hpp"
-#include "xtensor/xio.hpp"
-#include "xtensor/xview.hpp"
+#include <xtensor/containers/xarray.hpp>
+#include <xtensor/io/xio.hpp>
+#include <xtensor/views/xview.hpp>
 
 #include <iostream>
 
