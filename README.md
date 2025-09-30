@@ -52,13 +52,13 @@ cd devertexwahn # switch to the location where the MODULE.bazel file is located
 *Render a scene with Windows 10/11 x64 with Visual Studio 2019:*
 
 ```shell
-bazel --output_base=C:/bazel_output_base  run --config=vs2019 //flatland/cli:flatland.cli --scene_filename=C:\scenes\bunny.flatland.xml
+bazel --output_base=C:/bazel_output_base run --config=vs2019 //flatland/cli:flatland.cli -- --scene_filename=C:\scenes\bunny.flatland.xml
 ```
 
 *Render a scene with Windows 10/11 x64 with Visual Studio 2022:*
 
 ```shell
-bazel --output_base=C:/bazel_output_base  run --config=vs2022 //flatland/cli:flatland.cli --scene_filename=C:\scenes\bunny.flatland.xml
+bazel --output_base=C:/bazel_output_base  run --config=vs2022 //flatland/cli:flatland.cli -- --scene_filename=C:\scenes\bunny.flatland.xml
 ```
 
 For more hints on how to use Bazel on Windows have a look at the [Bazel on Windows](https://docs.google.com/document/d/17YIqUdffxpwcKP-0whHM6TFELN8VohTpjiiEIbbRfts/edit?usp=sharing) document.
