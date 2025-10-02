@@ -2,6 +2,7 @@
 
 # Release notes
 **Contents**<br>
+[3.11.0](#3110)<br>
 [3.10.0](#3100)<br>
 [3.9.1](#391)<br>
 [3.9.0](#390)<br>
@@ -68,6 +69,28 @@
 [2.0.1](#201)<br>
 [Older versions](#older-versions)<br>
 [Even Older versions](#even-older-versions)<br>
+
+
+## 3.11.0
+
+### Fixes
+* Fixed building on non-desktop GDK platforms (#3029)
+* Fixed message macros being susceptible to race in specific scenario (#3031)
+* Catch2's SEH filter will call the previously installed filter after reporting the error (#3033)
+
+### Improvements
+* Handling of scoped messages (e.g. `CAPTURE`) is a bit faster.
+* Better out-of-the-box support for QNX (#2953)
+* Improved performance of assertions by up-to 10%
+  * Release mode assertion fast-path sees the biggest improvement.
+* Faster processing of non-escaped strings in `--invisibles` mode.
+* Added support for Bazel's `TEST_RANDOM_SEED` env var (#3021)
+* Added support for Bazel's `TEST_PREMATURE_EXIT_FILE` env var (#3020)
+  * This creates a file that is deleted if the tests exit normally, but stays around if the process dies unexpectedly.
+  * This functionality is also exposed through CLI as `--premature-exit-guard-file`
+
+### Miscellaneous
+* **[Tuple.app](https://tuple.app/catch2) has sponsored Catch2**
 
 
 ## 3.10.0

@@ -73,7 +73,7 @@ test execution. Specifically it understands
 
 > Support for `TESTBRIDGE_TEST_ONLY` and sharding was introduced in Catch2 3.2.0
 
-> Support for `TEST_PREMATURE_EXIT_FILE` and `TEST_RANDOM_SEED` was introduced in Catch2 X.Y.Z
+> Support for `TEST_PREMATURE_EXIT_FILE` and `TEST_RANDOM_SEED` was introduced in Catch2 3.11.0
 
 This integration is enabled via either a [compile time configuration
 option](configuration.md#bazel-support), or via `BAZEL_TEST` environment

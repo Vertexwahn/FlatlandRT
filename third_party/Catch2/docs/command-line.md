@@ -653,7 +653,7 @@ Verbosity defaults to _normal_.
 ## Create file to guard against silent early termination
 <pre>--premature-exit-guard-file &lt;path&gt;</pre>
 
-> Introduced in Catch2 X.Y.Z
+> Introduced in Catch2 3.11.0
 
 Tells Catch2 to create an empty file at specified path before the tests
 start, and delete it after the tests finish. If the file is present after
