@@ -98,6 +98,7 @@ set(IMPL_HEADERS
   ${SOURCES_DIR}/internal/catch_jsonwriter.hpp
   ${SOURCES_DIR}/internal/catch_lazy_expr.hpp
   ${SOURCES_DIR}/internal/catch_leak_detector.hpp
+  ${SOURCES_DIR}/internal/catch_lifetimebound.hpp
   ${SOURCES_DIR}/internal/catch_list.hpp
   ${SOURCES_DIR}/internal/catch_logical_traits.hpp
   ${SOURCES_DIR}/internal/catch_message_info.hpp

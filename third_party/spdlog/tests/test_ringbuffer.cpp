@@ -50,4 +50,3 @@ TEST_CASE("ringbuffer retrieval limit", "[ringbuffer]") {
     REQUIRE(formatted[0] == spdlog::fmt_lib::format("B{}", default_eol));
     REQUIRE(formatted[1] == spdlog::fmt_lib::format("C{}", default_eol));
 }
-

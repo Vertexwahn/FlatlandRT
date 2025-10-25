@@ -33,11 +33,11 @@ cc_library(
     deps = [
         "//flatland/rendering:sampler",
         "//flatland/rendering/canvas:label",
-        "//flatland/rendering/emitter:emitter",
+        "//flatland/rendering/emitter",
         "//flatland/rendering/integrator",
         "//flatland/rendering/intersector",
-        "//flatland/rendering/shape",
         "//flatland/rendering/sensor",
+        "//flatland/rendering/shape",
     ],
 )
 

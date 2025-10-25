@@ -7,6 +7,7 @@
 // SPDX-License-Identifier: BSL-1.0
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/internal/catch_enforce.hpp>
 #include <catch2/internal/catch_case_insensitive_comparisons.hpp>
 #include <catch2/internal/catch_optional.hpp>
@@ -169,4 +170,65 @@ TEST_CASE( "Decomposer checks that the argument is 0 when handling "
     REQUIRE_NOTHROW( Catch::Decomposer{} <= 0 >= t );
 
     CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
+}
+
+
+TEST_CASE( "foo", "[approvals]" ) {
+    SECTION( "A" ) {
+        SECTION( "B1" ) { REQUIRE( true ); }
+        SECTION( "B2" ) { REQUIRE( true ); }
+        SECTION( "B3" ) { REQUIRE( true ); }
+    }
+}
+
+TEST_CASE( "bar", "[approvals]" ) {
+    REQUIRE( true );
+    SECTION( "A" ) {
+        SECTION( "B1" ) { REQUIRE( true ); }
+        SECTION( "B2" ) { REQUIRE( true ); }
+        SECTION( "B3" ) { REQUIRE( true ); }
+    }
+    REQUIRE( true );
+}
+
+TEST_CASE( "baz", "[approvals]" ) {
+    SECTION( "A" ) { REQUIRE( true ); }
+    auto _ = GENERATE( 1, 2, 3 );
+    (void)_;
+    SECTION( "B" ) { REQUIRE( true ); }
+}
+
+TEST_CASE( "qux", "[approvals]" ) {
+    REQUIRE( true );
+    SECTION( "A" ) { REQUIRE( true ); }
+    auto _ = GENERATE( 1, 2, 3 );
+    (void)_;
+    SECTION( "B" ) { REQUIRE( true ); }
+    REQUIRE( true );
+}
+
+TEST_CASE( "corge", "[approvals]" ) {
+    REQUIRE( true );
+    SECTION( "A" ) {
+        REQUIRE( true );
+    }
+    auto i = GENERATE( 1, 2, 3 );
+    DYNAMIC_SECTION( "i=" << i ) {
+        REQUIRE( true );
+    }
+    REQUIRE( true );
+}
+
+TEST_CASE("grault", "[approvals]") {
+    REQUIRE( true );
+    SECTION( "A" ) {
+        REQUIRE( true );
+    }
+    SECTION("B") {
+        auto i = GENERATE( 1, 2, 3 );
+        DYNAMIC_SECTION( "i=" << i ) {
+            REQUIRE( true );
+        }
+    }
+    REQUIRE( true );
 }

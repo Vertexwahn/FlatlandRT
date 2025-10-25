@@ -310,36 +310,21 @@ set_tests_properties(UnmatchedOutputFilter
     PASS_REGULAR_EXPRESSION "No test cases matched '\\[this-tag-does-not-exist\\]'"
 )
 
-add_test(NAME FilteredSection-1 COMMAND $<TARGET_FILE:SelfTest> \#1394 -c RunSection)
-set_tests_properties(FilteredSection-1 PROPERTIES FAIL_REGULAR_EXPRESSION "No tests ran")
-add_test(NAME FilteredSection-2 COMMAND $<TARGET_FILE:SelfTest> \#1394\ nested -c NestedRunSection -c s1)
-set_tests_properties(FilteredSection-2 PROPERTIES FAIL_REGULAR_EXPRESSION "No tests ran")
+add_test(NAME FilteredSections::SimpleExample::1 COMMAND $<TARGET_FILE:SelfTest> \#1394 -c RunSection)
+set_tests_properties(FilteredSections::SimpleExample::1 PROPERTIES FAIL_REGULAR_EXPRESSION "No tests ran")
+add_test(NAME FilteredSections::SimpleExample::2 COMMAND $<TARGET_FILE:SelfTest> \#1394\ nested -c NestedRunSection -c s1)
+set_tests_properties(FilteredSections::SimpleExample::2 PROPERTIES FAIL_REGULAR_EXPRESSION "No tests ran")
 
 add_test(
   NAME
-    FilteredSection::GeneratorsDontCauseInfiniteLoop-1
+    FilteredSections::GeneratorsDontCauseInfiniteLoop
   COMMAND
     $<TARGET_FILE:SelfTest> "#2025: original repro" -c "fov_0"
 )
-set_tests_properties(FilteredSection::GeneratorsDontCauseInfiniteLoop-1
+set_tests_properties(FilteredSections::GeneratorsDontCauseInfiniteLoop
   PROPERTIES
     PASS_REGULAR_EXPRESSION "inside with fov: 0" # This should happen
     FAIL_REGULAR_EXPRESSION "inside with fov: 1" # This would mean there was no filtering
-)
-
-# GENERATE between filtered sections (both are selected)
-add_test(
-  NAME
-    FilteredSection::GeneratorsDontCauseInfiniteLoop-2
-  COMMAND
-    $<TARGET_FILE:SelfTest> "#2025: same-level sections"
-    -c "A"
-    -c "B"
-    --colour-mode none
-)
-set_tests_properties(FilteredSection::GeneratorsDontCauseInfiniteLoop-2
-  PROPERTIES
-    PASS_REGULAR_EXPRESSION "All tests passed \\(4 assertions in 1 test case\\)"
 )
 
 add_test(NAME ApprovalTests
@@ -694,6 +679,14 @@ set_tests_properties("Bazel::RngSeedEnvVar::MalformedValueIsIgnored"
     PASS_REGULAR_EXPRESSION "Randomness seeded to: 17171717"
 )
 
+add_test(NAME "FilteredSections::DifferentSimpleFilters"
+  COMMAND
+      Python3::Interpreter "${CMAKE_CURRENT_LIST_DIR}/TestScripts/testSectionFiltering.py" $<TARGET_FILE:SelfTest>
+)
+set_tests_properties("FilteredSections::DifferentSimpleFilters"
+  PROPERTIES
+    LABELS "uses-python"
+)
 
 list(APPEND CATCH_TEST_TARGETS SelfTest)
 set(CATCH_TEST_TARGETS ${CATCH_TEST_TARGETS} PARENT_SCOPE)

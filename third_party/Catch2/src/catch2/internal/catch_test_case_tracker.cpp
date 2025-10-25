@@ -172,9 +172,9 @@ namespace TestCaseTracking {
     bool SectionTracker::isComplete() const {
         bool complete = true;
 
-        if (m_filters.empty()
+        if ( m_filters.empty()
             || m_filters[0].empty()
-            || std::find(m_filters.begin(), m_filters.end(), m_trimmed_name) != m_filters.end()) {
+            || m_filters[0] == m_trimmed_name ) {
             complete = TrackerBase::isComplete();
         }
         return complete;

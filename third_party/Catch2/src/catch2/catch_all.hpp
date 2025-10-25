@@ -79,6 +79,7 @@
 #include <catch2/internal/catch_jsonwriter.hpp>
 #include <catch2/internal/catch_lazy_expr.hpp>
 #include <catch2/internal/catch_leak_detector.hpp>
+#include <catch2/internal/catch_lifetimebound.hpp>
 #include <catch2/internal/catch_list.hpp>
 #include <catch2/internal/catch_logical_traits.hpp>
 #include <catch2/internal/catch_message_info.hpp>

@@ -57,6 +57,36 @@ namespace Detail {
         }
     } // end unnamed namespace
 
+    std::size_t catch_strnlen( const char* str, std::size_t n ) {
+        auto ret = std::char_traits<char>::find( str, n, '\0' );
+        if ( ret != nullptr ) { return static_cast<std::size_t>( ret - str ); }
+        return n;
+    }
+
+    std::string formatTimeT(std::time_t time) {
+#ifdef _MSC_VER
+        std::tm timeInfo = {};
+        const auto err = gmtime_s( &timeInfo, &time );
+        if ( err ) {
+            return "gmtime from provided timepoint has failed. This "
+                   "happens e.g. with pre-1970 dates using Microsoft libc";
+        }
+#else
+        std::tm* timeInfo = std::gmtime( &time );
+#endif
+
+        auto const timeStampSize = sizeof( "2017-01-16T17:06:45Z" );
+        char timeStamp[timeStampSize];
+        const char* const fmt = "%Y-%m-%dT%H:%M:%SZ";
+
+#ifdef _MSC_VER
+        std::strftime( timeStamp, timeStampSize, fmt, &timeInfo );
+#else
+        std::strftime( timeStamp, timeStampSize, fmt, timeInfo );
+#endif
+        return std::string( timeStamp, timeStampSize - 1 );
+    }
+
     std::string convertIntoString(StringRef string, bool escapeInvisibles) {
         std::string ret;
         // This is enough for the "don't escape invisibles" case, and a good

@@ -87,7 +87,7 @@ TEST_CASE("complex test case") {
 ```
 
 This test case will report 5 passing assertions; one for each of the three
-values in section `a1`, and then two in section `a2`, from values 2 and 4.
+values in section `a1`, and then two in section `a2`, from values 2 and 6.
 
 Note that as soon as one section is skipped, the entire test case will
 be reported as _skipped_ (unless there is a failing assertion, in which

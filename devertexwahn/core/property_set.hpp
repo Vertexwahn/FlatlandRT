@@ -14,6 +14,7 @@
 #include <exception>
 #include <initializer_list>
 #include <map>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -24,13 +25,11 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 class PropertyException : public std::exception {
 public:
     [[nodiscard]]
-    const char *what() const throw() override {
+    const char *what() const noexcept override {
         return error_message_.c_str();
     }
 
     virtual ~PropertyException() = default;
-
-    // virtual ~PropertyException() noexcept {} // Todo: Find out what is better here
 
 protected:
     std::string error_message_;
@@ -46,7 +45,8 @@ public:
     template<typename ValueType>
     explicit PropertyDoesAlreadyExistException(std::string_view property_name, const ValueType &value) {
         error_message_ =
-                fmt::format("Property with name '{}' does already exist and its value is '{}'", property_name,
+                fmt::format("Property with name '{}' does already exist and its value is '{}'",
+                        property_name,
                             value);
     }
 };
@@ -98,6 +98,14 @@ public:
         }
 
         return *this;
+    }
+
+    void add_child(const std::string &name, std::shared_ptr<PropertySetType> child) {
+        if (has_child(name)) {
+            throw PropertyDoesAlreadyExistException(name, nullptr);
+        } else {
+            childs_[name] = child;
+        }
     }
 
     template<typename ValueType>
@@ -152,9 +160,17 @@ public:
     }
 
 private:
+    [[nodiscard]]
+    bool has_child(const std::string &name) const {
+        return childs_.find(name) != childs_.end();
+    }
+
+private:
     using MapType = std::map<std::string, VariantType>;
+    using MapType2 = std::map<std::string, std::shared_ptr<PropertySetType<VariantType>>>;
 
     MapType property_name_to_value_;
+    MapType2 childs_;
 };
 
 DE_VERTEXWAHN_END_NAMESPACE

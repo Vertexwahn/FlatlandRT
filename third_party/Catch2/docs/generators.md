@@ -275,7 +275,7 @@ There are two ways to handle this, depending on whether you want this
 to be an error or not.
 
  * If empty generator **is** an error, throw an exception in constructor.
- * If empty generator **is not** an error, use the [`SKIP`](skipping-passing-failing.md#skipping-test-cases-at-runtime) in constructor.
+ * If empty generator **is not** an error, use the [`SKIP` macro](skipping-passing-failing.md#skipping-test-cases-at-runtime) in constructor.
 
 
 

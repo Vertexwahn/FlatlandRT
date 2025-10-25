@@ -105,6 +105,7 @@ internal_headers = [
   'internal/catch_jsonwriter.hpp',
   'internal/catch_lazy_expr.hpp',
   'internal/catch_leak_detector.hpp',
+  'internal/catch_lifetimebound.hpp',
   'internal/catch_list.hpp',
   'internal/catch_logical_traits.hpp',
   'internal/catch_message_info.hpp',

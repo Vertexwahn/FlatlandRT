@@ -57,7 +57,7 @@ public:
     }
 
     SOCKET fd() const { return socket_; }
-    
+
     int connect_socket_with_timeout(SOCKET sockfd,
                                     const struct sockaddr *addr,
                                     int addrlen,

@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  This source file contains source code copied from pbrt-v4
@@ -13,6 +13,8 @@
 
 #include "math/point.hpp"
 #include "math/vector.hpp"
+
+#include <cassert>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

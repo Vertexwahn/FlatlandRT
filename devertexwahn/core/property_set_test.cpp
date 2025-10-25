@@ -64,6 +64,18 @@ TEST(PropertySet, multiple_additons) {
     EXPECT_THAT(ps.get_property<int>("b"), 2);
 }
 
+TEST(PropertySet, nested_properties) {
+    using VariantType = std::variant<int>;
+    using PropertySet = PropertySetType<VariantType>;
+
+    PropertySet ps;
+    ps.add_property("a", 1);
+
+    std::shared_ptr<de_vertexwahn::PropertySetType<std::variant<int>>> child = std::make_shared<PropertySet>();
+    child->add_property("b", 2);
+    ps.add_child("c", child);
+}
+
 TEST(PropertySet, When_PropertyDoesNotExist_Then_RaiseException) {
     using VariantType = std::variant<int>;
     using PropertySet = PropertySetType<VariantType>;

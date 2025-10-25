@@ -8,11 +8,11 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 cc_library(
     name = "fresnel",
     srcs = ["fresnel.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
         "//math:vector",
     ],
-    visibility = ["//visibility:public"],
 )
 
 cc_test(
@@ -34,6 +34,7 @@ cc_library(
         "property_set.h",
         "property_set_formatter.hpp",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:object",
         "//core:property_set",
@@ -42,7 +43,6 @@ cc_library(
         "//math:point",
         "//math:transform",
     ],
-    visibility = ["//visibility:public"],
 )
 
 cc_test(
@@ -85,13 +85,13 @@ cc_library(
 cc_library(
     name = "sampler",
     hdrs = ["sampler.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//core:object",
         "//flatland/rendering:property_set",
         "//math:point",
         "@pcg",
     ],
-    visibility = ["//visibility:public"],
 )
 
 cc_test(

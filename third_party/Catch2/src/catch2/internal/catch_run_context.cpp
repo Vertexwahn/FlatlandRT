@@ -129,12 +129,8 @@ namespace Catch {
 
                         for ( auto const& child : m_children ) {
                             if ( child->isSectionTracker() &&
-                                 std::find( filters.begin(),
-                                            filters.end(),
-                                            static_cast<SectionTracker const&>(
-                                                *child )
-                                                .trimmedName() ) !=
-                                     filters.end() ) {
+                                 static_cast<SectionTracker const&>( *child )
+                                         .trimmedName() == filters[0] ) {
                                 return true;
                             }
                         }
