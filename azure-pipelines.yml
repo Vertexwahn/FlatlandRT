@@ -138,5 +138,3 @@ jobs:
       vmImage: 'windows-2025'
     steps:
       - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/windows-2025-vs2022-opt.yaml
-
-
