@@ -21,7 +21,7 @@
 #endif
 
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
-#define FMT_VERSION 120000
+#define FMT_VERSION 120100
 
 // Detect compiler versions.
 #if defined(__clang__) && !defined(__ibmxl__)
@@ -233,9 +233,9 @@
 FMT_PRAGMA_GCC(push_options)
 #if !defined(__OPTIMIZE__) && !defined(__CUDACC__) && !defined(FMT_MODULE)
 FMT_PRAGMA_GCC(optimize("Og"))
-#  define FMT_GCC_OPTIMIZED
 #endif
 FMT_PRAGMA_CLANG(diagnostic push)
+FMT_PRAGMA_GCC(diagnostic push)
 
 #ifdef FMT_ALWAYS_INLINE
 // Use the provided definition.
@@ -245,7 +245,7 @@ FMT_PRAGMA_CLANG(diagnostic push)
 #  define FMT_ALWAYS_INLINE inline
 #endif
 // A version of FMT_ALWAYS_INLINE to prevent code bloat in debug mode.
-#if defined(NDEBUG) || defined(FMT_GCC_OPTIMIZED)
+#ifdef NDEBUG
 #  define FMT_INLINE FMT_ALWAYS_INLINE
 #else
 #  define FMT_INLINE inline
@@ -923,10 +923,10 @@ class locale_ref {
  public:
   constexpr locale_ref() : locale_(nullptr) {}
 
-  template <typename Locale, int = (Locale::collate, 0)>
+  template <typename Locale, FMT_ENABLE_IF(sizeof(Locale::collate) != 0)>
   locale_ref(const Locale& loc) : locale_(&loc) {
     // Check if std::isalpha is found via ADL to reduce the chance of misuse.
-    isalpha('x', loc);
+    detail::ignore_unused(isalpha('x', loc));
   }
 
   inline explicit operator bool() const noexcept { return locale_ != nullptr; }
@@ -2755,7 +2755,9 @@ template <typename... T> struct fstring {
     static_assert(count<(is_view<remove_cvref_t<T>>::value &&
                          std::is_reference<T>::value)...>() == 0,
                   "passing views as lvalues is disallowed");
-    if (FMT_USE_CONSTEVAL) parse_format_string<char>(s, checker(s, arg_pack()));
+#if FMT_USE_CONSTEVAL
+    parse_format_string<char>(s, checker(s, arg_pack()));
+#endif
 #ifdef FMT_ENFORCE_COMPILE_STRING
     static_assert(
         FMT_USE_CONSTEVAL && sizeof(s) != 0,
@@ -2997,6 +2999,7 @@ FMT_INLINE void println(format_string<T...> fmt, T&&... args) {
   return fmt::println(stdout, fmt, static_cast<T&&>(args)...);
 }
 
+FMT_PRAGMA_GCC(diagnostic pop)
 FMT_PRAGMA_CLANG(diagnostic pop)
 FMT_PRAGMA_GCC(pop_options)
 FMT_END_EXPORT

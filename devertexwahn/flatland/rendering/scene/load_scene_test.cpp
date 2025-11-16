@@ -153,6 +153,32 @@ TEST(load_scene, read_rotate_z_transform) {
     EXPECT_THAT(trafo.matrix(), rotate_z(degree_to_radian(45.f)).matrix());
 }
 
+TEST(load_scene, read_rotate_transform) {
+    // Arrange
+    pugi::xml_document doc;
+
+    float angle = 45.f;
+
+    std::ofstream outfile("test.xml");
+    outfile << "<?xml version = \"1.0\" encoding=\"utf-8\"?>" << "\n";
+    outfile << "<transform>" << "\n";
+    outfile << "    <rotate x=\"1\" y=\"0\" z=\"0\" angle=\"" << angle << "\"/>" << "\n";
+    outfile << "</transform>" << "\n";
+    outfile.close();
+
+    pugi::xml_parse_result result = doc.load_file("test.xml");
+    auto xml_transform = doc.child("transform");
+
+    EXPECT_THAT(result.status, pugi::xml_parse_status::status_ok);
+
+    // Act
+    Transform44f trafo = read_transform<3>(xml_transform);
+
+    // Assert
+    ASSERT_TRUE(trafo.matrix().isApprox(rotate_x(degree_to_radian(angle)).matrix()));
+}
+
+
 TEST(load_scene, read_matrix_transform) {
     // Arrange
     pugi::xml_document doc;

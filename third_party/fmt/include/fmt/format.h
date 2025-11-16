@@ -1311,7 +1311,13 @@ class utf8_to_utf16 {
   inline auto str() const -> std::wstring { return {&buffer_[0], size()}; }
 };
 
-enum class to_utf8_error_policy { abort, replace };
+enum class to_utf8_error_policy { abort, replace, wtf };
+
+inline void to_utf8_3bytes(buffer<char>& buf, uint32_t cp) {
+  buf.push_back(static_cast<char>(0xe0 | (cp >> 12)));
+  buf.push_back(static_cast<char>(0x80 | ((cp & 0xfff) >> 6)));
+  buf.push_back(static_cast<char>(0x80 | (cp & 0x3f)));
+}
 
 // A converter from UTF-16/UTF-32 (host endian) to UTF-8.
 template <typename WChar, typename Buffer = memory_buffer> class to_utf8 {
@@ -1353,8 +1359,16 @@ template <typename WChar, typename Buffer = memory_buffer> class to_utf8 {
         // Handle a surrogate pair.
         ++p;
         if (p == s.end() || (c & 0xfc00) != 0xd800 || (*p & 0xfc00) != 0xdc00) {
-          if (policy == to_utf8_error_policy::abort) return false;
-          buf.append(string_view("\xEF\xBF\xBD"));
+          switch (policy) {
+          case to_utf8_error_policy::abort:
+            return false;
+          case to_utf8_error_policy::replace:
+            buf.append(string_view("\xEF\xBF\xBD"));
+            break;
+          case to_utf8_error_policy::wtf:
+            to_utf8_3bytes(buf, c);
+            break;
+          }
           --p;
           continue;
         }
@@ -1366,9 +1380,7 @@ template <typename WChar, typename Buffer = memory_buffer> class to_utf8 {
         buf.push_back(static_cast<char>(0xc0 | (c >> 6)));
         buf.push_back(static_cast<char>(0x80 | (c & 0x3f)));
       } else if ((c >= 0x800 && c <= 0xd7ff) || (c >= 0xe000 && c <= 0xffff)) {
-        buf.push_back(static_cast<char>(0xe0 | (c >> 12)));
-        buf.push_back(static_cast<char>(0x80 | ((c & 0xfff) >> 6)));
-        buf.push_back(static_cast<char>(0x80 | (c & 0x3f)));
+        to_utf8_3bytes(buf, c);
       } else if (c >= 0x10000 && c <= 0x10ffff) {
         buf.push_back(static_cast<char>(0xf0 | (c >> 18)));
         buf.push_back(static_cast<char>(0x80 | ((c & 0x3ffff) >> 12)));
@@ -2534,7 +2546,7 @@ FMT_CONSTEXPR20 auto write_fixed(OutputIt out, const DecimalFP& f,
     auto grouping = Grouping(loc, specs.localized());
     size += grouping.count_separators(exp);
     return write_padded<Char, align::right>(
-        out, specs, to_unsigned(size), [&](iterator it) {
+        out, specs, static_cast<size_t>(size), [&](iterator it) {
           if (s != sign::none) *it++ = detail::getsign<Char>(s);
           it = write_significand(it, f.significand, significand_size, exp,
                                  decimal_point, grouping);
@@ -2550,7 +2562,7 @@ FMT_CONSTEXPR20 auto write_fixed(OutputIt out, const DecimalFP& f,
   bool pointy = num_zeros != 0 || significand_size != 0 || specs.alt();
   size += 1 + (pointy ? 1 : 0) + num_zeros;
   return write_padded<Char, align::right>(
-      out, specs, to_unsigned(size), [&](iterator it) {
+      out, specs, static_cast<size_t>(size), [&](iterator it) {
         if (s != sign::none) *it++ = detail::getsign<Char>(s);
         *it++ = Char('0');
         if (!pointy) return it;
@@ -2594,7 +2606,7 @@ FMT_CONSTEXPR20 auto do_write_float(OutputIt out, const DecimalFP& f,
     *it++ = Char(exp_char);
     return write_exponent<Char>(exp, it);
   };
-  auto usize = to_unsigned(size);
+  size_t usize = static_cast<size_t>(size);
   return specs.width > 0
              ? write_padded<Char, align::right>(out, specs, usize, write)
              : base_iterator(out, write(reserve(out, usize)));

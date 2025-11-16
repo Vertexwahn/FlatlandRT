@@ -302,7 +302,7 @@ TEST(Util, CapacityToGrowthSmallValues) {
   }
   EXPECT_EQ(CapacityToGrowth(15), 14);
   EXPECT_EQ(CapacityToGrowth(31), 28);
-  EXPECT_EQ(CapacityToGrowth(63), 55);
+  EXPECT_EQ(CapacityToGrowth(63), 56);
 }
 
 TEST(Util, GrowthAndCapacity) {
@@ -2560,7 +2560,7 @@ std::vector<int> OrderOfIteration(const T& t) {
 // in seed.
 void GenerateIrrelevantSeeds(int cnt) {
   for (int i = cnt % 17; i > 0; --i) {
-    NextSeed();
+    HashtableSize::NextSeed();
   }
 }
 

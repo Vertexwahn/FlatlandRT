@@ -136,10 +136,9 @@ FMT_API std::system_error vwindows_error(int error_code, string_view fmt,
  * **Example**:
  *
  *     // This throws a system_error with the description
- *     //   cannot open file 'madeup': The system cannot find the file
- * specified.
- *     // or similar (system message may vary).
- *     const char *filename = "madeup";
+ *     //   cannot open file 'foo': The system cannot find the file specified.
+ *     // or similar (system message may vary) if the file doesn't exist.
+ *     const char *filename = "foo";
  *     LPOFSTRUCT of = LPOFSTRUCT();
  *     HFILE file = OpenFile(filename, &of, OF_READ);
  *     if (file == HFILE_ERROR) {
@@ -161,14 +160,6 @@ inline auto system_category() noexcept -> const std::error_category& {
   return std::system_category();
 }
 #endif  // _WIN32
-
-// std::system is not available on some platforms such as iOS (#2248).
-#ifdef __OSX__
-template <typename S, typename... Args, typename Char = char_t<S>>
-void say(const S& fmt, Args&&... args) {
-  std::system(format("say \"{}\"", format(fmt, args...)).c_str());
-}
-#endif
 
 // A buffered file.
 class buffered_file {

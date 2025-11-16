@@ -84,10 +84,12 @@ namespace detail {
 template <typename Char, typename PathChar>
 auto get_path_string(const std::filesystem::path& p,
                      const std::basic_string<PathChar>& native) {
-  if constexpr (std::is_same_v<Char, char> && std::is_same_v<PathChar, wchar_t>)
-    return to_utf8<wchar_t>(native, to_utf8_error_policy::replace);
-  else
+  if constexpr (std::is_same_v<Char, char> &&
+                std::is_same_v<PathChar, wchar_t>) {
+    return to_utf8<wchar_t>(native, to_utf8_error_policy::wtf);
+  } else {
     return p.string<Char>();
+  }
 }
 
 template <typename Char, typename PathChar>
@@ -514,7 +516,7 @@ template <> struct formatter<std::error_code> {
 
  public:
   FMT_CONSTEXPR void set_debug_format(bool set = true) { debug_ = set; }
-  
+
   FMT_CONSTEXPR auto parse(parse_context<>& ctx) -> const char* {
     auto it = ctx.begin(), end = ctx.end();
     if (it == end) return it;

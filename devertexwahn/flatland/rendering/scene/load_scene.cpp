@@ -53,6 +53,27 @@ Transform44f read_transform<3>(const pugi::xml_node &xmlTransform) {
     for( auto node : xmlTransform) {
         std::string transformType = node.name();
 
+        if (transformType == "rotate") {
+            auto x = node.attribute("x").as_float();
+            auto y = node.attribute("y").as_float();
+            auto z = node.attribute("z").as_float();
+            auto angle_in_degree = node.attribute("angle").as_float();
+
+            Vector3f w{x,y,z}; // rotation axis
+            w.normalize();
+
+            auto R = Eigen::AngleAxisf(degree_to_radian(angle_in_degree), w);
+            Eigen::Quaternion<float> q(R);
+
+            Eigen::Matrix3f m = q.matrix();
+
+            Eigen::Matrix4f Trans;
+            Trans.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
+            Trans.block<3,3>(0,0) = m;
+
+            transform = Transform44f(Trans) * transform;
+        }
+
         if (transformType == "rotate_x") {
             auto angle_in_degree = node.attribute("angle").as_float();
             transform = rotate_x(degree_to_radian(angle_in_degree)) * transform;

@@ -1,9 +1,23 @@
 """
     SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
+
+    This package contains basic classes such as Exception, Timer or PropertySet,
+    and provides basic services for logging, reading/writing files, and detecting
+    the used OS at compile time.
 """
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(
+    default_visibility = [
+        "//visibility:private",
+    ],
+    features = [
+        #"layering_check",
+        "parse_headers",
+    ],
+)
 
 cc_library(
     name = "exception",
@@ -145,9 +159,11 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        ":namespace",
         ":object",
         ":property_set",
         ":reference_counted",
+        "@fmt",
     ],
 )
 
@@ -206,6 +222,7 @@ cc_test(
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
+        "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
 )
@@ -264,6 +281,7 @@ cc_test(
     visibility = ["//visibility:public"],
     deps = [
         "//core:reference_counted",
+        "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
 )
