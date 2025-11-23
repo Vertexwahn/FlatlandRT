@@ -21,6 +21,9 @@ struct NormalType : public Eigen::Matrix<ScalarType, Dimension, 1> {
     NormalType() : Base() {}
     NormalType(const ScalarType x, const ScalarType y) : Base(x, y) {}
     NormalType(const ScalarType x, const ScalarType y, const ScalarType z) : Base(x, y, z) {}
+    explicit NormalType(const ScalarType value) {
+        *this = Base::Constant(value);
+    }
 
     template <typename Derived>
     NormalType(const Eigen::MatrixBase<Derived>& src) : Base(src) {
