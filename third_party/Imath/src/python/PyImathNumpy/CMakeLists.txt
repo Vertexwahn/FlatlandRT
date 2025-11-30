@@ -17,11 +17,7 @@ set(PYIMATHNUMPY_MODULE_SOURCES imathnumpymodule.cpp)
 set(CMAKE_DEBUG_POSTFIX "") 
 
 add_library(${PYIMATHNUMPY_MODULE} MODULE ${PYIMATHNUMPY_MODULE_SOURCES})
-
-# Ensure correct module extension on Windows
-if(WIN32)
-    set_target_properties(${PYIMATHNUMPY_MODULE} PROPERTIES SUFFIX ".pyd")
-endif()
+set_target_properties(${PYIMATHNUMPY_MODULE} PROPERTIES SUFFIX "${PYIMATH_EXTENSION_SUFFIX}")
 
 set_target_properties(${PYIMATHNUMPY_MODULE} PROPERTIES
     PREFIX ""
@@ -50,21 +46,7 @@ target_link_libraries(${PYIMATHNUMPY_MODULE}
 
 if (IMATH_INSTALL)
 
-  #
-  # Set the PYTHON_INSTALL_DIR but only if it's not already set,
-  # which allows an externally-set value to take effect.
-  #
-  
-  if (NOT DEFINED PYTHON_INSTALL_DIR)
-
-    set(PYTHON_INSTALL_DIR "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages")
-    message(STATUS "installing ${PYIMATHNUMPY_MODULE} module to ${PYTHON_INSTALL_DIR}")
-
-  else()
-
-    message(STATUS "installing ${PYIMATHNUMPY_MODULE} module to ${PYTHON_INSTALL_DIR} (set externally)")
-  
-  endif()
+  message(STATUS "installing ${PYIMATHNUMPY_MODULE} module to ${PYTHON_INSTALL_DIR}")
   
   install(TARGETS ${PYIMATHNUMPY_MODULE} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
 

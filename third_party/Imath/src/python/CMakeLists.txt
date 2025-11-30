@@ -19,6 +19,32 @@ if(NOT Boost_FOUND)
     message(FATAL_ERROR "Could not find Boost")
 endif()
 
+if (NOT DEFINED PYTHON_INSTALL_DIR)
+
+  #
+  # Set the PYTHON_INSTALL_DIR but only if it's not already set,
+  # which allows an externally-set value to take effect.
+  #
+  # PYTHON_INSTALL_DIR should be a relative path underneath the 
+  # INSTALL_DIR. Set it to Python3_SITEARCH, relative to the python
+  # system installation.
+  #
+    
+  if (NOT Python3_PREFIX)
+    # if Python3_PREFIX is not set, use the location of the python executable
+    get_filename_component(Python3_PREFIX "${Python3_EXECUTABLE}" DIRECTORY)
+    get_filename_component(Python3_PREFIX "${Python3_PREFIX}" DIRECTORY)
+  endif()
+
+  # Ensure Python3_SITEARCH is an absolute path
+  get_filename_component(Python3_SITEARCH_ABS "${Python3_SITEARCH}" REALPATH)
+
+  file(RELATIVE_PATH PYTHON_INSTALL_DIR
+    "${Python3_PREFIX}"
+    "${Python3_SITEARCH_ABS}")
+
+endif()
+
 #
 # Python library suffix string. By default, it includes the python
 # version and Imath release number, e.g. "_Python3_12-3_4"
@@ -31,6 +57,19 @@ set(PYIMATH_LIB_SUFFIX
 )
 
 set(PYIMATH_OUTPUT_SUBDIR Imath CACHE STRING "Destination sub-folder of the path for install of PyImath headers")
+
+#
+# Python extension suffix.
+# In cmake 3.17+ `Python_add_library` will handle this automatically
+# and then this code can be removed.
+#
+
+# Example suffix is '.cp311-win_amd64.pyd'.
+execute_process(
+    COMMAND "${Python3_EXECUTABLE}" -c "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))"
+    OUTPUT_VARIABLE PYIMATH_EXTENSION_SUFFIX
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 #
 # PyImath and PyImathNumpy

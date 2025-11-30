@@ -167,11 +167,7 @@ set(PYIMATH_MODULE_SOURCES
 
 add_library(${PYIMATH_MODULE} MODULE ${PYIMATH_MODULE_SOURCES})
 
-if(WIN32)
-    # Ensure correct module extension on Windows
-    set_target_properties(${PYIMATH_MODULE} PROPERTIES SUFFIX ".pyd")
-endif()
-
+set_target_properties(${PYIMATH_MODULE} PROPERTIES SUFFIX "${PYIMATH_EXTENSION_SUFFIX}")
 set_target_properties(${PYIMATH_MODULE} PROPERTIES
     OUTPUT_NAME ${PYIMATH_MODULE_NAME} # override the _d suffix for Debug builds
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python${Python3_VERSION_MAJOR}_${Python3_VERSION_MINOR}/"
@@ -206,22 +202,8 @@ add_library(PyImath::Config ALIAS PyImathConfig)
 
 if (IMATH_INSTALL)
 
-  if (NOT DEFINED PYTHON_INSTALL_DIR)
+  message(STATUS "installing ${PYIMATH_MODULE_NAME} module to ${PYTHON_INSTALL_DIR}")
 
-    #
-    # Set the PYTHON_INSTALL_DIR but only if it's not already set,
-    # which allows an externally-set value to take effect.
-    #
-  
-    set(PYTHON_INSTALL_DIR "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages")
-    message(STATUS "installing ${PYIMATH_MODULE_NAME} module to ${PYTHON_INSTALL_DIR}")
-
-  else()
-
-    message(STATUS "installing ${PYIMATH_MODULE_NAME} module to ${PYTHON_INSTALL_DIR} (set externally)")
-  
-  endif()
-  
   #
   # Install the python module 
   #
