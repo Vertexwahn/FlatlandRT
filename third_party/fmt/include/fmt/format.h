@@ -493,8 +493,8 @@ template <typename OutputIt,
 #if FMT_CLANG_VERSION >= 307 && !FMT_ICC_VERSION
 __attribute__((no_sanitize("undefined")))
 #endif
-FMT_CONSTEXPR20 inline auto
-reserve(OutputIt it, size_t n) -> typename OutputIt::value_type* {
+FMT_CONSTEXPR20 inline auto reserve(OutputIt it, size_t n) ->
+    typename OutputIt::value_type* {
   auto& c = get_container(it);
   size_t size = c.size();
   c.resize(size + n);
@@ -736,12 +736,8 @@ using fast_float_t = conditional_t<sizeof(T) == sizeof(double), double, float>;
 template <typename T>
 using is_double_double = bool_constant<std::numeric_limits<T>::digits == 106>;
 
-#ifndef FMT_USE_FULL_CACHE_DRAGONBOX
-#  define FMT_USE_FULL_CACHE_DRAGONBOX 0
-#endif
-
 // An allocator that uses malloc/free to allow removing dependency on the C++
-// standard libary runtime. std::decay is used for back_inserter to be found by
+// standard library runtime. std::decay is used for back_inserter to be found by
 // ADL when applied to memory_buffer.
 template <typename T> struct allocator : private std::decay<void> {
   using value_type = T;
