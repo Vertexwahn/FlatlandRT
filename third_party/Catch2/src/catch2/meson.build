@@ -148,6 +148,7 @@ internal_headers = [
   'internal/catch_test_registry.hpp',
   'internal/catch_test_spec_parser.hpp',
   'internal/catch_textflow.hpp',
+  'internal/catch_thread_local.hpp',
   'internal/catch_thread_support.hpp',
   'internal/catch_to_string.hpp',
   'internal/catch_uncaught_exceptions.hpp',

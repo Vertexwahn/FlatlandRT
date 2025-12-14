@@ -140,6 +140,7 @@ set(IMPL_HEADERS
   ${SOURCES_DIR}/internal/catch_test_registry.hpp
   ${SOURCES_DIR}/internal/catch_test_spec_parser.hpp
   ${SOURCES_DIR}/internal/catch_textflow.hpp
+  ${SOURCES_DIR}/internal/catch_thread_local.hpp
   ${SOURCES_DIR}/internal/catch_thread_support.hpp
   ${SOURCES_DIR}/internal/catch_to_string.hpp
   ${SOURCES_DIR}/internal/catch_uncaught_exceptions.hpp

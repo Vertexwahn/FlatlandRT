@@ -20,6 +20,7 @@
 #include <catch2/internal/catch_output_redirect.hpp>
 #include <catch2/internal/catch_assertion_handler.hpp>
 #include <catch2/internal/catch_test_failure_exception.hpp>
+#include <catch2/internal/catch_thread_local.hpp>
 #include <catch2/internal/catch_result_type.hpp>
 
 #include <cassert>
@@ -173,27 +174,40 @@ namespace Catch {
         // should also be thread local. For now we just use naked globals
         // below, in the future we will want to allocate piece of memory
         // from heap, to avoid consuming too much thread-local storage.
+        //
+        // Note that we also don't want non-trivial the thread-local variables
+        // below be initialized for every thread, only for those that touch
+        // Catch2. To make this work with both GCC/Clang and MSVC, we have to
+        // make them thread-local magic statics. (Class-level statics have the
+        // desired semantics on GCC, but not on MSVC).
 
         // This is used for the "if" part of CHECKED_IF/CHECKED_ELSE
-        static thread_local bool g_lastAssertionPassed = false;
+        static CATCH_INTERNAL_THREAD_LOCAL bool g_lastAssertionPassed = false;
 
         // This is the source location for last encountered macro. It is
         // used to provide the users with more precise location of error
         // when an unexpected exception/fatal error happens.
-        static thread_local SourceLineInfo g_lastKnownLineInfo("DummyLocation", static_cast<size_t>(-1));
+        static CATCH_INTERNAL_THREAD_LOCAL SourceLineInfo
+            g_lastKnownLineInfo( "DummyLocation", static_cast<size_t>( -1 ) );
 
         // Should we clear message scopes before sending off the messages to
         // reporter? Set in `assertionPassedFastPath` to avoid doing the full
         // clear there for performance reasons.
-        static thread_local bool g_clearMessageScopes = false;
+        static CATCH_INTERNAL_THREAD_LOCAL bool g_clearMessageScopes = false;
 
         CATCH_INTERNAL_START_WARNINGS_SUPPRESSION
         CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS
         // Actual messages to be provided to the reporter
-        static thread_local std::vector<MessageInfo> g_messages;
+        static std::vector<MessageInfo>& g_messages() {
+            static CATCH_INTERNAL_THREAD_LOCAL std::vector<MessageInfo> value;
+            return value;
+        }
 
         // Owners for the UNSCOPED_X information macro
-        static thread_local std::vector<ScopedMessage> g_messageScopes;
+        static std::vector<ScopedMessage>& g_messageScopes() {
+            static CATCH_INTERNAL_THREAD_LOCAL std::vector<ScopedMessage> value;
+            return value;
+        }
         CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
 
     } // namespace Detail
@@ -210,6 +224,13 @@ namespace Catch {
     {
         getCurrentMutableContext().setResultCapture( this );
         m_reporter->testRunStarting(m_runInfo);
+
+        // TODO: HACK!
+        //       We need to make sure the underlying cache is initialized
+        //       while we are guaranteed to be running in a single thread,
+        //       because the initialization is not thread-safe.
+        ReusableStringStream rss;
+        (void)rss;
     }
 
     RunContext::~RunContext() {
@@ -333,7 +354,7 @@ namespace Catch {
         }
 
         if ( Detail::g_clearMessageScopes ) {
-            Detail::g_messageScopes.clear();
+            Detail::g_messageScopes().clear();
             Detail::g_clearMessageScopes = false;
         }
 
@@ -342,11 +363,11 @@ namespace Catch {
         {
             auto _ = scopedDeactivate( *m_outputRedirect );
             updateTotalsFromAtomics();
-            m_reporter->assertionEnded( AssertionStats( result, Detail::g_messages, m_totals ) );
+            m_reporter->assertionEnded( AssertionStats( result, Detail::g_messages(), m_totals ) );
         }
 
         if ( result.getResultType() != ResultWas::Warning ) {
-            Detail::g_messageScopes.clear();
+            Detail::g_messageScopes().clear();
         }
 
         // Reset working state. assertion info will be reset after
@@ -635,10 +656,10 @@ namespace Catch {
 
         m_testCaseTracker->close();
         handleUnfinishedSections();
-        Detail::g_messageScopes.clear();
+        Detail::g_messageScopes().clear();
         // TBD: At this point, m_messages should be empty. Do we want to
         //      assert that this is true, or keep the defensive clear call?
-        Detail::g_messages.clear();
+        Detail::g_messages().clear();
 
         SectionStats testCaseSectionStats(CATCH_MOVE(testCaseSection), assertions, duration, missingAssertions);
         m_reporter->sectionEnded(testCaseSectionStats);
@@ -806,7 +827,7 @@ namespace Catch {
     }
 
     void IResultCapture::pushScopedMessage( MessageInfo&& message ) {
-        Detail::g_messages.push_back( CATCH_MOVE( message ) );
+        Detail::g_messages().push_back( CATCH_MOVE( message ) );
     }
 
     void IResultCapture::popScopedMessage( unsigned int messageId ) {
@@ -815,16 +836,25 @@ namespace Catch {
         //       messages than low single digits, so the optimization is tiny,
         //       and we would have to hand-write the loop to avoid terrible
         //       codegen of reverse iterators in debug mode.
-        Detail::g_messages.erase( std::find_if( Detail::g_messages.begin(),
-                                                Detail::g_messages.end(),
-                                                [=]( MessageInfo const& msg ) {
-                                                    return msg.sequence ==
-                                                           messageId;
-                                                } ) );
+        auto& messages = Detail::g_messages();
+        messages.erase( std::find_if( messages.begin(),
+                                      messages.end(),
+                                      [=]( MessageInfo const& msg ) {
+                                          return msg.sequence ==
+                                                 messageId;
+                                      } ) );
     }
 
     void IResultCapture::emplaceUnscopedMessage( MessageBuilder&& builder ) {
-        Detail::g_messageScopes.emplace_back( CATCH_MOVE( builder ) );
+        // Invalid unscoped messages are lazy cleared. If we have any,
+        // we have to get rid of them before adding new ones, or the
+        // delayed clear in assertion handling will erase the valid ones
+        // as well.
+        if ( Detail::g_clearMessageScopes ) {
+            Detail::g_messageScopes().clear();
+            Detail::g_clearMessageScopes = false;
+        }
+        Detail::g_messageScopes().emplace_back( CATCH_MOVE( builder ) );
     }
 
     void seedRng(IConfig const& config) {

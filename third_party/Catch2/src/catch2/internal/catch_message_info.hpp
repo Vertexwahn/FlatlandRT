@@ -37,8 +37,6 @@ namespace Catch {
         bool operator < (MessageInfo const& other) const {
             return sequence < other.sequence;
         }
-    private:
-        static thread_local unsigned int globalCount;
     };
 
 } // end namespace Catch

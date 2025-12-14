@@ -4147,6 +4147,22 @@ with expansion:
   0.00001 != Approx( 0.0000001 )
 
 -------------------------------------------------------------------------------
+Delayed unscoped message clearing does not catch newly inserted messages
+-------------------------------------------------------------------------------
+Message.tests.cpp:<line number>
+...............................................................................
+
+Message.tests.cpp:<line number>: PASSED:
+  REQUIRE( true )
+with message:
+  a
+
+Message.tests.cpp:<line number>: FAILED:
+  REQUIRE( false )
+with message:
+  b
+
+-------------------------------------------------------------------------------
 Directly creating an EnumInfo
 -------------------------------------------------------------------------------
 ToString.tests.cpp:<line number>
@@ -19284,6 +19300,6 @@ Misc.tests.cpp:<line number>
 Misc.tests.cpp:<line number>: PASSED:
 
 ===============================================================================
-test cases:  435 |  317 passed |  95 failed | 6 skipped | 17 failed as expected
-assertions: 2303 | 2105 passed | 157 failed | 41 failed as expected
+test cases:  436 |  317 passed |  95 failed | 6 skipped | 18 failed as expected
+assertions: 2305 | 2106 passed | 157 failed | 42 failed as expected
 

@@ -23,10 +23,10 @@ namespace Catch {
         using Mutex = std::mutex;
         using LockGuard = std::lock_guard<std::mutex>;
         struct AtomicCounts {
-            std::atomic<std::uint64_t> passed = 0;
-            std::atomic<std::uint64_t> failed = 0;
-            std::atomic<std::uint64_t> failedButOk = 0;
-            std::atomic<std::uint64_t> skipped = 0;
+            std::atomic<std::uint64_t> passed{ 0 };
+            std::atomic<std::uint64_t> failed{ 0 };
+            std::atomic<std::uint64_t> failedButOk{ 0 };
+            std::atomic<std::uint64_t> skipped{ 0 };
         };
 #else // ^^ Use actual mutex, lock and atomics
       // vv Dummy implementations for single-thread performance

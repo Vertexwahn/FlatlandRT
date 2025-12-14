@@ -136,6 +136,7 @@
 :test-result: FAIL Custom exceptions can be translated when testing for throwing as something else
 :test-result: FAIL Custom std-exceptions can be custom translated
 :test-result: PASS Default scale is invisible to comparison
+:test-result: XFAIL Delayed unscoped message clearing does not catch newly inserted messages
 :test-result: PASS Directly creating an EnumInfo
 :test-result: SKIP Empty generators can SKIP in constructor
 :test-result: PASS Empty stream name opens cout stream

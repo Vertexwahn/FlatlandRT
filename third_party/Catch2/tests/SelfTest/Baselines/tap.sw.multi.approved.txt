@@ -1022,6 +1022,10 @@ not ok {test-number} - unexpected exception with message: 'custom std exception'
 ok {test-number} - 101.000001 != Approx(100).epsilon(0.01) for: 101.00000099999999748 != Approx( 100.0 )
 # Default scale is invisible to comparison
 ok {test-number} - std::pow(10, -5) != Approx(std::pow(10, -7)) for: 0.00001 != Approx( 0.0000001 )
+# Delayed unscoped message clearing does not catch newly inserted messages
+ok {test-number} - true with 1 message: 'a'
+# Delayed unscoped message clearing does not catch newly inserted messages
+not ok {test-number} - false with 1 message: 'b'
 # Directly creating an EnumInfo
 ok {test-number} - enumInfo->lookup(0) == "Value1" for: Value1 == "Value1"
 # Directly creating an EnumInfo
@@ -4616,5 +4620,5 @@ ok {test-number} - q3 == 23. for: 23.0 == 23.0
 ok {test-number} -
 # xmlentitycheck
 ok {test-number} -
-1..2315
+1..2317
 

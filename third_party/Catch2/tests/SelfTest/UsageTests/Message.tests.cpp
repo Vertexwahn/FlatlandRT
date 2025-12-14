@@ -360,3 +360,12 @@ TEST_CASE( "Scoped message applies to all assertions in scope",
     CHECK( false );
     CHECK( false );
 }
+
+TEST_CASE(
+    "Delayed unscoped message clearing does not catch newly inserted messages",
+    "[messages][unscoped][!shouldfail]" ) {
+    UNSCOPED_INFO( "a" );
+    REQUIRE( true );
+    UNSCOPED_INFO( "b" );
+    REQUIRE( false );
+}

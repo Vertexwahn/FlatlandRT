@@ -21,7 +21,7 @@
 #endif
 
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
-#define FMT_VERSION 120100
+#define FMT_VERSION 120101
 
 // Detect compiler versions.
 #if defined(__clang__) && !defined(__ibmxl__)
@@ -926,10 +926,13 @@ class locale_ref {
   template <typename Locale, FMT_ENABLE_IF(sizeof(Locale::collate) != 0)>
   locale_ref(const Locale& loc) : locale_(&loc) {
     // Check if std::isalpha is found via ADL to reduce the chance of misuse.
-    detail::ignore_unused(isalpha('x', loc));
+    detail::ignore_unused(sizeof(isalpha('x', loc)));
   }
 
   inline explicit operator bool() const noexcept { return locale_ != nullptr; }
+#else
+ public:
+  inline explicit operator bool() const noexcept { return false; }
 #endif  // FMT_USE_LOCALE
 
  public:
@@ -2258,8 +2261,11 @@ template <typename Context> class value {
       : pointer(const_cast<const void*>(x)) {}
   FMT_INLINE value(nullptr_t) : pointer(nullptr) {}
 
-  template <typename T, FMT_ENABLE_IF(std::is_pointer<T>::value ||
-                                      std::is_member_pointer<T>::value)>
+  template <typename T,
+            FMT_ENABLE_IF(
+                (std::is_pointer<T>::value ||
+                 std::is_member_pointer<T>::value) &&
+                !std::is_void<typename std::remove_pointer<T>::type>::value)>
   value(const T&) {
     // Formatting of arbitrary pointers is disallowed. If you want to format a
     // pointer cast it to `void*` or `const void*`. In particular, this forbids

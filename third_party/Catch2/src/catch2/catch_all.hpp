@@ -122,6 +122,7 @@
 #include <catch2/internal/catch_test_registry.hpp>
 #include <catch2/internal/catch_test_spec_parser.hpp>
 #include <catch2/internal/catch_textflow.hpp>
+#include <catch2/internal/catch_thread_local.hpp>
 #include <catch2/internal/catch_thread_support.hpp>
 #include <catch2/internal/catch_to_string.hpp>
 #include <catch2/internal/catch_uncaught_exceptions.hpp>

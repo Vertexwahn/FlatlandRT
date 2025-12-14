@@ -1698,6 +1698,14 @@ at Message.tests.cpp:<line number>
       </failure>
     </testCase>
     <testCase name="Captures outlive section end/Dummy section" duration="{duration}"/>
+    <testCase name="Delayed unscoped message clearing does not catch newly inserted messages" duration="{duration}">
+      <skipped message="REQUIRE(false)">
+FAILED:
+	REQUIRE( false )
+b
+at Message.tests.cpp:<line number>
+      </skipped>
+    </testCase>
     <testCase name="FAIL aborts the test" duration="{duration}">
       <failure message="FAIL()">
 FAILED:
