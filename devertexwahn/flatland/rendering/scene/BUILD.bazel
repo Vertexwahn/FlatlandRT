@@ -66,12 +66,9 @@ cc_test(
         "//flatland/scenes",
         "//flatland/scenes/bunny:scenes",
         "//flatland/tests/scenes:test_scene_files",
-        #"//okapi/scenes",
     ],
     deps = [
         "//flatland/rendering",
-        #"//okapi/rendering",
-        #"//okapi/rendering/scene:load_scene",
         "@googletest//:gtest_main",
     ],
 )
