@@ -16,6 +16,7 @@
 #define De_Vertexwahn_Math_bfe8f1ea_9029_4b4e_b02a_7da908b1cdeb_h
 
 #include "core/namespace.hpp"
+#include "math/constants.hpp"
 
 #include "boost/predef.h"
 
@@ -178,6 +179,64 @@ template<typename T, std::enable_if_t<std::is_unsigned_v<T> && (sizeof(T) == 4u 
     if constexpr (sizeof(T) == 8u) { v |= v >> 32u; }
     return v + 1u;
 #endif
+}
+
+// The following function (unit_angle) was copied from Mitsuba 3
+// The copied code is available under the following license:
+
+/*
+    Copyright (c) 2017 Wenzel Jakob <wenzel.jakob@epfl.ch>, All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, this
+       list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
+       and/or other materials provided with the distribution.
+
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software
+       without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+    You are under no obligation whatsoever to provide any bug fixes, patches, or
+    upgrades to the features, functionality or performance of the source code
+    ("Enhancements") to anyone; however, if you choose to make your Enhancements
+    available either publicly, or directly to the author of this software, without
+    imposing a separate written license agreement for such Enhancements, then you
+    hereby grant the following license: a non-exclusive, royalty-free perpetual
+    license to install, use, modify, prepare derivative works, incorporate into
+    other computer software, distribute, and sublicense such enhancements or
+    derivative works thereof, in binary and source code form.
+*/
+/**
+ * \brief Numerically well-behaved routine for computing the angle
+ * between two unit direction vectors
+ *
+ * This should be used wherever one is tempted to compute the
+ * arc cosine of a dot product!
+ *
+ * Proposed by Don Hatch at
+ * http://www.plunk.org/~hatch/rightway.php
+ */
+template <typename VectorType> inline float unit_angle(const VectorType &u, const VectorType &v) {
+    if (u.dot(v) < 0)
+        return pif - 2 * std::asin(0.5f * (v+u).norm());
+    else
+        return 2 * std::asin(0.5f * (v-u).norm());
 }
 
 DE_VERTEXWAHN_END_NAMESPACE

@@ -336,6 +336,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
+        "//math:constants",
         #"@boost//:predef",
         "@boost.predef",
         "@eigen",
