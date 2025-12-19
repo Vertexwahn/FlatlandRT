@@ -29,16 +29,16 @@ bazel_dep(name = "fmt", version = "12.1.0")
 bazel_dep(name = "hypothesis")
 bazel_dep(name = "imath", version = "3.2.2.bcr.1")
 bazel_dep(name = "libdeflate", version = "1.25")
-bazel_dep(name = "libjpeg_turbo", version = "2.1.4")
-bazel_dep(name = "libpng", version = "1.6.52")
+bazel_dep(name = "libjpeg_turbo", version = "3.1.3")
+bazel_dep(name = "libpng", version = "1.6.53")
 bazel_dep(name = "libwebp", version = "1.6.0")
 bazel_dep(name = "nasm", version = "2.16.03.bcr.2")
 bazel_dep(name = "nlohmann_json", version = "3.12.0.bcr.1")
-bazel_dep(name = "openexr", version = "3.4.3")
+bazel_dep(name = "openexr", version = "3.4.4")
 bazel_dep(name = "pcg", version = "0.98.1.bcr.1")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "pugixml", version = "1.15")
-bazel_dep(name = "rules_cc", version = "0.2.14")
+bazel_dep(name = "rules_cc", version = "0.2.15")
 bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "rules_python", version = "1.6.3")
@@ -59,8 +59,13 @@ bazel_dep(name = "googletest", version = "1.17.0.bcr.2", dev_dependency = True)
 # dependencies are copied on a regular basis 1:1 with some Bazel related patches (if needed) to the `third_party` folder
 # and overridden here. If you do not like this approach you can simply remove most of the local_path_override's here and
 # live with the newest versions in the BCR (which can be much older).
-# Note: Some dependencies are not part in the BCR (such as pcg or xtl) and therefore the local_path_override is needed
-# here for some libraries.
+# Note: Some dependencies might be not part of the BCR and therefore the local_path_override is needed
+# here for those libraries.
+
+local_path_override(
+    module_name = "libjpeg_turbo",
+    path = "../third_party/libjpeg-turbo-3.1.3",
+)
 
 local_path_override(
     module_name = "abseil-cpp",
@@ -102,10 +107,10 @@ local_path_override(
     path = "../third_party/fmt",
 )
 
-local_path_override(
-    module_name = "imath",
-    path = "../third_party/Imath",
-)
+#local_path_override(
+#    module_name = "imath",
+#    path = "../third_party/Imath",
+#)
 
 local_path_override(
     module_name = "libdeflate",
@@ -152,20 +157,20 @@ local_path_override(
     path = "../third_party/xtensor-0.27.0",
 )
 
-local_path_override(
-    module_name = "xtl",
-    path = "../third_party/xtl",
-)
+#local_path_override(
+#    module_name = "xtl",
+#    path = "../third_party/xtl",
+#)
 
 local_path_override(
     module_name = "rules_pkg",
     path = "../third_party/rules_pkg-1.1.0",
 )
 
-local_path_override(
-    module_name = "spdlog",
-    path = "../third_party/spdlog",
-)
+#local_path_override(
+#    module_name = "spdlog",
+#    path = "../third_party/spdlog",
+#)
 
 local_path_override(
     module_name = "yaml-cpp",
