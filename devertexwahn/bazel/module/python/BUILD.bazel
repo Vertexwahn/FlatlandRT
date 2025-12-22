@@ -1,0 +1,16 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+
+compile_pip_requirements(
+    name = "requirements",
+    timeout = "moderate",
+    src = "requirements.in",
+    requirements_darwin = "requirements_darwin.txt",
+    requirements_linux = "requirements_linux.txt",
+    requirements_txt = "requirements.txt",
+    requirements_windows = "requirements_windows.txt",
+)

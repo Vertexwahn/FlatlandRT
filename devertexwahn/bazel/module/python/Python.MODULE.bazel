@@ -1,0 +1,38 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+bazel_dep(name = "rules_python", version = "1.7.0")
+
+PYTHON_VERSION = "3.13.2"
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = PYTHON_VERSION)
+use_repo(
+    python, 
+    python_3_13 = "python_3_13_2",
+)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    download_only = True,
+    experimental_requirement_cycles = {
+        "sphinx": [
+            "sphinx",
+            "sphinxcontrib-serializinghtml",
+            "sphinxcontrib-qthelp",
+            "sphinxcontrib-htmlhelp",
+            "sphinxcontrib-devhelp",
+            "sphinxcontrib-applehelp",
+        ],
+    },
+    hub_name = "pypi",
+    python_version = PYTHON_VERSION,
+    requirements_lock = "//bazel/module/python:requirements_lock.txt",
+    requirements_darwin = "//bazel/module/python:requirements_darwin.txt",
+    requirements_linux = "//bazel/module/python:requirements_linux.txt",
+    requirements_windows = "//bazel/module/python:requirements_windows.txt",
+)
+
+use_repo(pip, "pypi")
