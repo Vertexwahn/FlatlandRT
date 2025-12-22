@@ -1,14 +1,97 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_license//rules:license.bzl", "license")
+
+package(
+    default_applicable_licenses = [":license"],
+)
+
+exports_files([
+    "LICENSE",
+])
+
+license(
+    name = "license",
+    license_kinds = ["@rules_license//licenses/spdx:MIT"],
+    license_text = "LICENSE",
+)
+
+bool_flag(
+    name = "header_only",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "header_only_true",
+    flag_values = {
+        ":header_only": "True",
+    },
+)
+
+bool_flag(
+    name = "use_fmt",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "use_fmt_true",
+    flag_values = {
+        ":use_fmt": "True",
+    },
+)
+
+SRCS = glob(
+    [
+        "src/*.cpp",
+    ],
+    exclude = [
+        "src/bundled*",
+    ],
+)
+
+HDRS = glob(
+    [
+        "include/**/*.h",
+    ],
+    exclude = [
+        "include/**/*-inl.h",
+        "include/spdlog/fmt/bundled/**",
+    ],
+)
+
+INLS = glob(
+    [
+        "include/**/*-inl.h",
+    ],
+    exclude = [
+        "include/spdlog/fmt/bundled/**",
+    ],
+)
 
 cc_library(
     name = "spdlog",
-    hdrs = glob([
-        "include/**/*.h",
-    ]),
-    defines = ["SPDLOG_FMT_EXTERNAL"],
+    srcs = select({
+        ":header_only_true": [],
+        "//conditions:default": SRCS + INLS,
+    }),
+    hdrs = select({
+        ":header_only_true": HDRS + INLS,
+        "//conditions:default": HDRS,
+    }),
+    defines = select({
+                  ":use_fmt_true": ["SPDLOG_FMT_EXTERNAL"],
+                  "//conditions:default": ["SPDLOG_USE_STD_FORMAT"],
+              }) +
+              select({
+                  ":header_only_true": [],
+                  "//conditions:default": ["SPDLOG_COMPILED_LIB"],
+              }),
     includes = ["include"],
     visibility = ["//visibility:public"],
-    deps = ["@fmt"],
+    deps = select({
+        ":use_fmt_true": ["@fmt"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(
