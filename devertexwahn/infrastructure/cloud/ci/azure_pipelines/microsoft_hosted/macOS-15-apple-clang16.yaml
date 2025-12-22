@@ -39,7 +39,14 @@ steps:
     displayName: "Show Clang version"
 
 
-  
+
+  - script: |
+      cd devertexwahn
+      bazel run --config=macos --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //bazel/module/python:requirements.update
+    env:
+      BUILDBUDDY_API_KEY: $(BUILDBUDDY_API_KEY)
+    displayName: "Regenerate lock files for Python"
+    
   # fastbuild
   # Exclude okapi.cli for now, since it depends on boringssl - there seems to be a workaround for that https://github.com/bazelbuild/bazel/issues/10472 but it leads to Qt6 dependency issues
   - script: |
