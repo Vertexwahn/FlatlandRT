@@ -2,20 +2,21 @@
 # Copyright (c) Contributors to the OpenEXR Project.
 
 load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
 
 expand_template(
     name = "ImathConfig",
     out = "src/Imath/ImathConfig.h",
     substitutions = {
-        "@IMATH_INTERNAL_NAMESPACE@": "Imath_3_1",
-        "@IMATH_LIB_VERSION@": "3.1.12",
+        "@IMATH_INTERNAL_NAMESPACE@": "Imath_3_2",
+        "@IMATH_LIB_VERSION@": "3.2.2",
         "@IMATH_NAMESPACE_CUSTOM@": "0",
         "@IMATH_NAMESPACE@": "Imath",
-        "@IMATH_PACKAGE_NAME@": "Imath 3.1.12",
+        "@IMATH_PACKAGE_NAME@": "Imath 3.2.2",
         "@Imath_VERSION_MAJOR@": "3",
-        "@Imath_VERSION_MINOR@": "1",
-        "@Imath_VERSION_PATCH@": "12",
-        "@IMATH_VERSION@": "3.1.12",
+        "@Imath_VERSION_MINOR@": "2",
+        "@Imath_VERSION_PATCH@": "2",
+        "@IMATH_VERSION@": "3.2.2",
         "#cmakedefine IMATH_HALF_USE_LOOKUP_TABLE": "#define IMATH_HALF_USE_LOOKUP_TABLE",
         "#cmakedefine IMATH_ENABLE_API_VISIBILITY": "#define IMATH_ENABLE_API_VISIBILITY",
         "#cmakedefine IMATH_HAVE_LARGE_STACK": "/* #undef IMATH_HAVE_LARGE_STACK */",
@@ -26,7 +27,7 @@ expand_template(
 )
 
 cc_library(
-    name = "Imath",
+    name = "imath",
     srcs = [
         "src/Imath/ImathColorAlgo.cpp",
         "src/Imath/ImathFun.cpp",
@@ -72,12 +73,15 @@ cc_library(
         "src/Imath/halfFunction.h",
         "src/Imath/halfLimits.h",
     ],
-    includes = ["src/Imath"],
+    includes = [
+        "src",
+        "src/Imath",
+    ],
     visibility = ["//visibility:public"],
 )
 
 alias(
-    name = "imath",
-    actual = ":Imath",
+    name = "Imath",
+    actual = ":imath",
     visibility = ["//visibility:public"],
 )

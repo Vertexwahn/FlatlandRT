@@ -8,9 +8,9 @@ This file documents the commit hash of each library if it is not given in the fi
 # Flatland dependencies
 
 ```text
-abseil-cpp-9ebd93a7745858d32f23e3ca07d0e0fdc44d8dc2
+abseil-cpp-a8960c053bf4adadac097c1101d0028742d8042f
 bazel_clang_tidy-da986512bf1a46831d886fd090393b93b8967a5d
-bazel-skylib-53f6d0dfe32d2f71e14d27b9ccf00688c156da22
+bazel-skylib-ea054fcaf08c3b014e34212451d8cb45f01d8331
 bazel-toolchain-795d76fd03e0b17c0961f0981a8512a00cba4fa2
 boringssl-fcf70a1a66f4cd000ab9acefb91e3b380fe0984b
 Catch2-97091636d012baa87711e7dbbd4cd778b96a211b
@@ -25,7 +25,7 @@ openexr-74a0f59390eaa4a50c6853ad9fd9c4b1073f805c
 pbrt-v4-f140d7cba5dc7b941f9346d6b7d1476a05c28c37
 pcg-cpp-428802d1a5634f96bcd0705fab379ff0113bcf13
 pugixml-61c944895e071872370219cadade8423dc6e04dc
-rules_cc-34f61b4729f650f19dc0b5d1e091f6c043e73891
+rules_cc-08b493f37660f499e1623a68dcfa4a1f691325df
 spdlog-0209b12c502bbdd37e04d238d74af851457e8210
 xtensor-47886141576e34f0354a8481151b9f359f4b8c80
 xtl-d11fb6b5f4c417025124ed2c62175284846a1914

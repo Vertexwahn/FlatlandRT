@@ -5,6 +5,6 @@ module(
 )
 
 bazel_dep(name = "fmt", version = "12.1.0")
-bazel_dep(name = "rules_cc", version = "0.2.14")
+bazel_dep(name = "rules_cc", version = "0.2.15")
 
 bazel_dep(name = "catch2", version = "3.11.0", dev_dependency = True)
