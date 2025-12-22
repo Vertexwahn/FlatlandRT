@@ -7,6 +7,17 @@
 Changelog
 =========
 
+0.8.1
+-----
+
+- Lower the minimum CMake version to 3.16
+- fix: update xhalf_float_impl.hpp for modern clang and gcc to avoid -Wdeprecated-literal-operator warning on Clang 16 that will soon become a hard error.
+
+0.8.0
+-----
+
+- Migrated to C++17 and replaced backported features with standard ones
+
 0.7.7
 -----
 
