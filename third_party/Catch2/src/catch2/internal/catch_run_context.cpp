@@ -195,17 +195,75 @@ namespace Catch {
         // clear there for performance reasons.
         static CATCH_INTERNAL_THREAD_LOCAL bool g_clearMessageScopes = false;
 
+
+        // Holds the data for both scoped and unscoped messages together,
+        // to avoid issues where their lifetimes start in wrong order,
+        // and then are destroyed in wrong order.
+        class MessageHolder {
+            // The actual message vector passed to the reporters
+            std::vector<MessageInfo> messages;
+            // IDs of messages from UNSCOPED_X macros, which we have to
+            // remove manually.
+            std::vector<unsigned int> unscoped_ids;
+
+        public:
+            // We do not need to special-case the unscoped messages when
+            // we only keep around the raw msg ids.
+            ~MessageHolder() = default;
+
+
+            void addUnscopedMessage(MessageBuilder&& builder) {
+                repairUnscopedMessageInvariant();
+                MessageInfo info( CATCH_MOVE( builder.m_info ) );
+                info.message = builder.m_stream.str();
+                unscoped_ids.push_back( info.sequence );
+                messages.push_back( CATCH_MOVE( info ) );
+            }
+
+            void addScopedMessage(MessageInfo&& info) {
+                messages.push_back( CATCH_MOVE( info ) );
+            }
+
+            std::vector<MessageInfo> const& getMessages() const {
+                return messages;
+            }
+
+            void removeMessage( unsigned int messageId ) {
+                // Note: On average, it would probably be better to look for
+                //       the message backwards. However, we do not expect to have
+                //       to  deal with more messages than low single digits, so
+                //       the improvement is tiny, and we would have to hand-write
+                //       the loop to avoid terrible codegen of reverse iterators
+                //       in debug mode.
+                auto iter =
+                    std::find_if( messages.begin(),
+                                  messages.end(),
+                                  [messageId]( MessageInfo const& msg ) {
+                                      return msg.sequence == messageId;
+                                  } );
+                assert( iter != messages.end() &&
+                        "Trying to remove non-existent message." );
+                messages.erase( iter );
+            }
+
+            void removeUnscopedMessages() {
+                for ( const auto messageId : unscoped_ids ) {
+                    removeMessage( messageId );
+                }
+                unscoped_ids.clear();
+                g_clearMessageScopes = false;
+            }
+
+            void repairUnscopedMessageInvariant() {
+                if ( g_clearMessageScopes ) { removeUnscopedMessages(); }
+                g_clearMessageScopes = false;
+            }
+        };
+
         CATCH_INTERNAL_START_WARNINGS_SUPPRESSION
         CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS
-        // Actual messages to be provided to the reporter
-        static std::vector<MessageInfo>& g_messages() {
-            static CATCH_INTERNAL_THREAD_LOCAL std::vector<MessageInfo> value;
-            return value;
-        }
-
-        // Owners for the UNSCOPED_X information macro
-        static std::vector<ScopedMessage>& g_messageScopes() {
-            static CATCH_INTERNAL_THREAD_LOCAL std::vector<ScopedMessage> value;
+        static MessageHolder& g_messageHolder() {
+            static CATCH_INTERNAL_THREAD_LOCAL MessageHolder value;
             return value;
         }
         CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
@@ -353,21 +411,19 @@ namespace Catch {
             Detail::g_lastAssertionPassed = true;
         }
 
-        if ( Detail::g_clearMessageScopes ) {
-            Detail::g_messageScopes().clear();
-            Detail::g_clearMessageScopes = false;
-        }
+        auto& msgHolder = Detail::g_messageHolder();
+        msgHolder.repairUnscopedMessageInvariant();
 
         // From here, we are touching shared state and need mutex.
         Detail::LockGuard lock( m_assertionMutex );
         {
             auto _ = scopedDeactivate( *m_outputRedirect );
             updateTotalsFromAtomics();
-            m_reporter->assertionEnded( AssertionStats( result, Detail::g_messages(), m_totals ) );
+            m_reporter->assertionEnded( AssertionStats( result, msgHolder.getMessages(), m_totals ) );
         }
 
         if ( result.getResultType() != ResultWas::Warning ) {
-            Detail::g_messageScopes().clear();
+            msgHolder.removeUnscopedMessages();
         }
 
         // Reset working state. assertion info will be reset after
@@ -656,10 +712,10 @@ namespace Catch {
 
         m_testCaseTracker->close();
         handleUnfinishedSections();
-        Detail::g_messageScopes().clear();
-        // TBD: At this point, m_messages should be empty. Do we want to
-        //      assert that this is true, or keep the defensive clear call?
-        Detail::g_messages().clear();
+        auto& msgHolder = Detail::g_messageHolder();
+        msgHolder.removeUnscopedMessages();
+        assert( msgHolder.getMessages().empty() &&
+                "There should be no leftover messages after the test ends" );
 
         SectionStats testCaseSectionStats(CATCH_MOVE(testCaseSection), assertions, duration, missingAssertions);
         m_reporter->sectionEnded(testCaseSectionStats);
@@ -827,34 +883,15 @@ namespace Catch {
     }
 
     void IResultCapture::pushScopedMessage( MessageInfo&& message ) {
-        Detail::g_messages().push_back( CATCH_MOVE( message ) );
+        Detail::g_messageHolder().addScopedMessage(  CATCH_MOVE( message ) );
     }
 
     void IResultCapture::popScopedMessage( unsigned int messageId ) {
-        // Note: On average, it would probably be better to look for the message
-        //       backwards. However, we do not expect to have to deal with more
-        //       messages than low single digits, so the optimization is tiny,
-        //       and we would have to hand-write the loop to avoid terrible
-        //       codegen of reverse iterators in debug mode.
-        auto& messages = Detail::g_messages();
-        messages.erase( std::find_if( messages.begin(),
-                                      messages.end(),
-                                      [=]( MessageInfo const& msg ) {
-                                          return msg.sequence ==
-                                                 messageId;
-                                      } ) );
+        Detail::g_messageHolder().removeMessage( messageId );
     }
 
     void IResultCapture::emplaceUnscopedMessage( MessageBuilder&& builder ) {
-        // Invalid unscoped messages are lazy cleared. If we have any,
-        // we have to get rid of them before adding new ones, or the
-        // delayed clear in assertion handling will erase the valid ones
-        // as well.
-        if ( Detail::g_clearMessageScopes ) {
-            Detail::g_messageScopes().clear();
-            Detail::g_clearMessageScopes = false;
-        }
-        Detail::g_messageScopes().emplace_back( CATCH_MOVE( builder ) );
+        Detail::g_messageHolder().addUnscopedMessage( CATCH_MOVE( builder ) );
     }
 
     void seedRng(IConfig const& config) {

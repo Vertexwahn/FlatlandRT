@@ -41,3 +41,24 @@ TEST_CASE( "Failed REQUIRE in the main thread is fine", "[!shouldfail]" ) {
 
     REQUIRE( false );
 }
+
+TEST_CASE( "Using unscoped messages in sibling threads", "[!shouldfail]" ) {
+    std::vector<std::thread> threads;
+    for ( size_t t = 0; t < 4; ++t) {
+        threads.emplace_back( [t]() {
+            UNSCOPED_INFO("thread " << t << " start");
+            for (size_t i = 0; i < 100; ++i) {
+                for (size_t j = 0; j < 4; ++j) {
+                    UNSCOPED_INFO("t=" << i << ", " << j);
+                }
+                CHECK( false );
+            }
+        } );
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    REQUIRE( false );
+}
