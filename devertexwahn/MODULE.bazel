@@ -100,7 +100,7 @@ local_path_override(
 
 local_path_override(
     module_name = "eigen",
-    path = "../third_party/eigen-5.0.0",
+    path = "../third_party/eigen-5.0.1",
 )
 
 local_path_override(
