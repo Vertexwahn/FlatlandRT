@@ -3,6 +3,10 @@
 #   SPDX-License-Identifier: Apache-2.0
 #
 
+#----------------------------------------------------------------------------
+# BuildBuddy
+#----------------------------------------------------------------------------
+
 # BuildBuddy remote cache
 build:buildbuddy_remote_cache --bes_results_url=https://app.buildbuddy.io/invocation/
 build:buildbuddy_remote_cache --bes_backend=grpcs://remote.buildbuddy.io
@@ -14,3 +18,9 @@ build:buildbuddy_remote_cache --build_metadata=ROLE=CI
 
 # Local buchgr remote cache
 build:buchgr_remote_cache --remote_cache=http://localhost:9090
+
+#----------------------------------------------------------------------------
+# Remote Cache for CI jobs
+#----------------------------------------------------------------------------
+
+build:remote_cache_ci --config=buildbuddy_remote_cache
