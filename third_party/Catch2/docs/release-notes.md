@@ -2,6 +2,7 @@
 
 # Release notes
 **Contents**<br>
+[3.12.0](#3120)<br>
 [3.11.0](#3110)<br>
 [3.10.0](#3100)<br>
 [3.9.1](#391)<br>
@@ -69,6 +70,31 @@
 [2.0.1](#201)<br>
 [Older versions](#older-versions)<br>
 [Even Older versions](#even-older-versions)<br>
+
+
+## 3.12.0
+
+### Fixes
+* Fixed unscoped messages after a passing fast-pathed assertion being lost.
+* Fixed the help string for `--order` to mention random order as the default. (#3045)
+* Fixed small documentation typos. (#3039)
+* Fixed compilation with `CATCH_CONFIG_THREAD_SAFE_ASSERTIONS` for older C++ standards.
+* Fixed a thread-safety issue with message macros being used too early after the process starts.
+* Fixed automatic configuration to properly handle PlayStation platform. (#3054)
+* **Fixed the _weird_ behaviour of section filtering when specifying multiple filters.** (#3038)
+  * See #3038 for more details.
+
+### Improvements
+* Added `lifetimebound` attribute to various places.
+  * As an example, compiler that supports lifetime analysis will now diagnose invalid use of Matcher combinators.
+* Minor compile-time improvements to stringification. (#3028)
+  * `std::tuple` printer does not recurse.
+  * Some implementation details were outlined into the cpp file.
+* Global variables will only be marked with `thread_local` in thread-safe builds. (#3044)
+
+### Miscellaneous
+* The thread safety support is no longer experimental.
+  * The new CMake option and C++ define is now `CATCH_CONFIG_THREAD_SAFE_ASSERTIONS`.
 
 
 ## 3.11.0

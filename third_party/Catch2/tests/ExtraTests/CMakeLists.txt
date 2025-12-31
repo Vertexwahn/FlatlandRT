@@ -571,7 +571,7 @@ add_executable(ThreadSafetyTests
   ${TESTS_DIR}/X94-ThreadSafetyTests.cpp
 )
 target_link_libraries(ThreadSafetyTests Catch2_buildall_interface)
-target_compile_definitions(ThreadSafetyTests PUBLIC CATCH_CONFIG_EXPERIMENTAL_THREAD_SAFE_ASSERTIONS)
+target_compile_definitions(ThreadSafetyTests PUBLIC CATCH_CONFIG_THREAD_SAFE_ASSERTIONS)
 
 add_test(NAME ThreadSafetyTests::ScopedMessagesAndAssertions
   COMMAND ThreadSafetyTests -r compact "Failed REQUIRE in the main thread is fine"

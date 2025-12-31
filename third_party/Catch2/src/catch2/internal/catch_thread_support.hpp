@@ -10,7 +10,7 @@
 
 #include <catch2/catch_user_config.hpp>
 
-#if defined( CATCH_CONFIG_EXPERIMENTAL_THREAD_SAFE_ASSERTIONS )
+#if defined( CATCH_CONFIG_THREAD_SAFE_ASSERTIONS )
 #    include <atomic>
 #    include <mutex>
 #endif
@@ -19,7 +19,7 @@
 
 namespace Catch {
     namespace Detail {
-#if defined( CATCH_CONFIG_EXPERIMENTAL_THREAD_SAFE_ASSERTIONS )
+#if defined( CATCH_CONFIG_THREAD_SAFE_ASSERTIONS )
         using Mutex = std::mutex;
         using LockGuard = std::lock_guard<std::mutex>;
         struct AtomicCounts {

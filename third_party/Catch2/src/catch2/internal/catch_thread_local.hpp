@@ -10,7 +10,7 @@
 
 #include <catch2/catch_user_config.hpp>
 
-#if defined( CATCH_CONFIG_EXPERIMENTAL_THREAD_SAFE_ASSERTIONS )
+#if defined( CATCH_CONFIG_THREAD_SAFE_ASSERTIONS )
 #define CATCH_INTERNAL_THREAD_LOCAL thread_local
 #else
 #define CATCH_INTERNAL_THREAD_LOCAL

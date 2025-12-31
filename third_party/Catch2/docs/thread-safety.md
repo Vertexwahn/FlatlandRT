@@ -20,7 +20,7 @@ test case macros is not thread-safe. The way sections define paths through
 the test is incompatible with user spawning threads arbitrarily, so this
 limitation is here to stay.
 
-**Important: thread safety in Catch2 is [opt-in](configuration.md#experimental-thread-safety)**
+**Important: thread safety in Catch2 is [opt-in](configuration.md#thread-safety)**
 
 
 ## Using assertion macros from spawned threads
