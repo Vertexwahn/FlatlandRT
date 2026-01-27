@@ -208,7 +208,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // Visual C++
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__clang__)
 
 // We want to defer to nvcc-specific warning suppression if we are compiled
 // with nvcc masquerading for MSVC.
@@ -218,6 +218,11 @@
 #        define CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION \
             __pragma( warning( pop ) )
 #    endif
+
+// Suppress MSVC C++ Core Guidelines checker warning 26426:
+// "Global initializer calls a non-constexpr function (i.22)"
+#    define CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS \
+         __pragma( warning( disable : 26426 ) )
 
 // Universal Windows platform does not support SEH
 #  if !defined(CATCH_PLATFORM_WINDOWS_UWP)

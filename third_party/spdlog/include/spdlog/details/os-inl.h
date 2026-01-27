@@ -243,31 +243,29 @@ SPDLOG_INLINE size_t filesize(FILE *f) {
 #pragma warning(pop)
 #endif
 
-// Return utc offset in minutes or throw spdlog_ex on failure
 #if !defined(SPDLOG_NO_TZ_OFFSET)
-SPDLOG_INLINE int utc_minutes_offset(const std::tm &tm) {
 #ifdef _WIN32
-#if _WIN32_WINNT < _WIN32_WINNT_WS08
-    TIME_ZONE_INFORMATION tzinfo;
-    auto rv = ::GetTimeZoneInformation(&tzinfo);
-#else
-    DYNAMIC_TIME_ZONE_INFORMATION tzinfo;
-    auto rv = ::GetDynamicTimeZoneInformation(&tzinfo);
-#endif
-    if (rv == TIME_ZONE_ID_INVALID) throw_spdlog_ex("Failed getting timezone info. ", errno);
-
-    int offset = -tzinfo.Bias;
-    if (tm.tm_isdst) {
-        offset -= tzinfo.DaylightBias;
-    } else {
-        offset -= tzinfo.StandardBias;
+// Compare the timestamp as Local (mktime) vs UTC (_mkgmtime) to get the offset.
+SPDLOG_INLINE int utc_minutes_offset(const std::tm &tm) {
+    std::tm local_tm = tm;  // copy since mktime might adjust it (normalize dates, set tm_isdst)
+    std::time_t local_time_t = std::mktime(&local_tm);
+    if (local_time_t == -1) {
+        return 0; // fallback
     }
-    return offset;
-#else
-    auto offset_seconds = tm.tm_gmtoff;
+
+    std::time_t utc_time_t = _mkgmtime(&local_tm);
+    if (utc_time_t == -1) {
+        return 0; // fallback
+    }
+    auto offset_seconds = utc_time_t - local_time_t;
     return static_cast<int>(offset_seconds / 60);
-#endif
 }
+#else
+// On unix simply use tm_gmtoff
+SPDLOG_INLINE int utc_minutes_offset(const std::tm &tm) {
+    return static_cast<int>(tm.tm_gmtoff / 60);
+}
+#endif  // _WIN32
 #endif  // SPDLOG_NO_TZ_OFFSET
 
 // Return current thread id as size_t

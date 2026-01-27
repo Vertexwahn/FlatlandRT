@@ -93,6 +93,15 @@ namespace Detail {
             "specialization, use SingleValue Generator instead.");
         std::vector<T> m_values;
         size_t m_idx = 0;
+
+        void skipToNthElementImpl( std::size_t n ) override {
+            if ( n >= m_values.size() ) {
+                Detail::throw_generator_exception(
+                    "Coud not jump to Nth element: not enough elements" );
+            }
+            m_idx = n;
+        }
+
     public:
         FixedValuesGenerator( std::initializer_list<T> values ) : m_values( values ) {}
 

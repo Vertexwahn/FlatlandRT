@@ -27,7 +27,14 @@
 #include <cstring>
 #include <memory>
 #include <type_traits>
+#include <typeinfo>
 #include <utility>
+
+#ifdef __has_include
+#if __has_include(<version>)
+#include <version>  // For __cpp_lib_bit_cast.
+#endif
+#endif
 
 #if defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L
 #include <bit>  // For std::bit_cast.

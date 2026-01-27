@@ -3912,6 +3912,80 @@ with expansion:
   true
 
 -------------------------------------------------------------------------------
+ConcatGenerator
+  Cat support single-generator construction
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.get() == 1 )
+with expansion:
+  1 == 1
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( c.next() )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
+ConcatGenerator
+  Iterating over multiple generators
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.get() == i + 1 )
+with expansion:
+  1 == 1
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.next() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.get() == i + 1 )
+with expansion:
+  2 == 2
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.next() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.get() == i + 1 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.next() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.get() == i + 1 )
+with expansion:
+  4 == 4
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.next() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( c.get() == 5 )
+with expansion:
+  5 == 5
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( c.next() )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
 Contains string matcher
 -------------------------------------------------------------------------------
 Matchers.tests.cpp:<line number>
@@ -4757,6 +4831,40 @@ GeneratorsImpl.tests.cpp:<line number>
 
 GeneratorsImpl.tests.cpp:<line number>: PASSED:
   REQUIRE_THROWS_AS( filter( []( int ) { return false; }, value( 3 ) ), Catch::GeneratorException )
+
+-------------------------------------------------------------------------------
+FixedValuesGenerator can be skipped forward
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( values.currentElementIndex() == 0 )
+with expansion:
+  0 == 0
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( values.currentElementIndex() == 3 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( values.get() == 3 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( values.currentElementIndex() == 4 )
+with expansion:
+  4 == 4
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( values.get() == 4 )
+with expansion:
+  4 == 4
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_THROWS( values.skipToNthElement( 5 ) )
 
 -------------------------------------------------------------------------------
 Floating point matchers: double
@@ -5846,6 +5954,53 @@ Generators.tests.cpp:<line number>: PASSED:
   REQUIRE( 4u * i > str.size() )
 with expansion:
   12 > 3
+
+-------------------------------------------------------------------------------
+Generators can be skipped forward
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( generator.currentElementIndex() == 0 )
+with expansion:
+  0 == 0
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( generator.currentElementIndex() == 3 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( generator.get() == 3 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( generator.currentElementIndex() == 3 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( generator.get() == 3 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( generator.currentElementIndex() == 5 )
+with expansion:
+  5 == 5
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( generator.get() == 5 )
+with expansion:
+  5 == 5
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_THROWS( generator.skipToNthElement( 3 ) )
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_THROWS( generator.skipToNthElement( 6 ) )
 
 -------------------------------------------------------------------------------
 Generators internals
@@ -8014,6 +8169,50 @@ with message:
   was called
 
 -------------------------------------------------------------------------------
+MapGenerator can be skipped forward efficiently
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_generator.get() == 4 )
+with expansion:
+  4 == 4
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == map_calls_1 + 1 )
+with expansion:
+  2 == 2
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_generator.get() == 4 )
+with expansion:
+  4 == 4
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == map_calls_1 + 1 )
+with expansion:
+  2 == 2
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_generator.get() == 6 )
+with expansion:
+  6 == 6
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == map_calls_2 + 1 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_THROWS( map_generator.skipToNthElement( 7 ) )
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == map_calls_2 + 1 )
+with expansion:
+  3 == 3
+
+-------------------------------------------------------------------------------
 Matchers can be (AllOf) composed with the && operator
 -------------------------------------------------------------------------------
 Matchers.tests.cpp:<line number>
@@ -9986,6 +10185,44 @@ CmdLine.tests.cpp:<line number>: PASSED:
   REQUIRE( config.benchmarkSamples == 200 )
 with expansion:
   200 == 200
+
+-------------------------------------------------------------------------------
+Process can be configured on command line
+  Benchmark options
+  samples must be greater than zero
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  CHECK_FALSE( result )
+with expansion:
+  !{?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE_THAT( result.errorMessage(), ContainsSubstring("Benchmark samples must be greater than 0") )
+with expansion:
+  "Benchmark samples must be greater than 0" contains: "Benchmark samples must
+  be greater than 0"
+
+-------------------------------------------------------------------------------
+Process can be configured on command line
+  Benchmark options
+  samples must be parseable
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  CHECK_FALSE( result )
+with expansion:
+  !{?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE_THAT( result.errorMessage(), ContainsSubstring("Could not parse 'abc' as benchmark samples") )
+with expansion:
+  "Could not parse 'abc' as benchmark samples" contains: "Could not parse 'abc'
+  as benchmark samples"
 
 -------------------------------------------------------------------------------
 Process can be configured on command line
@@ -12077,6 +12314,56 @@ Tag.tests.cpp:<line number>: PASSED:
   REQUIRE_THAT( testCase.tags, VectorContains( Tag( "tag with spaces" ) ) && VectorContains( Tag( "I said \"good day\" sir!"_catch_sr ) ) )
 with expansion:
   { {?}, {?} } ( Contains: {?} and Contains: {?} )
+
+-------------------------------------------------------------------------------
+TakeGenerator can be skipped forward
+  take is shorter than underlying
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( take.get() == 0 )
+with expansion:
+  0 == 0
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( take.get() == 2 )
+with expansion:
+  2 == 2
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( take.get() == 5 )
+with expansion:
+  5 == 5
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_THROWS( take.skipToNthElement( 6 ) )
+
+-------------------------------------------------------------------------------
+TakeGenerator can be skipped forward
+  take is longer than underlying
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( take.get() == 0 )
+with expansion:
+  0 == 0
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( take.get() == 2 )
+with expansion:
+  2 == 2
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( take.get() == 5 )
+with expansion:
+  5 == 5
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_THROWS( take.skipToNthElement( 6 ) )
 
 -------------------------------------------------------------------------------
 Template test case method with test types specified inside std::tuple - MyTypes
@@ -14287,6 +14574,29 @@ due to unexpected exception with message:
   3.14000000000000012
 
 -------------------------------------------------------------------------------
+Unscoped capture outlives scope
+  A
+-------------------------------------------------------------------------------
+Message.tests.cpp:<line number>
+...............................................................................
+
+
+No assertions in section 'A'
+
+-------------------------------------------------------------------------------
+Unscoped capture outlives scope
+-------------------------------------------------------------------------------
+Message.tests.cpp:<line number>
+...............................................................................
+
+Message.tests.cpp:<line number>: FAILED:
+  REQUIRE( false )
+with messages:
+  i := 1
+  j := 2
+  i + j := 3
+
+-------------------------------------------------------------------------------
 Upcasting special member functions
   Move constructor
 -------------------------------------------------------------------------------
@@ -16378,6 +16688,102 @@ Tricky.tests.cpp:<line number>: PASSED:
   REQUIRE( obj.prop != 0 )
 with expansion:
   0x<hex digits> != 0
+
+-------------------------------------------------------------------------------
+cat generator
+  Simple usage
+-------------------------------------------------------------------------------
+Generators.tests.cpp:<line number>
+...............................................................................
+
+Generators.tests.cpp:<line number>: PASSED:
+  REQUIRE( input < 3 )
+with expansion:
+  0 < 3
+
+-------------------------------------------------------------------------------
+cat generator
+  Simple usage
+-------------------------------------------------------------------------------
+Generators.tests.cpp:<line number>
+...............................................................................
+
+Generators.tests.cpp:<line number>: PASSED:
+  REQUIRE( input < 3 )
+with expansion:
+  1 < 3
+
+-------------------------------------------------------------------------------
+cat generator
+  Simple usage
+-------------------------------------------------------------------------------
+Generators.tests.cpp:<line number>
+...............................................................................
+
+Generators.tests.cpp:<line number>: PASSED:
+  REQUIRE( input < 3 )
+with expansion:
+  2 < 3
+
+-------------------------------------------------------------------------------
+cat generator
+  Used in map
+-------------------------------------------------------------------------------
+Generators.tests.cpp:<line number>
+...............................................................................
+
+Generators.tests.cpp:<line number>: PASSED:
+  REQUIRE( input % 2 == 0 )
+with expansion:
+  0 == 0
+
+-------------------------------------------------------------------------------
+cat generator
+  Used in map
+-------------------------------------------------------------------------------
+Generators.tests.cpp:<line number>
+...............................................................................
+
+Generators.tests.cpp:<line number>: PASSED:
+  REQUIRE( input % 2 == 0 )
+with expansion:
+  0 == 0
+
+-------------------------------------------------------------------------------
+cat generator
+  Used in map
+-------------------------------------------------------------------------------
+Generators.tests.cpp:<line number>
+...............................................................................
+
+Generators.tests.cpp:<line number>: PASSED:
+  REQUIRE( input % 2 == 0 )
+with expansion:
+  0 == 0
+
+-------------------------------------------------------------------------------
+cat generator
+  Used in map
+-------------------------------------------------------------------------------
+Generators.tests.cpp:<line number>
+...............................................................................
+
+Generators.tests.cpp:<line number>: PASSED:
+  REQUIRE( input % 2 == 0 )
+with expansion:
+  0 == 0
+
+-------------------------------------------------------------------------------
+cat generator
+  Used in map
+-------------------------------------------------------------------------------
+Generators.tests.cpp:<line number>
+...............................................................................
+
+Generators.tests.cpp:<line number>: PASSED:
+  REQUIRE( input % 2 == 0 )
+with expansion:
+  0 == 0
 
 -------------------------------------------------------------------------------
 checkedElse
@@ -19311,6 +19717,6 @@ Misc.tests.cpp:<line number>
 Misc.tests.cpp:<line number>: PASSED:
 
 ===============================================================================
-test cases:  436 |  317 passed |  95 failed | 6 skipped | 18 failed as expected
-assertions: 2305 | 2106 passed | 157 failed | 42 failed as expected
+test cases:  443 |  323 passed |  96 failed | 6 skipped | 18 failed as expected
+assertions: 2362 | 2161 passed | 158 failed | 43 failed as expected
 

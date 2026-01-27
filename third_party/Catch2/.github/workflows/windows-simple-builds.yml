@@ -2,6 +2,10 @@ name: Windows Builds (Basic)
 
 on: [push, pull_request]
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CTEST_NO_TESTS_ACTION: error
+
 jobs:
   build:
     name: ${{matrix.os}}, ${{matrix.std}}, ${{matrix.build_type}}, ${{matrix.platform}}
@@ -27,5 +31,5 @@ jobs:
         shell: cmd
 
       - name: Run tests
-        run: ctest --test-dir build -C ${{matrix.build_type}} -j %NUMBER_OF_PROCESSORS% --output-on-failure
+        run: ctest --test-dir build -C ${{matrix.build_type}} -j %NUMBER_OF_PROCESSORS%
         shell: cmd

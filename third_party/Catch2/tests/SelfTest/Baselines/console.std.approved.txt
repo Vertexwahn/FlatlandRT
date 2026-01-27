@@ -1204,6 +1204,19 @@ due to unexpected exception with message:
   3.14000000000000012
 
 -------------------------------------------------------------------------------
+Unscoped capture outlives scope
+-------------------------------------------------------------------------------
+Message.tests.cpp:<line number>
+...............................................................................
+
+Message.tests.cpp:<line number>: FAILED:
+  REQUIRE( false )
+with messages:
+  i := 1
+  j := 2
+  i + j := 3
+
+-------------------------------------------------------------------------------
 Vector Approx matcher -- failing
   Empty and non empty vectors are not approx equal
 -------------------------------------------------------------------------------
@@ -1730,6 +1743,6 @@ due to unexpected exception with message:
   Why would you throw a std::string?
 
 ===============================================================================
-test cases:  436 |  335 passed |  76 failed | 7 skipped | 18 failed as expected
-assertions: 2284 | 2106 passed | 136 failed | 42 failed as expected
+test cases:  443 |  341 passed |  76 failed | 7 skipped | 19 failed as expected
+assertions: 2340 | 2161 passed | 136 failed | 43 failed as expected
 

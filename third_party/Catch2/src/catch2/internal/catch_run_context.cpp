@@ -211,13 +211,16 @@ namespace Catch {
             // we only keep around the raw msg ids.
             ~MessageHolder() = default;
 
-
-            void addUnscopedMessage(MessageBuilder&& builder) {
+            void addUnscopedMessage( MessageInfo&& info ) {
                 repairUnscopedMessageInvariant();
-                MessageInfo info( CATCH_MOVE( builder.m_info ) );
-                info.message = builder.m_stream.str();
                 unscoped_ids.push_back( info.sequence );
                 messages.push_back( CATCH_MOVE( info ) );
+            }
+
+            void addUnscopedMessage(MessageBuilder&& builder) {
+                MessageInfo info( CATCH_MOVE( builder.m_info ) );
+                info.message = builder.m_stream.str();
+                addUnscopedMessage( CATCH_MOVE( info ) );
             }
 
             void addScopedMessage(MessageInfo&& info) {
@@ -892,6 +895,10 @@ namespace Catch {
 
     void IResultCapture::emplaceUnscopedMessage( MessageBuilder&& builder ) {
         Detail::g_messageHolder().addUnscopedMessage( CATCH_MOVE( builder ) );
+    }
+
+    void IResultCapture::addUnscopedMessage( MessageInfo&& message ) {
+        Detail::g_messageHolder().addUnscopedMessage( CATCH_MOVE( message ) );
     }
 
     void seedRng(IConfig const& config) {

@@ -3,7 +3,7 @@
  * --------------------------------------------------------
  * Report bugs and download new versions at https://pugixml.org/
  *
- * SPDX-FileCopyrightText: Copyright (C) 2006-2025, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+ * SPDX-FileCopyrightText: Copyright (C) 2006-2026, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * SPDX-License-Identifier: MIT
  *
  * See LICENSE.md or notice at the end of this file.
@@ -53,7 +53,7 @@
 #endif
 
 /**
- * Copyright (c) 2006-2025 Arseny Kapoulkine
+ * Copyright (c) 2006-2026 Arseny Kapoulkine
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation

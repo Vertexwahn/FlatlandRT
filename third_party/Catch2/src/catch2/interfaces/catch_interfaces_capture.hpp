@@ -65,6 +65,7 @@ namespace Catch {
 
         static void pushScopedMessage( MessageInfo&& message );
         static void popScopedMessage( unsigned int messageId );
+        static void addUnscopedMessage( MessageInfo&& message );
         static void emplaceUnscopedMessage( MessageBuilder&& builder );
 
         virtual void handleFatalErrorCondition( StringRef message ) = 0;

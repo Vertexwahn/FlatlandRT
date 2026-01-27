@@ -526,6 +526,15 @@ enum cpuinfo_uarch {
 	/** ARM Cortex-A725. */
 	cpuinfo_uarch_cortex_a725 = 0x00300574,
 
+	/** ARM Lumex-C1-Ultra. */
+	cpuinfo_uarch_lumex_c1_ultra = 0x00300600,
+	/** ARM Lumex-C1-Premium. */
+	cpuinfo_uarch_lumex_c1_premium = 0x00300601,
+	/** ARM Lumex-C1-Pro. */
+	cpuinfo_uarch_lumex_c1_pro = 0x00300602,
+	/** ARM Lumex-C1-Nano. */
+	cpuinfo_uarch_lumex_c1_nano = 0x00300603,
+
 	/** Qualcomm Scorpion. */
 	cpuinfo_uarch_scorpion = 0x00400100,
 	/** Qualcomm Krait. */
@@ -613,6 +622,11 @@ enum cpuinfo_uarch {
 	cpuinfo_uarch_tahiti_everest = 0x00700206,
 	/** Apple A18 pro processor (little cores). */
 	cpuinfo_uarch_tahiti_sawtooth = 0x00700207,
+
+	/** Apple A19 processor (big cores). */
+	cpuinfo_uarch_tilos_everest = 0x00700208,
+	/** Apple A19 processor (little cores). */
+	cpuinfo_uarch_tilos_sawtooth = 0x00700209,
 
 	/** Apple M4 processor (big cores). */
 	cpuinfo_uarch_donan_everest = 0x00700308,

@@ -4376,6 +4376,111 @@ C
     </Section>
     <OverallResult success="true" skips="0"/>
   </TestCase>
+  <TestCase name="ConcatGenerator" tags="[concat][generators]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Section name="Cat support single-generator construction" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.get() == 1
+        </Original>
+        <Expanded>
+          1 == 1
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          !(c.next())
+        </Original>
+        <Expanded>
+          !false
+        </Expanded>
+      </Expression>
+      <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Iterating over multiple generators" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.get() == i + 1
+        </Original>
+        <Expanded>
+          1 == 1
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.next()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.get() == i + 1
+        </Original>
+        <Expanded>
+          2 == 2
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.next()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.get() == i + 1
+        </Original>
+        <Expanded>
+          3 == 3
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.next()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.get() == i + 1
+        </Original>
+        <Expanded>
+          4 == 4
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.next()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          c.get() == 5
+        </Original>
+        <Expanded>
+          5 == 5
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          !(c.next())
+        </Original>
+        <Expanded>
+          !false
+        </Expanded>
+      </Expression>
+      <OverallResults successes="10" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
   <TestCase name="Contains string matcher" tags="[.][failing][matchers]" filename="tests/<exe-name>/UsageTests/Matchers.tests.cpp" >
     <Expression success="false" type="CHECK_THAT" filename="tests/<exe-name>/UsageTests/Matchers.tests.cpp" >
       <Original>
@@ -5372,6 +5477,57 @@ Approx( 1.30000000000000004 )
       </Original>
       <Expanded>
         filter( []( int ) { return false; }, value( 3 ) ), Catch::GeneratorException
+      </Expanded>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="FixedValuesGenerator can be skipped forward" tags="[generators][values]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        values.currentElementIndex() == 0
+      </Original>
+      <Expanded>
+        0 == 0
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        values.currentElementIndex() == 3
+      </Original>
+      <Expanded>
+        3 == 3
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        values.get() == 3
+      </Original>
+      <Expanded>
+        3 == 3
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        values.currentElementIndex() == 4
+      </Original>
+      <Expanded>
+        4 == 4
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        values.get() == 4
+      </Original>
+      <Expanded>
+        4 == 4
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE_THROWS" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        values.skipToNthElement( 5 )
+      </Original>
+      <Expanded>
+        values.skipToNthElement( 5 )
       </Expanded>
     </Expression>
     <OverallResult success="true" skips="0"/>
@@ -6628,6 +6784,81 @@ Approx( 1.30000000000000004 )
       </Expression>
       <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
     </Section>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="Generators can be skipped forward" tags="[generators]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        generator.currentElementIndex() == 0
+      </Original>
+      <Expanded>
+        0 == 0
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        generator.currentElementIndex() == 3
+      </Original>
+      <Expanded>
+        3 == 3
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        generator.get() == 3
+      </Original>
+      <Expanded>
+        3 == 3
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        generator.currentElementIndex() == 3
+      </Original>
+      <Expanded>
+        3 == 3
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        generator.get() == 3
+      </Original>
+      <Expanded>
+        3 == 3
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        generator.currentElementIndex() == 5
+      </Original>
+      <Expanded>
+        5 == 5
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        generator.get() == 5
+      </Original>
+      <Expanded>
+        5 == 5
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE_THROWS" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        generator.skipToNthElement( 3 )
+      </Original>
+      <Expanded>
+        generator.skipToNthElement( 3 )
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE_THROWS" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        generator.skipToNthElement( 6 )
+      </Original>
+      <Expanded>
+        generator.skipToNthElement( 6 )
+      </Expanded>
+    </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
   <TestCase name="Generators internals" tags="[generators][internals]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
@@ -9595,6 +9826,73 @@ Approx( 1.21999999999999997 )
   <TestCase name="ManuallyRegistered" filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
     <OverallResult success="true" skips="0"/>
   </TestCase>
+  <TestCase name="MapGenerator can be skipped forward efficiently" tags="[generators][map]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        map_generator.get() == 4
+      </Original>
+      <Expanded>
+        4 == 4
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        map_calls == map_calls_1 + 1
+      </Original>
+      <Expanded>
+        2 == 2
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        map_generator.get() == 4
+      </Original>
+      <Expanded>
+        4 == 4
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        map_calls == map_calls_1 + 1
+      </Original>
+      <Expanded>
+        2 == 2
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        map_generator.get() == 6
+      </Original>
+      <Expanded>
+        6 == 6
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        map_calls == map_calls_2 + 1
+      </Original>
+      <Expanded>
+        3 == 3
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE_THROWS" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        map_generator.skipToNthElement( 7 )
+      </Original>
+      <Expanded>
+        map_generator.skipToNthElement( 7 )
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        map_calls == map_calls_2 + 1
+      </Original>
+      <Expanded>
+        3 == 3
+      </Expanded>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
   <TestCase name="Matchers can be (AllOf) composed with the &amp;&amp; operator" tags="[matchers][operator&amp;&amp;][operators]" filename="tests/<exe-name>/UsageTests/Matchers.tests.cpp" >
     <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/UsageTests/Matchers.tests.cpp" >
       <Original>
@@ -11988,6 +12286,50 @@ Approx( 1.21999999999999997 )
       <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
     </Section>
     <Section name="Benchmark options" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
+      <Section name="samples must be greater than zero" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
+        <Expression success="true" type="CHECK_FALSE" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
+          <Original>
+            !(result)
+          </Original>
+          <Expanded>
+            !{?}
+          </Expanded>
+        </Expression>
+        <Expression success="true" type="REQUIRE_THAT" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
+          <Original>
+            result.errorMessage(), ContainsSubstring("Benchmark samples must be greater than 0")
+          </Original>
+          <Expanded>
+            "Benchmark samples must be greater than 0" contains: "Benchmark samples must be greater than 0"
+          </Expanded>
+        </Expression>
+        <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+      </Section>
+      <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Benchmark options" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
+      <Section name="samples must be parseable" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
+        <Expression success="true" type="CHECK_FALSE" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
+          <Original>
+            !(result)
+          </Original>
+          <Expanded>
+            !{?}
+          </Expanded>
+        </Expression>
+        <Expression success="true" type="REQUIRE_THAT" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
+          <Original>
+            result.errorMessage(), ContainsSubstring("Could not parse 'abc' as benchmark samples")
+          </Original>
+          <Expanded>
+            "Could not parse 'abc' as benchmark samples" contains: "Could not parse 'abc' as benchmark samples"
+          </Expanded>
+        </Expression>
+        <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+      </Section>
+      <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Benchmark options" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
       <Section name="resamples" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
         <Expression success="true" type="CHECK" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
           <Original>
@@ -14100,6 +14442,79 @@ Message from section two
         { {?}, {?} } ( Contains: {?} and Contains: {?} )
       </Expanded>
     </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="TakeGenerator can be skipped forward" tags="[generators][take]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Section name="take is shorter than underlying" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take.get() == 0
+        </Original>
+        <Expanded>
+          0 == 0
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take.get() == 2
+        </Original>
+        <Expanded>
+          2 == 2
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take.get() == 5
+        </Original>
+        <Expanded>
+          5 == 5
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE_THROWS" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take.skipToNthElement( 6 )
+        </Original>
+        <Expanded>
+          take.skipToNthElement( 6 )
+        </Expanded>
+      </Expression>
+      <OverallResults successes="4" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="take is longer than underlying" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take.get() == 0
+        </Original>
+        <Expanded>
+          0 == 0
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take.get() == 2
+        </Original>
+        <Expanded>
+          2 == 2
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take.get() == 5
+        </Original>
+        <Expanded>
+          5 == 5
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE_THROWS" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take.skipToNthElement( 6 )
+        </Original>
+        <Expanded>
+          take.skipToNthElement( 6 )
+        </Expanded>
+      </Expression>
+      <OverallResults successes="4" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
     <OverallResult success="true" skips="0"/>
   </TestCase>
   <TestCase name="Template test case method with test types specified inside std::tuple - MyTypes - 0" tags="[class][list][template]" filename="tests/<exe-name>/UsageTests/Class.tests.cpp" >
@@ -16515,6 +16930,29 @@ There is no extra whitespace here
     <Exception filename="tests/<exe-name>/UsageTests/Exception.tests.cpp" >
       3.14000000000000012
     </Exception>
+    <OverallResult success="false" skips="0"/>
+  </TestCase>
+  <TestCase name="Unscoped capture outlives scope" tags="[!shouldfail][capture][messages][unscoped]" filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+    <Section name="A" filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+      <OverallResults successes="0" failures="1" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+      i := 1
+    </Info>
+    <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+      j := 2
+    </Info>
+    <Info filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+      i + j := 3
+    </Info>
+    <Expression success="false" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Message.tests.cpp" >
+      <Original>
+        false
+      </Original>
+      <Expanded>
+        false
+      </Expanded>
+    </Expression>
     <OverallResult success="false" skips="0"/>
   </TestCase>
   <TestCase name="Upcasting special member functions" tags="[internals][unique-ptr]" filename="tests/<exe-name>/IntrospectiveTests/UniquePtr.tests.cpp" >
@@ -19086,6 +19524,97 @@ Approx( 1.23999999999999999 )
         0x<hex digits> != 0
       </Expanded>
     </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="cat generator" tags="[concat][generators]" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+    <Section name="Simple usage" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+        <Original>
+          input &lt; 3
+        </Original>
+        <Expanded>
+          0 &lt; 3
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Simple usage" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+        <Original>
+          input &lt; 3
+        </Original>
+        <Expanded>
+          1 &lt; 3
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Simple usage" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+        <Original>
+          input &lt; 3
+        </Original>
+        <Expanded>
+          2 &lt; 3
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Used in map" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+        <Original>
+          input % 2 == 0
+        </Original>
+        <Expanded>
+          0 == 0
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Used in map" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+        <Original>
+          input % 2 == 0
+        </Original>
+        <Expanded>
+          0 == 0
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Used in map" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+        <Original>
+          input % 2 == 0
+        </Original>
+        <Expanded>
+          0 == 0
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Used in map" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+        <Original>
+          input % 2 == 0
+        </Original>
+        <Expanded>
+          0 == 0
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Used in map" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
+        <Original>
+          input % 2 == 0
+        </Original>
+        <Expanded>
+          0 == 0
+        </Expanded>
+      </Expression>
+      <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
     <OverallResult success="true" skips="0"/>
   </TestCase>
   <TestCase name="checkedElse" filename="tests/<exe-name>/UsageTests/Misc.tests.cpp" >
@@ -22349,6 +22878,6 @@ Approx( -1.95996398454005449 )
     </Section>
     <OverallResult success="true" skips="0"/>
   </TestCase>
-  <OverallResults successes="2106" failures="157" expectedFailures="42" skips="12"/>
-  <OverallResultsCases successes="317" failures="95" expectedFailures="18" skips="6"/>
+  <OverallResults successes="2161" failures="158" expectedFailures="43" skips="12"/>
+  <OverallResultsCases successes="323" failures="96" expectedFailures="18" skips="6"/>
 </Catch2TestRun>

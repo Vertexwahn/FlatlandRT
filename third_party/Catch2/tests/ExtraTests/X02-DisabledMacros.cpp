@@ -48,6 +48,7 @@ TEST_CASE( "Disabled Macros" ) {
 
     CAPTURE( 1 );
     CAPTURE( 1, "captured" );
+    UNSCOPED_CAPTURE( 3 );
 
     REQUIRE_THAT( 1,
                   Catch::Matchers::Predicate( []( int ) { return false; } ) );
@@ -68,6 +69,7 @@ TEST_CASE_PERSISTENT_FIXTURE( DisabledFixture, "Disabled Persistent Fixture" ) {
 
     CAPTURE( 1 );
     CAPTURE( 1, "captured" );
+    UNSCOPED_CAPTURE( 3 );
 
     REQUIRE_THAT( 1,
                   Catch::Matchers::Predicate( []( int ) { return false; } ) );

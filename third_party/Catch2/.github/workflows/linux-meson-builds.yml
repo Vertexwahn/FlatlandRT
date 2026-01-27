@@ -2,6 +2,10 @@ name: Linux Builds (Meson)
 
 on: [push, pull_request]
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CTEST_NO_TESTS_ACTION: error
+
 jobs:
   build:
     name: meson ${{matrix.cxx}}, C++${{matrix.std}}, ${{matrix.build_type}}

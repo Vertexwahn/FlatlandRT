@@ -29,11 +29,11 @@ namespace Catch {
         // The "ID" of the message, used to know when to remove it from reporter context.
         unsigned int sequence;
 
-        DEPRECATED( "Explicitly use the 'sequence' member instead" )
+        CATCH_DEPRECATED( "Explicitly use the 'sequence' member instead" )
         bool operator == (MessageInfo const& other) const {
             return sequence == other.sequence;
         }
-        DEPRECATED( "Explicitly use the 'sequence' member instead" )
+        CATCH_DEPRECATED( "Explicitly use the 'sequence' member instead" )
         bool operator < (MessageInfo const& other) const {
             return sequence < other.sequence;
         }

@@ -12,6 +12,7 @@
 /**
  * Event listener that listens to all assertions, forcing assertion slow path
  */
+namespace {
 class AssertionSlowPathListener : public Catch::EventListenerBase {
 public:
     static std::string getDescription() {
@@ -26,3 +27,4 @@ public:
 };
 
 CATCH_REGISTER_LISTENER( AssertionSlowPathListener )
+}

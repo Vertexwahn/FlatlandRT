@@ -38,7 +38,9 @@ namespace Catch {
     Capturer::Capturer( StringRef macroName,
                         SourceLineInfo const& lineInfo,
                         ResultWas::OfType resultType,
-                        StringRef names ) {
+                        StringRef names,
+                        bool isScoped):
+        m_isScoped(isScoped) {
         auto trimmed = [&] (size_t start, size_t end) {
             while (names[start] == ',' || isspace(static_cast<unsigned char>(names[start]))) {
                 ++start;
@@ -99,15 +101,21 @@ namespace Catch {
     }
     Capturer::~Capturer() {
         assert( m_captured == m_messages.size() );
-        for (auto const& message : m_messages) {
-            IResultCapture::popScopedMessage( message.sequence );
+        if ( m_isScoped ) {
+            for ( auto const& message : m_messages ) {
+                IResultCapture::popScopedMessage( message.sequence );
+            }
         }
     }
 
     void Capturer::captureValue( size_t index, std::string const& value ) {
         assert( index < m_messages.size() );
         m_messages[index].message += value;
-        IResultCapture::pushScopedMessage( CATCH_MOVE( m_messages[index] ) );
+        if ( m_isScoped ) {
+            IResultCapture::pushScopedMessage( CATCH_MOVE( m_messages[index] ) );
+        } else {
+            IResultCapture::addUnscopedMessage( CATCH_MOVE( m_messages[index] ) );
+        }
         m_captured++;
     }
 

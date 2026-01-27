@@ -540,6 +540,18 @@ Matchers.tests.cpp:<line number>: passed: !second.matchCalled for: true
 Matchers.tests.cpp:<line number>: passed: matcher.match( 1 ) for: true
 Matchers.tests.cpp:<line number>: passed: first.matchCalled for: true
 Matchers.tests.cpp:<line number>: passed: !second.matchCalled for: true
+GeneratorsImpl.tests.cpp:<line number>: passed: c.get() == 1 for: 1 == 1
+GeneratorsImpl.tests.cpp:<line number>: passed: !(c.next()) for: !false
+GeneratorsImpl.tests.cpp:<line number>: passed: c.get() == i + 1 for: 1 == 1
+GeneratorsImpl.tests.cpp:<line number>: passed: c.next() for: true
+GeneratorsImpl.tests.cpp:<line number>: passed: c.get() == i + 1 for: 2 == 2
+GeneratorsImpl.tests.cpp:<line number>: passed: c.next() for: true
+GeneratorsImpl.tests.cpp:<line number>: passed: c.get() == i + 1 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: c.next() for: true
+GeneratorsImpl.tests.cpp:<line number>: passed: c.get() == i + 1 for: 4 == 4
+GeneratorsImpl.tests.cpp:<line number>: passed: c.next() for: true
+GeneratorsImpl.tests.cpp:<line number>: passed: c.get() == 5 for: 5 == 5
+GeneratorsImpl.tests.cpp:<line number>: passed: !(c.next()) for: !false
 Matchers.tests.cpp:<line number>: failed: testStringForMatching(), ContainsSubstring( "not there", Catch::CaseSensitive::No ) for: "this string contains 'abc' as a substring" contains: "not there" (case insensitive)
 Matchers.tests.cpp:<line number>: failed: testStringForMatching(), ContainsSubstring( "STRING" ) for: "this string contains 'abc' as a substring" contains: "STRING"
 Generators.tests.cpp:<line number>: passed: elem % 2 == 1 for: 1 == 1
@@ -666,6 +678,12 @@ Misc.tests.cpp:<line number>: passed: Factorial(2) == 2 for: 2 == 2
 Misc.tests.cpp:<line number>: passed: Factorial(3) == 6 for: 6 == 6
 Misc.tests.cpp:<line number>: passed: Factorial(10) == 3628800 for: 3628800 (0x<hex digits>) == 3628800 (0x<hex digits>)
 GeneratorsImpl.tests.cpp:<line number>: passed: filter( []( int ) { return false; }, value( 3 ) ), Catch::GeneratorException
+GeneratorsImpl.tests.cpp:<line number>: passed: values.currentElementIndex() == 0 for: 0 == 0
+GeneratorsImpl.tests.cpp:<line number>: passed: values.currentElementIndex() == 3 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: values.get() == 3 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: values.currentElementIndex() == 4 for: 4 == 4
+GeneratorsImpl.tests.cpp:<line number>: passed: values.get() == 4 for: 4 == 4
+GeneratorsImpl.tests.cpp:<line number>: passed: values.skipToNthElement( 5 )
 Matchers.tests.cpp:<line number>: passed: 10., WithinRel( 11.1, 0.1 ) for: 10.0 and 11.09999999999999964 are within 10% of each other
 Matchers.tests.cpp:<line number>: passed: 10., !WithinRel( 11.2, 0.1 ) for: 10.0 not and 11.19999999999999929 are within 10% of each other
 Matchers.tests.cpp:<line number>: passed: 1., !WithinRel( 0., 0.99 ) for: 1.0 not and 0.0 are within 99% of each other
@@ -789,6 +807,15 @@ Generators.tests.cpp:<line number>: passed: j < i for: -1 < 3
 Generators.tests.cpp:<line number>: passed: 4u * i > str.size() for: 12 > 1
 Generators.tests.cpp:<line number>: passed: 4u * i > str.size() for: 12 > 2
 Generators.tests.cpp:<line number>: passed: 4u * i > str.size() for: 12 > 3
+GeneratorsImpl.tests.cpp:<line number>: passed: generator.currentElementIndex() == 0 for: 0 == 0
+GeneratorsImpl.tests.cpp:<line number>: passed: generator.currentElementIndex() == 3 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: generator.get() == 3 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: generator.currentElementIndex() == 3 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: generator.get() == 3 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: generator.currentElementIndex() == 5 for: 5 == 5
+GeneratorsImpl.tests.cpp:<line number>: passed: generator.get() == 5 for: 5 == 5
+GeneratorsImpl.tests.cpp:<line number>: passed: generator.skipToNthElement( 3 )
+GeneratorsImpl.tests.cpp:<line number>: passed: generator.skipToNthElement( 6 )
 GeneratorsImpl.tests.cpp:<line number>: passed: gen.get() == 123 for: 123 == 123
 GeneratorsImpl.tests.cpp:<line number>: passed: !(gen.next()) for: !false
 GeneratorsImpl.tests.cpp:<line number>: passed: gen.get() == 1 for: 1 == 1
@@ -1222,6 +1249,14 @@ Approx.tests.cpp:<line number>: passed: d <= Approx( 1.22 ).epsilon(0.1) for: 1.
 <=
 Approx( 1.21999999999999997 )
 Misc.tests.cpp:<line number>: passed: with 1 message: 'was called'
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get() == 4 for: 4 == 4
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == map_calls_1 + 1 for: 2 == 2
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get() == 4 for: 4 == 4
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == map_calls_1 + 1 for: 2 == 2
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get() == 6 for: 6 == 6
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == map_calls_2 + 1 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.skipToNthElement( 7 )
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == map_calls_2 + 1 for: 3 == 3
 Matchers.tests.cpp:<line number>: passed: testStringForMatching(), ContainsSubstring( "string" ) && ContainsSubstring( "abc" ) && ContainsSubstring( "substring" ) && ContainsSubstring( "contains" ) for: "this string contains 'abc' as a substring" ( contains: "string" and contains: "abc" and contains: "substring" and contains: "contains" )
 Matchers.tests.cpp:<line number>: passed: testStringForMatching(), ContainsSubstring( "string" ) || ContainsSubstring( "different" ) || ContainsSubstring( "random" ) for: "this string contains 'abc' as a substring" ( contains: "string" or contains: "different" or contains: "random" )
 Matchers.tests.cpp:<line number>: passed: testStringForMatching2(), ContainsSubstring( "string" ) || ContainsSubstring( "different" ) || ContainsSubstring( "random" ) for: "some completely different text that contains one common word" ( contains: "string" or contains: "different" or contains: "random" )
@@ -1503,6 +1538,10 @@ CmdLine.tests.cpp:<line number>: passed: !result for: true
 CmdLine.tests.cpp:<line number>: passed: result.errorMessage(), ContainsSubstring( "colour mode must be one of" ) for: "colour mode must be one of: default, ansi, win32, or none. 'wrong' is not recognised" contains: "colour mode must be one of"
 CmdLine.tests.cpp:<line number>: passed: cli.parse({ "test", "--benchmark-samples=200" }) for: {?}
 CmdLine.tests.cpp:<line number>: passed: config.benchmarkSamples == 200 for: 200 == 200
+CmdLine.tests.cpp:<line number>: passed: !(result) for: !{?}
+CmdLine.tests.cpp:<line number>: passed: result.errorMessage(), ContainsSubstring("Benchmark samples must be greater than 0") for: "Benchmark samples must be greater than 0" contains: "Benchmark samples must be greater than 0"
+CmdLine.tests.cpp:<line number>: passed: !(result) for: !{?}
+CmdLine.tests.cpp:<line number>: passed: result.errorMessage(), ContainsSubstring("Could not parse 'abc' as benchmark samples") for: "Could not parse 'abc' as benchmark samples" contains: "Could not parse 'abc' as benchmark samples"
 CmdLine.tests.cpp:<line number>: passed: cli.parse({ "test", "--benchmark-resamples=20000" }) for: {?}
 CmdLine.tests.cpp:<line number>: passed: config.benchmarkResamples == 20000 for: 20000 (0x<hex digits>) == 20000 (0x<hex digits>)
 CmdLine.tests.cpp:<line number>: passed: cli.parse({ "test", "--benchmark-confidence-interval=0.99" }) for: {?}
@@ -1905,6 +1944,14 @@ Tag.tests.cpp:<line number>: passed: registry.add( "@no square bracket at start]
 Tag.tests.cpp:<line number>: passed: registry.add( "[@no square bracket at end", "", Catch::SourceLineInfo( "file", 3 ) )
 Tag.tests.cpp:<line number>: passed: testCase.tags.size() == 2 for: 2 == 2
 Tag.tests.cpp:<line number>: passed: testCase.tags, VectorContains( Tag( "tag with spaces" ) ) && VectorContains( Tag( "I said \"good day\" sir!"_catch_sr ) ) for: { {?}, {?} } ( Contains: {?} and Contains: {?} )
+GeneratorsImpl.tests.cpp:<line number>: passed: take.get() == 0 for: 0 == 0
+GeneratorsImpl.tests.cpp:<line number>: passed: take.get() == 2 for: 2 == 2
+GeneratorsImpl.tests.cpp:<line number>: passed: take.get() == 5 for: 5 == 5
+GeneratorsImpl.tests.cpp:<line number>: passed: take.skipToNthElement( 6 )
+GeneratorsImpl.tests.cpp:<line number>: passed: take.get() == 0 for: 0 == 0
+GeneratorsImpl.tests.cpp:<line number>: passed: take.get() == 2 for: 2 == 2
+GeneratorsImpl.tests.cpp:<line number>: passed: take.get() == 5 for: 5 == 5
+GeneratorsImpl.tests.cpp:<line number>: passed: take.skipToNthElement( 6 )
 Class.tests.cpp:<line number>: passed: Template_Fixture<TestType>::m_a == 1 for: 1 == 1
 Class.tests.cpp:<line number>: passed: Template_Fixture<TestType>::m_a == 1 for: 1 == 1
 Class.tests.cpp:<line number>: passed: Template_Fixture<TestType>::m_a == 1 for: 1.0 == 1
@@ -2201,6 +2248,7 @@ MatchersRanges.tests.cpp:<line number>: passed: a, UnorderedRangeEquals( b ) for
 MatchersRanges.tests.cpp:<line number>: passed: vector_a, RangeEquals( array_a_plus_1, close_enough ) for: { 1, 2, 3 } elements are { 2, 3, 4 }
 MatchersRanges.tests.cpp:<line number>: passed: vector_a, UnorderedRangeEquals( array_a_plus_1, close_enough ) for: { 1, 2, 3 } unordered elements are { 2, 3, 4 }
 Exception.tests.cpp:<line number>: failed: unexpected exception with message: '3.14000000000000012'
+Message.tests.cpp:<line number>: failed: false with 3 messages: 'i := 1' and 'j := 2' and 'i + j := 3'
 UniquePtr.tests.cpp:<line number>: passed: bptr->i == 3 for: 3 == 3
 UniquePtr.tests.cpp:<line number>: passed: bptr->i == 3 for: 3 == 3
 MatchersRanges.tests.cpp:<line number>: passed: data, AllMatch(SizeIs(5)) for: { { 0, 1, 2, 3, 5 }, { 4, -3, -2, 5, 0 }, { 0, 0, 0, 5, 0 }, { 0, -5, 0, 5, 0 }, { 1, 0, 0, -1, 5 } } all match has size == 5
@@ -2478,6 +2526,14 @@ InternalBenchmark.tests.cpp:<line number>: passed: model.started == 0 for: 0 == 
 InternalBenchmark.tests.cpp:<line number>: passed: model.finished == 0 for: 0 == 0
 InternalBenchmark.tests.cpp:<line number>: passed: called == 1 for: 1 == 1
 Tricky.tests.cpp:<line number>: passed: obj.prop != 0 for: 0x<hex digits> != 0
+Generators.tests.cpp:<line number>: passed: input < 3 for: 0 < 3
+Generators.tests.cpp:<line number>: passed: input < 3 for: 1 < 3
+Generators.tests.cpp:<line number>: passed: input < 3 for: 2 < 3
+Generators.tests.cpp:<line number>: passed: input % 2 == 0 for: 0 == 0
+Generators.tests.cpp:<line number>: passed: input % 2 == 0 for: 0 == 0
+Generators.tests.cpp:<line number>: passed: input % 2 == 0 for: 0 == 0
+Generators.tests.cpp:<line number>: passed: input % 2 == 0 for: 0 == 0
+Generators.tests.cpp:<line number>: passed: input % 2 == 0 for: 0 == 0
 Misc.tests.cpp:<line number>: passed: flag for: true
 Misc.tests.cpp:<line number>: passed: testCheckedElse( true ) for: true
 Misc.tests.cpp:<line number>: failed - but was ok: flag for: false
@@ -2890,7 +2946,7 @@ InternalBenchmark.tests.cpp:<line number>: passed: med == 18. for: 18.0 == 18.0
 InternalBenchmark.tests.cpp:<line number>: passed: q3 == 23. for: 23.0 == 23.0
 Misc.tests.cpp:<line number>: passed:
 Misc.tests.cpp:<line number>: passed:
-test cases:  436 |  317 passed |  95 failed | 6 skipped | 18 failed as expected
-assertions: 2305 | 2106 passed | 157 failed | 42 failed as expected
+test cases:  443 |  323 passed |  96 failed | 6 skipped | 18 failed as expected
+assertions: 2362 | 2161 passed | 158 failed | 43 failed as expected
 
 

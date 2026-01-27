@@ -35,6 +35,15 @@ namespace Catch {
             //! Customization point for `currentElementAsString`
             virtual std::string stringifyImpl() const = 0;
 
+            /**
+             * Customization point for skipping to the n-th element
+             *
+             * Defaults to successively calling `countedNext`. If there
+             * are not enough elements to reach the nth one, will throw
+             * an error.
+             */
+            virtual void skipToNthElementImpl( std::size_t n );
+
         public:
             GeneratorUntypedBase() = default;
             // Generation of copy ops is deprecated (and Clang will complain)
@@ -57,6 +66,13 @@ namespace Catch {
             bool countedNext();
 
             std::size_t currentElementIndex() const { return m_currentElementIndex; }
+
+            /**
+             * Moves the generator forward **to** the n-th element
+             *
+             * Cannot move backwards. Can stay in place.
+             */
+            void skipToNthElement( std::size_t n );
 
             /**
              * Returns generator's current element as user-friendly string.

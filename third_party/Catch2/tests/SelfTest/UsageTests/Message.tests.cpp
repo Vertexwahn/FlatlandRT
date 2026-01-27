@@ -369,3 +369,13 @@ TEST_CASE(
     UNSCOPED_INFO( "b" );
     REQUIRE( false );
 }
+
+TEST_CASE( "Unscoped capture outlives scope",
+           "[messages][unscoped][capture][!shouldfail]" ) {
+    int i = 1;
+    SECTION( "A" ) {
+        int j = 2;
+        UNSCOPED_CAPTURE( i, j, i + j );
+    }
+    REQUIRE( false );
+}

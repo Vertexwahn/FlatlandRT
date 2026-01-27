@@ -48,13 +48,12 @@
 
 #ifndef FMT_MODULE
 #  include <stdlib.h>  // malloc, free
+#  include <string.h>  // memcpy
 
 #  include <cmath>    // std::signbit
 #  include <cstddef>  // std::byte
 #  include <cstdint>  // uint32_t
-#  include <cstring>  // std::memcpy
 #  include <limits>   // std::numeric_limits
-#  include <new>      // std::bad_alloc
 #  if defined(__GLIBCXX__) && !defined(_GLIBCXX_USE_DUAL_ABI)
 // Workaround for pre gcc 5 libstdc++.
 #    include <memory>  // std::allocator_traits
@@ -283,7 +282,7 @@ FMT_CONSTEXPR20 auto bit_cast(const From& from) -> To {
 #endif
   auto to = To();
   // The cast suppresses a bogus -Wclass-memaccess on GCC.
-  std::memcpy(static_cast<void*>(&to), &from, sizeof(to));
+  memcpy(static_cast<void*>(&to), &from, sizeof(to));
   return to;
 }
 
@@ -403,7 +402,7 @@ class uint128_fallback {
     auto carry = __builtin_ia32_addcarryx_u64(0, lo_, n, &result);
     lo_ = result;
     hi_ += carry;
-#elif defined(_MSC_VER) && defined(_M_X64)
+#elif defined(_MSC_VER) && defined(_M_AMD64)
     auto carry = _addcarry_u64(0, lo_, n, &lo_);
     _addcarry_u64(carry, hi_, 0, &hi_);
 #else
@@ -564,7 +563,7 @@ FMT_CONSTEXPR20 auto fill_n(T* out, Size count, char value) -> T* {
   if (is_constant_evaluated()) return fill_n<T*, Size, T>(out, count, value);
   static_assert(sizeof(T) == 1,
                 "sizeof(T) must be 1 to use char for initialization");
-  std::memset(out, value, to_unsigned(count));
+  memset(out, value, to_unsigned(count));
   return out + count;
 }
 
@@ -736,6 +735,8 @@ using fast_float_t = conditional_t<sizeof(T) == sizeof(double), double, float>;
 template <typename T>
 using is_double_double = bool_constant<std::numeric_limits<T>::digits == 106>;
 
+FMT_API auto allocate(size_t size) -> void*;
+
 // An allocator that uses malloc/free to allow removing dependency on the C++
 // standard library runtime. std::decay is used for back_inserter to be found by
 // ADL when applied to memory_buffer.
@@ -744,9 +745,7 @@ template <typename T> struct allocator : private std::decay<void> {
 
   auto allocate(size_t n) -> T* {
     FMT_ASSERT(n <= max_value<size_t>() / sizeof(T), "");
-    T* p = static_cast<T*>(malloc(n * sizeof(T)));
-    if (!p) FMT_THROW(std::bad_alloc());
-    return p;
+    return static_cast<T*>(detail::allocate(n * sizeof(T)));
   }
 
   void deallocate(T* p, size_t) { free(p); }
@@ -1425,7 +1424,7 @@ FMT_INLINE auto umul128(uint64_t x, uint64_t y) noexcept -> uint128_fallback {
 #if FMT_USE_INT128
   auto p = static_cast<uint128_opt>(x) * static_cast<uint128_opt>(y);
   return {static_cast<uint64_t>(p >> 64), static_cast<uint64_t>(p)};
-#elif defined(_MSC_VER) && defined(_M_X64)
+#elif defined(_MSC_VER) && defined(_M_AMD64)
   auto hi = uint64_t();
   auto lo = _umul128(x, y, &hi);
   return {hi, lo};
@@ -1468,7 +1467,7 @@ inline auto umul128_upper64(uint64_t x, uint64_t y) noexcept -> uint64_t {
 #if FMT_USE_INT128
   auto p = static_cast<uint128_opt>(x) * static_cast<uint128_opt>(y);
   return static_cast<uint64_t>(p >> 64);
-#elif defined(_MSC_VER) && defined(_M_X64)
+#elif defined(_MSC_VER) && defined(_M_AMD64)
   return __umulh(x, y);
 #else
   return umul128(x, y).high();
@@ -3944,8 +3943,8 @@ template <typename Locale> class format_facet : public Locale::facet {
   explicit format_facet(string_view sep = "", std::string grouping = "\3",
                         std::string decimal_point = ".")
       : separator_(sep.data(), sep.size()),
-        grouping_(grouping),
-        decimal_point_(decimal_point) {}
+        grouping_(std::move(grouping)),
+        decimal_point_(std::move(decimal_point)) {}
 
   auto put(appender out, loc_value val, const format_specs& specs) const
       -> bool {

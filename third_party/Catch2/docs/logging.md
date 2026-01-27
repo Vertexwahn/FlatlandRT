@@ -26,19 +26,22 @@ started" and "Section B", while the third one will only report "Test case
 started" as the extra info.
 
 
-## Logging without local scope
+## Logging outside of current scope
 
-> [Introduced](https://github.com/catchorg/Catch2/issues/1522) in Catch2 2.7.0.
+> `UNSCOPED_INFO` was [introduced](https://github.com/catchorg/Catch2/issues/1522) in Catch2 2.7.0.
 
-`UNSCOPED_INFO` is similar to `INFO` with two key differences:
+> `UNSCOPED_CAPTURE` was introduced in Catch2 X.Y.Z.
 
-- Lifetime of an unscoped message is not tied to its own scope.
+The `UNSCOPED_X` macros are similar to their plain `X` macro counterparts,
+with two key differences:
+
+- The lifetime of an unscoped message is not tied to its own scope.
 - An unscoped message can be reported by the first following assertion only, regardless of the result of that assertion.
 
-In other words, lifetime of `UNSCOPED_INFO` is limited by the following assertion (or by the end of test case/section, whichever comes first) whereas lifetime of `INFO` is limited by its own scope.
+In other words, the `UNSCOPED_X` macros are useful to add extra information
+to the next assertion, e.g. from helper functions or inner scopes.
 
-These differences make this macro useful for reporting information from helper functions or inner scopes. An example:
-
+An example:
 ```cpp
 void print_some_info() {
     UNSCOPED_INFO("Info from helper");
@@ -83,9 +86,16 @@ Second info
 Second unscoped info
 ```
 
+Note that unscoped messages are not passed between test cases, even if
+there were no assertions between them.
+
+
 ## Streaming macros
 
-All these macros allow heterogeneous sequences of values to be streaming using the insertion operator (```<<```) in the same way that std::ostream, std::cout, etc support it.
+Apart from `CAPTURE` (and its close sibling, `UNSCOPED_CAPTURE`), message
+macros support gradual streaming of messages and values in the same way
+that the standard streams do.
+
 
 E.g.:
 ```c++
@@ -98,9 +108,6 @@ These macros come in three forms:
 **INFO(** _message expression_ **)**
 
 The message is logged to a buffer, but only reported with next assertions that are logged. This allows you to log contextual information in case of failures which is not shown during a successful test run (for the console reporter, without -s). Messages are removed from the buffer at the end of their scope, so may be used, for example, in loops.
-
-_Note that in Catch2 2.x.x `INFO` can be used without a trailing semicolon as there is a trailing semicolon inside macro.
-This semicolon will be removed with next major version. It is highly advised to use a trailing semicolon after `INFO` macro._
 
 **UNSCOPED_INFO(** _message expression_ **)**
 
@@ -127,6 +134,10 @@ AS `FAIL`, but does not abort the test
 ## Quickly capture value of variables or expressions
 
 **CAPTURE(** _expression1_, _expression2_, ... **)**
+
+**UNSCOPED_CAPTURE(** _expression1_, _expression2_, ... **)**
+
+> `UNSCOPED_CAPTURE` was introduced in Catch2 X.Y.Z.
 
 Sometimes you just want to log a value of variable, or expression. For
 convenience, we provide the `CAPTURE` macro, that can take a variable,

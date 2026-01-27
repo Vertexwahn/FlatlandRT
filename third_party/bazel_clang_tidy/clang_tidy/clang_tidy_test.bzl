@@ -4,6 +4,7 @@ NOTE: This rule requires bash
 """
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load(":clang_tidy.bzl", "deps_flags", "is_c_translation_unit", "rule_sources", "safe_flags", "toolchain_flags")
 
 def _quote(s):
@@ -57,9 +58,8 @@ def _clang_tidy_rule_impl(ctx):
 set -euo pipefail
 
 readonly bin="{clang_tidy_bin}"
-readonly config="{clang_tidy_config}"
 
-test -e .clang-tidy || ln -s -f \\$config .clang-tidy
+test -e .clang-tidy || ln -s -f "{clang_tidy_config}" .clang-tidy
 if [[ ! -f .clang-tidy ]]; then
   echo "error: failed to setup config" >&2
   exit 1

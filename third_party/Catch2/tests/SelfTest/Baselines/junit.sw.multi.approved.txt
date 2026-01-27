@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="<exe-name>" errors="17" failures="140" skipped="12" tests="2317" hostname="tbd" time="{duration}" timestamp="{iso8601-timestamp}">
+  <testsuite name="<exe-name>" errors="17" failures="141" skipped="12" tests="2374" hostname="tbd" time="{duration}" timestamp="{iso8601-timestamp}">
     <properties>
       <property name="random-seed" value="1"/>
       <property name="filters" value="&quot;*&quot; ~[!nonportable] ~[!benchmark] ~[approvals]"/>
@@ -500,6 +500,9 @@ at Message.tests.cpp:<line number>
     <testcase classname="<exe-name>.global" name="Composed matchers shortcircuit" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Composed matchers shortcircuit/MatchAllOf" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Composed matchers shortcircuit/MatchAnyOf" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="ConcatGenerator" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="ConcatGenerator/Cat support single-generator construction" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="ConcatGenerator/Iterating over multiple generators" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Contains string matcher" time="{duration}" status="run">
       <failure message="testStringForMatching(), ContainsSubstring( &quot;not there&quot;, Catch::CaseSensitive::No )" type="CHECK_THAT">
 FAILED:
@@ -810,6 +813,7 @@ at Message.tests.cpp:<line number>
     </testcase>
     <testcase classname="<exe-name>.global" name="Factorials are computed" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Filter generator throws exception for empty generator" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="FixedValuesGenerator can be skipped forward" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Floating point matchers: double" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Floating point matchers: double/Relative" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Floating point matchers: double/Relative/Some subnormal values" time="{duration}" status="run"/>
@@ -845,6 +849,7 @@ at Message.tests.cpp:<line number>
     <testcase classname="<exe-name>.global" name="Generators -- simple" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Generators -- simple/one" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Generators -- simple/two" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="Generators can be skipped forward" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Generators internals" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Generators internals/Single value" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Generators internals/Preset values" time="{duration}" status="run"/>
@@ -1018,6 +1023,7 @@ at Condition.tests.cpp:<line number>
     <testcase classname="<exe-name>.global" name="Lambdas in assertions" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Less-than inequalities with different epsilons" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="ManuallyRegistered" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="MapGenerator can be skipped forward efficiently" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Matchers can be (AllOf) composed with the &amp;&amp; operator" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Matchers can be (AnyOf) composed with the || operator" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Matchers can be composed with both &amp;&amp; and ||" time="{duration}" status="run"/>
@@ -1324,6 +1330,8 @@ at Message.tests.cpp:<line number>
     <testcase classname="<exe-name>.global" name="Process can be configured on command line/use-colour/error" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Process can be configured on command line/Benchmark options" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Process can be configured on command line/Benchmark options/samples" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="Process can be configured on command line/Benchmark options/samples must be greater than zero" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="Process can be configured on command line/Benchmark options/samples must be parseable" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Process can be configured on command line/Benchmark options/resamples" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Process can be configured on command line/Benchmark options/confidence-interval" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Process can be configured on command line/Benchmark options/no-analysis" time="{duration}" status="run"/>
@@ -1548,6 +1556,9 @@ at Misc.tests.cpp:<line number>
     <testcase classname="<exe-name>.global" name="Tag alias can be registered against tag patterns/The same tag alias can only be registered once" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Tag alias can be registered against tag patterns/Tag aliases must be of the form [@name]" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Tags with spaces and non-alphanumerical characters are accepted" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="TakeGenerator can be skipped forward" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="TakeGenerator can be skipped forward/take is shorter than underlying" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="TakeGenerator can be skipped forward/take is longer than underlying" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.Template_Fixture" name="Template test case method with test types specified inside std::tuple - MyTypes - 0" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.Template_Fixture" name="Template test case method with test types specified inside std::tuple - MyTypes - 1" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.Template_Fixture" name="Template test case method with test types specified inside std::tuple - MyTypes - 2" time="{duration}" status="run"/>
@@ -1691,6 +1702,18 @@ FAILED:
 at Exception.tests.cpp:<line number>
       </error>
     </testcase>
+    <testcase classname="<exe-name>.global" name="Unscoped capture outlives scope" time="{duration}" status="run">
+      <skipped message="TEST_CASE tagged with !mayfail"/>
+      <failure message="false" type="REQUIRE">
+FAILED:
+  REQUIRE( false )
+i := 1
+j := 2
+i + j := 3
+at Message.tests.cpp:<line number>
+      </failure>
+    </testcase>
+    <testcase classname="<exe-name>.global" name="Unscoped capture outlives scope/A" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Upcasting special member functions" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Upcasting special member functions/Move constructor" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Upcasting special member functions/move assignment" time="{duration}" status="run"/>
@@ -1978,6 +2001,9 @@ at Skip.tests.cpp:<line number>
     <testcase classname="<exe-name>.global" name="benchmark function call/without chronometer" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="benchmark function call/with chronometer" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="boolean member" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="cat generator" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="cat generator/Simple usage" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="cat generator/Used in map" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="checkedElse" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="checkedElse, failing" time="{duration}" status="run">
       <failure message="testCheckedElse( false )" type="REQUIRE">

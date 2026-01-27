@@ -85,7 +85,7 @@ TEST_CASE("Generators internals", "[generators][internals]") {
                 filter([](int) { return false; }, values({ 1, 2, 3 })),
                 Catch::GeneratorException);
         }
-        
+
         // Non-trivial usage
         SECTION("Out-of-line predicates are copied into the generator") {
             auto evilNumber = Catch::Detail::make_unique<int>(2);
@@ -585,4 +585,139 @@ TEST_CASE("from_range(container) supports ADL begin/end and arrays", "[generator
         REQUIRE_FALSE( gen.next() );
     }
 
+}
+
+TEST_CASE( "ConcatGenerator", "[generators][concat]" ) {
+    using namespace Catch::Generators;
+    SECTION( "Cat support single-generator construction" ) {
+        ConcatGenerator<int> c( value( 1 ) );
+        REQUIRE( c.get() == 1 );
+        REQUIRE_FALSE( c.next() );
+    }
+    SECTION( "Iterating over multiple generators" ) {
+        ConcatGenerator<int> c( value( 1 ), values( { 2, 3, 4 } ), value( 5 ) );
+        for ( int i = 0; i < 4; ++i ) {
+            REQUIRE( c.get() == i + 1 );
+            REQUIRE( c.next() );
+        }
+        REQUIRE( c.get() == 5 );
+        REQUIRE_FALSE( c.next() );
+    }
+}
+
+namespace {
+    // Test the default behaviour of skipping generators forward. We do
+    // not want to use pre-existing generator, because they will get
+    // specialized forward skip implementation.
+    class SkipTestGenerator : public Catch::Generators::IGenerator<int> {
+        std::vector<int> m_elements{ 0, 1, 2, 3, 4, 5 };
+        size_t m_idx = 0;
+    public:
+        int const& get() const override { return m_elements[m_idx]; }
+        bool next() override {
+            ++m_idx;
+            return m_idx < m_elements.size();
+        }
+    };
+}
+
+TEST_CASE( "Generators can be skipped forward", "[generators]" ) {
+    SkipTestGenerator generator;
+    REQUIRE( generator.currentElementIndex() == 0 );
+
+    generator.skipToNthElement( 3 );
+    REQUIRE( generator.currentElementIndex() == 3 );
+    REQUIRE( generator.get() == 3 );
+
+    // Try "skipping" to the same element.
+    generator.skipToNthElement( 3 );
+    REQUIRE( generator.currentElementIndex() == 3 );
+    REQUIRE( generator.get() == 3 );
+
+    generator.skipToNthElement( 5 );
+    REQUIRE( generator.currentElementIndex() == 5 );
+    REQUIRE( generator.get() == 5 );
+
+    // Backwards
+    REQUIRE_THROWS( generator.skipToNthElement( 3 ) );
+    // Past the end
+    REQUIRE_THROWS( generator.skipToNthElement( 6 ) );
+}
+
+TEST_CASE( "FixedValuesGenerator can be skipped forward",
+           "[generators][values]" ) {
+    Catch::Generators::FixedValuesGenerator<int> values( {0, 1, 2, 3, 4} );
+    REQUIRE( values.currentElementIndex() == 0 );
+
+    values.skipToNthElement( 3 );
+    REQUIRE( values.currentElementIndex() == 3 );
+    REQUIRE( values.get() == 3 );
+
+    values.skipToNthElement( 4 );
+    REQUIRE( values.currentElementIndex() == 4 );
+    REQUIRE( values.get() == 4 );
+
+    // Past the end
+    REQUIRE_THROWS( values.skipToNthElement( 5 ) );
+}
+
+TEST_CASE( "TakeGenerator can be skipped forward", "[generators][take]" ) {
+    SECTION("take is shorter than underlying") {
+        Catch::Generators::TakeGenerator<int> take(
+            6, Catch::Generators::values( { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 } ) );
+        REQUIRE( take.get() == 0 );
+
+        take.skipToNthElement( 2 );
+        REQUIRE( take.get() == 2 );
+
+        take.skipToNthElement( 5 );
+        REQUIRE( take.get() == 5 );
+
+        // This is in the original values, but past the end of the take
+        REQUIRE_THROWS( take.skipToNthElement( 6 ) );
+    }
+    SECTION( "take is longer than underlying" ) {
+        Catch::Generators::TakeGenerator<int> take(
+            8, Catch::Generators::values( { 0, 1, 2, 3, 4, 5 } ) );
+        REQUIRE( take.get() == 0 );
+
+        take.skipToNthElement( 2 );
+        REQUIRE( take.get() == 2 );
+
+        take.skipToNthElement( 5 );
+        REQUIRE( take.get() == 5 );
+
+        // This is in the take, but outside of original values
+        REQUIRE_THROWS( take.skipToNthElement( 6 ) );
+    }
+}
+
+TEST_CASE("MapGenerator can be skipped forward efficiently",
+    "[generators][map]") {
+    using namespace Catch::Generators;
+
+    int map_calls = 0;
+    auto map_func = [&map_calls]( int i ) {
+        ++map_calls;
+        return i;
+    };
+
+    MapGenerator<int, int, decltype(map_func)> map_generator( map_func, values( { 0, 1, 2, 3, 4, 5, 6 } ) );
+    const int map_calls_1 = map_calls;
+
+    map_generator.skipToNthElement( 4 );
+    REQUIRE( map_generator.get() == 4 );
+    REQUIRE( map_calls == map_calls_1 + 1 );
+
+    map_generator.skipToNthElement( 4 );
+    REQUIRE( map_generator.get() == 4 );
+    REQUIRE( map_calls == map_calls_1 + 1 );
+
+    const int map_calls_2 = map_calls;
+    map_generator.skipToNthElement( 6 );
+    REQUIRE( map_generator.get() == 6 );
+    REQUIRE( map_calls == map_calls_2 + 1 );
+
+    REQUIRE_THROWS( map_generator.skipToNthElement( 7 ) );
+    REQUIRE( map_calls == map_calls_2 + 1 );
 }

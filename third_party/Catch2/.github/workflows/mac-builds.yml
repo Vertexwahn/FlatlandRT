@@ -2,6 +2,10 @@ name: Mac Builds
 
 on: [push, pull_request]
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CTEST_NO_TESTS_ACTION: error
+
 jobs:
   build:
     runs-on: ${{matrix.image}}
@@ -27,4 +31,4 @@ jobs:
       run: cmake --build build
 
     - name: Test
-      run: ctest --test-dir build -j --output-on-failure
+      run: ctest --test-dir build -j

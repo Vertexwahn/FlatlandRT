@@ -2,6 +2,10 @@ name: Linux Builds (Basic)
 
 on: [push, pull_request]
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CTEST_NO_TESTS_ACTION: error
+
 jobs:
   build:
     name: ${{matrix.cxx}}, C++${{matrix.std}}, ${{matrix.build_type}}
@@ -102,4 +106,4 @@ jobs:
       run: cmake --build build
 
     - name: Test
-      run: ctest --test-dir build -j --output-on-failure
+      run: ctest --test-dir build -j

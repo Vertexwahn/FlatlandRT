@@ -2,6 +2,10 @@ name: Linux Builds (Bazel)
 
 on: [push, pull_request]
 
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CTEST_NO_TESTS_ACTION: error
+
 jobs:
   build_and_test_ubuntu:
     name: Linux Ubuntu 22.04 Bazel build <GCC 11.2.0>

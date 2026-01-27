@@ -129,6 +129,7 @@
 :test-result: PASS Comparisons with int literals don't warn when mixing signed/ unsigned
 :test-result: PASS Composed generic matchers shortcircuit
 :test-result: PASS Composed matchers shortcircuit
+:test-result: PASS ConcatGenerator
 :test-result: FAIL Contains string matcher
 :test-result: PASS Copy and then generate a range
 :test-result: PASS Cout stream properly declares it writes to stdout
@@ -162,11 +163,13 @@
 :test-result: FAIL FAIL_CHECK does not abort the test
 :test-result: PASS Factorials are computed
 :test-result: PASS Filter generator throws exception for empty generator
+:test-result: PASS FixedValuesGenerator can be skipped forward
 :test-result: PASS Floating point matchers: double
 :test-result: PASS Floating point matchers: float
 :test-result: PASS GENERATE can combine literals and generators
 :test-result: PASS Generators -- adapters
 :test-result: PASS Generators -- simple
+:test-result: PASS Generators can be skipped forward
 :test-result: PASS Generators internals
 :test-result: PASS Greater-than inequalities with different epsilons
 :test-result: PASS Hashers with different seed produce different hash with same test case
@@ -186,6 +189,7 @@
 :test-result: PASS Lambdas in assertions
 :test-result: PASS Less-than inequalities with different epsilons
 :test-result: PASS ManuallyRegistered
+:test-result: PASS MapGenerator can be skipped forward efficiently
 :test-result: PASS Matchers can be (AllOf) composed with the && operator
 :test-result: PASS Matchers can be (AnyOf) composed with the || operator
 :test-result: PASS Matchers can be composed with both && and ||
@@ -253,6 +257,7 @@
 :test-result: FAIL Tabs and newlines show in output
 :test-result: PASS Tag alias can be registered against tag patterns
 :test-result: PASS Tags with spaces and non-alphanumerical characters are accepted
+:test-result: PASS TakeGenerator can be skipped forward
 :test-result: PASS Template test case method with test types specified inside std::tuple - MyTypes - 0
 :test-result: PASS Template test case method with test types specified inside std::tuple - MyTypes - 1
 :test-result: PASS Template test case method with test types specified inside std::tuple - MyTypes - 2
@@ -292,6 +297,7 @@
 :test-result: PASS Trim strings
 :test-result: PASS Type conversions of RangeEquals and similar
 :test-result: FAIL Unexpected exceptions can be translated
+:test-result: FAIL Unscoped capture outlives scope
 :test-result: PASS Upcasting special member functions
 :test-result: PASS Usage of AllMatch range matcher
 :test-result: PASS Usage of AllTrue range matcher
@@ -326,6 +332,7 @@
 :test-result: PASS array<int, N> -> toString
 :test-result: PASS benchmark function call
 :test-result: PASS boolean member
+:test-result: PASS cat generator
 :test-result: PASS checkedElse
 :test-result: FAIL checkedElse, failing
 :test-result: PASS checkedIf

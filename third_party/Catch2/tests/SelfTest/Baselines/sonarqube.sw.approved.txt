@@ -119,6 +119,8 @@ at AssertionHandler.tests.cpp:<line number>
     <testCase name="Process can be configured on command line/use-colour/error" duration="{duration}"/>
     <testCase name="Process can be configured on command line/Benchmark options" duration="{duration}"/>
     <testCase name="Process can be configured on command line/Benchmark options/samples" duration="{duration}"/>
+    <testCase name="Process can be configured on command line/Benchmark options/samples must be greater than zero" duration="{duration}"/>
+    <testCase name="Process can be configured on command line/Benchmark options/samples must be parseable" duration="{duration}"/>
     <testCase name="Process can be configured on command line/Benchmark options/resamples" duration="{duration}"/>
     <testCase name="Process can be configured on command line/Benchmark options/confidence-interval" duration="{duration}"/>
     <testCase name="Process can be configured on command line/Benchmark options/no-analysis" duration="{duration}"/>
@@ -143,7 +145,12 @@ at AssertionHandler.tests.cpp:<line number>
     <testCase name="convertToBits" duration="{duration}"/>
   </file>
   <file path="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp">
+    <testCase name="ConcatGenerator" duration="{duration}"/>
+    <testCase name="ConcatGenerator/Cat support single-generator construction" duration="{duration}"/>
+    <testCase name="ConcatGenerator/Iterating over multiple generators" duration="{duration}"/>
     <testCase name="Filter generator throws exception for empty generator" duration="{duration}"/>
+    <testCase name="FixedValuesGenerator can be skipped forward" duration="{duration}"/>
+    <testCase name="Generators can be skipped forward" duration="{duration}"/>
     <testCase name="Generators internals" duration="{duration}"/>
     <testCase name="Generators internals/Single value" duration="{duration}"/>
     <testCase name="Generators internals/Preset values" duration="{duration}"/>
@@ -181,6 +188,10 @@ at AssertionHandler.tests.cpp:<line number>
     <testCase name="Generators internals/Range/Negative manual step/Integer/Exact" duration="{duration}"/>
     <testCase name="Generators internals/Range/Negative manual step/Integer/Slightly over end" duration="{duration}"/>
     <testCase name="Generators internals/Range/Negative manual step/Integer/Slightly under end" duration="{duration}"/>
+    <testCase name="MapGenerator can be skipped forward efficiently" duration="{duration}"/>
+    <testCase name="TakeGenerator can be skipped forward" duration="{duration}"/>
+    <testCase name="TakeGenerator can be skipped forward/take is shorter than underlying" duration="{duration}"/>
+    <testCase name="TakeGenerator can be skipped forward/take is longer than underlying" duration="{duration}"/>
   </file>
   <file path="tests/<exe-name>/IntrospectiveTests/InternalBenchmark.tests.cpp">
     <testCase name="analyse no analysis" duration="{duration}"/>
@@ -1240,6 +1251,9 @@ at Generators.tests.cpp:<line number>
     <testCase name="Generators -- simple/one" duration="{duration}"/>
     <testCase name="Generators -- simple/two" duration="{duration}"/>
     <testCase name="Nested generators and captured variables" duration="{duration}"/>
+    <testCase name="cat generator" duration="{duration}"/>
+    <testCase name="cat generator/Simple usage" duration="{duration}"/>
+    <testCase name="cat generator/Used in map" duration="{duration}"/>
     <testCase name="strlen3" duration="{duration}"/>
     <testCase name="tables" duration="{duration}"/>
   </file>
@@ -1831,6 +1845,17 @@ at Message.tests.cpp:<line number>
     <testCase name="Standard output from all sections is reported/one" duration="{duration}"/>
     <testCase name="Standard output from all sections is reported/two" duration="{duration}"/>
     <testCase name="The NO_FAIL macro reports a failure but does not fail the test" duration="{duration}"/>
+    <testCase name="Unscoped capture outlives scope" duration="{duration}">
+      <skipped message="REQUIRE(false)">
+FAILED:
+	REQUIRE( false )
+i := 1
+j := 2
+i + j := 3
+at Message.tests.cpp:<line number>
+      </skipped>
+    </testCase>
+    <testCase name="Unscoped capture outlives scope/A" duration="{duration}"/>
     <testCase name="just failure" duration="{duration}">
       <failure message="FAIL()">
 FAILED:

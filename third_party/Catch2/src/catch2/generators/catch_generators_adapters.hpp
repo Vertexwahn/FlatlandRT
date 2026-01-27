@@ -22,6 +22,22 @@ namespace Generators {
         GeneratorWrapper<T> m_generator;
         size_t m_returned = 0;
         size_t m_target;
+
+        void skipToNthElementImpl( std::size_t n ) override {
+            if ( n >= m_target ) {
+                Detail::throw_generator_exception(
+                    "Coud not jump to Nth element: not enough elements" );
+            }
+
+            for (; m_returned < n; ++m_returned) {
+                const auto success = m_generator.next();
+                if ( !success ) {
+                    Detail::throw_generator_exception(
+                        "Coud not jump to Nth element: not enough elements" );
+                }
+            }
+        }
+
     public:
         TakeGenerator(size_t target, GeneratorWrapper<T>&& generator):
             m_generator(CATCH_MOVE(generator)),
@@ -158,6 +174,21 @@ namespace Generators {
         Func m_function;
         // To avoid returning dangling reference, we have to save the values
         T m_cache;
+
+        void skipToNthElementImpl( std::size_t n ) override {
+            for ( size_t curr = GeneratorUntypedBase::currentElementIndex();
+                  curr < n;
+                  ++curr ) {
+                const auto success = m_generator.next();
+                if (!success) {
+                    Detail::throw_generator_exception(
+                        "Coud not jump to Nth element: not enough elements" );
+                }
+            }
+
+            m_cache = m_function( m_generator.get() );
+        }
+
     public:
         template <typename F2 = Func>
         MapGenerator(F2&& function, GeneratorWrapper<U>&& generator) :
@@ -197,7 +228,6 @@ namespace Generators {
         std::vector<T> m_chunk;
         size_t m_chunk_size;
         GeneratorWrapper<T> m_generator;
-        bool m_used_up = false;
     public:
         ChunkGenerator(size_t size, GeneratorWrapper<T> generator) :
             m_chunk_size(size), m_generator(CATCH_MOVE(generator))
@@ -234,6 +264,49 @@ namespace Generators {
             Catch::Detail::make_unique<ChunkGenerator<T>>(size, CATCH_MOVE(generator))
         );
     }
+
+    template <typename T>
+    class ConcatGenerator final : public IGenerator<T> {
+        std::vector<GeneratorWrapper<T>> m_generators;
+        size_t m_current_generator = 0;
+
+        void InsertGenerators( GeneratorWrapper<T>&& gen ) {
+            m_generators.push_back( CATCH_MOVE( gen ) );
+        }
+
+        template <typename... Generators>
+        void InsertGenerators( GeneratorWrapper<T>&& gen, Generators&&... gens ) {
+            m_generators.push_back( CATCH_MOVE( gen ) );
+            InsertGenerators( CATCH_MOVE( gens )... );
+        }
+
+    public:
+        template <typename... Generators>
+        ConcatGenerator( Generators&&... generators ) {
+            InsertGenerators( CATCH_MOVE( generators )... );
+        }
+
+        T const& get() const override {
+            return m_generators[m_current_generator].get();
+        }
+        bool next() override {
+            const bool success = m_generators[m_current_generator].next();
+            if ( success ) { return true; }
+
+            // If current generator is used up, we have to move to the next one
+            ++m_current_generator;
+            return m_current_generator < m_generators.size();
+        }
+    };
+
+    template <typename T, typename... Generators>
+    GeneratorWrapper<T> cat( GeneratorWrapper<T>&& generator,
+                             Generators&&... generators ) {
+        return GeneratorWrapper<T>(
+            Catch::Detail::make_unique<ConcatGenerator<T>>(
+            CATCH_MOVE( generator ), CATCH_MOVE( generators )... ) );
+    }
+
 
 } // namespace Generators
 } // namespace Catch
