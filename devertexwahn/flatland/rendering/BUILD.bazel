@@ -84,10 +84,12 @@ cc_library(
 
 cc_library(
     name = "sampler",
+    srcs = ["sampler.cpp"],
     hdrs = ["sampler.hpp"],
     visibility = ["//visibility:public"],
     deps = [
         "//core:object",
+        "//core:object_factory",
         "//flatland/rendering:property_set",
         "//math:point",
         "@pcg",

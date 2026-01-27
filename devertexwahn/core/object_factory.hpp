@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -43,9 +43,7 @@ public:
 template<class PropertySetType>
 class ObjectFactory {
 public:
-    ObjectFactory() = default;
-
-    virtual ~ObjectFactory() = default;
+    using RegistrationCallback = std::function<void()>;
 
     [[nodiscard]]
     ReferenceCounted<Object> create_instance(std::string_view name, const PropertySetType &ps) const {
@@ -69,7 +67,33 @@ public:
         creation_function_[class_name] = create_object;
     }
 
+    static ObjectFactory<PropertySetType>& instance() {
+        static ObjectFactory<PropertySetType> factory;
+        if (registration_callback_ && !registration_done_) {
+            registration_done_ = true;
+            registration_callback_();
+        }
+        return factory;
+    }
+
+    static void set_registration_callback(RegistrationCallback callback) {
+        // in the case the callback has changed
+        // drop all registered classes and force re-registration
+        if (registration_callback_ != nullptr) {
+            instance().creation_function_.clear();
+            registration_done_ = false;
+        }
+
+        registration_callback_ = callback;
+    }
+
 private:
+    ObjectFactory() = default;
+    virtual ~ObjectFactory() = default;
+
+    static inline RegistrationCallback registration_callback_ = nullptr;
+    static inline bool registration_done_ = false;
+
     std::map<std::string, std::function<ReferenceCounted<Object>(PropertySetType)>> creation_function_;
 };
 

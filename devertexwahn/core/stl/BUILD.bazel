@@ -26,6 +26,13 @@ cc_library(
 )
 
 cc_library(
+    name = "map",
+    hdrs = ["map.hpp"],
+    visibility = ["//visibility:public"],
+    deps = ["//core:namespace"],
+)
+
+cc_library(
     name = "memory",
     hdrs = ["memory.hpp"],
     features = ["parse_headers"],

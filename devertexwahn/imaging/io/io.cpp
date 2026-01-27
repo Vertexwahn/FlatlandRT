@@ -9,6 +9,7 @@
 #include "imaging/io/io_openexr.hpp"
 #include "imaging/io/io_png.hpp"
 #include "imaging/io/io_ppm.hpp"
+#include "imaging/io/io_tiff.hpp"
 #include "imaging/io/io_webp.hpp"
 
 #include "math/util.hpp"
@@ -73,6 +74,8 @@ void store_image(std::string_view filename, const Image4b &image) {
         store_png(filename.data(), image);
     } else if (boost::ends_with(filename, ".jpg")) {
         store_jpeg(filename.data(), image);
+    } else if (boost::ends_with(filename, ".tif") || boost::ends_with(filename, ".tiff")) {
+        store_tiff(filename.data(), image);
     } else if (boost::ends_with(filename, ".webp")) {
         store_webp(filename.data(), image);
     } else {

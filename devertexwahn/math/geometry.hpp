@@ -10,6 +10,7 @@
 #include "math/point.hpp"
 
 #include "boost/algorithm/string.hpp"
+
 #include "fmt/core.h"
 
 #include <filesystem>

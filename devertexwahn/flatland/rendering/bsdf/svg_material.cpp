@@ -5,6 +5,8 @@
 
 #include "flatland/rendering/bsdf/svg_material.hpp"
 
+#include "core/object_factory.hpp"
+
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 ColorRGB3f SvgMaterial::stroke_color() const {
@@ -25,6 +27,10 @@ ColorRGB3f SvgMaterial::sample(BSDFSample2f& sample, const Point2& sample_point)
 
 ColorRGB3f SvgMaterial::evaluate(const BSDFSample2f& sample) const {
     return ColorRGB3f{0.f, 0.f, 0.f};
+}
+
+void register_SvgMaterial() {
+    ObjectFactory<PropertySet>::instance().register_class<SvgMaterial>("svg_material");
 }
 
 DE_VERTEXWAHN_END_NAMESPACE

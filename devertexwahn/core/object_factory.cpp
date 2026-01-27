@@ -14,7 +14,7 @@ const char *ObjectFactoryException::what() const noexcept {
 }
 
 ObjectFactoryClassDoesNotExist::ObjectFactoryClassDoesNotExist(std::string_view class_name) {
-    error_message_ = fmt::format("Class with name '{}' does is not registered",
+    error_message_ = fmt::format("Class with name '{}' is not registered",
                                  class_name);
 }
 

@@ -159,7 +159,7 @@ TEST(SvgCanvas, WhenTryToSaveToAnInvalidLocation_ThenRuntimeException) {
     SvgCanvas2f sc{800, 600};
 
     // Cannot write outside of test dirs
-    EXPECT_THROW(sc.store("/home/newton/Ray2CircleIntersection8.svg"), std::runtime_error);
+    EXPECT_THROW(sc.store("/home/not_existing_user/Ray2CircleIntersection8.svg"), std::runtime_error);
 }
 
 TEST(SvgCanvas, When_ShapeHasblue_material_ExpectInSvgBlueColor) {

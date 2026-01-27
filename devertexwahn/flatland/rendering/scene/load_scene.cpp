@@ -20,6 +20,8 @@
 #include "flatland/rendering/shape/triangle_mesh.hpp"
 #include "flatland/rendering/integrator/ambient_occlusion.hpp"
 
+#include "flatland/rendering/scene/registry.hpp"
+
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 // Copied from https://github.com/mitsuba-renderer/mitsuba3/blob/16261c1bd1f4805b8799300f93c91ba3af8174f0/src/core/string.cpp#L75
@@ -256,28 +258,8 @@ PropertySet read_all_properties(const pugi::xml_node &node) {
 }
 
 ReferenceCounted<Scene2f> load_scene2f(std::string_view filename) {
-    ObjectFactory<PropertySet> object_factory;
-
-    // Intersector
-    object_factory.register_class<BruteForceIntersector2f>("brute_force");
-    object_factory.register_class<QuadtreeIntersector2f>("quadtree");
-
-    // Integrator
-    object_factory.register_class<AmbientOcclusion2f>("ambient_occlusion");
-    object_factory.register_class<PathMirrorReflection2f>("path_mirror_reflection");
-    object_factory.register_class<PathSpecularTransmission>("path_specular_transmission");
-
-    // Shapes
-    object_factory.register_class<Disk2f>("disk");
-    object_factory.register_class<Polygon2f>("polygon");
-    object_factory.register_class<Rectangle2f>("rectangle");
-    object_factory.register_class<TriangleMesh2f>("triangle_mesh");
-
-    // BSDFs
-    object_factory.register_class<SvgMaterial>("svg_material");
-
-    // Sampler
-    object_factory.register_class<IndependentSampler>("independent");
+    ObjectFactory<PropertySet>::set_registration_callback(register_flatland_plugins);
+    ObjectFactory<PropertySet>& object_factory = ObjectFactory<PropertySet>::instance();
 
     //return load_scene<2,float>(filename, object_factory);
 

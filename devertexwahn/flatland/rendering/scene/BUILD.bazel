@@ -11,6 +11,7 @@ cc_library(
     hdrs = ["load_scene.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        ":registry",
         "//core:exception",
         "//core:object_factory",
         "//flatland/rendering/integrator:ambient_occlusion",
@@ -23,6 +24,17 @@ cc_library(
         "//flatland/rendering/shape:rectangle",
         "//flatland/rendering/shape:triangle_mesh",
         "@pugixml",
+    ],
+)
+
+cc_library(
+    name = "registry",
+    srcs = ["registry.cpp"],
+    hdrs = ["registry.hpp"],
+    deps = [
+        "//core:namespace",
+        #"//flatland/rendering/shape:disk",
+        #"//flatland/rendering/shape:triangle_mesh",
     ],
 )
 

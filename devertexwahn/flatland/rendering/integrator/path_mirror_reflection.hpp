@@ -8,6 +8,8 @@
 #define De_Vertexwahn_Flatland_Rendering_Intersector_f47251b4_9a7b_4321_a54f_cdf570fa8dd6_h
 
 #include "flatland/rendering/integrator/integrator.hpp"
+#include "flatland/rendering/scene/scene.hpp"
+
 #include "math/refract.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE

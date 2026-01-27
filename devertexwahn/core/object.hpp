@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,8 +17,9 @@ DE_VERTEXWAHN_BEGIN_NAMESPACE
 class Object : NonCopyable {
 public:
     Object() = default;
-
     virtual ~Object() = default;
+
+    virtual void add_child(Object* child);
 
     [[nodiscard]]
     virtual string to_string() const;

@@ -42,6 +42,7 @@ cc_library(
         ":io_openexr",
         ":io_pfm",
         ":io_png",
+        ":io_tiff",
         ":io_ppm",
         ":io_webp",
         "//imaging:color_converter",
@@ -152,6 +153,28 @@ cc_test(
     srcs = ["io_ppm_test.cpp"],
     deps = [
         ":io_ppm",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "io_tiff",
+    srcs = ["io_tiff.cpp"],
+    hdrs = ["io_tiff.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core:reference_counted",
+        "//imaging:image",
+        "@tiff",
+    ],
+)
+
+cc_test(
+    name = "io_tiff_test",
+    size = "small",
+    srcs = ["io_tiff_test.cpp"],
+    deps = [
+        ":io_tiff",
         "@googletest//:gtest_main",
     ],
 )

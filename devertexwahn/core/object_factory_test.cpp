@@ -1,18 +1,18 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/object_factory.hpp"
 #include "flatland/rendering/integrator/integrator.hpp"
 #include "flatland/rendering/shape/disk.hpp"
 
-using namespace de_vertexwahn;
-
-#include <filesystem>
+#include "core/object_factory.hpp"
 
 #include "gmock/gmock.h"
 
+#include <filesystem>
+
+using namespace de_vertexwahn;
 using namespace testing;
 
 TEST(ObjectFactoryClassAlreadyRegisteredException, what) {
@@ -33,11 +33,13 @@ public:
 TEST(MockIntegrator, trace) {
     auto integrator_name = "mock_integrator";
 
-    ObjectFactory<PropertySet> sf;
-    sf.register_class<MockIntegrator>(integrator_name);
+    ObjectFactory<PropertySet>::set_registration_callback( [](){ /* register nothing */ });
+    auto& factory = ObjectFactory<PropertySet>::instance();
+
+    factory.register_class<MockIntegrator>(integrator_name);
 
     PropertySet ps;
-    ReferenceCounted<MockIntegrator> integrator =  std::static_pointer_cast<MockIntegrator>(sf.create_instance(integrator_name, ps));
+    ReferenceCounted<MockIntegrator> integrator =  std::static_pointer_cast<MockIntegrator>(factory.create_instance(integrator_name, ps));
 
     EXPECT_CALL(*integrator.get(), trace(_, _, _, _))
             .Times(1)
@@ -50,18 +52,21 @@ TEST(MockIntegrator, trace) {
 TEST(ObjectFactory, create_instance) {
     auto integrator_name = "mock_integrator";
 
-    ObjectFactory<PropertySet> sf;
-    sf.register_class<MockIntegrator>(integrator_name);
+    ObjectFactory<PropertySet>::set_registration_callback( [](){ /* register nothing */ });
+    auto& factory = ObjectFactory<PropertySet>::instance();
+
+    factory.register_class<MockIntegrator>(integrator_name);
 
     PropertySet ps;
-    auto integrator = sf.create_instance(integrator_name, ps);
+    auto integrator = factory.create_instance(integrator_name, ps);
 
     EXPECT_TRUE(integrator.get());
 }
 
-TEST(ShapeFactory, WhenCreatingADisk_ThenDiskHasCorrectRadiusAndTransform) {
+TEST(ObjectFactory, WhenCreatingADisk_ThenDiskHasCorrectRadiusAndTransform) {
     // Arrange
-    ObjectFactory<PropertySet> sf;
+    ObjectFactory<PropertySet>::set_registration_callback( [](){ /* register nothing */ });
+    auto& factory = ObjectFactory<PropertySet>::instance();
 
     auto diskRadius = 5.f;
 
@@ -70,8 +75,8 @@ TEST(ShapeFactory, WhenCreatingADisk_ThenDiskHasCorrectRadiusAndTransform) {
     ps.add_property("radius", diskRadius);
 
     // Act
-    sf.register_class<Disk2f>("Disk");
-    auto shape = sf.create_instance("Disk", ps);
+    factory.register_class<Disk2f>("Disk");
+    auto shape = factory.create_instance("Disk", ps);
 
     ReferenceCounted<Disk2f> disk = std::dynamic_pointer_cast<Disk2f>(shape);
 
@@ -81,17 +86,53 @@ TEST(ShapeFactory, WhenCreatingADisk_ThenDiskHasCorrectRadiusAndTransform) {
     EXPECT_THAT(disk->radius(), diskRadius);
 }
 
-TEST(ShapeFactory, WhenSameClassIsRegisteredTwice_ThenThrowException) {
-    ObjectFactory<PropertySet> sf;
-    sf.register_class<Disk2f>("Disk");
+TEST(ObjectFactory, WhenSameClassIsRegisteredTwice_ThenThrowException) {
+    ObjectFactory<PropertySet>::set_registration_callback( [](){ /* register nothing */ });
+    PropertySet ps;
+    auto& factory = ObjectFactory<PropertySet>::instance();
+    factory.register_class<Disk2f>("Disk");
 
-    EXPECT_THROW(sf.register_class<Disk2f>("Disk"), ObjectFactoryClassAlreadyRegisteredException);
-
+    EXPECT_THROW(factory.register_class<Disk2f>("Disk"), ObjectFactoryClassAlreadyRegisteredException);
 }
 
-TEST(ShapeFactory, WhenTryingToCreateAnInstanceOfANotRegistedClass_ThenThrowException) {
-    ObjectFactory<PropertySet> sf;
+TEST(ObjectFactory, WhenTryingToCreateAnInstanceOfANotRegistedClass_ThenThrowException) {
+    ObjectFactory<PropertySet>::set_registration_callback( [](){ /* register nothing */ });
     PropertySet ps;
+    auto& factory = ObjectFactory<PropertySet>::instance();
 
-    EXPECT_THROW(sf.create_instance("Disk", ps), ObjectFactoryClassDoesNotExist);
+    EXPECT_THROW(factory.create_instance("Muhkuh", ps), ObjectFactoryClassDoesNotExist);
+}
+
+TEST(ObjectFactory, WhenRegisterCallbackIsSet_ExpectAvailibiltyOfNewTypesAnUnavailbilityOfOldTypes) {
+    // test property set for "Disk" (has transform and radius)
+    PropertySet ps_disk;
+    ps_disk.add_property("transform", translate(Vector2f{100.f, 200.f}));
+    ps_disk.add_property("radius", 1.f);
+
+    // test property set for "MockIntegrator" (empty be intention)
+    PropertySet ps_mock_integrator;
+
+    // start wit an empty factory
+    ObjectFactory<PropertySet>::set_registration_callback( [](){ /* register nothing */ });
+
+    // nothing should be registered
+    EXPECT_THROW(ObjectFactory<PropertySet>::instance().create_instance("Disk", ps_disk), ObjectFactoryClassDoesNotExist);
+    EXPECT_THROW(ObjectFactory<PropertySet>::instance().create_instance("mock_integrator", ps_mock_integrator), ObjectFactoryClassDoesNotExist);
+
+    // register "Disk"
+    ObjectFactory<PropertySet>::set_registration_callback( []() {
+        ObjectFactory<PropertySet>::instance().register_class<Disk2f>("Disk");
+    });
+
+    // This should call the register callback that registers Disk
+    EXPECT_TRUE(ObjectFactory<PropertySet>::instance().create_instance("Disk", ps_disk) != nullptr);
+    EXPECT_THROW(ObjectFactory<PropertySet>::instance().create_instance("mock_integrator", ps_mock_integrator), ObjectFactoryClassDoesNotExist);
+
+    // register "mock_integrator"
+    ObjectFactory<PropertySet>::set_registration_callback( []() {
+        ObjectFactory<PropertySet>::instance().register_class<MockIntegrator>("mock_integrator");
+    });
+
+    EXPECT_THROW(ObjectFactory<PropertySet>::instance().create_instance("Disk", ps_disk), ObjectFactoryClassDoesNotExist);
+    EXPECT_TRUE(ObjectFactory<PropertySet>::instance().create_instance("mock_integrator", ps_mock_integrator) != nullptr);
 }

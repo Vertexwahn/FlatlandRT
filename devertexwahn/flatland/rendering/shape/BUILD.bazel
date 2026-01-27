@@ -7,9 +7,11 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
     name = "disk",
-    srcs = ["disk.hpp"],
+    srcs = ["disk.cpp"],
+    hdrs = ["disk.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        "//core:object_factory",
         "//flatland/rendering:property_set",
         "//flatland/rendering/shape",
         "//math:intersection",
@@ -40,9 +42,11 @@ cc_library(
 
 cc_library(
     name = "polygon",
+    srcs = ["polygon.cpp"],
     hdrs = ["polygon.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        "//core:object_factory",
         "//flatland/rendering/shape",
         "//math:geometry",
         "//math:intersection",
@@ -63,9 +67,11 @@ cc_test(
 
 cc_library(
     name = "rectangle",
+    srcs = ["rectangle.cpp"],
     hdrs = ["rectangle.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        "//core:object_factory",
         "//flatland/rendering/shape",
         "//math:geometry",
         "//math:intersection",
@@ -126,10 +132,12 @@ cc_test(
 
 cc_library(
     name = "triangle_mesh",
+    srcs = ["triangle_mesh.cpp"],
     hdrs = ["triangle_mesh.hpp"],
     visibility = ["//visibility:public"],
     deps = [
         "//core:logging",
+        "//core:object_factory",
         "//flatland/rendering/shape",
         "//math:axis_aligned_bounding_box",
         "//math:geometry",

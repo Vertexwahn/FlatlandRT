@@ -7,9 +7,15 @@
 #ifndef De_Vertexwahn_Flatland_Rendering_BruteForceIntersector_81859627_2b07_46f2_b5f4_026825b75239_h
 #define De_Vertexwahn_Flatland_Rendering_BruteForceIntersector_81859627_2b07_46f2_b5f4_026825b75239_h
 
-#include "core/logging.hpp"
+#include "flatland/rendering/shape/shape.hpp"
 #include "flatland/rendering/intersector/intersector.hpp"
 #include "flatland/rendering/property_set.h"
+
+#include "flatland/rendering/shape/medium_event.hpp"
+
+#include "core/logging.hpp"
+
+#include <limits>
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

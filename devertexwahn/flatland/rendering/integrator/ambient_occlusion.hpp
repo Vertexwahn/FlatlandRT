@@ -7,9 +7,12 @@
 #ifndef De_Vertexwahn_Core_AmbientOcclusion2_b609d24d_c389_4692_82df_bcb7e77f756a_h
 #define De_Vertexwahn_Core_AmbientOcclusion2_b609d24d_c389_4692_82df_bcb7e77f756a_h
 
-#include "core/namespace.hpp"
 #include "flatland/rendering/integrator/integrator.hpp"
+#include "flatland/rendering/scene/scene.hpp"
+
 #include "math/sampling.hpp"
+
+#include "core/namespace.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

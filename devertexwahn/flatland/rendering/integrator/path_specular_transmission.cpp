@@ -1,13 +1,15 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
 #include "flatland/rendering/integrator/path_specular_transmission.hpp"
+#include "flatland/rendering/scene/scene.hpp"
+
+#include "math/refract.hpp"
 
 #include "core/logging.hpp"
-#include "math/refract.hpp"
-#include "flatland/rendering/scene/scene.hpp"
+#include "core/object_factory.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
@@ -63,6 +65,10 @@ ColorRGB3f PathSpecularTransmission::trace(
     canvas_->add(ray);
 
     return ColorRGB3f{0.f, 0.f, 0.f};
+}
+
+void register_PathSpecularTransmission() {
+    ObjectFactory<PropertySet>::instance().register_class<PathSpecularTransmission>("path_specular_transmission");
 }
 
 DE_VERTEXWAHN_END_NAMESPACE

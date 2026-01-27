@@ -37,6 +37,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":bsdf",
+        "//core:object_factory",
     ],
 )
 

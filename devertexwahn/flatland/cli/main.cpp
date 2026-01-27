@@ -3,16 +3,19 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "core/logging.hpp"
 #include "flatland/rendering/canvas/svg_canvas.hpp"
 #include "flatland/rendering/intersector/quadtree_intersector.hpp"
 #include "flatland/rendering/rendering.hpp"
 #include "flatland/rendering/scene/load_scene.hpp"
 
+#include "core/logging.hpp"
+
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "absl/flags/usage_config.h"
+
 #include "boost/version.hpp"
+
 #include "fmt/core.h"
 
 #include <filesystem>

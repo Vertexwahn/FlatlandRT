@@ -78,7 +78,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":point",
-        #"@boost//:algorithm",
         "@boost.algorithm",
         "@fmt",
     ],

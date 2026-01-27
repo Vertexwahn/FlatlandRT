@@ -7,12 +7,16 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
     name = "brute_force_intersector",
+    srcs = ["brute_force_intersector.cpp"],
     hdrs = ["brute_force_intersector.hpp"],
     visibility = ["//visibility:public"],
     deps = [
         ":intersector",
         "//core:logging",
+        "//core:object_factory",
         "//flatland/rendering:property_set",
+        "//flatland/rendering/shape",
+        "//flatland/rendering/shape:medium_event",
     ],
 )
 
@@ -35,6 +39,7 @@ cc_library(
     deps = [
         ":intersector",
         "//core:logging",
+        "//core:object_factory",
         "//flatland/rendering/shape:polygon",
         "//flatland/rendering/shape:triangle_mesh",
         "//math:axis_aligned_bounding_box",

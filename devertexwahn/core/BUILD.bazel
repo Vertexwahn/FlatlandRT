@@ -20,6 +20,18 @@ package(
 )
 
 cc_library(
+    name = "demangle",
+    srcs = ["demangle.cpp"],
+    hdrs = ["demangle.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":namespace",
+        "//core/stl:string",
+        "@boost.core",
+    ],
+)
+
+cc_library(
     name = "exception",
     srcs = ["exception.cpp"],
     hdrs = ["exception.hpp"],

@@ -22,8 +22,22 @@ TEST(ToneMapping, convert_to_uint8) {
 }
 
 TEST(ToneMapping, srgb_operator) {
-    Image4f image{2, 2};
+    Image4f image{1, 1};
+    image.set_pixel(0, 0, ColorRGBA4f{1.0f, 0.f, 0.f, 1.f});
     Image4b result = srgb_operator(image);
+
+    EXPECT_THAT(result.get_pixel(0,0).red(), 255);
+    EXPECT_THAT(result.get_pixel(0,0).green(), 0);
+}
+
+TEST(ToneMapping, srgb_operator_on_image3f)
+{
+    Image3f image{1, 1};
+    image.set_pixel(0, 0, ColorRGB3f{1.0f, 0.f, 0.f});
+    Image3b result = srgb_operator(image);
+
+    EXPECT_THAT(result.get_pixel(0,0).red(), 255);
+    EXPECT_THAT(result.get_pixel(0,0).green(), 0);
 }
 
 /*

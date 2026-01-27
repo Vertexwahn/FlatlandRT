@@ -5,8 +5,10 @@
 
 #include "flatland/rendering/intersector/quadtree_intersector.hpp"
 
-#include "core/logging.hpp"
 #include "math/util.hpp"
+
+#include "core/logging.hpp"
+#include "core/object_factory.hpp"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
@@ -142,6 +144,10 @@ QuadtreeNode *build_quadtree(const QuadtreeBuildDescription &qtbd) {
     }
 
     return parent;
+}
+
+void register_QuadtreeIntersector2f() {
+    ObjectFactory<PropertySet>::instance().register_class<QuadtreeIntersector2f>("quadtree");
 }
 
 DE_VERTEXWAHN_END_NAMESPACE

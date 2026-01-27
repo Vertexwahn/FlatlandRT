@@ -7,11 +7,14 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
     name = "ambient_occlusion",
+    srcs = ["ambient_occlusion.cpp"],
     hdrs = ["ambient_occlusion.hpp"],
     visibility = ["//visibility:public"],
     deps = [
         "//core:namespace",
+        "//core:object_factory",
         "//flatland/rendering/integrator",
+        "//flatland/rendering/scene",
         "//math:sampling",
     ],
 )
@@ -24,6 +27,7 @@ cc_test(
     ],
     data = ["//flatland/scenes"],
     deps = [
+        "//core:object_factory",
         "//flatland/rendering",
         "//flatland/rendering/integrator:ambient_occlusion",
         "//flatland/rendering/scene:load_scene",
@@ -46,10 +50,13 @@ cc_library(
 
 cc_library(
     name = "path_mirror_reflection",
+    srcs = ["path_mirror_reflection.cpp"],
     hdrs = ["path_mirror_reflection.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        "//core:object_factory",
         "//flatland/rendering/integrator",
+        "//flatland/rendering/scene",
         "//math:refract",
     ],
 )
@@ -75,6 +82,7 @@ cc_library(
     hdrs = ["path_specular_transmission.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        "//core:object_factory",
         "//flatland/rendering/scene",
         "//math:refract",
     ],

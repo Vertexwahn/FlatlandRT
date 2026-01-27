@@ -13,12 +13,12 @@
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 
 // compute reflection direction
-Vector3f reflect(const Vector3f& v, const Vector3f& n) {
+inline Vector3f reflect(const Vector3f& v, const Vector3f& n) {
     return -v + 2.0f * v.dot(n) * n;
 }
 
 // compute refracted direction
-bool refract(const Vector3f& v, const Vector3f& n, float iorI, float iorT,
+inline bool refract(const Vector3f& v, const Vector3f& n, float iorI, float iorT,
                     Vector3f& t) {
     const Vector3f t_h = -iorI / iorT * (v - v.dot(n) * n);
     // total reflection
