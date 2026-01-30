@@ -112,7 +112,7 @@ TEST(ObjectFactory, WhenRegisterCallbackIsSet_ExpectAvailibiltyOfNewTypesAnUnava
     // test property set for "MockIntegrator" (empty be intention)
     PropertySet ps_mock_integrator;
 
-    // start wit an empty factory
+    // start with an empty factory
     ObjectFactory<PropertySet>::set_registration_callback( [](){ /* register nothing */ });
 
     // nothing should be registered
