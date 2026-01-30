@@ -200,3 +200,26 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "io_gif",
+    srcs = ["io_gif.cpp"],
+    hdrs = ["io_gif.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core:reference_counted",
+        "//imaging:color_converter",
+        "//imaging:image",
+        "@giflib",
+    ],
+)
+
+cc_test(
+    name = "io_gif_test",
+    size = "small",
+    srcs = ["io_gif_test.cpp"],
+    deps = [
+        ":io_gif",
+        "@googletest//:gtest_main",
+    ],
+)

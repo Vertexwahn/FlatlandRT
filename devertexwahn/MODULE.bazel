@@ -45,6 +45,7 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_pkg", version = "1.2.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 bazel_dep(name = "spdlog", version = "1.17.0")
+bazel_dep(name = "tiff", version = "4.7.1")
 bazel_dep(name = "xtensor", version = "0.27.1")
 bazel_dep(name = "xtl", version = "0.8.1")
 bazel_dep(name = "yaml-cpp", version = "0.8.0.bcr.1")
@@ -77,6 +78,11 @@ local_path_override(
 #    module_name = "ape",
 #    path = "../third_party/ape-v1.0.1",
 #)
+
+local_path_override(
+    module_name = "tiff",
+    path = "../third_party/tiff-4.7.1",
+)
 
 local_path_override(
     module_name = "bazel_skylib",

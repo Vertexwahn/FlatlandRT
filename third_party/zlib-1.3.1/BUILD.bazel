@@ -1,0 +1,87 @@
+# Adapted from https://github.com/protocolbuffers/protobuf/blob/master/third_party/zlib.BUILD
+# with Windows fix for zconf.h unistd.h include issue
+
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+_ZLIB_HEADERS = [
+    "crc32.h",
+    "deflate.h",
+    "gzguts.h",
+    "inffast.h",
+    "inffixed.h",
+    "inflate.h",
+    "inftrees.h",
+    "trees.h",
+    "zconf.h",
+    "zlib.h",
+    "zutil.h",
+]
+
+# In order to limit the damage from the `includes` propagation
+# via `:zlib`, copy the public headers to a subdirectory and
+# expose those.
+[
+    copy_file(
+        name = "copy_public_header_" + hdr.replace(".", "_"),
+        src = hdr,
+        out = "zlib/include/" + hdr,
+        allow_symlink = True,
+    )
+    for hdr in _ZLIB_HEADERS
+]
+
+cc_library(
+    name = "z",
+    srcs = [
+        "adler32.c",
+        "compress.c",
+        "crc32.c",
+        "deflate.c",
+        "gzclose.c",
+        "gzlib.c",
+        "gzread.c",
+        "gzwrite.c",
+        "infback.c",
+        "inffast.c",
+        "inflate.c",
+        "inftrees.c",
+        "trees.c",
+        "uncompr.c",
+        "zutil.c",
+    ] + _ZLIB_HEADERS,
+    hdrs = ["zlib/include/" + hdr for hdr in _ZLIB_HEADERS],
+    copts = select({
+        "@rules_cc//cc/compiler:mingw-gcc": [
+            "-fpermissive",
+        ],
+        "@rules_cc//cc/compiler:msvc-cl": [
+            "/wd4127",  # conditional expression is constant
+            "/wd4242",  # possible loss of data
+            "/wd4244",  # possible loss of data
+        ],
+        "@platforms//os:macos": [
+            "-Wno-unused-variable",
+            "-Wno-implicit-function-declaration",
+        ],
+        "//conditions:default": [
+            "-Wno-deprecated-non-prototype",
+            "-Wno-unused-variable",
+            "-Wno-implicit-function-declaration",
+        ],
+    }),
+    includes = ["zlib/include/"],
+    local_defines = select({
+        "@platforms//os:windows": ["_CRT_NONSTDC_NO_WARNINGS"],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "zlib",
+    actual = ":z",
+    visibility = ["//visibility:public"],
+)
