@@ -1,5 +1,5 @@
 #
-#   SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
+#   SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
 #   SPDX-License-Identifier: Apache-2.0
 #
 
@@ -13,7 +13,7 @@ common --incompatible_disallow_empty_glob=false  # TODO: Get rid of this - Set e
 # Bzlmod
 #-------------------------------------------------------------------------------------
 
-#common --registry=file:///%workspace%/registry  # Does not work on Windows 11 + Bazel 6.5.0
+#common --registry=file:///%workspace%/registry
 common --registry=https://bcr.bazel.build
 
 

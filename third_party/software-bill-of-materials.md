@@ -8,14 +8,14 @@ This file documents the commit hash of each library if it is not given in the fi
 # Flatland dependencies
 
 ```text
-abseil-cpp-0437a6d16a02455a07bb59da6f08ef01c6a20682
+abseil-cpp-1fdbcb591f544576228330f1e69b23ec14b6fac4
 bazel_clang_tidy-c4d35e0d0b838309358e57a2efed831780f85cd0
 bazel-skylib-ea054fcaf08c3b014e34212451d8cb45f01d8331
 bazel-toolchain-795d76fd03e0b17c0961f0981a8512a00cba4fa2
 boringssl-fcf70a1a66f4cd000ab9acefb91e3b380fe0984b
 Catch2-de7e8630134f46e67a6b59269436f9cab94cd28e
 cpuinfo-f9a03241f8c3d4ed0c9728f5d70bff873d43d4e0
-fmt-01e6f01076f8fcaddc8bd52fd8a3355ac37844e3
+fmt-b5c4e795bba50793eee7e4ccce44a48c3310adca
 gflags-03a4842c9c6aaef438d7bf0c84e8a62c8064992b
 glog-570c7e4e1dd197e9ae2777152b87a5ea9e06bcac
 googletest-56efe3983185e3f37e43415d1afa97e3860f187f
