@@ -172,14 +172,21 @@ cc_library(
 # Public library - exposes headers to users
 # Note: The VERSION file has been modified to be valid C++ to prevent conflicts
 # with C++20's <version> header on Windows (case-insensitive filesystem)
+# On Windows, when C++20 code includes <version>, the case-insensitive filesystem
+# may match VERSION instead. We expose this file so Bazel can track the dependency.
 cc_library(
     name = "tiff",
-    hdrs = TIFF_PUBLIC_HEADERS,
-    implementation_deps = [":tiff_impl"],
-    includes = ["libtiff"],
-    textual_hdrs = [
+    hdrs = TIFF_PUBLIC_HEADERS + [
         # VERSION file is now valid C++ to prevent collision with <version> on Windows
+        # Added to hdrs (not textual_hdrs) so Bazel properly tracks it as a dependency
         "VERSION",
+        # Lowercase version for Bazel's case-sensitive dependency tracking on Windows
+        "version",
+    ],
+    implementation_deps = [":tiff_impl"],
+    includes = [
+        "libtiff",
+        "",  # Include root to allow VERSION to be found when matched as <version>
     ],
     visibility = ["//visibility:public"],
 )
