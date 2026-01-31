@@ -75,11 +75,25 @@ cmake_configure_file(
     ],
 )
 
+cmake_configure_file(
+    name = "tiffvers_h",
+    src = "libtiff/tiffvers.h.cmake.in",
+    out = "libtiff/tiffvers.h",
+    defines = [
+        "LIBTIFF_VERSION=4.7.1",
+        "LIBTIFF_RELEASE_DATE=20250911",
+        "LIBTIFF_MAJOR_VERSION=4",
+        "LIBTIFF_MINOR_VERSION=7",
+        "LIBTIFF_MICRO_VERSION=1",
+        "VAR=",  # Appears in a comment, but cmake_configure_file requires it
+    ],
+)
+
 TIFF_PUBLIC_HEADERS = [
     "libtiff/tiff.h",
     "libtiff/tiffio.h",
-    "libtiff/tiffvers.h",
     ":tiffconf_h",
+    ":tiffvers_h",
 ]
 
 TIFF_PRIVATE_HEADERS = [
@@ -170,26 +184,12 @@ cc_library(
 )
 
 # Public library - exposes headers to users
-# Note: The VERSION file has been modified to be valid C++ to prevent conflicts
-# with C++20's <version> header on Windows (case-insensitive filesystem)
-# On Windows, when C++20 code includes <version>, the case-insensitive filesystem
-# may match VERSION instead. We expose this file so Bazel can track the dependency.
 cc_library(
     name = "tiff",
-    hdrs = TIFF_PUBLIC_HEADERS + [
-        # VERSION file is now valid C++ to prevent collision with <version> on Windows
-        # Added to hdrs (not textual_hdrs) so Bazel properly tracks it as a dependency
-        "VERSION",
-    ] + select({
-        # On Windows (case-insensitive filesystem), Bazel tracks the include as lowercase
-        # 'version' even though the file is 'VERSION'. We add it so Bazel can find it.
-        "@platforms//os:windows": ["version"],
-        "//conditions:default": [],
-    }),
+    hdrs = TIFF_PUBLIC_HEADERS,
     implementation_deps = [":tiff_impl"],
     includes = [
         "libtiff",
-        "",  # Include root to allow VERSION to be found when matched as <version>
     ],
     visibility = ["//visibility:public"],
 )
