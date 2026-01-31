@@ -161,16 +161,7 @@ cc_library(
         "@platforms//os:windows": ["libtiff/tif_win32.c"],
         "//conditions:default": ["libtiff/tif_unix.c"],
     }) + TIFF_PRIVATE_HEADERS + TIFF_PUBLIC_HEADERS,
-    copts = select({
-        "@platforms//os:windows": [
-            "/Iexternal/tiff+/libtiff",
-            "/I$(GENDIR)/external/tiff+/libtiff",
-        ],
-        "//conditions:default": [
-            "-Iexternal/tiff+/libtiff",
-            "-I$(GENDIR)/external/tiff+/libtiff",
-        ],
-    }),
+    includes = ["libtiff"],
     linkstatic = True,
     local_defines = select({
         "@platforms//os:windows": ["_CRT_SECURE_NO_WARNINGS"],
