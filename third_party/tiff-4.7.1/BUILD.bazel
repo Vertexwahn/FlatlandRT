@@ -33,7 +33,7 @@ _TIF_CONFIG_WINDOWS_DEFINES = _TIF_CONFIG_COMMON_DEFINES + [
 # Generate config headers into libtiff/ subdirectory
 cmake_configure_file(
     name = "tif_config_h",
-    src = "tif_config.h.bazel.in",
+    src = "libtiff/tif_config.h.cmake.in",
     out = "libtiff/tif_config.h",
     defines = select({
         "@platforms//os:windows": _TIF_CONFIG_WINDOWS_DEFINES,
