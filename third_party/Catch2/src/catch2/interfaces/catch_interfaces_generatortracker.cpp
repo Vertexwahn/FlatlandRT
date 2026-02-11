@@ -55,5 +55,7 @@ namespace Catch {
             return m_stringReprCache;
         }
 
+        bool GeneratorUntypedBase::isFinite() const { return true; }
+
     } // namespace Generators
 } // namespace Catch

@@ -589,3 +589,16 @@ set_tests_properties(ThreadSafetyTests::UnscopedMessagesAndAssertions
     PASS_REGULAR_EXPRESSION "assertions: 401 \\| 401 failed as expected"
     RUN_SERIAL ON
 )
+
+add_executable(InfiniteGenerators ${TESTS_DIR}/X95-InfiniteGenerators.cpp)
+target_link_libraries(InfiniteGenerators PRIVATE Catch2::Catch2WithMain)
+
+add_test(
+  NAME Warnings::InfiniteGenerators
+  COMMAND $<TARGET_FILE:InfiniteGenerators> --warn InfiniteGenerators
+)
+set_tests_properties(Warnings::InfiniteGenerators
+  PROPERTIES
+    PASS_REGULAR_EXPRESSION "test cases: 1 \\| 1 failed"
+    TIMEOUT 5
+)

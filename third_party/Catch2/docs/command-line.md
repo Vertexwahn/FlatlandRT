@@ -358,9 +358,12 @@ There are currently two warnings implemented:
                         // (e.g. `REQUIRE`) is encountered.
     UnmatchedTestSpec   // Fail test run if any of the CLI test specs did
                         // not match any tests.
+    InfiniteGenerators  // Fail if GENERATE would run infinitely
 ```
 
 > `UnmatchedTestSpec` was introduced in Catch2 3.0.1.
+
+> `InfiniteGenerators` was introduced in Catch2 vX.Y.Z
 
 
 <a id="reporting-timings"></a>

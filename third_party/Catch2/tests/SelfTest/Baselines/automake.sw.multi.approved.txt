@@ -167,6 +167,7 @@
 :test-result: PASS Floating point matchers: double
 :test-result: PASS Floating point matchers: float
 :test-result: PASS GENERATE can combine literals and generators
+:test-result: PASS Generator adapters properly handle isFinite
 :test-result: PASS Generators -- adapters
 :test-result: PASS Generators -- simple
 :test-result: PASS Generators can be skipped forward
@@ -224,11 +225,15 @@
 :test-result: PASS Product with differing arities - std::tuple<int>
 :test-result: PASS Random seed generation accepts known methods
 :test-result: PASS Random seed generation reports unknown methods
+:test-result: PASS RandomGenerator reports itself as infinite - float
+:test-result: PASS RandomGenerator reports itself as infinite - int
+:test-result: PASS RandomGenerator reports itself as infinite - long double
 :test-result: PASS Range type with sentinel
 :test-result: FAIL Reconstruction should be based on stringification: #914
 :test-result: FAIL Regex string matcher
 :test-result: PASS Registering reporter with '::' in name fails
 :test-result: PASS Regression test #1
+:test-result: PASS RepeatGenerator refuses infinite generators
 :test-result: PASS Reporter's write listings to provided stream
 :test-result: PASS Reproducer for #2309 - a very long description past 80 chars (default console width) with a late colon : blablabla
 :test-result: PASS SUCCEED counts as a test pass

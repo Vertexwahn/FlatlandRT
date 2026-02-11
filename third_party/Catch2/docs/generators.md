@@ -276,10 +276,21 @@ struct IGenerator : GeneratorUntypedBase {
      * Going backwards is not supported.
      */
     virtual void skipToNthElementImpl( std::size_t n );
+
+    /**
+     * Returns true if calls to `next` will eventually return false
+     *
+     * Note that for backwards compatibility this is currently defaulted
+     * to return `true`, but in the future all generators will have to
+     * provide their own implementation.
+     */
+    virtual bool isFinite() const = 0;
 };
 ```
 
 > `skipToNthElementImpl` was added in Catch2 vX.Y.Z
+
+> `isFinite` was added in Catch2 vX.Y.Z
 
 However, to be able to use your custom generator inside `GENERATE`, it
 will need to be wrapped inside a `GeneratorWrapper<T>`.

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="<exe-name>" errors="17" failures="141" skipped="12" tests="2374" hostname="tbd" time="{duration}" timestamp="{iso8601-timestamp}">
+  <testsuite name="<exe-name>" errors="17" failures="141" skipped="12" tests="2388" hostname="tbd" time="{duration}" timestamp="{iso8601-timestamp}">
     <properties>
       <property name="random-seed" value="1"/>
       <property name="filters" value="&quot;*&quot; ~[!nonportable] ~[!benchmark] ~[approvals]"/>
@@ -831,6 +831,12 @@ at Message.tests.cpp:<line number>
     <testcase classname="<exe-name>.global" name="Floating point matchers: float/Constructor validation" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Floating point matchers: float/IsNaN" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="GENERATE can combine literals and generators" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="Generator adapters properly handle isFinite" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="Generator adapters properly handle isFinite/concat generator" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="Generator adapters properly handle isFinite/take generator" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="Generator adapters properly handle isFinite/chunk generator" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="Generator adapters properly handle isFinite/map" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="Generator adapters properly handle isFinite/filter" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Generators -- adapters" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Generators -- adapters/Filtering by predicate" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Generators -- adapters/Filtering by predicate/Basic usage" time="{duration}" status="run"/>
@@ -1341,6 +1347,9 @@ at Message.tests.cpp:<line number>
     <testcase classname="<exe-name>.global" name="Product with differing arities - std::tuple&lt;int>" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Random seed generation accepts known methods" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Random seed generation reports unknown methods" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="RandomGenerator reports itself as infinite - float" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="RandomGenerator reports itself as infinite - int" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="RandomGenerator reports itself as infinite - long double" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Range type with sentinel" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Reconstruction should be based on stringification: #914" time="{duration}" status="run">
       <failure message="truthy(false)" type="CHECK">
@@ -1379,6 +1388,7 @@ at Matchers.tests.cpp:<line number>
     </testcase>
     <testcase classname="<exe-name>.global" name="Registering reporter with '::' in name fails" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Regression test #1" time="{duration}" status="run"/>
+    <testcase classname="<exe-name>.global" name="RepeatGenerator refuses infinite generators" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Reporter's write listings to provided stream" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Reporter's write listings to provided stream/Automake reporter lists tags" time="{duration}" status="run"/>
     <testcase classname="<exe-name>.global" name="Reporter's write listings to provided stream/Automake reporter lists reporters" time="{duration}" status="run"/>

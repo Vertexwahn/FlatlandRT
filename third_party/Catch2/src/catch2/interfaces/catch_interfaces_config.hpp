@@ -29,6 +29,8 @@ namespace Catch {
         NoAssertions = 0x01,
         //! A command line test spec matched no test cases
         UnmatchedTestSpec = 0x02,
+        //! The resulting generator in GENERATE is infinite
+        InfiniteGenerator = 0x04,
     }; };
 
     enum class ShowDurations {
@@ -71,6 +73,7 @@ namespace Catch {
         virtual bool shouldDebugBreak() const = 0;
         virtual bool warnAboutMissingAssertions() const = 0;
         virtual bool warnAboutUnmatchedTestSpecs() const = 0;
+        virtual bool warnAboutInfiniteGenerators() const = 0;
         virtual bool zeroTestsCountAsSuccess() const = 0;
         virtual int abortAfter() const = 0;
         virtual bool showInvisibles() const = 0;

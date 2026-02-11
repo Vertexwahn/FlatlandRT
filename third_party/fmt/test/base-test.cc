@@ -10,6 +10,9 @@
 #include "test-assert.h"
 // clang-format on
 
+// Suppress warnings for pathological types convertible to detail::value.
+#pragma GCC diagnostic ignored "-Wconversion"
+
 #include "fmt/base.h"
 
 #include <limits.h>  // INT_MAX
@@ -277,17 +280,6 @@ TEST(base_test, is_back_insert_iterator) {
               std::back_insert_iterator<std::string>>::value);
   EXPECT_FALSE(fmt::detail::is_back_insert_iterator<
                std::front_insert_iterator<std::string>>::value);
-}
-
-struct minimal_container {
-  using value_type = char;
-  void push_back(char) {}
-};
-
-TEST(base_test, copy) {
-  minimal_container c;
-  static constexpr char str[] = "a";
-  fmt::detail::copy<char>(str, str + 1, std::back_inserter(c));
 }
 
 TEST(base_test, get_buffer) {

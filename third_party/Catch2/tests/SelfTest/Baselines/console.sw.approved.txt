@@ -5315,6 +5315,91 @@ with expansion:
   0 == 0
 
 -------------------------------------------------------------------------------
+Generator adapters properly handle isFinite
+  concat generator
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( finite_cat.isFinite() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( infinite_cat.isFinite() )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
+Generator adapters properly handle isFinite
+  take generator
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( take_1.isFinite() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( take_2.isFinite() )
+with expansion:
+  true
+
+-------------------------------------------------------------------------------
+Generator adapters properly handle isFinite
+  chunk generator
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( finite_chunk.isFinite() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( infinite_chunk.isFinite() )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
+Generator adapters properly handle isFinite
+  map
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( finite_map.isFinite() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( infinite_map.isFinite() )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
+Generator adapters properly handle isFinite
+  filter
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( finite_filter.isFinite() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( infinite_filter.isFinite() )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
 Generators -- adapters
   Filtering by predicate
   Basic usage
@@ -9340,14 +9425,14 @@ CmdLine.tests.cpp:<line number>
 ...............................................................................
 
 CmdLine.tests.cpp:<line number>: PASSED:
-  REQUIRE( cli.parse( { "test", "--warn", "NoAssertions", "--warn", "UnmatchedTestSpec" } ) )
+  REQUIRE( cli.parse( { "test", "--warn", "NoAssertions", "--warn", "UnmatchedTestSpec", "--warn", "InfiniteGenerators" } ) )
 with expansion:
   {?}
 
 CmdLine.tests.cpp:<line number>: PASSED:
-  REQUIRE( config.warnings == ( WarnAbout::NoAssertions | WarnAbout::UnmatchedTestSpec ) )
+  REQUIRE( config.warnings == ( WarnAbout::NoAssertions | WarnAbout::UnmatchedTestSpec | WarnAbout::InfiniteGenerator ) )
 with expansion:
-  3 == 3
+  7 == 7
 
 -------------------------------------------------------------------------------
 Pointers can be compared to null
@@ -10368,6 +10453,39 @@ RandomNumberGeneration.tests.cpp:<line number>: PASSED:
   REQUIRE_THROWS( Catch::generateRandomSeed(static_cast<Catch::GenerateFrom>(77)) )
 
 -------------------------------------------------------------------------------
+RandomGenerator reports itself as infinite - float
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite() )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
+RandomGenerator reports itself as infinite - int
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite() )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
+RandomGenerator reports itself as infinite - long double
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite() )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
 Range type with sentinel
 -------------------------------------------------------------------------------
 ToString.tests.cpp:<line number>
@@ -10435,6 +10553,15 @@ Matchers.tests.cpp:<line number>: PASSED:
   CHECK_THAT( actual, !UnorderedEquals( expected ) )
 with expansion:
   { 'a', 'b' } not UnorderedEquals: { 'c', 'b' }
+
+-------------------------------------------------------------------------------
+RepeatGenerator refuses infinite generators
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE_THROWS( RepeatGenerator<int>( 2, random( 1, 100 ) ) )
 
 -------------------------------------------------------------------------------
 Reporter's write listings to provided stream
@@ -19717,6 +19844,6 @@ Misc.tests.cpp:<line number>
 Misc.tests.cpp:<line number>: PASSED:
 
 ===============================================================================
-test cases:  443 |  323 passed |  96 failed | 6 skipped | 18 failed as expected
-assertions: 2362 | 2161 passed | 158 failed | 43 failed as expected
+test cases:  448 |  328 passed |  96 failed | 6 skipped | 18 failed as expected
+assertions: 2376 | 2175 passed | 158 failed | 43 failed as expected
 

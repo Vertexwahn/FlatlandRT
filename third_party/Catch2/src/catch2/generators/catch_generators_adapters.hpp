@@ -62,6 +62,8 @@ namespace Generators {
             }
             return success;
         }
+
+        bool isFinite() const override { return true; }
     };
 
     template <typename T>
@@ -103,6 +105,8 @@ namespace Generators {
             while (!m_predicate(m_generator.get()) && (success = m_generator.next()) == true);
             return success;
         }
+
+        bool isFinite() const override { return m_generator.isFinite(); }
     };
 
 
@@ -127,6 +131,9 @@ namespace Generators {
             m_target_repeats(repeats)
         {
             assert(m_target_repeats > 0 && "Repeat generator must repeat at least once");
+            if (!m_generator.isFinite()) {
+                Detail::throw_generator_exception( "Cannot repeat infinite generator" );
+            }
         }
 
         T const& get() const override {
@@ -160,6 +167,8 @@ namespace Generators {
             }
             return m_current_repeat < m_target_repeats;
         }
+
+        bool isFinite() const override { return m_generator.isFinite(); }
     };
 
     template <typename T>
@@ -207,6 +216,8 @@ namespace Generators {
             }
             return success;
         }
+
+        bool isFinite() const override { return m_generator.isFinite(); }
     };
 
     template <typename Func, typename U, typename T = FunctionReturnType<Func, U>>
@@ -256,6 +267,8 @@ namespace Generators {
             }
             return true;
         }
+
+        bool isFinite() const override { return m_generator.isFinite(); }
     };
 
     template <typename T>
@@ -296,6 +309,13 @@ namespace Generators {
             // If current generator is used up, we have to move to the next one
             ++m_current_generator;
             return m_current_generator < m_generators.size();
+        }
+
+        bool isFinite() const override {
+            for ( auto const& gen : m_generators ) {
+                if ( !gen.isFinite() ) { return false; }
+            }
+            return true;
         }
     };
 

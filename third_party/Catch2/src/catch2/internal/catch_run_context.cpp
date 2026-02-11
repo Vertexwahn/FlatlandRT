@@ -21,7 +21,9 @@
 #include <catch2/internal/catch_assertion_handler.hpp>
 #include <catch2/internal/catch_test_failure_exception.hpp>
 #include <catch2/internal/catch_thread_local.hpp>
+#include <catch2/internal/catch_unreachable.hpp>
 #include <catch2/internal/catch_result_type.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -495,6 +497,11 @@ namespace Catch {
         currentTracker.addChild( CATCH_MOVE( newTracker ) );
 
         ret->setGenerator( CATCH_MOVE( generator ) );
+        if ( m_config->warnAboutInfiniteGenerators() &&
+             !ret->getGenerator()->isFinite() ) {
+            // TBD: Would it be better to expand this macro inline?
+            FAIL( "GENERATE() would run infinitely" );
+        }
         ret->open();
         return ret;
     }

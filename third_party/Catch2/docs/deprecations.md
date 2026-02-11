@@ -48,6 +48,21 @@ If you are mutating the fixture instance from within the test case, and
 want to keep doing so in the future, mark the mutated members as `mutable`.
 
 
+### Generator interfaces
+
+#### Defaulted `UntypedGeneratorBase::isFinite()`
+
+> Deprecated in Catch2 vX.Y.Z
+
+The `UntypedGeneratorBase` currently provides a default implementation
+for `isFinite` that always returns `true`. This was done to keep backwards
+compatibility with pre-existing generators, as infinite generators can
+be diagnosed as errors in some cases.
+
+In the future, all generators will be expected to override `isFinite`.
+
+
+
 ---
 
 [Home](Readme.md#top)

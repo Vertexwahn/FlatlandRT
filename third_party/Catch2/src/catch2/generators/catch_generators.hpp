@@ -64,6 +64,8 @@ namespace Detail {
         bool next() {
             return m_generator->countedNext();
         }
+
+        bool isFinite() const { return m_generator->isFinite(); }
     };
 
 
@@ -84,6 +86,8 @@ namespace Detail {
         bool next() override {
             return false;
         }
+
+        bool isFinite() const override { return true; }
     };
 
     template<typename T>
@@ -112,6 +116,8 @@ namespace Detail {
             ++m_idx;
             return m_idx < m_values.size();
         }
+
+        bool isFinite() const override { return true; }
     };
 
     template <typename T, typename DecayedT = std::decay_t<T>>
@@ -175,6 +181,14 @@ namespace Detail {
                 ++m_current;
             }
             return m_current < m_generators.size();
+        }
+
+        bool isFinite() const override {
+            for (auto const& gen : m_generators) {
+                if (!gen.isFinite()) { return false;
+                }
+            }
+            return true;
         }
     };
 

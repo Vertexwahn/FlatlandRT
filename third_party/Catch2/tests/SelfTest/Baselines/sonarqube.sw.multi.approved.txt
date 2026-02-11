@@ -149,6 +149,12 @@ at AssertionHandler.tests.cpp:<line number>
     <testCase name="ConcatGenerator/Iterating over multiple generators" duration="{duration}"/>
     <testCase name="Filter generator throws exception for empty generator" duration="{duration}"/>
     <testCase name="FixedValuesGenerator can be skipped forward" duration="{duration}"/>
+    <testCase name="Generator adapters properly handle isFinite" duration="{duration}"/>
+    <testCase name="Generator adapters properly handle isFinite/concat generator" duration="{duration}"/>
+    <testCase name="Generator adapters properly handle isFinite/take generator" duration="{duration}"/>
+    <testCase name="Generator adapters properly handle isFinite/chunk generator" duration="{duration}"/>
+    <testCase name="Generator adapters properly handle isFinite/map" duration="{duration}"/>
+    <testCase name="Generator adapters properly handle isFinite/filter" duration="{duration}"/>
     <testCase name="Generators can be skipped forward" duration="{duration}"/>
     <testCase name="Generators internals" duration="{duration}"/>
     <testCase name="Generators internals/Single value" duration="{duration}"/>
@@ -188,6 +194,10 @@ at AssertionHandler.tests.cpp:<line number>
     <testCase name="Generators internals/Range/Negative manual step/Integer/Slightly over end" duration="{duration}"/>
     <testCase name="Generators internals/Range/Negative manual step/Integer/Slightly under end" duration="{duration}"/>
     <testCase name="MapGenerator can be skipped forward efficiently" duration="{duration}"/>
+    <testCase name="RandomGenerator reports itself as infinite - float" duration="{duration}"/>
+    <testCase name="RandomGenerator reports itself as infinite - int" duration="{duration}"/>
+    <testCase name="RandomGenerator reports itself as infinite - long double" duration="{duration}"/>
+    <testCase name="RepeatGenerator refuses infinite generators" duration="{duration}"/>
     <testCase name="TakeGenerator can be skipped forward" duration="{duration}"/>
     <testCase name="TakeGenerator can be skipped forward/take is shorter than underlying" duration="{duration}"/>
     <testCase name="TakeGenerator can be skipped forward/take is longer than underlying" duration="{duration}"/>

@@ -32,6 +32,9 @@ namespace Catch {
             } else if ( warning == "UnmatchedTestSpec" ) {
                 config.warnings = static_cast<WarnAbout::What>(config.warnings | WarnAbout::UnmatchedTestSpec);
                 return ParserResult::ok( ParseResultType::Matched );
+            } else if ( warning == "InfiniteGenerators" ) {
+                config.warnings = static_cast<WarnAbout::What>(config.warnings | WarnAbout::InfiniteGenerator);
+                return ParserResult::ok( ParseResultType::Matched );
             }
 
             return ParserResult ::runtimeError(

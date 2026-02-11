@@ -413,9 +413,10 @@ TEST_CASE( "Parsing warnings", "[cli][warnings]" ) {
     SECTION( "Combining multiple warnings" ) {
         REQUIRE( cli.parse( { "test",
                               "--warn", "NoAssertions",
-                              "--warn", "UnmatchedTestSpec" } ) );
+                              "--warn", "UnmatchedTestSpec",
+                              "--warn", "InfiniteGenerators" } ) );
 
-        REQUIRE( config.warnings == ( WarnAbout::NoAssertions | WarnAbout::UnmatchedTestSpec ) );
+        REQUIRE( config.warnings == ( WarnAbout::NoAssertions | WarnAbout::UnmatchedTestSpec | WarnAbout::InfiniteGenerator ) );
     }
 }
 

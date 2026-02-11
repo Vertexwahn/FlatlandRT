@@ -128,7 +128,7 @@ TEST(ranges_test, format_set) {
 
 // Models std::flat_set close enough to test if no ambiguous lookup of a
 // formatter happens due to the flat_set type matching is_set and
-// is_container_adaptor_like.
+// is_container_adaptor.
 template <typename T> class flat_set {
  public:
   using key_type = T;
@@ -395,13 +395,6 @@ TEST(ranges_test, join) {
   EXPECT_EQ(fmt::format("{}", join(v4, " ")), "0 1 0");
 }
 
-#ifdef __cpp_lib_byte
-TEST(ranges_test, join_bytes) {
-  auto v = std::vector<std::byte>{std::byte(1), std::byte(2), std::byte(3)};
-  EXPECT_EQ(fmt::format("{}", fmt::join(v, ", ")), "1, 2, 3");
-}
-#endif
-
 TEST(ranges_test, join_tuple) {
   // Value tuple args.
   auto t1 = std::tuple<char, int, float>('a', 1, 2.0f);
@@ -608,12 +601,11 @@ TEST(ranges_test, vector_char) {
 
 TEST(ranges_test, container_adaptor) {
   {
-    using fmt::detail::is_container_adaptor_like;
     using T = std::nullptr_t;
-    static_assert(is_container_adaptor_like<std::stack<T>>::value, "");
-    static_assert(is_container_adaptor_like<std::queue<T>>::value, "");
-    static_assert(is_container_adaptor_like<std::priority_queue<T>>::value, "");
-    static_assert(!is_container_adaptor_like<std::vector<T>>::value, "");
+    static_assert(fmt::is_container_adaptor<std::stack<T>>::value, "");
+    static_assert(fmt::is_container_adaptor<std::queue<T>>::value, "");
+    static_assert(fmt::is_container_adaptor<std::priority_queue<T>>::value, "");
+    static_assert(!fmt::is_container_adaptor<std::vector<T>>::value, "");
   }
 
   {
@@ -797,3 +789,23 @@ struct not_range {
   void end() const {}
 };
 static_assert(!fmt::is_formattable<not_range>{}, "");
+
+struct test_adaptor {
+  using container_type = std::vector<int>;
+  std::vector<int> c = {1, 2, 3};
+};
+
+namespace fmt {
+template <> struct is_container_adaptor<test_adaptor> : std::false_type {};
+
+template <> struct formatter<test_adaptor> : formatter<string_view> {
+  auto format(const test_adaptor&, format_context& ctx) const
+      -> format_context::iterator {
+    return formatter<string_view>::format("test", ctx);
+  }
+};
+}  // namespace fmt
+
+TEST(ranges_test, container_adaptor_opt_out) {
+  EXPECT_EQ(fmt::format("{}", test_adaptor()), "test");
+}

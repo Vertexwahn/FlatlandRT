@@ -169,7 +169,7 @@ if(CATCH_ENABLE_COVERAGE)
 endif()
 
 # configure unit tests via CTest
-add_test(NAME RunTests COMMAND $<TARGET_FILE:SelfTest> --order rand --rng-seed time)
+add_test(NAME RunTests COMMAND $<TARGET_FILE:SelfTest> --order rand --rng-seed time --warn InfiniteGenerators)
 set_tests_properties(RunTests PROPERTIES
   FAIL_REGULAR_EXPRESSION "Filters:"
   COST 15

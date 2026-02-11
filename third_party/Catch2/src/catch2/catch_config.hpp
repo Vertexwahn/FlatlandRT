@@ -124,6 +124,7 @@ namespace Catch {
         bool includeSuccessfulResults() const override;
         bool warnAboutMissingAssertions() const override;
         bool warnAboutUnmatchedTestSpecs() const override;
+        bool warnAboutInfiniteGenerators() const override;
         bool zeroTestsCountAsSuccess() const override;
         ShowDurations showDurations() const override;
         double minDuration() const override;

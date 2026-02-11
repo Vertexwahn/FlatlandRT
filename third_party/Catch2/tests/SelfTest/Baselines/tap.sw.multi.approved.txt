@@ -1356,6 +1356,26 @@ ok {test-number} - i % 2 == 0 for: 0 == 0
 ok {test-number} - i % 2 == 0 for: 0 == 0
 # GENERATE can combine literals and generators
 ok {test-number} - i % 2 == 0 for: 0 == 0
+# Generator adapters properly handle isFinite
+ok {test-number} - finite_cat.isFinite() for: true
+# Generator adapters properly handle isFinite
+ok {test-number} - !(infinite_cat.isFinite()) for: !false
+# Generator adapters properly handle isFinite
+ok {test-number} - take_1.isFinite() for: true
+# Generator adapters properly handle isFinite
+ok {test-number} - take_2.isFinite() for: true
+# Generator adapters properly handle isFinite
+ok {test-number} - finite_chunk.isFinite() for: true
+# Generator adapters properly handle isFinite
+ok {test-number} - !(infinite_chunk.isFinite()) for: !false
+# Generator adapters properly handle isFinite
+ok {test-number} - finite_map.isFinite() for: true
+# Generator adapters properly handle isFinite
+ok {test-number} - !(infinite_map.isFinite()) for: !false
+# Generator adapters properly handle isFinite
+ok {test-number} - finite_filter.isFinite() for: true
+# Generator adapters properly handle isFinite
+ok {test-number} - !(infinite_filter.isFinite()) for: !false
 # Generators -- adapters
 ok {test-number} - i % 2 == 0 for: 0 == 0
 # Generators -- adapters
@@ -2349,9 +2369,9 @@ ok {test-number} - config.warnings == WarnAbout::NoAssertions for: 1 == 1
 # Parsing warnings
 ok {test-number} - !(cli.parse( { "test", "-w", "NoTests" } )) for: !{?}
 # Parsing warnings
-ok {test-number} - cli.parse( { "test", "--warn", "NoAssertions", "--warn", "UnmatchedTestSpec" } ) for: {?}
+ok {test-number} - cli.parse( { "test", "--warn", "NoAssertions", "--warn", "UnmatchedTestSpec", "--warn", "InfiniteGenerators" } ) for: {?}
 # Parsing warnings
-ok {test-number} - config.warnings == ( WarnAbout::NoAssertions | WarnAbout::UnmatchedTestSpec ) for: 3 == 3
+ok {test-number} - config.warnings == ( WarnAbout::NoAssertions | WarnAbout::UnmatchedTestSpec | WarnAbout::InfiniteGenerator ) for: 7 == 7
 # Pointers can be compared to null
 ok {test-number} - p == 0 for: 0 == 0
 # Pointers can be compared to null
@@ -2590,6 +2610,12 @@ ok {test-number} - Catch::generateRandomSeed(method)
 ok {test-number} - Catch::generateRandomSeed(method)
 # Random seed generation reports unknown methods
 ok {test-number} - Catch::generateRandomSeed(static_cast<Catch::GenerateFrom>(77))
+# RandomGenerator reports itself as infinite - float
+ok {test-number} - !(Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite()) for: !false
+# RandomGenerator reports itself as infinite - int
+ok {test-number} - !(Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite()) for: !false
+# RandomGenerator reports itself as infinite - long double
+ok {test-number} - !(Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite()) for: !false
 # Range type with sentinel
 ok {test-number} - Catch::Detail::stringify(UsesSentinel{}) == "{  }" for: "{  }" == "{  }"
 # Reconstruction should be based on stringification: #914
@@ -2604,6 +2630,8 @@ not ok {test-number} - testStringForMatching(), Matches( "this string contains '
 ok {test-number} - registry.registerReporter( "with::doublecolons", Catch::Detail::make_unique<TestReporterFactory>() ), "'::' is not allowed in reporter name: 'with::doublecolons'" for: "'::' is not allowed in reporter name: 'with::doublecolons'" equals: "'::' is not allowed in reporter name: 'with::doublecolons'"
 # Regression test #1
 ok {test-number} - actual, !UnorderedEquals( expected ) for: { 'a', 'b' } not UnorderedEquals: { 'c', 'b' }
+# RepeatGenerator refuses infinite generators
+ok {test-number} - RepeatGenerator<int>( 2, random( 1, 100 ) )
 # Reporter's write listings to provided stream
 ok {test-number} - !(factories.empty()) for: !false
 # Reporter's write listings to provided stream
@@ -4732,5 +4760,5 @@ ok {test-number} - q3 == 23. for: 23.0 == 23.0
 ok {test-number} -
 # xmlentitycheck
 ok {test-number} -
-1..2374
+1..2388
 

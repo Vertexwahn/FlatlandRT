@@ -13,6 +13,7 @@
 #include <helpers/range_test_helpers.hpp>
 
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generator_exception.hpp>
 #include <catch2/generators/catch_generators_adapters.hpp>
@@ -339,6 +340,7 @@ public:
     bool next() override {
         return false;
     }
+    bool isFinite() const override { return true; }
 };
 
 // Avoids -Wweak-vtables
@@ -472,6 +474,7 @@ namespace {
 
     public:
         bool const& get() const override;
+        bool isFinite() const override { return true; }
     };
 
     // Avoids -Wweak-vtables
@@ -509,6 +512,7 @@ namespace {
 
         bool const& get() const override;
         size_t stringificationCalls() const { return m_stringificationCalls; }
+        bool isFinite() const override { return true; }
     };
 
     // Avoids -Wweak-vtables
@@ -618,6 +622,8 @@ namespace {
             ++m_idx;
             return m_idx < m_elements.size();
         }
+
+        bool isFinite() const override { return true; }
     };
 }
 
@@ -720,4 +726,67 @@ TEST_CASE("MapGenerator can be skipped forward efficiently",
 
     REQUIRE_THROWS( map_generator.skipToNthElement( 7 ) );
     REQUIRE( map_calls == map_calls_2 + 1 );
+}
+
+TEST_CASE( "Generator adapters properly handle isFinite",
+           "[generators][map][take][chunk][filter][concat]" ) {
+    using namespace Catch::Generators;
+    SECTION( "concat generator" ) {
+        ConcatGenerator<int> finite_cat(
+            value( 1 ), values( { 2, 3, 4 } ), value( 5 ) );
+        REQUIRE( finite_cat.isFinite() );
+
+        ConcatGenerator<int> infinite_cat(
+            value( 1 ), random( 1, 10 ), value( 3 ) );
+        REQUIRE_FALSE( infinite_cat.isFinite() );
+    }
+    SECTION( "take generator" ) {
+        TakeGenerator<int> take_1( 2, values( { 1, 2, 3, 4, 5 } ) );
+        REQUIRE( take_1.isFinite() );
+        TakeGenerator<int> take_2( 3, random( 1, 100 ) );
+        REQUIRE( take_2.isFinite() );
+    }
+    SECTION( "chunk generator" ) {
+        ChunkGenerator<int> finite_chunk( 2, values( { 1, 2, 3, 4, 5 } ) );
+        REQUIRE( finite_chunk.isFinite() );
+        ChunkGenerator<int> infinite_chunk( 2, random( 1, 100 ) );
+        REQUIRE_FALSE( infinite_chunk.isFinite() );
+    }
+    SECTION( "map" ) {
+        auto identity = []( int i ) {
+            return i;
+        };
+
+        MapGenerator<int, int, decltype( identity )> finite_map(
+            identity, values( { 1, 2, 3 } ) );
+        REQUIRE( finite_map.isFinite() );
+        MapGenerator<int, int, decltype( identity )> infinite_map(
+            identity, random( 1, 100 ) );
+        REQUIRE_FALSE( infinite_map.isFinite() );
+    }
+    SECTION( "filter" ) {
+        auto always_true = []( int ) {
+            return true;
+        };
+        FilterGenerator<int, decltype( always_true )> finite_filter(
+            always_true, values( { 1, 2, 3, 4, 5 } ) );
+        REQUIRE( finite_filter.isFinite() );
+        FilterGenerator<int, decltype( always_true )> infinite_filter(
+            always_true, random( 1, 100 ) );
+        REQUIRE_FALSE( infinite_filter.isFinite() );
+    }
+}
+
+TEST_CASE( "RepeatGenerator refuses infinite generators",
+           "[generators][repeat]" ) {
+    using namespace Catch::Generators;
+    REQUIRE_THROWS( RepeatGenerator<int>( 2, random( 1, 100 ) ) );
+}
+
+TEMPLATE_TEST_CASE( "RandomGenerator reports itself as infinite",
+                    "[generators][random]",
+    int,
+    float,
+    long double) {
+    REQUIRE_FALSE( Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite() );
 }

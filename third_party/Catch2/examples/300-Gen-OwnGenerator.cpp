@@ -40,6 +40,8 @@ public:
         return true;
     }
 
+    bool isFinite() const override { return false; }
+
     // Note: this improves the performance only a bit, but it is here
     //       to show how you can override the skip functionality.
     void skipToNthElementImpl( std::size_t n ) override {

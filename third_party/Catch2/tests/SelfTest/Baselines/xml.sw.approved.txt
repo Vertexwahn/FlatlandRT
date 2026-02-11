@@ -6119,6 +6119,104 @@ Approx( 1.30000000000000004 )
     </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
+  <TestCase name="Generator adapters properly handle isFinite" tags="[chunk][concat][filter][generators][map][take]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Section name="concat generator" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          finite_cat.isFinite()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          !(infinite_cat.isFinite())
+        </Original>
+        <Expanded>
+          !false
+        </Expanded>
+      </Expression>
+      <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="take generator" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take_1.isFinite()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          take_2.isFinite()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="chunk generator" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          finite_chunk.isFinite()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          !(infinite_chunk.isFinite())
+        </Original>
+        <Expanded>
+          !false
+        </Expanded>
+      </Expression>
+      <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="map" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          finite_map.isFinite()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          !(infinite_map.isFinite())
+        </Original>
+        <Expanded>
+          !false
+        </Expanded>
+      </Expression>
+      <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="filter" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          finite_filter.isFinite()
+        </Original>
+        <Expanded>
+          true
+        </Expanded>
+      </Expression>
+      <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+        <Original>
+          !(infinite_filter.isFinite())
+        </Original>
+        <Expanded>
+          !false
+        </Expanded>
+      </Expression>
+      <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
   <TestCase name="Generators -- adapters" tags="[generators][generic]" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
     <Section name="Filtering by predicate" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
       <Section name="Basic usage" filename="tests/<exe-name>/UsageTests/Generators.tests.cpp" >
@@ -11193,7 +11291,7 @@ Approx( 1.21999999999999997 )
     <Section name="Combining multiple warnings" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
       <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
         <Original>
-          cli.parse( { "test", "--warn", "NoAssertions", "--warn", "UnmatchedTestSpec" } )
+          cli.parse( { "test", "--warn", "NoAssertions", "--warn", "UnmatchedTestSpec", "--warn", "InfiniteGenerators" } )
         </Original>
         <Expanded>
           {?}
@@ -11201,10 +11299,10 @@ Approx( 1.21999999999999997 )
       </Expression>
       <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp" >
         <Original>
-          config.warnings == ( WarnAbout::NoAssertions | WarnAbout::UnmatchedTestSpec )
+          config.warnings == ( WarnAbout::NoAssertions | WarnAbout::UnmatchedTestSpec | WarnAbout::InfiniteGenerator )
         </Original>
         <Expanded>
-          3 == 3
+          7 == 7
         </Expanded>
       </Expression>
       <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
@@ -12492,6 +12590,39 @@ Approx( 0.98999999999999999 )
     </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
+  <TestCase name="RandomGenerator reports itself as infinite - float" tags="[generators][random]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        !(Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite())
+      </Original>
+      <Expanded>
+        !false
+      </Expanded>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="RandomGenerator reports itself as infinite - int" tags="[generators][random]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        !(Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite())
+      </Original>
+      <Expanded>
+        !false
+      </Expanded>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="RandomGenerator reports itself as infinite - long double" tags="[generators][random]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Expression success="true" type="REQUIRE_FALSE" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        !(Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite())
+      </Original>
+      <Expanded>
+        !false
+      </Expanded>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
   <TestCase name="Range type with sentinel" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
     <Expression success="true" type="CHECK" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
       <Original>
@@ -12559,6 +12690,17 @@ Approx( 0.98999999999999999 )
       </Original>
       <Expanded>
         { 'a', 'b' } not UnorderedEquals: { 'c', 'b' }
+      </Expanded>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="RepeatGenerator refuses infinite generators" tags="[generators][repeat]" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+    <Expression success="true" type="REQUIRE_THROWS" filename="tests/<exe-name>/IntrospectiveTests/GeneratorsImpl.tests.cpp" >
+      <Original>
+        RepeatGenerator&lt;int>( 2, random( 1, 100 ) )
+      </Original>
+      <Expanded>
+        RepeatGenerator&lt;int>( 2, random( 1, 100 ) )
       </Expanded>
     </Expression>
     <OverallResult success="true" skips="0"/>
@@ -22878,6 +23020,6 @@ Approx( -1.95996398454005449 )
     </Section>
     <OverallResult success="true" skips="0"/>
   </TestCase>
-  <OverallResults successes="2161" failures="158" expectedFailures="43" skips="12"/>
-  <OverallResultsCases successes="323" failures="96" expectedFailures="18" skips="6"/>
+  <OverallResults successes="2175" failures="158" expectedFailures="43" skips="12"/>
+  <OverallResultsCases successes="328" failures="96" expectedFailures="18" skips="6"/>
 </Catch2TestRun>

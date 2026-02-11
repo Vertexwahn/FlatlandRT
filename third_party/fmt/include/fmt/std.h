@@ -15,7 +15,8 @@
 #  include <atomic>
 #  include <bitset>
 #  include <complex>
-#  include <exception>
+#  include <cstddef>     // std::byte
+#  include <exception>   // std::exception
 #  include <functional>  // std::reference_wrapper
 #  include <memory>
 #  include <thread>
@@ -78,6 +79,23 @@
 
 FMT_BEGIN_NAMESPACE
 namespace detail {
+
+#ifdef FMT_USE_BITINT
+// Use the provided definition.
+#elif FMT_CLANG_VERSION >= 1500 && !defined(__CUDACC__)
+#  define FMT_USE_BITINT 1
+#else
+#  define FMT_USE_BITINT 0
+#endif
+
+#if FMT_USE_BITINT
+FMT_PRAGMA_CLANG(diagnostic ignored "-Wbit-int-extension")
+template <int N> using bitint = _BitInt(N);
+template <int N> using ubitint = unsigned _BitInt(N);
+#else
+template <int N> struct bitint {};
+template <int N> struct ubitint {};
+#endif  // FMT_USE_BITINT
 
 #if FMT_CPP_LIB_FILESYSTEM
 
@@ -611,6 +629,30 @@ struct formatter<
   }
 };
 
+template <int N, typename Char>
+struct formatter<detail::bitint<N>, Char> : formatter<long long, Char> {
+  static_assert(N <= 64, "unsupported _BitInt");
+  static auto format_as(detail::bitint<N> x) -> long long {
+    return static_cast<long long>(x);
+  }
+  template <typename Context>
+  auto format(detail::bitint<N> x, Context& ctx) const -> decltype(ctx.out()) {
+    return formatter<long long, Char>::format(format_as(x), ctx);
+  }
+};
+
+template <int N, typename Char>
+struct formatter<detail::ubitint<N>, Char> : formatter<ullong, Char> {
+  static_assert(N <= 64, "unsupported _BitInt");
+  static auto format_as(detail::ubitint<N> x) -> ullong {
+    return static_cast<ullong>(x);
+  }
+  template <typename Context>
+  auto format(detail::ubitint<N> x, Context& ctx) const -> decltype(ctx.out()) {
+    return formatter<ullong, Char>::format(format_as(x), ctx);
+  }
+};
+
 // We can't use std::vector<bool, Allocator>::reference and
 // std::bitset<N>::reference because the compiler can't deduce Allocator and N
 // in partial specialization.
@@ -624,6 +666,19 @@ struct formatter<BitRef, Char,
     return formatter<bool, Char>::format(v, ctx);
   }
 };
+
+#ifdef __cpp_lib_byte
+template <typename Char>
+struct formatter<std::byte, Char> : formatter<unsigned, Char> {
+  static auto format_as(std::byte b) -> unsigned char {
+    return static_cast<unsigned char>(b);
+  }
+  template <typename Context>
+  auto format(std::byte b, Context& ctx) const -> decltype(ctx.out()) {
+    return formatter<unsigned, Char>::format(format_as(b), ctx);
+  }
+};
+#endif
 
 template <typename T, typename Char>
 struct formatter<std::atomic<T>, Char,

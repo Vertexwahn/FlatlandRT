@@ -505,8 +505,7 @@ struct formatter<
   using nonlocking = void;
 
   FMT_CONSTEXPR formatter() {
-    if (detail::const_check(range_format_kind<R, Char>::value !=
-                            range_format::set))
+    if FMT_CONSTEXPR20 (range_format_kind<R, Char>::value != range_format::set)
       return;
     range_formatter_.set_brackets(detail::string_literal<Char, '{'>{},
                                   detail::string_literal<Char, '}'>{});
@@ -607,13 +606,14 @@ struct formatter<
   auto format(range_type& range, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     auto out = ctx.out();
-    if (detail::const_check(range_format_kind<R, Char>::value ==
-                            range_format::debug_string))
+    if FMT_CONSTEXPR20 (range_format_kind<R, Char>::value ==
+                        range_format::debug_string) {
       *out++ = '"';
+    }
     out = underlying_.format(
         string_type{detail::range_begin(range), detail::range_end(range)}, ctx);
-    if (detail::const_check(range_format_kind<R, Char>::value ==
-                            range_format::debug_string))
+    if FMT_CONSTEXPR20 (range_format_kind<R, Char>::value ==
+                        range_format::debug_string)
       *out++ = '"';
     return out;
   }
@@ -748,9 +748,20 @@ struct formatter<tuple_join_view<Tuple, Char>, Char,
 };
 
 namespace detail {
-// Check if T has an interface like a container adaptor (e.g. std::stack,
-// std::queue, std::priority_queue).
-template <typename T> class is_container_adaptor_like {
+template <typename Container> struct all {
+  const Container& c;
+  auto begin() const -> typename Container::const_iterator { return c.begin(); }
+  auto end() const -> typename Container::const_iterator { return c.end(); }
+};
+}  // namespace detail
+
+/**
+ * Specifies if `T` is a container adaptor (like `std::stack`) that should be
+ * formatted as the underlying container.
+ */
+FMT_EXPORT
+template <typename T> struct is_container_adaptor {
+ private:
   template <typename U> static auto check(U* p) -> typename U::container_type;
   template <typename> static void check(...);
 
@@ -759,17 +770,10 @@ template <typename T> class is_container_adaptor_like {
       !std::is_void<decltype(check<T>(nullptr))>::value;
 };
 
-template <typename Container> struct all {
-  const Container& c;
-  auto begin() const -> typename Container::const_iterator { return c.begin(); }
-  auto end() const -> typename Container::const_iterator { return c.end(); }
-};
-}  // namespace detail
-
 template <typename T, typename Char>
 struct formatter<
     T, Char,
-    enable_if_t<conjunction<detail::is_container_adaptor_like<T>,
+    enable_if_t<conjunction<is_container_adaptor<T>,
                             bool_constant<range_format_kind<T, Char>::value ==
                                           range_format::disabled>>::value>>
     : formatter<detail::all<typename T::container_type>, Char> {
