@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -11,7 +11,6 @@
  * Solely, the pure integration of {fmt} within this project should be tested here.
  */
 
-#include "fmt/core.h"
 #include "fmt/format.h"
 
 #include "gmock/gmock.h"

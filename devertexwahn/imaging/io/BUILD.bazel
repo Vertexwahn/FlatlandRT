@@ -165,7 +165,7 @@ cc_library(
     deps = [
         "//core:reference_counted",
         "//imaging:image",
-        "@tiff",
+        "@libtiff//:tiff",
     ],
 )
 

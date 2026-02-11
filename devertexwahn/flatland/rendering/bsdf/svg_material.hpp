@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -20,25 +20,15 @@ public:
 
         std::string interface_interaction = ps.get_property<std::string>("interface_interaction",
                                                                          "specular_transmission");
-
-
     }
 
-    [[nodiscard]]
-    ColorRGB3f stroke_color() const;
+    [[nodiscard]] ColorRGB3f stroke_color() const;
+    [[nodiscard]] float stroke_width() const;
+    [[nodiscard]] ColorRGB3f fill_color() const;
 
-    [[nodiscard]]
-    float stroke_width() const;
-
-    [[nodiscard]]
-    ColorRGB3f fill_color() const;
-
-    [[nodiscard]]
-    ColorRGB3f sample(BSDFSample2f& sample, const Point2& sample_point) const override;
-    [[nodiscard]]
-    float pdf(const BSDFSample2f& sample) const override { return 0.f; };
-    [[nodiscard]]
-    ColorRGB3f evaluate(const BSDFSample2f& sample) const override;
+    [[nodiscard]] ColorRGB3f sample(BSDFSample2f& sample, const Point2& sample_point) const override;
+    [[nodiscard]] float pdf(const BSDFSample2f& sample) const override { return 0.f; };
+    [[nodiscard]] ColorRGB3f evaluate(const BSDFSample2f& sample) const override;
 
 private:
     ColorRGB3f stroke_color_{0.f, 0.f, 0.f};
@@ -51,8 +41,7 @@ public:
     GlassMaterial() = default;
 
     // todo: move this to a dielectric material class
-    [[nodiscard]]
-    Scalar refraction_index() const {
+    [[nodiscard]] Scalar refraction_index() const {
         return refraction_index_;
     }
 private:

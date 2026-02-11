@@ -5,7 +5,7 @@
 
 #include "core/property_set.hpp"
 
-#include "fmt/core.h"
+#include "fmt/format.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

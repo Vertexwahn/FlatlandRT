@@ -2,7 +2,7 @@
 
 This directory defines the Python toolchain.
 
-Currently Python `3.13.2` is used.
+Currently, Python `3.13.2` is used.
 
 ## Updating the lock files
 

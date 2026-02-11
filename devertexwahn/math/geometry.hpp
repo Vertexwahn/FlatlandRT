@@ -11,7 +11,7 @@
 
 #include "boost/algorithm/string.hpp"
 
-#include "fmt/core.h"
+#include "fmt/format.h"
 
 #include <filesystem>
 #include <fstream>

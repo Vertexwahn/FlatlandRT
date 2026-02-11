@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -16,7 +16,7 @@
 
 #include "boost/version.hpp"
 
-#include "fmt/core.h"
+#include "fmt/format.h"
 
 #include <filesystem>
 

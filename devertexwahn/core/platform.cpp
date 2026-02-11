@@ -48,7 +48,7 @@
 
 #include <windows.h>
 
-#include "fmt/core.h"
+#include "fmt/format.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

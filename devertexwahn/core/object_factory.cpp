@@ -5,7 +5,7 @@
 
 #include "core/object_factory.hpp"
 
-#include "fmt/core.h"
+#include "fmt/format.h"
 
 DE_VERTEXWAHN_BEGIN_NAMESPACE
 

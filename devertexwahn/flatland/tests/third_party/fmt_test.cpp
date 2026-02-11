@@ -3,7 +3,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
-#include "fmt/core.h"
+#include "fmt/format.h"
 
 #include "gmock/gmock.h"
 

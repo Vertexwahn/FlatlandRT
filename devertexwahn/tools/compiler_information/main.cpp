@@ -1,11 +1,10 @@
 /*
-  *  SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+  *  SPDX-FileCopyrightText: Copyright 2026 Julian Amann <dev@vertexwahn.de>
   *  SPDX-License-Identifier: Apache-2.0
   */
 
 #include "boost/predef.h"
 
-#include "fmt/core.h"
 #include "fmt/format.h"
 
 #include <map>
