@@ -1,9 +1,9 @@
 """
-    SPDX-FileCopyrightText: Copyright 2025 Julian Amann <dev@vertexwahn.de>
+    SPDX-FileCopyrightText: Copyright 2025-2026 Julian Amann <dev@vertexwahn.de>
     SPDX-License-Identifier: Apache-2.0
 """
 
-bazel_dep(name = "rules_python", version = "1.8.3")
+bazel_dep(name = "rules_python", version = "1.8.4")
 
 PYTHON_VERSION = "3.13.2"
 
