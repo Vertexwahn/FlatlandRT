@@ -599,6 +599,7 @@ add_test(
 )
 set_tests_properties(Warnings::InfiniteGenerators
   PROPERTIES
-    PASS_REGULAR_EXPRESSION "test cases: 1 \\| 1 failed"
+    # One test case fails with infinite generator, but the other one runs
+    PASS_REGULAR_EXPRESSION "test cases: 2 \\| 1 passed \\| 1 failed"
     TIMEOUT 5
 )

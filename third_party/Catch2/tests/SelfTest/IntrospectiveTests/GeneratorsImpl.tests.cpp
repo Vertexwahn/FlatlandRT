@@ -708,24 +708,46 @@ TEST_CASE("MapGenerator can be skipped forward efficiently",
         return i;
     };
 
-    MapGenerator<int, int, decltype(map_func)> map_generator( map_func, values( { 0, 1, 2, 3, 4, 5, 6 } ) );
-    const int map_calls_1 = map_calls;
+    SECTION( "via calls to next()" ) {
+        MapGenerator<int, int, decltype( map_func )> map_generator(
+            map_func, values( { 0, 1, 2, 3, 4, 5, 6 } ) );
+        REQUIRE( map_calls == 0 );
 
-    map_generator.skipToNthElement( 4 );
-    REQUIRE( map_generator.get() == 4 );
-    REQUIRE( map_calls == map_calls_1 + 1 );
+        map_generator.next();
+        map_generator.next();
+        map_generator.next();
+        REQUIRE( map_calls == 0 );
+        REQUIRE( map_generator.get() == 3 );
+        REQUIRE( map_calls == 1 );
+        REQUIRE( map_generator.get() == 3 );
+        REQUIRE( map_calls == 1 );
 
-    map_generator.skipToNthElement( 4 );
-    REQUIRE( map_generator.get() == 4 );
-    REQUIRE( map_calls == map_calls_1 + 1 );
+        map_generator.next();
+        REQUIRE( map_calls == 1 );
+    }
+    SECTION("via calls to skipToNthElement()") {
+        MapGenerator<int, int, decltype( map_func )> map_generator(
+            map_func, values( { 0, 1, 2, 3, 4, 5, 6 } ) );
+        REQUIRE( map_calls == 0 );
 
-    const int map_calls_2 = map_calls;
-    map_generator.skipToNthElement( 6 );
-    REQUIRE( map_generator.get() == 6 );
-    REQUIRE( map_calls == map_calls_2 + 1 );
+        map_generator.skipToNthElement( 3 );
+        map_generator.skipToNthElement( 4 );
+        REQUIRE( map_calls == 0 );
+        REQUIRE( map_generator.get() == 4 );
+        REQUIRE( map_calls == 1 );
 
-    REQUIRE_THROWS( map_generator.skipToNthElement( 7 ) );
-    REQUIRE( map_calls == map_calls_2 + 1 );
+        map_generator.skipToNthElement( 4 );
+        REQUIRE( map_generator.get() == 4 );
+        REQUIRE( map_calls == 1 );
+
+        map_generator.skipToNthElement( 6 );
+        REQUIRE( map_calls == 1 );
+        REQUIRE( map_generator.get() == 6 );
+        REQUIRE( map_calls == 2 );
+
+        REQUIRE_THROWS( map_generator.skipToNthElement( 7 ) );
+        REQUIRE( map_calls == 2 );
+    }
 }
 
 TEST_CASE( "Generator adapters properly handle isFinite",
@@ -789,4 +811,21 @@ TEMPLATE_TEST_CASE( "RandomGenerator reports itself as infinite",
     float,
     long double) {
     REQUIRE_FALSE( Catch::Generators::random( TestType{ 0 }, TestType{ 100 } ).isFinite() );
+}
+
+namespace {
+    struct NotDefaultConstructible {
+        int m_i;
+        explicit NotDefaultConstructible( int i ): m_i( i ){}
+    };
+}
+
+TEST_CASE( "MapGenerator can handle not default constructible types",
+           "[generators][map]" ) {
+    using namespace Catch::Generators;
+    auto map_generator = map( []( int i ) { return NotDefaultConstructible( i ); }, values({1, 2, 3}));
+    REQUIRE( map_generator.get().m_i == 1 );
+    REQUIRE( map_generator.next() );
+    REQUIRE( map_generator.next() );
+    REQUIRE( map_generator.get().m_i == 3 );
 }

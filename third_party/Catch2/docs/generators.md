@@ -132,7 +132,7 @@ a test case,
 
 > `IteratorGenerator<T>` was introduced in Catch2 2.10.0.
 
-> `ConcatGenerator<T>` was introduced in Catch2 X.Y.Z
+> `ConcatGenerator<T>` was introduced in Catch2 3.13.0
 
 The generators also have associated helper functions that infer their
 type, making their usage much nicer. These are
@@ -159,7 +159,7 @@ type, making their usage much nicer. These are
 
 > `range()` for floating point numbers has been introduced in Catch2 2.11.0
 
-> `cat` has been introduced in Catch2 X.Y.Z
+> `cat` has been introduced in Catch2 3.13.0
 
 And can be used as shown in the example below to create a generator
 that returns 100 odd random number:
@@ -288,9 +288,9 @@ struct IGenerator : GeneratorUntypedBase {
 };
 ```
 
-> `skipToNthElementImpl` was added in Catch2 vX.Y.Z
+> `skipToNthElementImpl` was added in Catch2 3.13.0
 
-> `isFinite` was added in Catch2 vX.Y.Z
+> `isFinite` was added in Catch2 3.13.0
 
 However, to be able to use your custom generator inside `GENERATE`, it
 will need to be wrapped inside a `GeneratorWrapper<T>`.

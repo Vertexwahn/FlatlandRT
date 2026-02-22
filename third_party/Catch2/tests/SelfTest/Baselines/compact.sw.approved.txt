@@ -1259,14 +1259,28 @@ Approx.tests.cpp:<line number>: passed: d <= Approx( 1.22 ).epsilon(0.1) for: 1.
 <=
 Approx( 1.21999999999999997 )
 Misc.tests.cpp:<line number>: passed: with 1 message: 'was called'
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 0 for: 0 == 0
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 0 for: 0 == 0
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get() == 3 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 1 for: 1 == 1
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get() == 3 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 1 for: 1 == 1
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 1 for: 1 == 1
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 0 for: 0 == 0
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 0 for: 0 == 0
 GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get() == 4 for: 4 == 4
-GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == map_calls_1 + 1 for: 2 == 2
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 1 for: 1 == 1
 GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get() == 4 for: 4 == 4
-GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == map_calls_1 + 1 for: 2 == 2
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 1 for: 1 == 1
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 1 for: 1 == 1
 GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get() == 6 for: 6 == 6
-GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == map_calls_2 + 1 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 2 for: 2 == 2
 GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.skipToNthElement( 7 )
-GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == map_calls_2 + 1 for: 3 == 3
+GeneratorsImpl.tests.cpp:<line number>: passed: map_calls == 2 for: 2 == 2
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get().m_i == 1 for: 1 == 1
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.next() for: true
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.next() for: true
+GeneratorsImpl.tests.cpp:<line number>: passed: map_generator.get().m_i == 3 for: 3 == 3
 Matchers.tests.cpp:<line number>: passed: testStringForMatching(), ContainsSubstring( "string" ) && ContainsSubstring( "abc" ) && ContainsSubstring( "substring" ) && ContainsSubstring( "contains" ) for: "this string contains 'abc' as a substring" ( contains: "string" and contains: "abc" and contains: "substring" and contains: "contains" )
 Matchers.tests.cpp:<line number>: passed: testStringForMatching(), ContainsSubstring( "string" ) || ContainsSubstring( "different" ) || ContainsSubstring( "random" ) for: "this string contains 'abc' as a substring" ( contains: "string" or contains: "different" or contains: "random" )
 Matchers.tests.cpp:<line number>: passed: testStringForMatching2(), ContainsSubstring( "string" ) || ContainsSubstring( "different" ) || ContainsSubstring( "random" ) for: "some completely different text that contains one common word" ( contains: "string" or contains: "different" or contains: "random" )
@@ -1425,6 +1439,29 @@ Parse.tests.cpp:<line number>: passed: !(parseUInt( "0x<hex digits>", 10 )) for:
 TestSpecParser.tests.cpp:<line number>: passed: spec.hasFilters() for: true
 TestSpecParser.tests.cpp:<line number>: passed: spec.getInvalidSpecs().empty() for: true
 TestSpecParser.tests.cpp:<line number>: passed: spec.matches( testCase ) for: true
+CmdLine.tests.cpp:<line number>: passed: result for: {?}
+CmdLine.tests.cpp:<line number>: passed: !(config.useNewPathFilteringBehaviour) for: !false
+CmdLine.tests.cpp:<line number>: passed: result for: {?}
+CmdLine.tests.cpp:<line number>: passed: config.useNewPathFilteringBehaviour for: true
+CmdLine.tests.cpp:<line number>: passed: !(result) for: !{?}
+CmdLine.tests.cpp:<line number>: passed: result for: {?}
+CmdLine.tests.cpp:<line number>: passed: config.pathFilters[0] == PathFilter( PathFilter::For::Generator, "*" ) for: {?} == {?}
+CmdLine.tests.cpp:<line number>: passed: !(result) for: !{?}
+CmdLine.tests.cpp:<line number>: passed: result for: {?}
+CmdLine.tests.cpp:<line number>: passed: config.useNewPathFilteringBehaviour for: true
+CmdLine.tests.cpp:<line number>: passed: config.pathFilters[0] == PathFilter( PathFilter::For::Generator, "1" ) for: {?} == {?}
+CmdLine.tests.cpp:<line number>: passed: config.pathFilters[1] == PathFilter( PathFilter::For::Section, "foobar" ) for: {?} == {?}
+CmdLine.tests.cpp:<line number>: passed: !(result) for: !{?}
+CmdLine.tests.cpp:<line number>: passed: !(result1) for: !{?}
+CmdLine.tests.cpp:<line number>: passed: !(result2) for: !{?}
+CmdLine.tests.cpp:<line number>: passed: result for: {?}
+CmdLine.tests.cpp:<line number>: passed: config.pathFilters[0] == PathFilter( PathFilter::For::Section, "foo-bar" ) for: {?} == {?}
+CmdLine.tests.cpp:<line number>: passed: config.pathFilters[1] == PathFilter( PathFilter::For::Generator, "3" ) for: {?} == {?}
+CmdLine.tests.cpp:<line number>: passed: config.pathFilters[2] == PathFilter( PathFilter::For::Generator, "123" ) for: {?} == {?}
+CmdLine.tests.cpp:<line number>: passed: config.pathFilters[3] == PathFilter( PathFilter::For::Section, "baz" ) for: {?} == {?}
+CmdLine.tests.cpp:<line number>: passed: result for: {?}
+CmdLine.tests.cpp:<line number>: passed: config.pathFilters[0] == PathFilter(PathFilter::For::Section, "untrimmed" ) for: {?} == {?}
+CmdLine.tests.cpp:<line number>: passed: config.pathFilters[1] == PathFilter(PathFilter::For::Generator, "42" ) for: {?} == {?}
 CmdLine.tests.cpp:<line number>: passed: cli.parse({ "test", "--shard-count=8" }) for: {?}
 CmdLine.tests.cpp:<line number>: passed: config.shardCount == 8 for: 8 == 8
 CmdLine.tests.cpp:<line number>: passed: !(result) for: !{?}
@@ -2960,7 +2997,7 @@ InternalBenchmark.tests.cpp:<line number>: passed: med == 18. for: 18.0 == 18.0
 InternalBenchmark.tests.cpp:<line number>: passed: q3 == 23. for: 23.0 == 23.0
 Misc.tests.cpp:<line number>: passed:
 Misc.tests.cpp:<line number>: passed:
-test cases:  448 |  328 passed |  96 failed | 6 skipped | 18 failed as expected
-assertions: 2376 | 2175 passed | 158 failed | 43 failed as expected
+test cases:  450 |  330 passed |  96 failed | 6 skipped | 18 failed as expected
+assertions: 2413 | 2212 passed | 158 failed | 43 failed as expected
 
 

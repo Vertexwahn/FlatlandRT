@@ -31,6 +31,7 @@
 #include <map>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <ostream>
 #include <random>
 #include <set>
@@ -53,7 +54,6 @@
 #include "absl/container/internal/container_memory.h"
 #include "absl/container/internal/hash_function_defaults.h"
 #include "absl/container/internal/hash_policy_testing.h"
-#include "absl/random/random.h"
 #include "absl/container/internal/hashtable_control_bytes.h"
 #include "absl/container/internal/hashtable_debug.h"
 #include "absl/container/internal/hashtablez_sampler.h"
@@ -68,9 +68,9 @@
 #include "absl/memory/memory.h"
 #include "absl/meta/type_traits.h"
 #include "absl/numeric/int128.h"
+#include "absl/random/random.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "absl/types/optional.h"
 
 namespace absl {
 ABSL_NAMESPACE_BEGIN
@@ -2831,7 +2831,6 @@ TYPED_TEST(RawHashSamplerTest, Sample) {
   absl::flat_hash_set<const HashtablezInfo*> preexisting_info(10);
   absl::flat_hash_map<size_t, int> observed_checksums(10);
   absl::flat_hash_map<ssize_t, int> reservations(10);
-  absl::flat_hash_map<std::pair<size_t, size_t>, int> hit_misses(10);
 
   start_size += sampler.Iterate([&](const HashtablezInfo& info) {
     preexisting_info.insert(&info);
@@ -2844,8 +2843,6 @@ TYPED_TEST(RawHashSamplerTest, Sample) {
 
     const bool do_reserve = (i % 10 > 5);
     const bool do_rehash = !do_reserve && (i % 10 > 0);
-    const bool do_first_insert_hit = i % 2 == 0;
-    const bool do_second_insert_hit = i % 4 == 0;
 
     if (do_reserve) {
       // Don't reserve on all tables.
@@ -2853,14 +2850,7 @@ TYPED_TEST(RawHashSamplerTest, Sample) {
     }
 
     tables.back().insert(1);
-    if (do_first_insert_hit) {
-      tables.back().insert(1);
-      tables.back().insert(1);
-    }
     tables.back().insert(i % 5);
-    if (do_second_insert_hit) {
-      tables.back().insert(i % 5);
-    }
 
     if (do_rehash) {
       // Rehash some other tables.
@@ -2872,10 +2862,6 @@ TYPED_TEST(RawHashSamplerTest, Sample) {
     ++end_size;
     if (preexisting_info.contains(&info)) return;
     reservations[info.max_reserve.load(std::memory_order_relaxed)]++;
-    hit_misses[std::make_pair(
-        info.num_insert_hits.load(std::memory_order_relaxed),
-        info.size.load(std::memory_order_relaxed))]++;
-
     EXPECT_EQ(info.inline_element_size, sizeof(typename TypeParam::value_type));
     EXPECT_EQ(info.key_size, sizeof(typename TypeParam::key_type));
     EXPECT_EQ(info.value_size, sizeof(typename TypeParam::value_type));
@@ -2899,21 +2885,6 @@ TYPED_TEST(RawHashSamplerTest, Sample) {
     EXPECT_NEAR((100 * count) / static_cast<double>(tables.size()), 0.1, 0.05)
         << reservation;
   }
-
-  EXPECT_THAT(hit_misses, testing::SizeIs(6));
-  const double sampled_tables = end_size - start_size;
-  // i % 20: { 1, 11 }
-  EXPECT_NEAR((hit_misses[{1, 1}] / sampled_tables), 0.10, 0.02);
-  // i % 20: { 6 }
-  EXPECT_NEAR((hit_misses[{3, 1}] / sampled_tables), 0.05, 0.02);
-  // i % 20: { 0, 4, 8, 12 }
-  EXPECT_NEAR((hit_misses[{3, 2}] / sampled_tables), 0.20, 0.02);
-  // i % 20: { 2, 10, 14, 18 }
-  EXPECT_NEAR((hit_misses[{2, 2}] / sampled_tables), 0.20, 0.02);
-  // i % 20: { 16 }
-  EXPECT_NEAR((hit_misses[{4, 1}] / sampled_tables), 0.05, 0.02);
-  // i % 20: { 3, 5, 7, 9, 13, 15, 17, 19 }
-  EXPECT_NEAR((hit_misses[{0, 2}] / sampled_tables), 0.40, 0.02);
 }
 
 std::vector<const HashtablezInfo*> SampleSooMutation(
@@ -3869,7 +3840,7 @@ struct DestroyCaller {
   ~DestroyCaller() {
     if (destroy_func) (*destroy_func)();
   }
-  void Deactivate() { destroy_func = absl::nullopt; }
+  void Deactivate() { destroy_func = std::nullopt; }
 
   template <typename H>
   friend H AbslHashValue(H h, const DestroyCaller& d) {
@@ -3878,7 +3849,7 @@ struct DestroyCaller {
   bool operator==(const DestroyCaller& d) const { return val == d.val; }
 
   int val;
-  absl::optional<absl::FunctionRef<void()>> destroy_func;
+  std::optional<absl::FunctionRef<void()>> destroy_func;
 };
 
 TEST(Table, ReentrantCallsFail) {
@@ -3926,7 +3897,7 @@ TEST(Table, DestroyedCallsFail) {
 #if !defined(__clang__) && defined(__GNUC__)
   GTEST_SKIP() << "Flaky on GCC.";
 #endif
-  absl::optional<IntTable> t;
+  std::optional<IntTable> t;
   t.emplace({1});
   IntTable* t_ptr = &*t;
   EXPECT_TRUE(t_ptr->contains(1));
@@ -3954,7 +3925,7 @@ TEST(Table, DestroyedCallsFailDuringDestruction) {
   bool do_lookup = false;
 
   using Table = absl::flat_hash_map<int, std::shared_ptr<int>>;
-  absl::optional<Table> t = Table();
+  std::optional<Table> t = Table();
   Table* t_ptr = &*t;
   auto destroy = [&](int* ptr) {
     if (do_lookup) {

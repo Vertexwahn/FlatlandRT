@@ -9,6 +9,7 @@
 #define CATCH_GENERATORS_HPP_INCLUDED
 
 #include <catch2/catch_tostring.hpp>
+#include <catch2/generators/catch_generators_throw.hpp>
 #include <catch2/interfaces/catch_interfaces_generatortracker.hpp>
 #include <catch2/internal/catch_source_line_info.hpp>
 #include <catch2/internal/catch_stringref.hpp>
@@ -21,14 +22,6 @@
 namespace Catch {
 
 namespace Generators {
-
-namespace Detail {
-
-    //! Throws GeneratorException with the provided message
-    [[noreturn]]
-    void throw_generator_exception(char const * msg);
-
-} // end namespace detail
 
     template<typename T>
     class IGenerator : public GeneratorUntypedBase {
@@ -66,6 +59,7 @@ namespace Detail {
         }
 
         bool isFinite() const { return m_generator->isFinite(); }
+        void skipToNthElement( size_t n ) { m_generator->skipToNthElement(n); }
     };
 
 

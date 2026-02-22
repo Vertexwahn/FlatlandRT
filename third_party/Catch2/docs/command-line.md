@@ -52,6 +52,8 @@ Click one of the following links to take you straight to that option - or scroll
 <a href="#reporting-timings">                           `    -d, --durations`</a><br />
 <a href="#input-file">                                  `    -f, --input-file`</a><br />
 <a href="#run-section">                                 `    -c, --section`</a><br />
+<a href="#path-filtering">                              `    -g, --generator-index`</a><br />
+<a href="#path-filtering">                              `    -p, --path-filter`</a><br />
 <a href="#filenames-as-tags">                           `    -#, --filenames-as-tags`</a><br />
 
 
@@ -287,9 +289,10 @@ as follows:
 | Option             | `normal` (default)              | `quiet`             | `high`                                  |
 |--------------------|---------------------------------|---------------------|-----------------------------------------|
 | `--list-tests`     | Test names and tags             | Test names only     | Same as `normal`, plus source code line |
-| `--list-tags`      | Tags and counts                 | Same as `normal`    | Same as `normal`                        |
+| `--list-tags`      | Tags and counts                 | Tags only           | Same as `normal`                        |
 | `--list-reporters` | Reporter names and descriptions | Reporter names only | Same as `normal`                        |
-| `--list-listeners` | Listener names and descriptions | Same as `normal`    | Same as `normal`                        |
+| `--list-listeners` | Listener names and descriptions | Listener names only | Same as `normal`                        |
+
 
 <a id="sending-output-to-a-file"></a>
 ## Sending output to a file
@@ -363,7 +366,7 @@ There are currently two warnings implemented:
 
 > `UnmatchedTestSpec` was introduced in Catch2 3.0.1.
 
-> `InfiniteGenerators` was introduced in Catch2 vX.Y.Z
+> `InfiniteGenerators` was introduced in Catch2 3.13.0
 
 
 <a id="reporting-timings"></a>
@@ -532,45 +535,19 @@ Prints the command line arguments to stdout
 
 
 <a id="run-section"></a>
-## Specify the section to run
+<a id="path-filtering"></a>
+## Specify the section/generator element to run
 <pre>-c, --section &lt;section name&gt;</pre>
+<pre>-g, --generator-index &lt;index in generator&gt;</pre>
+<pre>-p, --path-filter &lt;path filter spec&gt;</pre>
 
-To limit execution to a specific section within a test case, use this option one or more times.
-To narrow to sub-sections use multiple instances, where each subsequent instance specifies a deeper nesting level.
+> The generator and generic path filtering was added in Catch2 3.13.0
 
-E.g. if you have:
+These arguments allow you to run specific section(s) in a test case, or
+only get specific element from a generator. All the variants form a shared
+stack of filters.
 
-<pre>
-TEST_CASE( "Test" ) {
-  SECTION( "sa" ) {
-    SECTION( "sb" ) {
-      /*...*/
-    }
-    SECTION( "sc" ) {
-      /*...*/
-    }
-  }
-  SECTION( "sd" ) {
-    /*...*/
-  }
-}
-</pre>
-
-Then you can run `sb` with:
-<pre>./MyExe Test -c sa -c sb</pre>
-
-Or run just `sd` with:
-<pre>./MyExe Test -c sd</pre>
-
-To run all of `sa`, including `sb` and `sc` use:
-<pre>./MyExe Test -c sa</pre>
-
-There are some limitations of this feature to be aware of:
-- Code outside of sections being skipped will still be executed - e.g. any set-up code in the TEST_CASE before the
-start of the first section.</br>
-- At time of writing, wildcards are not supported in section names.
-- If you specify a section without narrowing to a test case first then all test cases will be executed
-(but only matching sections within them).
+[See the full documentation of path filtering for more details](filtering-execution-path.md#top)
 
 
 <a id="filenames-as-tags"></a>

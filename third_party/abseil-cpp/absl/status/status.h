@@ -53,6 +53,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <utility>
@@ -583,32 +584,32 @@ class ABSL_ATTRIBUTE_TRIVIAL_ABI Status final {
   // Status::GetPayload()
   //
   // Gets the payload of a status given its unique `type_url` key, if present.
-  absl::optional<absl::Cord> GetPayload(absl::string_view type_url) const;
+std::optional<absl::Cord> GetPayload(absl::string_view type_url) const;
 
-  // Status::SetPayload()
-  //
-  // Sets the payload for a non-ok status using a `type_url` key, overwriting
-  // any existing payload for that `type_url`.
-  //
-  // NOTE: This function does nothing if the Status is ok.
-  void SetPayload(absl::string_view type_url, absl::Cord payload);
+// Status::SetPayload()
+//
+// Sets the payload for a non-ok status using a `type_url` key, overwriting
+// any existing payload for that `type_url`.
+//
+// NOTE: This function does nothing if the Status is ok.
+void SetPayload(absl::string_view type_url, absl::Cord payload);
 
-  // Status::ErasePayload()
-  //
-  // Erases the payload corresponding to the `type_url` key.  Returns `true` if
-  // the payload was present.
-  bool ErasePayload(absl::string_view type_url);
+// Status::ErasePayload()
+//
+// Erases the payload corresponding to the `type_url` key.  Returns `true` if
+// the payload was present.
+bool ErasePayload(absl::string_view type_url);
 
-  // Status::ForEachPayload()
-  //
-  // Iterates over the stored payloads and calls the
-  // `visitor(type_key, payload)` callable for each one.
-  //
-  // NOTE: The order of calls to `visitor()` is not specified and may change at
-  // any time.
-  //
-  // NOTE: Any mutation on the same 'absl::Status' object during visitation is
-  // forbidden and could result in undefined behavior.
+// Status::ForEachPayload()
+//
+// Iterates over the stored payloads and calls the
+// `visitor(type_key, payload)` callable for each one.
+//
+// NOTE: The order of calls to `visitor()` is not specified and may change at
+// any time.
+//
+// NOTE: Any mutation on the same 'absl::Status' object during visitation is
+// forbidden and could result in undefined behavior.
   void ForEachPayload(
       absl::FunctionRef<void(absl::string_view, const absl::Cord&)> visitor)
       const;
@@ -862,9 +863,9 @@ inline void swap(absl::Status& a, absl::Status& b) noexcept {
   swap(a.rep_, b.rep_);
 }
 
-inline absl::optional<absl::Cord> Status::GetPayload(
+inline std::optional<absl::Cord> Status::GetPayload(
     absl::string_view type_url) const {
-  if (IsInlined(rep_)) return absl::nullopt;
+  if (IsInlined(rep_)) return std::nullopt;
   return RepToPointer(rep_)->GetPayload(type_url);
 }
 

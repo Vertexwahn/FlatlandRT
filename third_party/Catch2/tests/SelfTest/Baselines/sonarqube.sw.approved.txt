@@ -64,6 +64,17 @@ at AssertionHandler.tests.cpp:<line number>
     <testCase name="is_unary_function" duration="{duration}"/>
   </file>
   <file path="tests/<exe-name>/IntrospectiveTests/CmdLine.tests.cpp">
+    <testCase name="Parsing path filter specs" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Only section specs leads to old filter behaviour" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Generator specs enable new filter behaviour" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Generator specs do not accept stringish arguments" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Generator specs accept star as argument" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Generator specs do not accept negative numbers" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Generic path spec enables new filter behaviour" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Generic path spec for generator is validated" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Generic path spec without colon is rejected" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Using both section and generator filters creates filter stack" duration="{duration}"/>
+    <testCase name="Parsing path filter specs/Section/generator filters are whitespace trimmed" duration="{duration}"/>
     <testCase name="Parsing sharding-related cli flags" duration="{duration}"/>
     <testCase name="Parsing sharding-related cli flags/shard-count" duration="{duration}"/>
     <testCase name="Parsing sharding-related cli flags/Negative shard count reports error" duration="{duration}"/>
@@ -195,6 +206,9 @@ at AssertionHandler.tests.cpp:<line number>
     <testCase name="Generators internals/Range/Negative manual step/Integer/Slightly over end" duration="{duration}"/>
     <testCase name="Generators internals/Range/Negative manual step/Integer/Slightly under end" duration="{duration}"/>
     <testCase name="MapGenerator can be skipped forward efficiently" duration="{duration}"/>
+    <testCase name="MapGenerator can be skipped forward efficiently/via calls to next()" duration="{duration}"/>
+    <testCase name="MapGenerator can be skipped forward efficiently/via calls to skipToNthElement()" duration="{duration}"/>
+    <testCase name="MapGenerator can handle not default constructible types" duration="{duration}"/>
     <testCase name="RandomGenerator reports itself as infinite - float" duration="{duration}"/>
     <testCase name="RandomGenerator reports itself as infinite - int" duration="{duration}"/>
     <testCase name="RandomGenerator reports itself as infinite - long double" duration="{duration}"/>

@@ -34,3 +34,7 @@ namespace {
 TEST_CASE() {
     auto _ = GENERATE( make_infinite_generator() );
 }
+
+TEST_CASE() {
+    REQUIRE(true);
+}

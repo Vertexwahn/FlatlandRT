@@ -30,7 +30,7 @@ started" as the extra info.
 
 > `UNSCOPED_INFO` was [introduced](https://github.com/catchorg/Catch2/issues/1522) in Catch2 2.7.0.
 
-> `UNSCOPED_CAPTURE` was introduced in Catch2 X.Y.Z.
+> `UNSCOPED_CAPTURE` was introduced in Catch2 3.13.0.
 
 The `UNSCOPED_X` macros are similar to their plain `X` macro counterparts,
 with two key differences:
@@ -137,7 +137,7 @@ AS `FAIL`, but does not abort the test
 
 **UNSCOPED_CAPTURE(** _expression1_, _expression2_, ... **)**
 
-> `UNSCOPED_CAPTURE` was introduced in Catch2 X.Y.Z.
+> `UNSCOPED_CAPTURE` was introduced in Catch2 3.13.0.
 
 Sometimes you just want to log a value of variable, or expression. For
 convenience, we provide the `CAPTURE` macro, that can take a variable,

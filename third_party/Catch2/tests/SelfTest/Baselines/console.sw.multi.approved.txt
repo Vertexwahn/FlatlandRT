@@ -8253,19 +8253,72 @@ with message:
 
 -------------------------------------------------------------------------------
 MapGenerator can be skipped forward efficiently
+  via calls to next()
 -------------------------------------------------------------------------------
 GeneratorsImpl.tests.cpp:<line number>
 ...............................................................................
 
 GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == 0 )
+with expansion:
+  0 == 0
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == 0 )
+with expansion:
+  0 == 0
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_generator.get() == 3 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == 1 )
+with expansion:
+  1 == 1
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_generator.get() == 3 )
+with expansion:
+  3 == 3
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == 1 )
+with expansion:
+  1 == 1
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == 1 )
+with expansion:
+  1 == 1
+
+-------------------------------------------------------------------------------
+MapGenerator can be skipped forward efficiently
+  via calls to skipToNthElement()
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == 0 )
+with expansion:
+  0 == 0
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == 0 )
+with expansion:
+  0 == 0
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
   REQUIRE( map_generator.get() == 4 )
 with expansion:
   4 == 4
 
 GeneratorsImpl.tests.cpp:<line number>: PASSED:
-  REQUIRE( map_calls == map_calls_1 + 1 )
+  REQUIRE( map_calls == 1 )
 with expansion:
-  2 == 2
+  1 == 1
 
 GeneratorsImpl.tests.cpp:<line number>: PASSED:
   REQUIRE( map_generator.get() == 4 )
@@ -8273,9 +8326,14 @@ with expansion:
   4 == 4
 
 GeneratorsImpl.tests.cpp:<line number>: PASSED:
-  REQUIRE( map_calls == map_calls_1 + 1 )
+  REQUIRE( map_calls == 1 )
 with expansion:
-  2 == 2
+  1 == 1
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_calls == 1 )
+with expansion:
+  1 == 1
 
 GeneratorsImpl.tests.cpp:<line number>: PASSED:
   REQUIRE( map_generator.get() == 6 )
@@ -8283,15 +8341,41 @@ with expansion:
   6 == 6
 
 GeneratorsImpl.tests.cpp:<line number>: PASSED:
-  REQUIRE( map_calls == map_calls_2 + 1 )
+  REQUIRE( map_calls == 2 )
 with expansion:
-  3 == 3
+  2 == 2
 
 GeneratorsImpl.tests.cpp:<line number>: PASSED:
   REQUIRE_THROWS( map_generator.skipToNthElement( 7 ) )
 
 GeneratorsImpl.tests.cpp:<line number>: PASSED:
-  REQUIRE( map_calls == map_calls_2 + 1 )
+  REQUIRE( map_calls == 2 )
+with expansion:
+  2 == 2
+
+-------------------------------------------------------------------------------
+MapGenerator can handle not default constructible types
+-------------------------------------------------------------------------------
+GeneratorsImpl.tests.cpp:<line number>
+...............................................................................
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_generator.get().m_i == 1 )
+with expansion:
+  1 == 1
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_generator.next() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_generator.next() )
+with expansion:
+  true
+
+GeneratorsImpl.tests.cpp:<line number>: PASSED:
+  REQUIRE( map_generator.get().m_i == 3 )
 with expansion:
   3 == 3
 
@@ -9227,6 +9311,191 @@ TestSpecParser.tests.cpp:<line number>: PASSED:
   REQUIRE( spec.matches( testCase ) )
 with expansion:
   true
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Only section specs leads to old filter behaviour
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( result )
+with expansion:
+  {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( config.useNewPathFilteringBehaviour )
+with expansion:
+  !false
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Generator specs enable new filter behaviour
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( result )
+with expansion:
+  {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.useNewPathFilteringBehaviour )
+with expansion:
+  true
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Generator specs do not accept stringish arguments
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( result )
+with expansion:
+  !{?}
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Generator specs accept star as argument
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( result )
+with expansion:
+  {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.pathFilters[0] == PathFilter( PathFilter::For::Generator, "*" ) )
+with expansion:
+  {?} == {?}
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Generator specs do not accept negative numbers
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( result )
+with expansion:
+  !{?}
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Generic path spec enables new filter behaviour
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( result )
+with expansion:
+  {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.useNewPathFilteringBehaviour )
+with expansion:
+  true
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.pathFilters[0] == PathFilter( PathFilter::For::Generator, "1" ) )
+with expansion:
+  {?} == {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.pathFilters[1] == PathFilter( PathFilter::For::Section, "foobar" ) )
+with expansion:
+  {?} == {?}
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Generic path spec for generator is validated
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( result )
+with expansion:
+  !{?}
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Generic path spec without colon is rejected
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( result1 )
+with expansion:
+  !{?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE_FALSE( result2 )
+with expansion:
+  !{?}
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Using both section and generator filters creates filter stack
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( result )
+with expansion:
+  {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.pathFilters[0] == PathFilter( PathFilter::For::Section, "foo-bar" ) )
+with expansion:
+  {?} == {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.pathFilters[1] == PathFilter( PathFilter::For::Generator, "3" ) )
+with expansion:
+  {?} == {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.pathFilters[2] == PathFilter( PathFilter::For::Generator, "123" ) )
+with expansion:
+  {?} == {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.pathFilters[3] == PathFilter( PathFilter::For::Section, "baz" ) )
+with expansion:
+  {?} == {?}
+
+-------------------------------------------------------------------------------
+Parsing path filter specs
+  Section/generator filters are whitespace trimmed
+-------------------------------------------------------------------------------
+CmdLine.tests.cpp:<line number>
+...............................................................................
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( result )
+with expansion:
+  {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.pathFilters[0] == PathFilter(PathFilter::For::Section, "untrimmed" ) )
+with expansion:
+  {?} == {?}
+
+CmdLine.tests.cpp:<line number>: PASSED:
+  REQUIRE( config.pathFilters[1] == PathFilter(PathFilter::For::Generator, "42" ) )
+with expansion:
+  {?} == {?}
 
 -------------------------------------------------------------------------------
 Parsing sharding-related cli flags
@@ -19833,6 +20102,6 @@ Misc.tests.cpp:<line number>
 Misc.tests.cpp:<line number>: PASSED:
 
 ===============================================================================
-test cases:  448 |  328 passed |  96 failed | 6 skipped | 18 failed as expected
-assertions: 2376 | 2175 passed | 158 failed | 43 failed as expected
+test cases:  450 |  330 passed |  96 failed | 6 skipped | 18 failed as expected
+assertions: 2413 | 2212 passed | 158 failed | 43 failed as expected
 

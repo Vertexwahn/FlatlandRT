@@ -765,7 +765,6 @@ absl_cc_test(
     ${ABSL_TEST_COPTS}
   DEPS
     absl::core_headers
-    absl::optional
     GTest::gtest_main
 )
 

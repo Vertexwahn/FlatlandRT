@@ -191,6 +191,7 @@
 :test-result: PASS Less-than inequalities with different epsilons
 :test-result: PASS ManuallyRegistered
 :test-result: PASS MapGenerator can be skipped forward efficiently
+:test-result: PASS MapGenerator can handle not default constructible types
 :test-result: PASS Matchers can be (AllOf) composed with the && operator
 :test-result: PASS Matchers can be (AnyOf) composed with the || operator
 :test-result: PASS Matchers can be composed with both && and ||
@@ -213,6 +214,7 @@
 :test-result: PASS Overloaded comma or address-of operators are not used
 :test-result: PASS Parse uints
 :test-result: PASS Parsed tags are matched case insensitive
+:test-result: PASS Parsing path filter specs
 :test-result: PASS Parsing sharding-related cli flags
 :test-result: PASS Parsing tags with non-alphabetical characters is pass-through
 :test-result: PASS Parsing warnings

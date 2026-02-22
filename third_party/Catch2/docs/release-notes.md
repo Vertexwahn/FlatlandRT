@@ -2,6 +2,7 @@
 
 # Release notes
 **Contents**<br>
+[3.13.0](#3130)<br>
 [3.12.0](#3120)<br>
 [3.11.0](#3110)<br>
 [3.10.0](#3100)<br>
@@ -70,6 +71,32 @@
 [2.0.1](#201)<br>
 [Older versions](#older-versions)<br>
 [Even Older versions](#even-older-versions)<br>
+
+
+## 3.13.0
+
+### Fixes
+* `--benchmark-samples 0` no longer hard crashes (#3056)
+  * The CLI validation fails instead.
+* Fixed warning suppression macros being doubly defined when using Clang on Windows (#3060)
+
+
+### Improvements
+* Suppressed static analysis 26426 diagnostic for MSVC (#3057)
+* Renamed the internal deprecation macro from `DEPRECATED` to `CATCH_DEPRECATED` to avoid conflicts (#3058)
+* Added `UNSCOPED_CAPTURE` macro (#2954)
+* Added `ConcatGenerator` to combine multiple separate generator into one
+  * The short form is `cat`
+* Generators can now jump forward to nth element efficiently
+  * Custom generators that can jump forward efficiently should override `skipToNthElementImpl`
+* Generators can declare themselves infinite
+  * The generator base defaults to declaring itself finite for backwards compatibility
+  * Custom generators should override `isFinite()` to return the proper value
+* Added `--warn InfiniteGenerators` to error out on `GENERATE` being given an infinite generator
+* Extended options for section filtering from CLI to include generators
+  * The user can specify which element from the generator to use in the test case
+  * See documentation for how the new filters work and how they can be specified
+* `MapGenerator` only calls the mapping function if the output will be used
 
 
 ## 3.12.0

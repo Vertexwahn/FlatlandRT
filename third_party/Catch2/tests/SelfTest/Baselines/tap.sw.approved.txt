@@ -2061,21 +2061,49 @@ ok {test-number} - d <= Approx( 1.22 ).epsilon(0.1) for: 1.22999999999999998 <= 
 # ManuallyRegistered
 ok {test-number} - with 1 message: 'was called'
 # MapGenerator can be skipped forward efficiently
+ok {test-number} - map_calls == 0 for: 0 == 0
+# MapGenerator can be skipped forward efficiently
+ok {test-number} - map_calls == 0 for: 0 == 0
+# MapGenerator can be skipped forward efficiently
+ok {test-number} - map_generator.get() == 3 for: 3 == 3
+# MapGenerator can be skipped forward efficiently
+ok {test-number} - map_calls == 1 for: 1 == 1
+# MapGenerator can be skipped forward efficiently
+ok {test-number} - map_generator.get() == 3 for: 3 == 3
+# MapGenerator can be skipped forward efficiently
+ok {test-number} - map_calls == 1 for: 1 == 1
+# MapGenerator can be skipped forward efficiently
+ok {test-number} - map_calls == 1 for: 1 == 1
+# MapGenerator can be skipped forward efficiently
+ok {test-number} - map_calls == 0 for: 0 == 0
+# MapGenerator can be skipped forward efficiently
+ok {test-number} - map_calls == 0 for: 0 == 0
+# MapGenerator can be skipped forward efficiently
 ok {test-number} - map_generator.get() == 4 for: 4 == 4
 # MapGenerator can be skipped forward efficiently
-ok {test-number} - map_calls == map_calls_1 + 1 for: 2 == 2
+ok {test-number} - map_calls == 1 for: 1 == 1
 # MapGenerator can be skipped forward efficiently
 ok {test-number} - map_generator.get() == 4 for: 4 == 4
 # MapGenerator can be skipped forward efficiently
-ok {test-number} - map_calls == map_calls_1 + 1 for: 2 == 2
+ok {test-number} - map_calls == 1 for: 1 == 1
+# MapGenerator can be skipped forward efficiently
+ok {test-number} - map_calls == 1 for: 1 == 1
 # MapGenerator can be skipped forward efficiently
 ok {test-number} - map_generator.get() == 6 for: 6 == 6
 # MapGenerator can be skipped forward efficiently
-ok {test-number} - map_calls == map_calls_2 + 1 for: 3 == 3
+ok {test-number} - map_calls == 2 for: 2 == 2
 # MapGenerator can be skipped forward efficiently
 ok {test-number} - map_generator.skipToNthElement( 7 )
 # MapGenerator can be skipped forward efficiently
-ok {test-number} - map_calls == map_calls_2 + 1 for: 3 == 3
+ok {test-number} - map_calls == 2 for: 2 == 2
+# MapGenerator can handle not default constructible types
+ok {test-number} - map_generator.get().m_i == 1 for: 1 == 1
+# MapGenerator can handle not default constructible types
+ok {test-number} - map_generator.next() for: true
+# MapGenerator can handle not default constructible types
+ok {test-number} - map_generator.next() for: true
+# MapGenerator can handle not default constructible types
+ok {test-number} - map_generator.get().m_i == 3 for: 3 == 3
 # Matchers can be (AllOf) composed with the && operator
 ok {test-number} - testStringForMatching(), ContainsSubstring( "string" ) && ContainsSubstring( "abc" ) && ContainsSubstring( "substring" ) && ContainsSubstring( "contains" ) for: "this string contains 'abc' as a substring" ( contains: "string" and contains: "abc" and contains: "substring" and contains: "contains" )
 # Matchers can be (AnyOf) composed with the || operator
@@ -2328,6 +2356,52 @@ ok {test-number} - spec.hasFilters() for: true
 ok {test-number} - spec.getInvalidSpecs().empty() for: true
 # Parsed tags are matched case insensitive
 ok {test-number} - spec.matches( testCase ) for: true
+# Parsing path filter specs
+ok {test-number} - result for: {?}
+# Parsing path filter specs
+ok {test-number} - !(config.useNewPathFilteringBehaviour) for: !false
+# Parsing path filter specs
+ok {test-number} - result for: {?}
+# Parsing path filter specs
+ok {test-number} - config.useNewPathFilteringBehaviour for: true
+# Parsing path filter specs
+ok {test-number} - !(result) for: !{?}
+# Parsing path filter specs
+ok {test-number} - result for: {?}
+# Parsing path filter specs
+ok {test-number} - config.pathFilters[0] == PathFilter( PathFilter::For::Generator, "*" ) for: {?} == {?}
+# Parsing path filter specs
+ok {test-number} - !(result) for: !{?}
+# Parsing path filter specs
+ok {test-number} - result for: {?}
+# Parsing path filter specs
+ok {test-number} - config.useNewPathFilteringBehaviour for: true
+# Parsing path filter specs
+ok {test-number} - config.pathFilters[0] == PathFilter( PathFilter::For::Generator, "1" ) for: {?} == {?}
+# Parsing path filter specs
+ok {test-number} - config.pathFilters[1] == PathFilter( PathFilter::For::Section, "foobar" ) for: {?} == {?}
+# Parsing path filter specs
+ok {test-number} - !(result) for: !{?}
+# Parsing path filter specs
+ok {test-number} - !(result1) for: !{?}
+# Parsing path filter specs
+ok {test-number} - !(result2) for: !{?}
+# Parsing path filter specs
+ok {test-number} - result for: {?}
+# Parsing path filter specs
+ok {test-number} - config.pathFilters[0] == PathFilter( PathFilter::For::Section, "foo-bar" ) for: {?} == {?}
+# Parsing path filter specs
+ok {test-number} - config.pathFilters[1] == PathFilter( PathFilter::For::Generator, "3" ) for: {?} == {?}
+# Parsing path filter specs
+ok {test-number} - config.pathFilters[2] == PathFilter( PathFilter::For::Generator, "123" ) for: {?} == {?}
+# Parsing path filter specs
+ok {test-number} - config.pathFilters[3] == PathFilter( PathFilter::For::Section, "baz" ) for: {?} == {?}
+# Parsing path filter specs
+ok {test-number} - result for: {?}
+# Parsing path filter specs
+ok {test-number} - config.pathFilters[0] == PathFilter(PathFilter::For::Section, "untrimmed" ) for: {?} == {?}
+# Parsing path filter specs
+ok {test-number} - config.pathFilters[1] == PathFilter(PathFilter::For::Generator, "42" ) for: {?} == {?}
 # Parsing sharding-related cli flags
 ok {test-number} - cli.parse({ "test", "--shard-count=8" }) for: {?}
 # Parsing sharding-related cli flags
@@ -4771,5 +4845,5 @@ ok {test-number} - q3 == 23. for: 23.0 == 23.0
 ok {test-number} -
 # xmlentitycheck
 ok {test-number} -
-1..2388
+1..2425
 
