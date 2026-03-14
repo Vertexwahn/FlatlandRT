@@ -1030,6 +1030,7 @@ struct is_view : std::false_type {};
 template <typename T>
 struct is_view<T, bool_constant<sizeof(T) != 0>> : std::is_base_of<view, T> {};
 
+// DEPRECATED! named_arg will be moved to the fmt namespace.
 template <typename T, typename Char> struct named_arg;
 template <typename T> struct is_named_arg : std::false_type {};
 template <typename T> struct is_static_named_arg : std::false_type {};
@@ -1808,6 +1809,7 @@ template <typename T> class buffer {
   /// Appends data to the end of the buffer.
   template <typename U>
   FMT_CONSTEXPR20 void append(const U* begin, const U* end) {
+    static_assert(std::is_same<T, U>() || std::is_same<U, char>(), "");
     while (begin != end) {
       auto size = size_;
       auto free_cap = capacity_ - size;
@@ -1820,7 +1822,7 @@ template <typename T> class buffer {
       }
       // A loop is faster than memcpy on small sizes.
       T* out = ptr_ + size;
-      for (size_t i = 0; i < count; ++i) out[i] = begin[i];
+      for (size_t i = 0; i < count; ++i) out[i] = static_cast<T>(begin[i]);
       size_ += count;
       begin += count;
     }
@@ -2342,6 +2344,9 @@ inline void vprint_mojibake(FILE*, string_view, const format_args&, bool) {}
 
 // The main public API.
 
+template <typename T, typename Char = char>
+using named_arg = detail::named_arg<T, Char>;
+
 template <typename Char>
 FMT_CONSTEXPR void parse_context<Char>::do_check_arg_id(int arg_id) {
   // Argument id is only checked at compile time during parsing because
@@ -2718,7 +2723,7 @@ using vargs =
  * sufficiently new compilers. See `operator""_a()`.
  */
 template <typename T>
-inline auto arg(const char* name, const T& arg) -> detail::named_arg<T> {
+inline auto arg(const char* name, const T& arg) -> named_arg<T> {
   return {name, arg};
 }
 

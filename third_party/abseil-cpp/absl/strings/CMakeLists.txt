@@ -86,6 +86,8 @@ absl_cc_library(
     absl::memory
     absl::nullability
     absl::raw_logging_internal
+    absl::source_location
+    absl::strings
     absl::throw_delegate
     absl::type_traits
   PUBLIC
@@ -114,6 +116,32 @@ absl_cc_library(
   DEPS
     absl::config
   PUBLIC
+)
+
+absl_cc_library(
+  NAME
+    stringify_stream
+  HDRS
+    "internal/stringify_stream.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  DEPS
+    absl::string_view
+    absl::config
+)
+
+absl_cc_test(
+  NAME
+    stringify_stream_test
+  SRCS
+    "internal/stringify_stream_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  DEPS
+    absl::string_view
+    absl::stringify_stream
+    absl::str_format
+    GTest::gmock_main
 )
 
 # Internal-only target, do not depend on directly.

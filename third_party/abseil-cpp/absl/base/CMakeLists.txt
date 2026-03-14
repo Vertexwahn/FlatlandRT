@@ -43,6 +43,20 @@ absl_cc_library(
 
 absl_cc_library(
   NAME
+    hardening
+  HDRS
+    "internal/hardening.h"
+  SRCS
+    "internal/hardening.cc"
+  DEPS
+    absl::config
+    absl::core_headers
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+)
+
+absl_cc_library(
+  NAME
     log_severity
   HDRS
     "log_severity.h"
@@ -401,6 +415,19 @@ absl_cc_test(
   DEPS
     absl::config
     absl::core_headers
+    GTest::gtest_main
+)
+
+absl_cc_test(
+  NAME
+    hardening_test
+  SRCS
+    "internal/hardening_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  DEPS
+    absl::config
+    absl::hardening
     GTest::gtest_main
 )
 

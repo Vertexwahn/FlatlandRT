@@ -1071,7 +1071,7 @@ using uint64_or_128_t = conditional_t<num_bits<T>() <= 64, uint64_t, uint128_t>;
 inline auto digits2(size_t value) noexcept -> const char* {
   // Align data since unaligned access may be slower when crossing a
   // hardware-specific boundary.
-  alignas(2) static const char data[] =
+  alignas(2) static constexpr char data[] =
       "0001020304050607080910111213141516171819"
       "2021222324252627282930313233343536373839"
       "4041424344454647484950515253545556575859"
@@ -1084,7 +1084,7 @@ inline auto digits2(size_t value) noexcept -> const char* {
 // the decimal point of i / 100 in base 2, the first 2 bytes
 // after digits2_i(x) is the string representation of i.
 inline auto digits2_i(size_t value) noexcept -> const char* {
-  alignas(2) static const char data[] =
+  alignas(2) static constexpr char data[] =
       "00010203  0405060707080910  1112"
       "131414151617  18192021  222324  "
       "25262728  2930313232333435  3637"
@@ -1097,8 +1097,8 @@ inline auto digits2_i(size_t value) noexcept -> const char* {
 }
 
 template <typename Char> constexpr auto getsign(sign s) -> Char {
-  return static_cast<char>(((' ' << 24) | ('+' << 16) | ('-' << 8)) >>
-                           (static_cast<int>(s) * 8));
+  return static_cast<Char>(static_cast<char>(
+      ((' ' << 24) | ('+' << 16) | ('-' << 8)) >> (static_cast<int>(s) * 8)));
 }
 
 template <typename T> FMT_CONSTEXPR auto count_digits_fallback(T n) -> int {
@@ -1219,7 +1219,7 @@ FMT_API auto thousands_sep_impl(locale_ref loc) -> thousands_sep_result<Char>;
 template <typename Char>
 inline auto thousands_sep(locale_ref loc) -> thousands_sep_result<Char> {
   auto result = thousands_sep_impl<char>(loc);
-  return {result.grouping, Char(result.thousands_sep)};
+  return {std::move(result.grouping), Char(result.thousands_sep)};
 }
 template <>
 inline auto thousands_sep(locale_ref loc) -> thousands_sep_result<wchar_t> {
@@ -1968,7 +1968,7 @@ template <typename Char> class digit_grouping {
   explicit digit_grouping(locale_ref loc, bool localized = true) {
     if (!localized) return;
     auto sep = thousands_sep<Char>(loc);
-    grouping_ = sep.grouping;
+    grouping_ = std::move(sep.grouping);
     if (sep.thousands_sep) thousands_sep_.assign(1, sep.thousands_sep);
   }
   digit_grouping(std::string grouping, std::basic_string<Char> sep)
@@ -3621,8 +3621,8 @@ FMT_CONSTEXPR20 auto write(OutputIt out, T value) -> OutputIt {
       memcpy(ptr, prefix, 2);
       ptr += 2;
     } else {
-      *ptr++ = prefix[0];
-      *ptr++ = prefix[1];
+      *ptr++ = static_cast<Char>(prefix[0]);
+      *ptr++ = static_cast<Char>(prefix[1]);
     }
     if (abs_exponent >= 100) {
       *ptr++ = static_cast<Char>('0' + abs_exponent / 100);

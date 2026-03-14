@@ -96,7 +96,8 @@ typedef signed char fmt_signed_char;
 #  else
 typedef enum {} fmt_signed_char;
 #  endif
-// Require modern MSVC with conformant preprocessor
+
+// Require modern MSVC with conformant preprocessor.
 #  if defined(_MSC_VER) && (!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL)
 #    error "C API requires MSVC 2019+ with /Zc:preprocessor flag."
 #  endif
@@ -127,12 +128,12 @@ typedef enum {} fmt_signed_char;
 #  define FMT_CAT(a, b) FMT_CAT_(a, b)
 #  define FMT_CAT_(a, b) a##b
 
-#  define FMT_NARG_(_id, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, \
-                    _13, _14, _15, _16, N, ...)                             \
+#  define FMT_NARG_(_unused, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, \
+                    _12, _13, _14, _15, _16, N, ...)                       \
     N
-#  define FMT_NARG(...)                                                        \
-    FMT_NARG_(dummy, ##__VA_ARGS__, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, \
-              4, 3, 2, 1, 0)
+#  define FMT_NARG(_unused, ...)                                             \
+    FMT_NARG_(, ##__VA_ARGS__, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, \
+              3, 2, 1, 0)
 
 #  define FMT_MAP_0(...)
 #  define FMT_MAP_1(f, a) f(a)
@@ -166,13 +167,24 @@ typedef enum {} fmt_signed_char;
         f(n), f(o), f(p), f(q)
 
 #  define FMT_MAP(f, ...) \
-    FMT_CAT(FMT_MAP_, FMT_NARG(__VA_ARGS__))(f, ##__VA_ARGS__)
+    FMT_CAT(FMT_MAP_, FMT_NARG(, ##__VA_ARGS__))(f, ##__VA_ARGS__)
+
+// select between two expressions depending on whether __VA_ARGS__ is empty
+// expands to e if __VA_ARGS__ is empty and n otherwise
+#  define FMT_VA_SELECT(e, n, ...)                                             \
+    FMT_NARG_(, ##__VA_ARGS__, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, \
+              e)
+
+#  define FMT_MAKE_NULL(...) NULL
+#  define FMT_MAKE_ARGLIST(...) \
+    (fmt_arg[]) { FMT_MAP(FMT_MAKE_ARG, ##__VA_ARGS__) }
+#  define FMT_EXPAND(v) v
 
 #  define fmt_format(buffer, size, fmt, ...)                              \
-    fmt_vformat(                                                          \
-        buffer, size, fmt,                                                \
-        (fmt_arg[]){{fmt_int}, FMT_MAP(FMT_MAKE_ARG, ##__VA_ARGS__)} + 1, \
-        FMT_NARG(__VA_ARGS__))
+    fmt_vformat((buffer), (size), (fmt),                                  \
+                FMT_EXPAND(FMT_VA_SELECT(FMT_MAKE_NULL, FMT_MAKE_ARGLIST, \
+                                         ##__VA_ARGS__)(__VA_ARGS__)),    \
+                FMT_NARG(, ##__VA_ARGS__))
 
 #endif  // __cplusplus
 

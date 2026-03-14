@@ -77,7 +77,11 @@ public:
 
     template <typename... Args>
     void log(source_loc loc, level::level_enum lvl, format_string_t<Args...> fmt, Args &&...args) {
-        log_(loc, lvl, details::to_string_view(fmt), std::forward<Args>(args)...);
+#if defined(SPDLOG_USE_STD_FORMAT) && __cpp_lib_format < 202207L
+        log_(loc, lvl, fmt, std::forward<Args>(args)...);
+#else
+        log_(loc, lvl, fmt.get(), std::forward<Args>(args)...);
+#endif
     }
 
     template <typename... Args>
@@ -158,7 +162,11 @@ public:
 #ifdef SPDLOG_WCHAR_TO_UTF8_SUPPORT
     template <typename... Args>
     void log(source_loc loc, level::level_enum lvl, wformat_string_t<Args...> fmt, Args &&...args) {
-        log_(loc, lvl, details::to_string_view(fmt), std::forward<Args>(args)...);
+#if defined(SPDLOG_USE_STD_FORMAT) && __cpp_lib_format < 202207L
+        log_(loc, lvl, fmt, std::forward<Args>(args)...);
+#else
+        log_(loc, lvl, fmt.get(), std::forward<Args>(args)...);
+#endif
     }
 
     template <typename... Args>

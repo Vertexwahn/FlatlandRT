@@ -114,6 +114,7 @@ cc_library(
         "//absl/meta:type_traits",
         "//absl/numeric:bits",
         "//absl/numeric:int128",
+        "//absl/types:source_location",
     ],
 )
 
@@ -217,6 +218,7 @@ cc_test(
         "internal/escaping_test_common.h",
     ],
     copts = ABSL_TEST_COPTS,
+    tags = ["no_test_chromiumos_x86_64"],
     visibility = ["//visibility:private"],
     deps = [
         ":cord",
@@ -417,6 +419,35 @@ cc_test(
         "//absl/base:core_headers",
         "//absl/base:dynamic_annotations",
         "//absl/meta:type_traits",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "stringify_stream",
+    hdrs = ["internal/stringify_stream.h"],
+    copts = ABSL_DEFAULT_COPTS,
+    linkopts = ABSL_DEFAULT_LINKOPTS,
+    visibility = [
+        "//visibility:private",
+    ],
+    deps = [
+        ":string_view",
+        "//absl/base:config",
+    ],
+)
+
+cc_test(
+    name = "stringify_stream_test",
+    srcs = ["internal/stringify_stream_test.cc"],
+    copts = ABSL_TEST_COPTS,
+    linkopts = ABSL_DEFAULT_LINKOPTS,
+    deps = [
+        ":string_view",
+        ":stringify_stream",
+        "//absl/base:config",
+        "//absl/strings:str_format",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
@@ -1557,6 +1588,7 @@ cc_library(
     linkopts = ABSL_DEFAULT_LINKOPTS,
     visibility = [
         "//absl:__subpackages__",
+        "//absl:friends",
     ],
     deps = [
         ":str_format",
