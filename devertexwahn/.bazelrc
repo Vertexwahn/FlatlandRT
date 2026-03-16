@@ -50,8 +50,8 @@ build:gcc13 --cxxopt=-std=c++23
 build:gcc13 --cxxopt=-Wall
 build:gcc13 --define compiler=gcc13
 build:gcc13 --cxxopt=-fpermissive # Needed for fmt
-#build:gcc13 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
-#build:gcc13 --@rules_cuda//cuda:copts=-allow-unsupported-compiler
+
+
 
 # Clang 14.0.0 (config is used on Ubuntu)
 build:clang14 --cxxopt=-std=c++20
@@ -68,9 +68,11 @@ build:clang14 --define compiler=clang14
 
 # Visual Studio 2022
 #build:vs2022 --copt=-DNOGDI
-#build:vs2022 --host_copt=-DNOGDI
-build:vs2022 --copt=-DWIN32_LEAN_AND_MEAN
 #build:vs2022 --cxxopt=/std:c++20
+#build:vs2022 --host_copt=-DNOGDI
+
+
+build:vs2022 --copt=-DWIN32_LEAN_AND_MEAN
 build:vs2022 --cxxopt=/std:c++latest # Support for C++23 features
 build:vs2022 --cxxopt=/utf-8
 build:vs2022 --cxxopt=/Zc:__cplusplus
@@ -78,6 +80,7 @@ build:vs2022 --cxxopt=/Zc:preprocessor # needed for __VA_OPT__ macro
 build:vs2022 --define compiler=vs2022
 build:vs2022 --enable_runfiles # https://github.com/bazelbuild/bazel/issues/8843
 build:vs2022 --host_copt=-DWIN32_LEAN_AND_MEAN
+
 
 build:windows --config=vs2022
 
