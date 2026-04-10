@@ -9,7 +9,7 @@ bazel_dep(name = "rules_cc", version = "0.2.17")
 # LLVM toolchain for Bazel
 #-------------------------------------------------------------------------------------
 
-bazel_dep(name = "toolchains_llvm", version = "1.6.0")
+bazel_dep(name = "toolchains_llvm", version = "1.7.0")
 #git_override(
 #    module_name = "toolchains_llvm",
 #    commit = "b3c96d2dbc698eab752366bbe747e2a7df7fa504",
