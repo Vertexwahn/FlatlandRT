@@ -15,17 +15,16 @@
 
 #include <stdint.h>  // uint32_t
 
-#include <cfenv>               // fegetexceptflag and FE_ALL_EXCEPT
-#include <climits>             // INT_MAX
-#include <cmath>               // std::signbit
-#include <condition_variable>  // std::condition_variable
-#include <cstring>             // std::strlen
-#include <iterator>            // std::back_inserter
-#include <list>                // std::list
-#include <mutex>               // std::mutex
-#include <string>              // std::string
-#include <thread>              // std::thread
-#include <type_traits>         // std::is_default_constructible
+#include <cfenv>        // fegetexceptflag and FE_ALL_EXCEPT
+#include <climits>      // INT_MAX
+#include <cmath>        // std::signbit
+#include <cstring>      // std::strlen
+#include <iterator>     // std::back_inserter
+#include <list>         // std::list
+#include <mutex>        // std::mutex
+#include <string>       // std::string
+#include <thread>       // std::thread
+#include <type_traits>  // std::is_default_constructible
 #if FMT_CPLUSPLUS > 201703L && FMT_HAS_INCLUDE(<version>)
 #  include <version>
 #endif
@@ -268,22 +267,6 @@ TEST(util_test, format_system_error) {
   fmt::format_system_error(message, EDOM, "test");
   auto ec = std::error_code(EDOM, std::generic_category());
   EXPECT_EQ(to_string(message), std::system_error(ec, "test").what());
-  message = fmt::memory_buffer();
-
-  // Check if std::allocator throws on allocating max size_t / 2 chars.
-  size_t max_size = max_value<size_t>() / 2;
-  bool throws_on_alloc = false;
-  try {
-    auto alloc = std::allocator<char>();
-    alloc.deallocate(alloc.allocate(max_size), max_size);
-  } catch (const std::bad_alloc&) {
-    throws_on_alloc = true;
-  }
-  if (!throws_on_alloc) {
-    fmt::print(stderr, "warning: std::allocator allocates {} chars\n",
-               max_size);
-    return;
-  }
 }
 
 TEST(util_test, system_error) {

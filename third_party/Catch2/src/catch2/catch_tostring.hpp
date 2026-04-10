@@ -18,7 +18,8 @@
 #include <catch2/internal/catch_config_wchar.hpp>
 #include <catch2/internal/catch_reusable_string_stream.hpp>
 #include <catch2/internal/catch_void_type.hpp>
-#include <catch2/interfaces/catch_interfaces_enum_values_registry.hpp>
+#include <catch2/internal/catch_enum_info.hpp>
+#include <catch2/internal/catch_stringref.hpp>
 
 #ifdef CATCH_CONFIG_CPP17_STRING_VIEW
 #include <string_view>
@@ -630,17 +631,21 @@ struct ratio_string<std::milli> {
     };
 }
 
-#include <catch2/interfaces/catch_interfaces_registry_hub.hpp>
-
-#define INTERNAL_CATCH_REGISTER_ENUM( enumName, ... ) \
-namespace Catch { \
-    template<> struct StringMaker<enumName> { \
-        static std::string convert( enumName value ) { \
-            static const auto& enumInfo = ::Catch::getMutableRegistryHub().getMutableEnumValuesRegistry().registerEnum( #enumName, #__VA_ARGS__, { __VA_ARGS__ } ); \
-            return static_cast<std::string>(enumInfo.lookup( static_cast<int>( value ) )); \
-        } \
-    }; \
-}
+#define INTERNAL_CATCH_REGISTER_ENUM( enumName, ... )                       \
+    namespace Catch {                                                       \
+        template <>                                                         \
+        struct StringMaker<enumName> {                                      \
+            static std::string convert( enumName value ) {                  \
+                CATCH_INTERNAL_START_WARNINGS_SUPPRESSION                   \
+                CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS                    \
+                static const auto enumInfo = ::Catch::Detail::makeEnumInfo( \
+                    #enumName, #__VA_ARGS__, { __VA_ARGS__ } );             \
+                CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION                    \
+                return static_cast<std::string>(                            \
+                    enumInfo.lookup( static_cast<int64_t>( value ) ) );     \
+            }                                                               \
+        };                                                                  \
+    }
 
 #define CATCH_REGISTER_ENUM( enumName, ... ) INTERNAL_CATCH_REGISTER_ENUM( enumName, __VA_ARGS__ )
 

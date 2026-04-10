@@ -87,7 +87,7 @@ set(IMPL_HEADERS
   ${SOURCES_DIR}/internal/catch_decomposer.hpp
   ${SOURCES_DIR}/internal/catch_deprecation_macro.hpp
   ${SOURCES_DIR}/internal/catch_enforce.hpp
-  ${SOURCES_DIR}/internal/catch_enum_values_registry.hpp
+  ${SOURCES_DIR}/internal/catch_enum_info.hpp
   ${SOURCES_DIR}/internal/catch_errno_guard.hpp
   ${SOURCES_DIR}/internal/catch_exception_translator_registry.hpp
   ${SOURCES_DIR}/internal/catch_fatal_condition_handler.hpp
@@ -181,7 +181,7 @@ set(IMPL_SOURCES
   ${SOURCES_DIR}/internal/catch_debugger.cpp
   ${SOURCES_DIR}/internal/catch_decomposer.cpp
   ${SOURCES_DIR}/internal/catch_enforce.cpp
-  ${SOURCES_DIR}/internal/catch_enum_values_registry.cpp
+  ${SOURCES_DIR}/internal/catch_enum_info.cpp
   ${SOURCES_DIR}/internal/catch_errno_guard.cpp
   ${SOURCES_DIR}/internal/catch_exception_translator_registry.cpp
   ${SOURCES_DIR}/internal/catch_fatal_condition_handler.cpp
@@ -227,7 +227,6 @@ set(INTERFACE_HEADERS
   ${SOURCES_DIR}/interfaces/catch_interfaces_all.hpp
   ${SOURCES_DIR}/interfaces/catch_interfaces_capture.hpp
   ${SOURCES_DIR}/interfaces/catch_interfaces_config.hpp
-  ${SOURCES_DIR}/interfaces/catch_interfaces_enum_values_registry.hpp
   ${SOURCES_DIR}/interfaces/catch_interfaces_exception.hpp
   ${SOURCES_DIR}/interfaces/catch_interfaces_generatortracker.hpp
   ${SOURCES_DIR}/interfaces/catch_interfaces_registry_hub.hpp

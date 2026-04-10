@@ -29,7 +29,7 @@
 namespace Catch {
 
 template<typename C>
-class TestInvokerAsMethod : public ITestInvoker {
+class TestInvokerAsMethod final : public ITestInvoker {
     void (C::*m_testAsMethod)();
 public:
     constexpr TestInvokerAsMethod( void ( C::*testAsMethod )() ) noexcept:
@@ -49,7 +49,7 @@ Detail::unique_ptr<ITestInvoker> makeTestInvoker( void (C::*testAsMethod)() ) {
 }
 
 template <typename C>
-class TestInvokerFixture : public ITestInvoker {
+class TestInvokerFixture final : public ITestInvoker {
     void ( C::*m_testAsMethod )() const;
     Detail::unique_ptr<C> m_fixture = nullptr;
 

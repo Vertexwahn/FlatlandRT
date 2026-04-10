@@ -11,6 +11,7 @@
 #include <catch2/generators/catch_generators_throw.hpp>
 #include <catch2/interfaces/catch_interfaces_config.hpp>
 #include <catch2/interfaces/catch_interfaces_generatortracker.hpp>
+#include <catch2/interfaces/catch_interfaces_registry_hub.hpp>
 #include <catch2/interfaces/catch_interfaces_reporter.hpp>
 #include <catch2/internal/catch_compiler_capabilities.hpp>
 #include <catch2/internal/catch_context.hpp>
@@ -60,9 +61,14 @@ namespace Catch {
                         // can be, so the tracker has to throw for a wrong
                         // filter to stop the execution flow.
                         if (filter.type == PathFilter::For::Section) {
-                            // TBD: Explicit SKIP, or new exception that says
-                            //      "don't continue", but doesn't show in totals?
-                            SKIP();
+                            // We want the semantics of `SKIP()`, but we inline it
+                            // to avoid issues with conditionally prefixed macros
+                            INTERNAL_CATCH_MSG(
+                                "SKIP",
+                                Catch::ResultWas::ExplicitSkip,
+                                Catch::ResultDisposition::Normal,
+                                "" );
+                            Catch::Detail::Unreachable();
                         }
                         // '*' is the wildcard for "all elements in generator"
                         // used for filtering sections below the generator, but
@@ -303,6 +309,25 @@ namespace Catch {
         }
         CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION
 
+
+        void pushScopedMessage( MessageInfo&& message ) {
+            Detail::g_messageHolder().addScopedMessage(  CATCH_MOVE( message ) );
+        }
+
+        void popScopedMessage( unsigned int messageId ) {
+            Detail::g_messageHolder().removeMessage( messageId );
+        }
+
+        void emplaceUnscopedMessage( MessageBuilder&& builder ) {
+            Detail::g_messageHolder().addUnscopedMessage( CATCH_MOVE( builder ) );
+        }
+
+        void addUnscopedMessage( MessageInfo&& message ) {
+            Detail::g_messageHolder().addUnscopedMessage( CATCH_MOVE( message ) );
+        }
+
+        bool lastAssertionPassed() { return Detail::g_lastAssertionPassed; }
+
     } // namespace Detail
 
     RunContext::RunContext(IConfig const* _config, IEventListenerPtr&& reporter)
@@ -519,8 +544,12 @@ namespace Catch {
         // TBD: Do we want to avoid the warning if the generator is filtered?
         if ( m_config->warnAboutInfiniteGenerators() &&
              !generator->isFinite() ) {
-            // TBD: Would it be better to expand this macro inline?
-            FAIL( "GENERATE() would run infinitely" );
+            // We want the semantics of `FAIL()`, but we inline it
+            // to avoid issues with conditionally prefixed macros
+            INTERNAL_CATCH_MSG( "FAIL",
+                                Catch::ResultWas::ExplicitFailure,
+                                Catch::ResultDisposition::Normal,
+                                "GENERATE() would run infinitely" );
         }
 
         auto nameAndLoc = TestCaseTracking::NameAndLocation( static_cast<std::string>( generatorName ), lineInfo );
@@ -693,10 +722,6 @@ namespace Catch {
         m_totals.testCases.failed++;
         updateTotalsFromAtomics();
         m_reporter->testRunEnded(TestRunStats(m_runInfo, m_totals, false));
-    }
-
-    bool RunContext::lastAssertionPassed() {
-        return Detail::g_lastAssertionPassed;
     }
 
     void RunContext::assertionPassedFastPath(SourceLineInfo lineInfo) {
@@ -926,22 +951,6 @@ namespace Catch {
             populateReaction(
                 reaction, info.resultDisposition & ResultDisposition::Normal );
         }
-    }
-
-    void IResultCapture::pushScopedMessage( MessageInfo&& message ) {
-        Detail::g_messageHolder().addScopedMessage(  CATCH_MOVE( message ) );
-    }
-
-    void IResultCapture::popScopedMessage( unsigned int messageId ) {
-        Detail::g_messageHolder().removeMessage( messageId );
-    }
-
-    void IResultCapture::emplaceUnscopedMessage( MessageBuilder&& builder ) {
-        Detail::g_messageHolder().addUnscopedMessage( CATCH_MOVE( builder ) );
-    }
-
-    void IResultCapture::addUnscopedMessage( MessageInfo&& message ) {
-        Detail::g_messageHolder().addUnscopedMessage( CATCH_MOVE( message ) );
     }
 
     void seedRng(IConfig const& config) {

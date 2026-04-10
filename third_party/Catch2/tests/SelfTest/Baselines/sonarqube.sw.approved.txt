@@ -422,16 +422,11 @@ at AssertionHandler.tests.cpp:<line number>
     <testCase name="Parsing tags with non-alphabetical characters is pass-through" duration="{duration}"/>
   </file>
   <file path="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp">
-    <testCase name="Directly creating an EnumInfo" duration="{duration}"/>
     <testCase name="Exception thrown inside stringify does not fail the test" duration="{duration}"/>
     <testCase name="Range type with sentinel" duration="{duration}"/>
     <testCase name="Stringifying char arrays with statically known sizes - char" duration="{duration}"/>
     <testCase name="Stringifying char arrays with statically known sizes - signed char" duration="{duration}"/>
     <testCase name="Stringifying char arrays with statically known sizes - unsigned char" duration="{duration}"/>
-    <testCase name="parseEnums" duration="{duration}"/>
-    <testCase name="parseEnums/No enums" duration="{duration}"/>
-    <testCase name="parseEnums/One enum value" duration="{duration}"/>
-    <testCase name="parseEnums/Multiple enum values" duration="{duration}"/>
   </file>
   <file path="tests/<exe-name>/IntrospectiveTests/UniquePtr.tests.cpp">
     <testCase name="Upcasting special member functions" duration="{duration}"/>
@@ -1079,8 +1074,14 @@ at Decomposition.tests.cpp:<line number>
     </testCase>
   </file>
   <file path="tests/<exe-name>/UsageTests/EnumToString.tests.cpp">
+    <testCase name="Directly creating an EnumInfo" duration="{duration}"/>
+    <testCase name="Enum backed by larger underlying type" duration="{duration}"/>
     <testCase name="Enums can quickly have stringification enabled using CATCH_REGISTER_ENUM" duration="{duration}"/>
     <testCase name="Enums in namespaces can quickly have stringification enabled using CATCH_REGISTER_ENUM" duration="{duration}"/>
+    <testCase name="parseEnums" duration="{duration}"/>
+    <testCase name="parseEnums/No enums" duration="{duration}"/>
+    <testCase name="parseEnums/One enum value" duration="{duration}"/>
+    <testCase name="parseEnums/Multiple enum values" duration="{duration}"/>
     <testCase name="toString(enum class w/operator&lt;&lt;)" duration="{duration}"/>
     <testCase name="toString(enum class)" duration="{duration}"/>
     <testCase name="toString(enum w/operator&lt;&lt;)" duration="{duration}"/>

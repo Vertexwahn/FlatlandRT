@@ -102,8 +102,6 @@ namespace Catch {
 
         void handleFatalErrorCondition( StringRef message ) override;
 
-        bool lastAssertionPassed() override;
-
     public:
         // !TBD We need to do this another way!
         bool aborting() const;

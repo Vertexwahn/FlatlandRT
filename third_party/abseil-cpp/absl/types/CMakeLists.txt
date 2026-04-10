@@ -55,6 +55,7 @@ absl_cc_test(
     ${ABSL_TEST_COPTS}
   DEPS
     absl::config
+    absl::core_headers
     absl::exception_testing
     absl::hash_testing
     absl::raw_logging_internal
@@ -169,10 +170,13 @@ absl_cc_library(
     source_location
   HDRS
     "source_location.h"
+  SRCS
+    "source_location.cc"
   COPTS
     ${ABSL_DEFAULT_COPTS}
   DEPS
     absl::config
+    absl::core_headers
     absl::nullability
   PUBLIC
 )

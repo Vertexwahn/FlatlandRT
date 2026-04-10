@@ -367,7 +367,7 @@ struct IsDecomposable : std::false_type {};
 
 template <class Policy, class Hash, class Eq, class... Ts>
 struct IsDecomposable<
-    absl::void_t<decltype(Policy::apply(
+    std::void_t<decltype(Policy::apply(
         RequireUsableKey<typename Policy::key_type, Hash, Eq>(),
         std::declval<Ts>()...))>,
     Policy, Hash, Eq, Ts...> : std::true_type {};
@@ -1930,7 +1930,7 @@ class raw_hash_set {
   // An enabler for insert(T&&): T must be convertible to init_type or be the
   // same as [cv] value_type [ref].
   template <class T>
-  using Insertable = absl::disjunction<
+  using Insertable = std::disjunction<
       std::is_same<absl::remove_cvref_t<reference>, absl::remove_cvref_t<T>>,
       std::is_convertible<T, init_type>>;
   template <class T>
@@ -1970,9 +1970,9 @@ class raw_hash_set {
     using iterator_category = std::forward_iterator_tag;
     using value_type = typename raw_hash_set::value_type;
     using reference =
-        absl::conditional_t<PolicyTraits::constant_iterators::value,
+        std::conditional_t<PolicyTraits::constant_iterators::value,
                             const value_type&, value_type&>;
-    using pointer = absl::remove_reference_t<reference>*;
+    using pointer = std::remove_reference_t<reference>*;
     using difference_type = typename raw_hash_set::difference_type;
 
     iterator() {}
@@ -3751,7 +3751,7 @@ void ForEach(Callback& cb, const raw_hash_set<P, Params...>* c) {
 
 namespace hashtable_debug_internal {
 template <typename Set>
-struct HashtableDebugAccess<Set, absl::void_t<typename Set::raw_hash_set>> {
+struct HashtableDebugAccess<Set, std::void_t<typename Set::raw_hash_set>> {
   using Traits = typename Set::PolicyTraits;
   using Slot = typename Traits::slot_type;
 

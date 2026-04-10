@@ -4241,21 +4241,21 @@ with message:
 -------------------------------------------------------------------------------
 Directly creating an EnumInfo
 -------------------------------------------------------------------------------
-ToString.tests.cpp:<line number>
+EnumToString.tests.cpp:<line number>
 ...............................................................................
 
-ToString.tests.cpp:<line number>: PASSED:
-  CHECK( enumInfo->lookup(0) == "Value1" )
+EnumToString.tests.cpp:<line number>: PASSED:
+  CHECK( enumInfo.lookup(0) == "Value1" )
 with expansion:
   Value1 == "Value1"
 
-ToString.tests.cpp:<line number>: PASSED:
-  CHECK( enumInfo->lookup(1) == "Value2" )
+EnumToString.tests.cpp:<line number>: PASSED:
+  CHECK( enumInfo.lookup(1) == "Value2" )
 with expansion:
   Value2 == "Value2"
 
-ToString.tests.cpp:<line number>: PASSED:
-  CHECK( enumInfo->lookup(3) == "{** unexpected enum value **}" )
+EnumToString.tests.cpp:<line number>: PASSED:
+  CHECK( enumInfo.lookup(3) == "{** unexpected enum value **}" )
 with expansion:
   {** unexpected enum value **}
   ==
@@ -4298,6 +4298,27 @@ Matchers.tests.cpp:<line number>: FAILED:
 with expansion:
   "this string contains 'abc' as a substring" ends with: "this" (case
   insensitive)
+
+-------------------------------------------------------------------------------
+Enum backed by larger underlying type
+-------------------------------------------------------------------------------
+EnumToString.tests.cpp:<line number>
+...............................................................................
+
+EnumToString.tests.cpp:<line number>: PASSED:
+  REQUIRE( stringify( LargeEnum::Flag1 ) == "Flag1" )
+with expansion:
+  "Flag1" == "Flag1"
+
+EnumToString.tests.cpp:<line number>: PASSED:
+  REQUIRE( stringify( LargeEnum::Flag2 ) == "Flag2" )
+with expansion:
+  "Flag2" == "Flag2"
+
+EnumToString.tests.cpp:<line number>: PASSED:
+  REQUIRE( stringify( LargeEnum::Flag5 ) == "Flag5" )
+with expansion:
+  "Flag5" == "Flag5"
 
 -------------------------------------------------------------------------------
 Enums can quickly have stringification enabled using CATCH_REGISTER_ENUM
@@ -18383,10 +18404,10 @@ with expansion:
 parseEnums
   No enums
 -------------------------------------------------------------------------------
-ToString.tests.cpp:<line number>
+EnumToString.tests.cpp:<line number>
 ...............................................................................
 
-ToString.tests.cpp:<line number>: PASSED:
+EnumToString.tests.cpp:<line number>: PASSED:
   CHECK_THAT( parseEnums( "" ), Equals( std::vector<Catch::StringRef>{} ) )
 with expansion:
   {  } Equals: {  }
@@ -18395,20 +18416,20 @@ with expansion:
 parseEnums
   One enum value
 -------------------------------------------------------------------------------
-ToString.tests.cpp:<line number>
+EnumToString.tests.cpp:<line number>
 ...............................................................................
 
-ToString.tests.cpp:<line number>: PASSED:
+EnumToString.tests.cpp:<line number>: PASSED:
   CHECK_THAT( parseEnums( "ClassName::EnumName::Value1" ), Equals(std::vector<Catch::StringRef>{"Value1"} ) )
 with expansion:
   { Value1 } Equals: { Value1 }
 
-ToString.tests.cpp:<line number>: PASSED:
+EnumToString.tests.cpp:<line number>: PASSED:
   CHECK_THAT( parseEnums( "Value1" ), Equals( std::vector<Catch::StringRef>{"Value1"} ) )
 with expansion:
   { Value1 } Equals: { Value1 }
 
-ToString.tests.cpp:<line number>: PASSED:
+EnumToString.tests.cpp:<line number>: PASSED:
   CHECK_THAT( parseEnums( "EnumName::Value1" ), Equals(std::vector<Catch::StringRef>{"Value1"} ) )
 with expansion:
   { Value1 } Equals: { Value1 }
@@ -18417,20 +18438,20 @@ with expansion:
 parseEnums
   Multiple enum values
 -------------------------------------------------------------------------------
-ToString.tests.cpp:<line number>
+EnumToString.tests.cpp:<line number>
 ...............................................................................
 
-ToString.tests.cpp:<line number>: PASSED:
+EnumToString.tests.cpp:<line number>: PASSED:
   CHECK_THAT( parseEnums( "ClassName::EnumName::Value1, ClassName::EnumName::Value2" ), Equals( std::vector<Catch::StringRef>{"Value1", "Value2"} ) )
 with expansion:
   { Value1, Value2 } Equals: { Value1, Value2 }
 
-ToString.tests.cpp:<line number>: PASSED:
+EnumToString.tests.cpp:<line number>: PASSED:
   CHECK_THAT( parseEnums( "ClassName::EnumName::Value1, ClassName::EnumName::Value2, ClassName::EnumName::Value3" ), Equals( std::vector<Catch::StringRef>{"Value1", "Value2", "Value3"} ) )
 with expansion:
   { Value1, Value2, Value3 } Equals: { Value1, Value2, Value3 }
 
-ToString.tests.cpp:<line number>: PASSED:
+EnumToString.tests.cpp:<line number>: PASSED:
   CHECK_THAT( parseEnums( "ClassName::EnumName::Value1,ClassName::EnumName::Value2 , ClassName::EnumName::Value3" ), Equals( std::vector<Catch::StringRef>{"Value1", "Value2", "Value3"} ) )
 with expansion:
   { Value1, Value2, Value3 } Equals: { Value1, Value2, Value3 }
@@ -20113,6 +20134,6 @@ Misc.tests.cpp:<line number>
 Misc.tests.cpp:<line number>: PASSED:
 
 ===============================================================================
-test cases:  450 |  330 passed |  96 failed | 6 skipped | 18 failed as expected
-assertions: 2413 | 2212 passed | 158 failed | 43 failed as expected
+test cases:  451 |  331 passed |  96 failed | 6 skipped | 18 failed as expected
+assertions: 2416 | 2215 passed | 158 failed | 43 failed as expected
 

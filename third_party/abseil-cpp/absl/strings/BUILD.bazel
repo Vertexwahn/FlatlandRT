@@ -401,7 +401,6 @@ cc_test(
     visibility = ["//visibility:private"],
     deps = [
         ":strings",
-        "//absl/meta:type_traits",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
@@ -430,6 +429,7 @@ cc_library(
     copts = ABSL_DEFAULT_COPTS,
     linkopts = ABSL_DEFAULT_LINKOPTS,
     visibility = [
+        "//absl:friends",
         "//visibility:private",
     ],
     deps = [
@@ -676,6 +676,7 @@ cc_library(
         "//absl/base:endian",
         "//absl/base:nullability",
         "//absl/base:raw_logging_internal",
+        "//absl/cleanup",
         "//absl/container:inlined_vector",
         "//absl/crc:crc32c",
         "//absl/crc:crc_cord_state",
@@ -1114,6 +1115,7 @@ cc_test(
         "//absl/container:btree",
         "//absl/container:flat_hash_map",
         "//absl/container:node_hash_map",
+        "//absl/hash",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],

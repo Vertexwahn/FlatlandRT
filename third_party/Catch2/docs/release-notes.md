@@ -2,6 +2,7 @@
 
 # Release notes
 **Contents**<br>
+[3.14.0](#3140)<br>
 [3.13.0](#3130)<br>
 [3.12.0](#3120)<br>
 [3.11.0](#3110)<br>
@@ -73,13 +74,28 @@
 [Even Older versions](#even-older-versions)<br>
 
 
+## 3.14.0
+
+### Fixes
+* Added missing `<cstdint>` includes. (#3078)
+* Fixed suppression of empty variadic macro arguments warning on Clang <19. (#3085)
+* Fixed `catch_discover_tests` failing during `PRE_TEST` discovery if a target does not have discoverable tests. (#3075)
+* Fixed build of the main library failing with `CATCH_CONFIG_PREFIX_ALL` defined. (#3087)
+* JUnit reporter outputs single failed (errored/skipped) assertion per test case. (#1919)
+
+### Improvements
+* The default implementation of `--list-tags` and `--list-listeners` has a quiet variant.
+* Suppressed the new Clang warning about `__COUNTER__` usage. (#3076)
+* Line-wrapping counts utf-8 codepoints instead of bytes. (#1022, #3086)
+  * Combining character sequences are still miscounted, but Catch2 does not aim to fully support Unicode.
+
+
 ## 3.13.0
 
 ### Fixes
 * `--benchmark-samples 0` no longer hard crashes (#3056)
   * The CLI validation fails instead.
 * Fixed warning suppression macros being doubly defined when using Clang on Windows (#3060)
-
 
 ### Improvements
 * Suppressed static analysis 26426 diagnostic for MSVC (#3057)

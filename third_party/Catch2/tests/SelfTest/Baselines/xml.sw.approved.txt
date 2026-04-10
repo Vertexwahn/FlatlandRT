@@ -4743,26 +4743,26 @@ C
     </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
-  <TestCase name="Directly creating an EnumInfo" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
-    <Expression success="true" type="CHECK" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+  <TestCase name="Directly creating an EnumInfo" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
+    <Expression success="true" type="CHECK" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
       <Original>
-        enumInfo->lookup(0) == "Value1"
+        enumInfo.lookup(0) == "Value1"
       </Original>
       <Expanded>
         Value1 == "Value1"
       </Expanded>
     </Expression>
-    <Expression success="true" type="CHECK" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+    <Expression success="true" type="CHECK" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
       <Original>
-        enumInfo->lookup(1) == "Value2"
+        enumInfo.lookup(1) == "Value2"
       </Original>
       <Expanded>
         Value2 == "Value2"
       </Expanded>
     </Expression>
-    <Expression success="true" type="CHECK" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+    <Expression success="true" type="CHECK" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
       <Original>
-        enumInfo->lookup(3) == "{** unexpected enum value **}"
+        enumInfo.lookup(3) == "{** unexpected enum value **}"
       </Original>
       <Expanded>
         {** unexpected enum value **}
@@ -4807,6 +4807,33 @@ C
       </Expanded>
     </Expression>
     <OverallResult success="false" skips="0"/>
+  </TestCase>
+  <TestCase name="Enum backed by larger underlying type" tags="[enum][toString]" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
+      <Original>
+        stringify( LargeEnum::Flag1 ) == "Flag1"
+      </Original>
+      <Expanded>
+        "Flag1" == "Flag1"
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
+      <Original>
+        stringify( LargeEnum::Flag2 ) == "Flag2"
+      </Original>
+      <Expanded>
+        "Flag2" == "Flag2"
+      </Expanded>
+    </Expression>
+    <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
+      <Original>
+        stringify( LargeEnum::Flag5 ) == "Flag5"
+      </Original>
+      <Expanded>
+        "Flag5" == "Flag5"
+      </Expanded>
+    </Expression>
+    <OverallResult success="true" skips="0"/>
   </TestCase>
   <TestCase name="Enums can quickly have stringification enabled using CATCH_REGISTER_ENUM" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
     <Expression success="true" type="REQUIRE" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
@@ -21361,9 +21388,9 @@ Approx( -1.95996398454005449 )
     </Expression>
     <OverallResult success="true" skips="0"/>
   </TestCase>
-  <TestCase name="parseEnums" tags="[enums][Strings]" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
-    <Section name="No enums" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
-      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+  <TestCase name="parseEnums" tags="[enums][Strings]" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
+    <Section name="No enums" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
+      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
         <Original>
           parseEnums( "" ), Equals( std::vector&lt;Catch::StringRef>{} )
         </Original>
@@ -21373,8 +21400,8 @@ Approx( -1.95996398454005449 )
       </Expression>
       <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
     </Section>
-    <Section name="One enum value" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
-      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+    <Section name="One enum value" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
+      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
         <Original>
           parseEnums( "ClassName::EnumName::Value1" ), Equals(std::vector&lt;Catch::StringRef>{"Value1"} )
         </Original>
@@ -21382,7 +21409,7 @@ Approx( -1.95996398454005449 )
           { Value1 } Equals: { Value1 }
         </Expanded>
       </Expression>
-      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
         <Original>
           parseEnums( "Value1" ), Equals( std::vector&lt;Catch::StringRef>{"Value1"} )
         </Original>
@@ -21390,7 +21417,7 @@ Approx( -1.95996398454005449 )
           { Value1 } Equals: { Value1 }
         </Expanded>
       </Expression>
-      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
         <Original>
           parseEnums( "EnumName::Value1" ), Equals(std::vector&lt;Catch::StringRef>{"Value1"} )
         </Original>
@@ -21400,8 +21427,8 @@ Approx( -1.95996398454005449 )
       </Expression>
       <OverallResults successes="3" failures="0" expectedFailures="0" skipped="false"/>
     </Section>
-    <Section name="Multiple enum values" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
-      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+    <Section name="Multiple enum values" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
+      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
         <Original>
           parseEnums( "ClassName::EnumName::Value1, ClassName::EnumName::Value2" ), Equals( std::vector&lt;Catch::StringRef>{"Value1", "Value2"} )
         </Original>
@@ -21409,7 +21436,7 @@ Approx( -1.95996398454005449 )
           { Value1, Value2 } Equals: { Value1, Value2 }
         </Expanded>
       </Expression>
-      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
         <Original>
           parseEnums( "ClassName::EnumName::Value1, ClassName::EnumName::Value2, ClassName::EnumName::Value3" ), Equals( std::vector&lt;Catch::StringRef>{"Value1", "Value2", "Value3"} )
         </Original>
@@ -21417,7 +21444,7 @@ Approx( -1.95996398454005449 )
           { Value1, Value2, Value3 } Equals: { Value1, Value2, Value3 }
         </Expanded>
       </Expression>
-      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/IntrospectiveTests/ToString.tests.cpp" >
+      <Expression success="true" type="CHECK_THAT" filename="tests/<exe-name>/UsageTests/EnumToString.tests.cpp" >
         <Original>
           parseEnums( "ClassName::EnumName::Value1,ClassName::EnumName::Value2 , ClassName::EnumName::Value3" ), Equals( std::vector&lt;Catch::StringRef>{"Value1", "Value2", "Value3"} )
         </Original>
@@ -23358,6 +23385,6 @@ Approx( -1.95996398454005449 )
     </Section>
     <OverallResult success="true" skips="0"/>
   </TestCase>
-  <OverallResults successes="2212" failures="158" expectedFailures="43" skips="12"/>
-  <OverallResultsCases successes="330" failures="96" expectedFailures="18" skips="6"/>
+  <OverallResults successes="2215" failures="158" expectedFailures="43" skips="12"/>
+  <OverallResultsCases successes="331" failures="96" expectedFailures="18" skips="6"/>
 </Catch2TestRun>

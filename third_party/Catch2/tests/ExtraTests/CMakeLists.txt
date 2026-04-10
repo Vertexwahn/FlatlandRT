@@ -56,9 +56,9 @@ set(TESTS_DIR ${CATCH_DIR}/tests/ExtraTests)
 
 add_executable(PrefixedMacros ${TESTS_DIR}/X01-PrefixedMacros.cpp)
 target_compile_definitions(PrefixedMacros PRIVATE CATCH_CONFIG_PREFIX_ALL CATCH_CONFIG_RUNTIME_STATIC_REQUIRE)
-# Macro configuration does not touch the compiled parts, so we can link
-# it against the main library
-target_link_libraries(PrefixedMacros Catch2WithMain)
+# We want to verify that the main library can also be built with prefixed
+# macros, regression test for #3087.
+target_link_libraries(PrefixedMacros Catch2_buildall_interface)
 
 add_test(NAME CATCH_CONFIG_PREFIX_ALL COMMAND PrefixedMacros -s)
 set_tests_properties(CATCH_CONFIG_PREFIX_ALL
