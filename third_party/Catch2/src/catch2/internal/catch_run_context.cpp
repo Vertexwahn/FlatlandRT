@@ -461,14 +461,13 @@ namespace Catch {
             Detail::g_lastAssertionPassed = true;
         } else if (!result.succeeded()) {
             Detail::g_lastAssertionPassed = false;
-            if (result.isOk()) {
-            }
-            else if( m_activeTestCase->getTestCaseInfo().okToFail() ) // Read from a shared state established before the threads could start, this is fine
+            if (result.isOk()) {}
+            else if( m_activeTestCase->getTestCaseInfo().okToFail() ) { // Read from a shared state established before the threads could start, this is fine
                 m_atomicAssertionCount.failedButOk++;
-            else
+            } else {
                 m_atomicAssertionCount.failed++;
-        }
-        else {
+            }
+        } else {
             Detail::g_lastAssertionPassed = true;
         }
 
@@ -650,7 +649,7 @@ namespace Catch {
         //      and since IResultCapture::getLastResult is deprecated,
         //      we will leave it as is, until it is finally removed.
         Detail::LockGuard _( m_assertionMutex );
-        return &(*m_lastResult);
+        return &*m_lastResult;
     }
 
     void RunContext::exceptionEarlyReported() {
@@ -902,7 +901,7 @@ namespace Catch {
     }
 
     void RunContext::populateReaction( AssertionReaction& reaction,
-                                       bool has_normal_disposition ) {
+                                       bool has_normal_disposition ) const {
         reaction.shouldDebugBreak = m_shouldDebugBreak;
         reaction.shouldThrow = aborting() || has_normal_disposition;
     }

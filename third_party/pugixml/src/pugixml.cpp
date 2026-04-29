@@ -54,6 +54,7 @@
 #if defined(__clang__)
 #	pragma clang diagnostic push
 #	pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant" // NULL as null pointer constant
+#	pragma clang diagnostic ignored "-Wsign-conversion" // implicit conversion changes signedness
 #endif
 
 #if defined(_MSC_VER) && defined(__c2__)
@@ -97,6 +98,13 @@
 #	define PUGI_IMPL_NO_INLINE
 #endif
 
+// Unaligned memory access attribute
+#if defined(__GNUC__) && !defined(__c2__)
+#	define PUGI_IMPL_UNALIGNED __attribute__((aligned(1)))
+#else
+#	define PUGI_IMPL_UNALIGNED
+#endif
+
 // Branch weight controls
 #if defined(__GNUC__) && !defined(__c2__)
 #	define PUGI_IMPL_UNLIKELY(cond) __builtin_expect(cond, 0)
@@ -105,7 +113,7 @@
 #endif
 
 // Simple static assertion
-#define PUGI_IMPL_STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; }
+#define PUGI_IMPL_STATIC_ASSERT(cond) do { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; } while (0)
 
 // Digital Mars C++ bug workaround for passing char loaded from memory via stack
 #ifdef __DMC__
@@ -1253,16 +1261,36 @@ PUGI_IMPL_NS_BEGIN
 			attr = next;
 		}
 
-		for (xml_node_struct* child = n->first_child; child; )
+		alloc.deallocate_memory(n, sizeof(xml_node_struct), PUGI_IMPL_GETPAGE(n));
+	}
+
+	inline void destroy_tree(xml_node_struct* n, xml_allocator& alloc)
+	{
+		xml_node_struct* cur = n;
+
+		while (cur->first_child)
+			cur = cur->first_child;
+
+		while (cur != n)
 		{
-			xml_node_struct* next = child->next_sibling;
+			// loop invariant: cur is inside the subtree rooted at n, cur's subtree is destroyed
+			xml_node_struct* parent = cur->parent;
+			xml_node_struct* next = cur->next_sibling;
 
-			destroy_node(child, alloc);
+			destroy_node(cur, alloc);
 
-			child = next;
+			if (next)
+			{
+				cur = next;
+
+				while (cur->first_child)
+					cur = cur->first_child;
+			}
+			else
+				cur = parent;
 		}
 
-		alloc.deallocate_memory(n, sizeof(xml_node_struct), PUGI_IMPL_GETPAGE(n));
+		destroy_node(n, alloc);
 	}
 
 	inline void append_node(xml_node_struct* child, xml_node_struct* node)
@@ -1736,9 +1764,9 @@ PUGI_IMPL_NS_BEGIN
 
 	template <typename opt_swap> struct utf16_decoder
 	{
-		typedef uint16_t type;
+		typedef uint16_t type PUGI_IMPL_UNALIGNED;
 
-		template <typename Traits> static inline typename Traits::value_type process(const uint16_t* data, size_t size, typename Traits::value_type result, Traits)
+		template <typename Traits> static inline typename Traits::value_type process(const type* data, size_t size, typename Traits::value_type result, Traits)
 		{
 			while (size)
 			{
@@ -1788,9 +1816,9 @@ PUGI_IMPL_NS_BEGIN
 
 	template <typename opt_swap> struct utf32_decoder
 	{
-		typedef uint32_t type;
+		typedef uint32_t type PUGI_IMPL_UNALIGNED;
 
-		template <typename Traits> static inline typename Traits::value_type process(const uint32_t* data, size_t size, typename Traits::value_type result, Traits)
+		template <typename Traits> static inline typename Traits::value_type process(const type* data, size_t size, typename Traits::value_type result, Traits)
 		{
 			while (size)
 			{
@@ -1968,8 +1996,8 @@ PUGI_IMPL_NS_BEGIN
 
 	PUGI_IMPL_FN bool parse_declaration_encoding(const uint8_t* data, size_t size, const uint8_t*& out_encoding, size_t& out_length)
 	{
-	#define PUGI_IMPL_SCANCHAR(ch) { if (offset >= size || data[offset] != ch) return false; offset++; }
-	#define PUGI_IMPL_SCANCHARTYPE(ct) { while (offset < size && PUGI_IMPL_IS_CHARTYPE(data[offset], ct)) offset++; }
+	#define PUGI_IMPL_SCANCHAR(ch) do { if (offset >= size || data[offset] != ch) return false; offset++; } while (0)
+	#define PUGI_IMPL_SCANCHARTYPE(ct) do { while (offset < size && PUGI_IMPL_IS_CHARTYPE(data[offset], ct)) offset++; } while (0)
 
 		// check if we have a non-empty XML declaration
 		if (size < 6 || !((data[0] == '<') & (data[1] == '?') & (data[2] == 'x') & (data[3] == 'm') & (data[4] == 'l') && PUGI_IMPL_IS_CHARTYPE(data[5], ct_space)))
@@ -2638,16 +2666,16 @@ PUGI_IMPL_NS_BEGIN
 
 	// Parser utilities
 	#define PUGI_IMPL_ENDSWITH(c, e)        ((c) == (e) || ((c) == 0 && endch == (e)))
-	#define PUGI_IMPL_SKIPWS()              { while (PUGI_IMPL_IS_CHARTYPE(*s, ct_space)) ++s; }
+	#define PUGI_IMPL_SKIPWS()              do { while (PUGI_IMPL_IS_CHARTYPE(*s, ct_space)) ++s; } while (0)
 	#define PUGI_IMPL_OPTSET(OPT)           ( optmsk & (OPT) )
-	#define PUGI_IMPL_PUSHNODE(TYPE)        { cursor = append_new_node(cursor, *alloc, TYPE); if (!cursor) PUGI_IMPL_THROW_ERROR(status_out_of_memory, s); }
-	#define PUGI_IMPL_POPNODE()             { cursor = cursor->parent; }
-	#define PUGI_IMPL_SCANFOR(X)            { while (*s != 0 && !(X)) ++s; }
-	#define PUGI_IMPL_SCANWHILE(X)          { while (X) ++s; }
-	#define PUGI_IMPL_SCANWHILE_UNROLL(X)   { for (;;) { char_t ss = s[0]; if (PUGI_IMPL_UNLIKELY(!(X))) { break; } ss = s[1]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 1; break; } ss = s[2]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 2; break; } ss = s[3]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 3; break; } s += 4; } }
-	#define PUGI_IMPL_ENDSEG()              { ch = *s; *s = 0; ++s; }
+	#define PUGI_IMPL_PUSHNODE(TYPE)        do { cursor = append_new_node(cursor, *alloc, TYPE); if (!cursor) PUGI_IMPL_THROW_ERROR(status_out_of_memory, s); } while (0)
+	#define PUGI_IMPL_POPNODE()             do { cursor = cursor->parent; } while (0)
+	#define PUGI_IMPL_SCANFOR(X)            do { while (*s != 0 && !(X)) ++s; } while (0)
+	#define PUGI_IMPL_SCANWHILE(X)          do { while (X) ++s; } while (0)
+	#define PUGI_IMPL_SCANWHILE_UNROLL(X)   do { for (;;) { char_t ss = s[0]; if (PUGI_IMPL_UNLIKELY(!(X))) { break; } ss = s[1]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 1; break; } ss = s[2]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 2; break; } ss = s[3]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 3; break; } s += 4; } } while (0)
+	#define PUGI_IMPL_ENDSEG()              do { ch = *s; *s = 0; ++s; } while (0)
 	#define PUGI_IMPL_THROW_ERROR(err, m)   return error_offset = m, error_status = err, static_cast<char_t*>(NULL)
-	#define PUGI_IMPL_CHECK_ERROR(err, m)   { if (*s == 0) PUGI_IMPL_THROW_ERROR(err, m); }
+	#define PUGI_IMPL_CHECK_ERROR(err, m)   do { if (*s == 0) PUGI_IMPL_THROW_ERROR(err, m); } while (0)
 
 	PUGI_IMPL_FN char_t* strconv_comment(char_t* s, char_t endch)
 	{
@@ -6599,7 +6627,7 @@ namespace pugi
 		if (!alloc.reserve()) return false;
 
 		impl::remove_node(n._root);
-		impl::destroy_node(n._root, alloc);
+		impl::destroy_tree(n._root, alloc);
 
 		return true;
 	}
@@ -6615,7 +6643,7 @@ namespace pugi
 		{
 			xml_node_struct* next = cur->next_sibling;
 
-			impl::destroy_node(cur, alloc);
+			impl::destroy_tree(cur, alloc);
 
 			cur = next;
 		}
@@ -13512,6 +13540,7 @@ namespace pugi
 
 // Undefine all local macros (makes sure we're not leaking macros in header-only mode)
 #undef PUGI_IMPL_NO_INLINE
+#undef PUGI_IMPL_UNALIGNED
 #undef PUGI_IMPL_UNLIKELY
 #undef PUGI_IMPL_STATIC_ASSERT
 #undef PUGI_IMPL_DMC_VOLATILE

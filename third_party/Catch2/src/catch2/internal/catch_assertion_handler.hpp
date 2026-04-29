@@ -15,7 +15,7 @@
 
 namespace Catch {
 
-    class IResultCapture;
+    class RunContext;
 
     struct AssertionReaction {
         bool shouldDebugBreak = false;
@@ -27,7 +27,10 @@ namespace Catch {
         AssertionInfo m_assertionInfo;
         AssertionReaction m_reaction;
         bool m_completed = false;
-        IResultCapture& m_resultCapture;
+        // Since all uses are hidden in the .cpp file, we can directly use
+        // the final type and avoid going through virtual dispatch, without
+        // massive compilation time overhead.
+        RunContext& m_resultCapture;
 
         void finishIncomplete();
 

@@ -39,8 +39,8 @@ namespace {
         //           -------------------------
         //           |  a  |  b  |  c  |  d  |
 
-#define CarryBits( x ) ( x >> 32 )
-#define Digits( x ) ( x & 0xFF'FF'FF'FF )
+#define CarryBits( x ) ( (x) >> 32 )
+#define Digits( x ) ( (x) & 0xFF'FF'FF'FF )
 
         auto r2l2 = Digits( rhs ) * Digits( lhs );
         auto r2l1 = Digits( rhs ) * CarryBits( lhs );

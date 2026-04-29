@@ -124,7 +124,7 @@ struct AutoReg : Detail::NonCopyable {
 namespace Catch {
     namespace Detail {
         struct DummyUse {
-            DummyUse( void ( * )( int ), Catch::NameAndTags const& );
+            DummyUse( void ( * )( int ), Catch::NameAndTags const& ) noexcept;
         };
     } // namespace Detail
 } // namespace Catch

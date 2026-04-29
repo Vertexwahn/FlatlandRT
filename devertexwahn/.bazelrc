@@ -24,8 +24,10 @@ common --registry=https://bcr.bazel.build
 build --@boost.asio//:ssl=boringssl
 
 # macOS
+build:macos --macos_minimum_os=10.15
 build:macos --cxxopt=-std=c++23  # see https://clang.llvm.org/cxx_status.html
 build:macos --cxxopt=-Wall  # Turn on all warnings
+build:macos --cxxopt=-Wno-error=implicit-function-declaration  # Qt qyieldcpu.h calls __yield() without including <arm_acle.h>
 #build:macos --sandbox_block_path=/usr/local # This will fix okapi.cli but break okapi.ui - Note: Workaround for https://github.com/bazelbuild/bazel/issues/10472 - compile error with boringssl
 build:macos --define compiler=macos
 #build:macos --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
