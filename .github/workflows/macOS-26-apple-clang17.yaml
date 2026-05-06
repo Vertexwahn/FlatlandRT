@@ -55,11 +55,6 @@ jobs:
         run: |
           clang --version
 
-      - name: "Add macOS specific Bazel ignore file"
-        run: |
-          cd devertexwahn
-          mv "bazel/ignore/.bazelignore.macos" ".bazelignore"
-
       - name: "Regenerate lock files for Python"
         run: |
           cd devertexwahn
