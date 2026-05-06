@@ -36,4 +36,71 @@ jobs:
       - name: "Show disk space"
         run: |
           df -h
-  
+
+      - name: "Show OS version"
+        run: |
+          sw_vers
+          uname
+
+      - name: "Show CPU info"
+        run: |
+          sysctl -a | grep machdep.cpu
+
+      - name: "Show Bazel version"
+        run: |
+          cd devertexwahn
+          bazel version
+
+      - name: "Show Clang version"
+        run: |
+          clang --version
+
+      - name: "Add macOS specific Bazel ignore file"
+        run: |
+          cd devertexwahn
+          mv "bazel/ignore/.bazelignore.macos" ".bazelignore"
+
+      - name: "Regenerate lock files for Python"
+        run: |
+          cd devertexwahn
+          bazel run --config=macos -- //bazel/module/python:requirements.update
+
+      # Was here to recover for some strange build error
+      # Not sure what it caused - maybe switch form Bazel 8 to 9?
+      #- name: "Bazel clean"
+      #  run: |
+      #    cd devertexwahn
+      #    bazel clean --expunge
+
+      # fastbuild
+      - name: "Bazel build macos-fastbuild"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos -- //...
+
+      - name: "Bazel test macos-fastbuild"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos -- //...
+
+      # dbg
+      - name: "Bazel build macos-dbg"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos --compilation_mode=dbg -- //...
+
+      - name: "Bazel test macos-dbg"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos --compilation_mode=dbg -- //...
+
+      # opt
+      - name: "Bazel build macos-opt"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos --compilation_mode=opt -- //...
+
+      - name: "Bazel test macos-opt"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos --compilation_mode=opt -- //...

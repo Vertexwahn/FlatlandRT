@@ -82,6 +82,10 @@ build:vs2022 --cxxopt=/Zc:preprocessor # needed for __VA_OPT__ macro
 build:vs2022 --define compiler=vs2022
 build:vs2022 --enable_runfiles # https://github.com/bazelbuild/bazel/issues/8843
 build:vs2022 --host_copt=-DWIN32_LEAN_AND_MEAN
+build:vs2022 --action_env=PATH # powershell.exe must be reachable for rules_python build_data_writer.ps1
+# NOTE: The Bazel server inherits PATH from the invoking shell. If Python targets fail with
+# "powershell.exe not found", ensure C:\Windows\System32\WindowsPowerShell\v1.0 is in PATH,
+# then run: bazel shutdown && bazel build ...
 
 
 build:windows --config=vs2022
