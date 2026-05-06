@@ -8,15 +8,17 @@
 #ifndef FMT_FORMAT_INL_H_
 #define FMT_FORMAT_INL_H_
 
+#ifdef __SANITIZE_THREAD__
+extern "C" void __tsan_acquire(void*);
+extern "C" void __tsan_release(void*);
+#endif
+
 #ifndef FMT_MODULE
 #  include <stddef.h>  // ptrdiff_t
 
 #  include <algorithm>
 #  include <cerrno>  // errno
-#  include <climits>
-#  include <cmath>
-#  include <exception>
-#  include <new>  // std::bad_alloc
+#  include <new>     // std::bad_alloc
 #endif
 
 #if defined(_WIN32) && !defined(FMT_USE_WRITE_CONSOLE)
@@ -1696,6 +1698,9 @@ class file_print_buffer<F, enable_if_t<has_flockfile<F>::value>>
  public:
   explicit file_print_buffer(F* f) : buffer(grow, size_t()), file_(f) {
     flockfile(f);
+#ifdef __SANITIZE_THREAD__
+    __tsan_acquire(f);
+#endif
     file_.init_buffer();
     auto buf = file_.get_write_buffer();
     set(buf.data, buf.size);
@@ -1703,7 +1708,10 @@ class file_print_buffer<F, enable_if_t<has_flockfile<F>::value>>
   ~file_print_buffer() {
     file_.advance_write_buffer(size());
     bool flush = file_.needs_flush();
-    F* f = file_;    // Make funlockfile depend on the template parameter F
+    F* f = file_;  // Make funlockfile depend on the template parameter F.
+#ifdef __SANITIZE_THREAD__
+    __tsan_release(f);
+#endif
     funlockfile(f);  // for the system API detection to work.
     if (flush) fflush(file_);
   }
