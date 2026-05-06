@@ -15,6 +15,14 @@ jobs:
     steps:
       - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/macOS-15-apple-clang16.yaml
 
+  - job: MacOSAppleClang17Tahoe
+    displayName: "Apple Clang17 on macOS 26 (Tahoe)"
+    pool:
+      vmImage: 'macOS-26'
+    steps:
+      - template: devertexwahn/infrastructure/cloud/ci/azure_pipelines/microsoft_hosted/macOS-26-apple-clang17.yaml
+
+
   #- job: Ubuntu20Clang14
   #  displayName: "Clang14 on Ubuntu 20.04"
   #  pool:
