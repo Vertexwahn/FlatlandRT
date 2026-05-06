@@ -7,6 +7,18 @@
 
 name: Bazel
 
+on:
+  push:
+    paths:
+      - .github/workflows/**
+      - devertexwahn/**
+      - third_party/**
+  pull_request:
+    paths:
+      - .github/workflows/**
+      - devertexwahn/**
+      - third_party/**
+
 jobs:
   macos_26_apple_clang17:
     uses: ./.github/workflows/macOS-26-apple-clang17.yaml
