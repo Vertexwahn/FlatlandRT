@@ -22,8 +22,8 @@ permissions:
 
 jobs:
   build_and_test_macos15:
-    name: "Apple Clang16 on macOS 15 (Sequoia)"
-    runs-on: devertexwahn-macos-15
+    name: "Apple Clang17 on macOS 26 (Tahoe)"
+    runs-on: macos-26
     #runs-on: macos-15  # GitHub hosted runner
     steps:
       - name: "Show disk space"
