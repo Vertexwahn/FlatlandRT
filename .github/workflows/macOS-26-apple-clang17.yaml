@@ -1,0 +1,39 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2026 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# Apple Clang 17 on macOS 26 (Tahoe)
+# Make sure we can build with Apple Clang16 in all different compilation modes
+name: Apple Clang16 on macOS 26 (Tahoe)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+#on:
+#  schedule:
+#    - cron: "0 0 * * *"
+#  #push: {}
+#  # Allows you to run this workflow manually from the Actions tab
+#  workflow_dispatch:
+
+jobs:
+  build_and_test_macos15:
+    name: "Apple Clang16 on macOS 15 (Sequoia)"
+    runs-on: devertexwahn-macos-15
+    #runs-on: macos-15  # GitHub hosted runner
+    steps:
+      - name: "Show disk space"
+        run: |
+          df -h
+
+      - name: "Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Show disk space"
+        run: |
+          df -h
+  

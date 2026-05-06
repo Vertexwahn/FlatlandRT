@@ -1,0 +1,12 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2026 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# Bazel build and test
+
+name: Bazel
+
+jobs:
+  macos_26_apple_clang17:
+    uses: ./.github/workflows/macOS-26-apple-clang17.yaml
