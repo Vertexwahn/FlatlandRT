@@ -224,9 +224,14 @@
 #  define FMT_PRAGMA_CLANG(x)
 #endif
 
+#ifndef FMT_USE_OPTIMIZE_PRAGMA
+#  define FMT_USE_OPTIMIZE_PRAGMA 1
+#endif
+
 // Enable minimal optimizations for more compact code in debug mode.
 FMT_PRAGMA_GCC(push_options)
-#if !defined(__OPTIMIZE__) && !defined(__CUDACC__) && !defined(FMT_MODULE)
+#if FMT_USE_OPTIMIZE_PRAGMA && !defined(__OPTIMIZE__) && \
+    !defined(__CUDACC__) && !defined(FMT_MODULE)
 FMT_PRAGMA_GCC(optimize("Og"))
 #endif
 

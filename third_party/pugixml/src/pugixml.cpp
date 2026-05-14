@@ -2187,6 +2187,7 @@ PUGI_IMPL_NS_BEGIN
 
 		// first pass: get length in wchar_t units
 		size_t length = D::process(data, data_length, 0, wchar_counter());
+		if (static_cast<size_t>(-1) / sizeof(char_t) <= length) return false;
 
 		// allocate buffer of suitable length
 		char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
@@ -4198,6 +4199,13 @@ PUGI_IMPL_NS_BEGIN
 		}
 	}
 
+	PUGI_IMPL_FN bool node_output_empty(xml_node_struct* node)
+	{
+		xml_node_struct* child = node->first_child;
+
+		return !child || (!child->next_sibling && PUGI_IMPL_NODETYPE(child) == node_pcdata && (!child->value || !child->value[0]));
+	}
+
 	PUGI_IMPL_FN bool node_output_start(xml_buffered_writer& writer, xml_node_struct* node, const char_t* indent, size_t indent_length, unsigned int flags, unsigned int depth)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
@@ -4212,7 +4220,7 @@ PUGI_IMPL_NS_BEGIN
 		// element nodes can have value if parse_embed_pcdata was used
 		if (!node->value)
 		{
-			if (!node->first_child)
+			if (!node->first_child || node_output_empty(node))
 			{
 				if (flags & format_no_empty_element_tags)
 				{
@@ -4926,6 +4934,7 @@ PUGI_IMPL_NS_BEGIN
 		if (size_status != status_ok) return make_parse_result(size_status);
 
 		size_t max_suffix_size = sizeof(char_t);
+		if (static_cast<size_t>(-1) - max_suffix_size < size) return make_parse_result(status_out_of_memory);
 
 		// allocate buffer for the whole file
 		char* contents = static_cast<char*>(xml_memory::allocate(size + max_suffix_size));
@@ -5015,6 +5024,7 @@ PUGI_IMPL_NS_BEGIN
 		}
 
 		size_t max_suffix_size = sizeof(char_t);
+		if (static_cast<size_t>(-1) - max_suffix_size < total) return status_out_of_memory;
 
 		// copy chunk list to a contiguous buffer
 		char* buffer = static_cast<char*>(xml_memory::allocate(total + max_suffix_size));
@@ -5054,6 +5064,7 @@ PUGI_IMPL_NS_BEGIN
 		if (static_cast<std::streamsize>(read_length) != length || length < 0) return status_out_of_memory;
 
 		size_t max_suffix_size = sizeof(char_t);
+		if ((static_cast<size_t>(-1) - max_suffix_size) / sizeof(T) < read_length) return status_out_of_memory;
 
 		// read stream data into memory (guard against stream exceptions with buffer holder)
 		auto_deleter<void> buffer(xml_memory::allocate(read_length * sizeof(T) + max_suffix_size), xml_memory::deallocate);

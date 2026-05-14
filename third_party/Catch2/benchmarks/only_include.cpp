@@ -5,11 +5,12 @@
 //        https://www.boost.org/LICENSE_1_0.txt)
 
 // SPDX-License-Identifier: BSL-1.0
-#ifndef CATCH_VERSION_MACROS_HPP_INCLUDED
-#define CATCH_VERSION_MACROS_HPP_INCLUDED
 
-#define CATCH_VERSION_MAJOR 3
-#define CATCH_VERSION_MINOR 15
-#define CATCH_VERSION_PATCH 0
+/**\file 
+ * "empty" include of catch_test_macros.hpp
+ * 
+ * This file does only one thing: include `catch2/catch_test_macros.hpp`,
+ * so that we can measure the compilation cost of the header.
+ */
 
-#endif // CATCH_VERSION_MACROS_HPP_INCLUDED
+#include <catch2/catch_test_macros.hpp>

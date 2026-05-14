@@ -124,8 +124,9 @@ set(TEST_SOURCES
   ${SELF_TEST_DIR}/UsageTests/ToStringWhich.tests.cpp
   ${SELF_TEST_DIR}/UsageTests/Tricky.tests.cpp
   ${SELF_TEST_DIR}/UsageTests/VariadicMacros.tests.cpp
-  ${SELF_TEST_DIR}/UsageTests/MatchersRanges.tests.cpp
   ${SELF_TEST_DIR}/UsageTests/Matchers.tests.cpp
+  ${SELF_TEST_DIR}/UsageTests/MatchersConstexpr.tests.cpp
+  ${SELF_TEST_DIR}/UsageTests/MatchersRanges.tests.cpp
 )
 
 set(TEST_HEADERS

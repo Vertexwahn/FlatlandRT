@@ -20,7 +20,6 @@ set(ABSL_INTERNAL_DLL_FILES
   "base/internal/dynamic_annotations.h"
   "base/internal/endian.h"
   "base/internal/errno_saver.h"
-  "base/internal/hardening.cc"
   "base/internal/hardening.h"
   "base/internal/hide_ptr.h"
   "base/internal/iterator_traits.h"

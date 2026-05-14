@@ -174,7 +174,7 @@ target_compile_definitions(DeferredStaticChecks PRIVATE "CATCH_CONFIG_RUNTIME_ST
 add_test(NAME DeferredStaticChecks COMMAND DeferredStaticChecks -r compact)
 set_tests_properties(DeferredStaticChecks
   PROPERTIES
-    PASS_REGULAR_EXPRESSION "test cases: 1 \\| 1 failed\nassertions: 3 \\| 3 failed"
+    PASS_REGULAR_EXPRESSION "test cases: 1 \\| 1 failed\nassertions: 3 \\| 3 failed;test cases: 1 \\| 1 failed\nassertions: 4 \\| 4 failed"
 )
 
 add_executable(MixingClearedAndUnclearedMessages ${TESTS_DIR}/X06-MixingClearedAndUnclearedMessages.cpp)

@@ -225,6 +225,10 @@
 #include <ranges>  // NOLINT(build/c++20)
 #endif
 
+#ifdef __BMI2__
+#include <bmi2intrin.h>
+#endif  // __BMI2__
+
 namespace absl {
 ABSL_NAMESPACE_BEGIN
 namespace container_internal {
@@ -301,57 +305,6 @@ void CopyAlloc(AllocType& lhs, AllocType& rhs,
 template <typename AllocType>
 void CopyAlloc(AllocType&, AllocType&, std::false_type /* propagate_alloc */) {}
 
-// The state for a probe sequence.
-//
-// Currently, the sequence is a triangular progression of the form
-//
-//   p(i) := Width * (i^2 + i)/2 + hash (mod mask + 1)
-//
-// The use of `Width` ensures that each probe step does not overlap groups;
-// the sequence effectively outputs the addresses of *groups* (although not
-// necessarily aligned to any boundary). The `Group` machinery allows us
-// to check an entire group with minimal branching.
-//
-// Wrapping around at `mask + 1` is important, but not for the obvious reason.
-// As described above, the first few entries of the control byte array
-// are mirrored at the end of the array, which `Group` will find and use
-// for selecting candidates. However, when those candidates' slots are
-// actually inspected, there are no corresponding slots for the cloned bytes,
-// so we need to make sure we've treated those offsets as "wrapping around".
-//
-// It turns out that this probe sequence visits every group exactly once if the
-// number of groups is a power of two, since (i^2+i)/2 is a bijection in
-// Z/(2^m). See https://en.wikipedia.org/wiki/Quadratic_probing
-template <size_t Width>
-class probe_seq {
- public:
-  // Creates a new probe sequence using `hash` as the initial value of the
-  // sequence and `mask` (usually the capacity of the table) as the mask to
-  // apply to each value in the progression.
-  probe_seq(size_t hash, size_t mask) {
-    ABSL_SWISSTABLE_ASSERT(((mask + 1) & mask) == 0 && "not a mask");
-    mask_ = mask;
-    offset_ = hash & mask_;
-  }
-
-  // The offset within the table, i.e., the value `p(i)` above.
-  size_t offset() const { return offset_; }
-  size_t offset(size_t i) const { return (offset_ + i) & mask_; }
-
-  void next() {
-    index_ += Width;
-    offset_ += index_;
-    offset_ &= mask_;
-  }
-  // 0-based probe index, a multiple of `Width`.
-  size_t index() const { return index_; }
-
- private:
-  size_t mask_;
-  size_t offset_;
-  size_t index_ = 0;
-};
-
 template <class ContainerKey, class Hash, class Eq>
 struct RequireUsableKey {
   template <class PassedKey, class... Args>
@@ -409,6 +362,8 @@ inline bool IsEmptyGeneration(const GenerationType* generation) {
 // - In order to prevent user code from depending on iteration order for small
 //   tables, we would need to randomize the iteration order somehow.
 constexpr size_t SooCapacity() { return 1; }
+// Maximum capacity of a table where we don't need to hash any keys.
+constexpr size_t MaxSmallCapacity() { return 1; }
 // Sentinel type to indicate SOO CommonFields construction.
 struct soo_tag_t {};
 // Sentinel type to indicate SOO CommonFields construction with full size.
@@ -426,7 +381,9 @@ struct no_seed_empty_tag_t {};
 constexpr bool IsValidCapacity(size_t n) { return ((n + 1) & n) == 0 && n > 0; }
 
 // Whether a table is small enough that we don't need to hash any keys.
-constexpr bool IsSmallCapacity(size_t capacity) { return capacity <= 1; }
+constexpr bool IsSmallCapacity(size_t capacity) {
+  return capacity <= MaxSmallCapacity();
+}
 
 // Converts `n` into the next valid capacity, per `IsValidCapacity`.
 constexpr size_t NormalizeCapacity(size_t n) {
@@ -566,6 +523,29 @@ class HashtableCapacityImpl {
                                            : (size_t{1} << capacity_data_) - 1;
   }
 
+  constexpr bool is_small() const {
+    // Small tables have capacity 0 or 1. This expression is valid for both
+    // capacity storage modes.
+    // Comparing capacity_data_ directly leads to a better generated code.
+    // One byte comparison is used before computing the capacity in order to
+    // detect small tables faster for critical path.
+    static_assert(MaxSmallCapacity() == 1);
+    return capacity_data_ <= 1;
+  }
+
+  constexpr size_t mask(size_t value) const {
+#ifdef __BMI2__
+    if constexpr (StorageMode == kCapacityByLog) {
+      if constexpr (sizeof(size_t) == 8) {
+        return _bzhi_u64(value, capacity_data_);
+      } else {
+        return _bzhi_u32(value, capacity_data_);
+      }
+    }
+#endif  // __BMI2__
+    return value & capacity();
+  }
+
  private:
   // We use these sentinel capacity values in debug mode to indicate different
   // classes of bugs.
@@ -634,6 +614,7 @@ class PerTableSeedImpl {
 template <HashtableCapacityStorageMode StorageMode>
 class HashtableInlineDataImpl {
  public:
+  static constexpr HashtableCapacityStorageMode kStorageMode = StorageMode;
   using PerTableSeed = PerTableSeedImpl<
       std::conditional_t<StorageMode == kCapacityByValue, uint16_t, uint8_t>>;
   using HashtableCapacity = HashtableCapacityImpl<StorageMode>;
@@ -652,10 +633,10 @@ class HashtableInlineDataImpl {
         data_(kSizeOneNoMetadata |
               (has_tried_sampling ? kSooHasTriedSamplingMask : 0)) {}
 
-  HashtableCapacity maybe_invalid_capacity() const {
+  HashtableCapacity capacity() const {
     return HashtableCapacity::FromRawData(capacity_internal_);
   }
-  size_t capacity() const { return maybe_invalid_capacity().capacity(); }
+  bool is_small() const { return capacity().is_small(); }
 
   void set_capacity(HashtableCapacity c) { capacity_internal_ = c.ToRawData(); }
   void set_capacity(size_t c) { set_capacity(HashtableCapacity(c)); }
@@ -747,7 +728,11 @@ static_assert(
     sizeof(HashtableInlineDataImpl<kCapacityByLog>::HashtableCapacity) == 1);
 static_assert(sizeof(HashtableInlineDataImpl<kCapacityByLog>) == 8);
 
+#ifndef ABSL_SWISSTABLE_INTERNAL_ENABLE_CAPACITY_BY_LOG
 using HashtableInlineData = HashtableInlineDataImpl<kCapacityByValue>;
+#else
+using HashtableInlineData = HashtableInlineDataImpl<kCapacityByLog>;
+#endif  // ABSL_SWISSTABLE_INTERNAL_ENABLE_CAPACITY_BY_LOG
 using PerTableSeed = HashtableInlineData::PerTableSeed;
 using HashtableCapacity = HashtableInlineData::HashtableCapacity;
 
@@ -1231,16 +1216,22 @@ class CommonFields : public CommonFieldsGenerationInfo {
   }
   void set_no_seed_for_testing() { inline_data_.set_no_seed_for_testing(); }
 
-  // The total number of available slots.
-  size_t capacity() const { return inline_data_.capacity(); }
+  HashtableCapacity capacity_impl() const {
+    HashtableCapacity cap = inline_data_.capacity();
+    ABSL_SWISSTABLE_ASSERT(cap.IsValid());
+    return cap;
+  }
+  size_t capacity() const { return capacity_impl().capacity(); }
+  // We have a separate alias for callsites in which the capacity may be
+  // invalid.
   HashtableCapacity maybe_invalid_capacity() const {
-    return inline_data_.maybe_invalid_capacity();
+    return inline_data_.capacity();
   }
   void set_capacity(HashtableCapacity c) { inline_data_.set_capacity(c); }
   void set_capacity(size_t c) {
     set_capacity(HashtableCapacity(c));
   }
-  bool is_small() const { return IsSmallCapacity(capacity()); }
+  bool is_small() const { return inline_data_.is_small(); }
 
   // The number of slots we can still fill without needing to rehash.
   // This is stored in the heap allocation before the control bytes.
@@ -1434,13 +1425,25 @@ inline void AssertIsValidForComparison(const ctrl_t* ctrl,
                                        GenerationType generation,
                                        const GenerationType* generation_ptr) {
   if (!SwisstableDebugEnabled()) return;
-  const bool ctrl_is_valid_for_comparison =
-      ctrl == nullptr || ctrl == DefaultIterControl() || IsFull(*ctrl);
+  const bool ctrl_is_valid_for_comparison = [ctrl]() {
+    if (ctrl == nullptr) return true;
+    if (ctrl == DefaultIterControl()) return true;
+    // Note: if the following line crashes, then it's likely that `ctrl` is from
+    // a backing array that has been deallocated. If you see a crash here, it
+    // likely means that you are comparing an invalid iterator from a table that
+    // has rehashed, moved, or been destroyed.
+    return IsFull(*ctrl);
+  }();
   if (SwisstableGenerationsEnabled()) {
     if (ABSL_PREDICT_FALSE(generation != *generation_ptr)) {
-      ABSL_RAW_LOG(FATAL,
-                   "Invalid iterator comparison. The table could have rehashed "
-                   "or moved since this iterator was initialized.");
+      // Note: in the case of a rehash, we would expect to see a sanitizer crash
+      // above when `ctrl` is dereferenced so this assertion will only catch
+      // moved table cases, unless we're using a custom allocator that does not
+      // deallocate the old backing array (e.g. an arena allocator).
+      ABSL_RAW_LOG(
+          FATAL,
+          "Invalid iterator comparison. The table was likely moved (or "
+          "possibly rehashed) since this iterator was initialized.");
     }
     if (ABSL_PREDICT_FALSE(!ctrl_is_valid_for_comparison)) {
       ABSL_RAW_LOG(
@@ -1544,15 +1547,64 @@ constexpr bool is_single_group(size_t capacity) {
   return capacity <= Group::kWidth;
 }
 
+// The state for a probe sequence.
+//
+// Currently, the sequence is a triangular progression of the form
+//
+//   p(i) := Width * (i^2 + i)/2 + hash (mod mask + 1)
+//
+// The use of `Width` ensures that each probe step does not overlap groups;
+// the sequence effectively outputs the addresses of *groups* (although not
+// necessarily aligned to any boundary). The `Group` machinery allows us
+// to check an entire group with minimal branching.
+//
+// Wrapping around at `mask + 1` is important, but not for the obvious reason.
+// As described above, the first few entries of the control byte array
+// are mirrored at the end of the array, which `Group` will find and use
+// for selecting candidates. However, when those candidates' slots are
+// actually inspected, there are no corresponding slots for the cloned bytes,
+// so we need to make sure we've treated those offsets as "wrapping around".
+//
+// It turns out that this probe sequence visits every group exactly once if the
+// number of groups is a power of two, since (i^2+i)/2 is a bijection in
+// Z/(2^m). See https://en.wikipedia.org/wiki/Quadratic_probing
+template <size_t Width>
+class probe_seq {
+ public:
+  // Creates a new probe sequence using `hash` as the initial value of the
+  // sequence and `capacity` as the mask to apply to each value in the
+  // progression.
+  probe_seq(HashtableCapacity capacity, size_t hash)
+      : capacity_(capacity), offset_(capacity.mask(hash)) {}
+
+  // The offset within the table, i.e., the value `p(i)` above.
+  size_t offset() const { return offset_; }
+  size_t offset(size_t i) const { return capacity_.mask(offset_ + i); }
+
+  void next() {
+    index_ += Width;
+    offset_ += index_;
+    offset_ = capacity_.mask(offset_);
+  }
+  // 0-based probe index, a multiple of `Width`.
+  size_t index() const { return index_; }
+
+ private:
+  HashtableCapacity capacity_;
+  size_t offset_;
+  size_t index_ = 0;
+};
+
 // Begins a probing operation on `common.control`, using `hash`.
-inline probe_seq<Group::kWidth> probe_h1(size_t capacity, size_t h1) {
-  return probe_seq<Group::kWidth>(h1, capacity);
+inline probe_seq<Group::kWidth> probe_h1(HashtableCapacity capacity,
+                                         size_t h1) {
+  return probe_seq<Group::kWidth>(capacity, h1);
 }
-inline probe_seq<Group::kWidth> probe(size_t capacity, size_t hash) {
+inline probe_seq<Group::kWidth> probe(HashtableCapacity capacity, size_t hash) {
   return probe_h1(capacity, H1(hash));
 }
 inline probe_seq<Group::kWidth> probe(const CommonFields& common, size_t hash) {
-  return probe(common.capacity(), hash);
+  return probe(common.capacity_impl(), hash);
 }
 
 constexpr size_t kProbedElementIndexSentinel = ~size_t{};

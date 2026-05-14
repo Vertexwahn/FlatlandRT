@@ -53,6 +53,8 @@ TEST_CASE( "Disabled Macros" ) {
     REQUIRE_THAT( 1,
                   Catch::Matchers::Predicate( []( int ) { return false; } ) );
     BENCHMARK( "Disabled benchmark" ) { REQUIRE( 1 == 2 ); };
+
+    STATIC_REQUIRE_THAT( 1, Catch::Matchers::Predicate( []( int ) { return false; } ) );
 }
 
 struct DisabledFixture {};

@@ -2,6 +2,7 @@
 
 # Release notes
 **Contents**<br>
+[3.15.0](#3150)<br>
 [3.14.0](#3140)<br>
 [3.13.0](#3130)<br>
 [3.12.0](#3120)<br>
@@ -72,6 +73,22 @@
 [2.0.1](#201)<br>
 [Older versions](#older-versions)<br>
 [Even Older versions](#even-older-versions)<br>
+
+
+## 3.15.0
+
+### Fixes
+* Fixed ambiguous overload issue with `std::optional<T>` in C++26. (#3095)
+  * Since `std::optional` was turned into a range, the partial specialization of `StringMaker` for range-like types and for `std::optional<T>` were in conflict.
+
+### Improvements
+* Simplified `CATCH_REGISTER_ENUM` internals for faster compilation and retrieval.
+* Successful assertion are slightly (1-2%) faster.
+* Generic (new-style) matchers support constexpr matching in C++20.
+  * Combining matchers requires C++26.
+  * Catch2-provided generic matchers are all constexpr enabled.
+* Added `STATIC_REQUIRE_THAT` for compile-time matcher assertions.
+  * This requires the compiler to support enough `constexpr` for matchers, see above.
 
 
 ## 3.14.0
