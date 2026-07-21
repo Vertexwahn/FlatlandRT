@@ -15,7 +15,7 @@ matplotlib==3.10.8
 mitsuba==3.8.0
 opencv-python==4.13.0.92
 packaging==26.0
-pillow==12.2.0
+pillow==12.3.0
 pyparsing==3.3.2
 pytest==9.0.3
 python-dateutil==2.9.0.post0
