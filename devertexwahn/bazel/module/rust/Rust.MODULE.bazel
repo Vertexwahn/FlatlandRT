@@ -1,0 +1,21 @@
+"""
+    SPDX-FileCopyrightText: Copyright 2025-2026 Julian Amann <dev@vertexwahn.de>
+    SPDX-License-Identifier: Apache-2.0
+"""
+
+bazel_dep(name = "rules_rust", version = "0.75.0")
+
+# Rust toolchain
+RUST_EDITION = "2024"
+
+# Rust >= 1.98.0 is required on macOS 27: older rustc versions strip dylibs (incl. proc
+# macros) with a misaligned LINKEDIT string pool that dyld rejects (rust-lang/rust#157750).
+RUST_VERSION = "1.98.0"
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = RUST_EDITION,
+    versions = [RUST_VERSION],
+)
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")

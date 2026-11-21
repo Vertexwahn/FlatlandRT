@@ -16,6 +16,7 @@ bazel_dep(name = "apple_support", version = "2.12.0")
 
 include("//bazel/module/cpp:Cpp.MODULE.bazel")
 include("//bazel/module/python:Python.MODULE.bazel")
+include("//bazel/module/rust:Rust.MODULE.bazel")
 
 bazel_dep(name = "abseil-cpp", version = "20260526.0")
 bazel_dep(name = "bazel_skylib", version = "1.9.2")
