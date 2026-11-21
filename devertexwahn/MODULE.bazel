@@ -172,7 +172,7 @@ local_path_override(
 
 local_path_override(
     module_name = "rules_pkg",
-    path = "../third_party/rules_pkg-1.1.0",
+    path = "../third_party/rules_pkg-1.2.0",
 )
 
 local_path_override(
