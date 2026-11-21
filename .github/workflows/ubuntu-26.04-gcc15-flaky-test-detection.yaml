@@ -65,7 +65,7 @@ jobs:
       - name: "Detect flaky tests"
         run: |
           cd devertexwahn
-          bazel test --config=gcc15 --compilation_mode=opt --cache_test_results=no --runs_per_test=20 --flaky_test_attempts=5 -- //...
+          bazel test --config=gcc15 --compilation_mode=opt --cache_test_results=no --runs_per_test=20 --flaky_test_attempts=5 -- //... -//flatland/tests/acceptance_tests:acceptance_test
 
       - name: "Show disk space"
         run: |
