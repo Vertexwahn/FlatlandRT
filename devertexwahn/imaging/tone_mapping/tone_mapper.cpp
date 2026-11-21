@@ -23,6 +23,9 @@ public:
         desc.add_options()
             ("filename", value<std::string>(), "Filename of an HDR input image")
             ("outfile", value<std::string>(), "Filename of LDR output file")
+            ("operator", value<std::string>()->default_value("agx"),
+                "Tone mapping operator: 'agx' (Blender-style filmic, default) "
+                "or 'srgb' (plain sRGB encode)")
             ("help,h", "Help screen")
             ("version,v", "print version string");
     }
@@ -74,6 +77,10 @@ public:
         return vm["outfile"].as<std::string>();
     }
 
+    std::string tone_mapping_operator() const {
+        return vm["operator"].as<std::string>();
+    }
+
 private:
     boost::program_options::variables_map vm;
     boost::program_options::options_description desc{"Options"};
@@ -95,7 +102,12 @@ public:
         LOG_INFO_WITH_LOCATION("Outfile: {}", command_line_options.outfile());
 
         Image3f hdr_image = load_image_openexr(command_line_options.filename());
-        Image3b ldr_image = srgb_operator(hdr_image);
+
+        const std::string op = command_line_options.tone_mapping_operator();
+        LOG_INFO_WITH_LOCATION("Tone mapping operator: {}", op);
+        Image3b ldr_image = (op == "srgb")
+            ? srgb_operator(hdr_image)
+            : agx_operator(hdr_image);
 
         store_image(command_line_options.outfile(), ldr_image);
 
