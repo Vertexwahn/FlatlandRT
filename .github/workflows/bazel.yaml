@@ -22,3 +22,6 @@ on:
 jobs:
   macos_26_apple_clang17:
     uses: ./.github/workflows/macOS-26-apple-clang17.yaml
+
+  ubuntu_26_gcc15_fast_opt:
+    uses: ./.github/workflows/ubuntu-26.04-gcc15-fast-opt.yaml

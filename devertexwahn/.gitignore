@@ -5,3 +5,8 @@ MODULE.bazel.lock
 
 # cppcheck
 /cppcheck-build-dir
+
+brickwahn/speed_build_output/
+
+# Machine-local Bazel settings (imported by .bazelrc)
+.bazelrc.local
