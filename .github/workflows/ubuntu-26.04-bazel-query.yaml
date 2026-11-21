@@ -29,6 +29,15 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v7
 
+      - uses: bazel-contrib/setup-bazel@0.19.2
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+
       - name: "Show disk space"
         run: |
           df -h
@@ -41,11 +50,6 @@ jobs:
         run: |
           cd devertexwahn
           bazel version
-
-      #- name: "Add Linux specific Bazel ignore file"
-      #  run: |
-      #    cd devertexwahn
-      #    mv "bazel/ignore/.bazelignore.linux" ".bazelignore"
 
       - name: "Compiler feature dump"
         run: |

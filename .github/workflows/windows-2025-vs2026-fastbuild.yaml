@@ -25,15 +25,19 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v7
 
+      - uses: bazel-contrib/setup-bazel@0.19.2
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+
       - name: "Show Bazel version"
         run: |
           cd devertexwahn
           bazel version
-
-      - name: "Add Windows specific Bazel ignore file"
-        run: |
-          cd devertexwahn
-          Copy-Item -Path "bazel/ignore/.bazelignore.windows" -Destination ".bazelignore"
 
       - name: "Compiler feature dump"
         run: |
