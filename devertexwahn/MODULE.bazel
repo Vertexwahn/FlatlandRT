@@ -142,7 +142,7 @@ local_path_override(
 
 local_path_override(
     module_name = "openexr",
-    path = "../third_party/openexr-3.4.4",
+    path = "../third_party/openexr-3.4.8",
 )
 
 local_path_override(
