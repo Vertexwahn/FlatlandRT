@@ -1,0 +1,20 @@
+name: Whitespace
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  whitespace:
+    name: Whitespace
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check whitespace
+        run: python3 util/check-whitespace.py
