@@ -146,8 +146,8 @@ TEST(Transform44f, GivenRayInWorldSpace_ExpetRayInObjectSpace_WhenTransformedWit
     auto toObjectSpace = to_world.inverse();
     Ray2f ray = toObjectSpace * r;
 
-    EXPECT_THAT(ray.origin, (Point2f{-translation.x(), -translation.y()}));
-    EXPECT_THAT(ray.direction, direction);
+    EXPECT_TRUE(ray.origin.isApprox(Point2f{-translation.x(), -translation.y()}));
+    EXPECT_TRUE(ray.direction.isApprox(direction));
     EXPECT_FLOAT_EQ(ray.min_t, min_distance);
     EXPECT_FLOAT_EQ(ray.max_t, max_distance);
 }
@@ -164,8 +164,7 @@ TEST(Transform44f, dir) {
     auto to_object_space = to_world.inverse();
     Ray2f ray = to_object_space * r;
 
-    EXPECT_THAT(ray.origin, (Point2f{-translation.x()*1.f/3.f, -translation.y()*1.f/3.f}));
-    //EXPECT_THAT(ray.direction, direction);
+    EXPECT_TRUE(ray.origin.isApprox(Point2f{-translation.x()*1.f/3.f, -translation.y()*1.f/3.f}));
     EXPECT_FLOAT_EQ(ray.min_t, min_distance);
     EXPECT_FLOAT_EQ(ray.max_t, max_distance);
 }

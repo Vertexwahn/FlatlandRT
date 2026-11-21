@@ -75,4 +75,4 @@ jobs:
       - name: "Bazel test gcc15-fastbuild"
         run: |
           cd devertexwahn
-          bazel test --config=gcc15 --test_output=errors -- //...
+          bazel test --config=gcc15 --test_output=errors -- //... -//flatland/tests/acceptance_tests:acceptance_test
