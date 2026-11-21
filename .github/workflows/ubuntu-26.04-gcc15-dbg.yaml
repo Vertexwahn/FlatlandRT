@@ -1,0 +1,74 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2025-2026 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# gcc15 on Ubuntu 26.04
+# Make sure we can build with gcc15 in all different compilation modes
+
+name: gcc15 dbg on Ubuntu 26.04
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  Ubuntu26GCC15DebugPart1:
+    name: "gcc15 dbg on Ubuntu 26.04"
+    runs-on: ubuntu-26.04
+    steps:
+      - name: "Show disk space"
+        run: |
+          df -h
+
+      - name: "Checkout"
+        uses: actions/checkout@v7
+
+      - uses: bazel-contrib/setup-bazel@0.19.2
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+
+      - name: "Show disk space"
+        run: |
+          df -h
+  
+      - name: "Show OS version"
+        run: |
+          lsb_release -a
+
+      - name: "Show Bazel version"
+        run: |
+          cd devertexwahn
+          bazel version
+
+      - name: "Show GCC version"
+        run: |
+          gcc --version
+
+      - name: "Compiler feature dump"
+        run: |
+          cd devertexwahn
+          bazel run --config=gcc15 --compilation_mode=dbg -- //tools/compiler_feature_dump
+
+      - name: "Regenerate lock files for Python"
+        run: |
+          cd devertexwahn
+          bazel run --config=gcc15 -- //bazel/module/python:requirements.update
+
+      # dbg
+      - name: "Bazel build gcc15-dbg"
+        run: |
+          cd devertexwahn
+          bazel build --config=gcc15 --compilation_mode=dbg -- //...
+
+      - name: "Bazel test gcc15-dbg"
+        run: |
+          cd devertexwahn
+          bazel test --config=gcc15 --compilation_mode=dbg -- //...

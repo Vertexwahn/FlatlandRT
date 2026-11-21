@@ -74,10 +74,10 @@ jobs:
           cd devertexwahn
           bazel cquery --config=gcc15 //...
 
-      - name: "Bazel mod graph"
-        run: |
-          cd devertexwahn
-          bazel mod graph
+      #- name: "Bazel mod graph"
+      #  run: |
+      #    cd devertexwahn
+      #    bazel mod graph
 
       - name: "Show disk space"
         run: |

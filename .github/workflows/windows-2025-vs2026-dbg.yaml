@@ -1,0 +1,61 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2025-2026 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# VS2026 on Windows Server 2025
+# Make sure we can build with VS2026 in all dbg compilation mode
+
+name: VS2026 dbg on Windows Server 2025
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  VisualStudio2026_WindowsServer2025_Dbg:
+    name: "VS2026 dbg on Windows Server 2025"
+    runs-on: windows-2025  # https://github.com/actions/runner-images#available-images
+    steps:
+      - name: "Show system information"
+        run: |
+          systeminfo
+
+      - name: "Checkout"
+        uses: actions/checkout@v7
+
+      - uses: bazel-contrib/setup-bazel@0.19.2
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+
+      - name: "Show Bazel version"
+        run: |
+          cd devertexwahn
+          bazel version
+
+      - name: "Compiler feature dump"
+        run: |
+          cd devertexwahn
+          bazel --output_base=C:/bazel_output_base run --config=vs2026 --compilation_mode=dbg -- //tools/compiler_feature_dump
+
+      - name: "Show CPU information"
+        run: |
+          cd devertexwahn
+          bazel --output_base=C:/bazel_output_base run --config=vs2026 --compilation_mode=dbg -- //tools/cpu_info:cpu_info
+
+      # dbg
+      - name: "Bazel build vs2026-dbg"
+        run: |
+          cd devertexwahn
+          bazel --output_base=C:/bazel_output_base build --config=vs2026 --compilation_mode=dbg -- //...
+      - name: "Bazel test vs2026-dbg"
+        run: |
+          cd devertexwahn
+          bazel --output_base=C:/bazel_output_base test --config=vs2026 --compilation_mode=dbg -- //...
