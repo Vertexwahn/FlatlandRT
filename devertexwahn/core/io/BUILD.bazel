@@ -12,7 +12,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":stream",
-        "@googletest//:gtest_main",
     ],
 )
 

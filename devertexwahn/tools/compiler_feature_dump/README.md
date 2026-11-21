@@ -25,5 +25,5 @@ bazel run --config=macos //tools/compiler_feature_dump
 # Windows
 
 ```shell
-bazel --output_base=G:/bazel_output_base run --config=vs2022 --compilation_mode=opt //tools/compiler_feature_dump
+bazel --output_base=G:/bazel_output_base run --config=vs2026 --compilation_mode=opt //tools/compiler_feature_dump
 ```

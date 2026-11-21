@@ -3,7 +3,12 @@
     SPDX-License-Identifier: Apache-2.0
 """
 
-bazel_dep(name = "rules_python", version = "2.0.0")
+bazel_dep(name = "rules_python", version = "2.5.1")
+
+# Opt out of the deprecated implicit __init__.py creation for all py_* targets of this module.
+# See https://github.com/bazel-contrib/rules_python/issues/2945
+rules_python_config = use_extension("@rules_python//python/extensions:config.bzl", "config")
+rules_python_config.explicit_init_py(default = True)
 
 PYTHON_VERSION = "3.13.2"
 
@@ -27,11 +32,14 @@ pip.parse(
             "sphinxcontrib-applehelp",
         ],
     },
-    hub_name = "pypi",
+    hub_name = "de_vertexwahn_pypi",
     python_version = PYTHON_VERSION,
     requirements_darwin = "//bazel/module/python:requirements_darwin.txt",
     requirements_linux = "//bazel/module/python:requirements_linux.txt",
     requirements_lock = "//bazel/module/python:requirements_lock.txt",
     requirements_windows = "//bazel/module/python:requirements_windows.txt",
 )
-use_repo(pip, "pypi")
+
+# The hub name "pypi" is reserved for rules_python's unified hub, so the hub has a module-specific
+# name and is mapped back to the short local name @pypi used throughout this repository.
+use_repo(pip, pypi = "de_vertexwahn_pypi")
