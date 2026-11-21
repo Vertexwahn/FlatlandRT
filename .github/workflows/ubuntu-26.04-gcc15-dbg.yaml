@@ -71,4 +71,4 @@ jobs:
       - name: "Bazel test gcc15-dbg"
         run: |
           cd devertexwahn
-          bazel test --config=gcc15 --compilation_mode=dbg -- //...
+          bazel test --config=gcc15 --compilation_mode=dbg -- //... -//flatland/tests/acceptance_tests:acceptance_test

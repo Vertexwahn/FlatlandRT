@@ -29,6 +29,9 @@ jobs:
   ubuntu_26_bazel_query:
     uses: ./.github/workflows/ubuntu-26.04-bazel-query.yaml
 
+  ubuntu_26_coverage:
+    uses: ./.github/workflows/ubuntu-26.04-coverage.yaml
+    
   ubuntu_26_gcc15_dbg:
     uses: ./.github/workflows/ubuntu-26.04-gcc15-dbg.yaml
 
