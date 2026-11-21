@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: Copyright 2022-2025 Julian Amann <dev@vertexwahn.de>
+SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
 SPDX-License-Identifier: Apache-2.0
 -->
 
@@ -49,30 +49,18 @@ cd FlatlandRT # change directory to cloned repository
 cd devertexwahn # switch to the location where the MODULE.bazel file is located
 ```
 
-*Render a scene with Windows 10/11 x64 with Visual Studio 2019:*
+*Render a scene with Windows 10/11 x64 with Visual Studio 2026:*
 
 ```shell
-bazel --output_base=C:/bazel_output_base run --config=vs2019 //flatland/cli:flatland.cli -- --scene_filename=C:\scenes\bunny.flatland.xml
-```
-
-*Render a scene with Windows 10/11 x64 with Visual Studio 2022:*
-
-```shell
-bazel --output_base=C:/bazel_output_base  run --config=vs2022 //flatland/cli:flatland.cli -- --scene_filename=C:\scenes\bunny.flatland.xml
+bazel --output_base=C:/bazel_output_base  run --config=vs2026 //flatland/cli:flatland.cli -- --scene_filename=C:\scenes\bunny.flatland.xml
 ```
 
 For more hints on how to use Bazel on Windows have a look at the [Bazel on Windows](https://docs.google.com/document/d/17YIqUdffxpwcKP-0whHM6TFELN8VohTpjiiEIbbRfts/edit?usp=sharing) document.
 
-*Render a scene with Ubuntu 22.04:*
+*Render a scene with Ubuntu 26.04:*
 
 ```shell
-bazel run --config=gcc11 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
-```
-
-*Render a scene with Ubuntu 24.04:*
-
-```shell
-bazel run --config=gcc13 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
+bazel run --config=gcc15 //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/flatland/scenes/bunny/bunny.flatland.xml
 ```
 
 *Render a scene with macOS 11/12/13:*
@@ -88,14 +76,10 @@ bazel run --config=macos //flatland/cli:flatland.cli -- --scene_filename=$(pwd)/
 #### Command line (bash/zsh)
 
 ```shell
-# Run all tests using GCC 11
-bazel test --config=gcc11 //...
-# Build all targets uing GCC 11
-bazel build --config=gcc11 //...
-# Run all tests using GCC 13
-bazel test --config=gcc13 //...
-# Build all targets uing GCC 13
-bazel build --config=gcc13 //...
+# Run all tests using GCC 15
+bazel test --config=gcc15 //...
+# Build all targets uing GCC 15
+bazel build --config=gcc15 //...
 # Run all tests using Clang 14
 bazel test --config=clang14 //...
 # Build all targets uing Clang 14
@@ -168,7 +152,7 @@ bazel build //core:object \
 
 ```shell
 # Build with Visual Studio C++ Compiler
-bazel build --config=vs2022 //...
+bazel build --config=vs2026 //...
 ```
 
 #### Using Visual Studio
@@ -176,7 +160,7 @@ bazel build --config=vs2022 //...
 Use [Lavender](https://github.com/tmandry/lavender) to generate a solution and project files for Visual Studio.
 
 ```shell
-python3 G:\dev\lavender\generate.py --config=vs2022  //...
+python3 G:\dev\lavender\generate.py --config=vs2026  //...
 ```
 
 Lavender is far from being perfect.

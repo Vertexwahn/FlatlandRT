@@ -25,6 +25,7 @@ build --@boost.asio//:ssl=boringssl
 
 # macOS
 build:macos --macos_minimum_os=10.15
+build:macos --features=-use_header_modules  # Apple Clang 17+ in Bazel can incorrectly enable header module mode for libc++ and abseil; disable it globally on macOS.
 build:macos --cxxopt=-std=c++23  # see https://clang.llvm.org/cxx_status.html
 build:macos --cxxopt=-Wall  # Turn on all warnings
 build:macos --cxxopt=-Wno-error=implicit-function-declaration  # Qt qyieldcpu.h calls __yield() without including <arm_acle.h>
@@ -35,23 +36,11 @@ build:macos --define compiler=macos
 #build:macos --cxxopt=-Wextra
 #build:macos --spawn_strategy=local
 
-# GCC 11.4
-build:gcc11 --cxxopt=-std=c++23
-build:gcc11 --cxxopt=-Wall
-build:gcc11 --define compiler=gcc11
-build:gcc11 --cxxopt=-fpermissive # Needed for fmt
-#build:gcc11 --noincompatible_enable_cc_toolchain_resolution  # disable LLVM toolchain
-#build:gcc11 --cxxopt=-Werror
-#build:gcc11 --cxxopt=-Wno-volatile # blocked by emsdk
-##build:gcc11 --cxxopt=-Wextra
-
-build:linux --config=gcc11
-
-# GCC 13
-build:gcc13 --cxxopt=-std=c++23
-build:gcc13 --cxxopt=-Wall
-build:gcc13 --define compiler=gcc13
-build:gcc13 --cxxopt=-fpermissive # Needed for fmt
+# GCC 15
+build:gcc15 --cxxopt=-std=c++23
+build:gcc15 --cxxopt=-Wall
+build:gcc15 --define compiler=gcc15
+build:gcc15 --cxxopt=-fpermissive # Needed for fmt
 
 
 
@@ -68,27 +57,29 @@ build:clang14 --features=-libtool
 build:clang14 --cxxopt=-mwaitpkg
 build:clang14 --define compiler=clang14
 
-# Visual Studio 2022
-#build:vs2022 --copt=-DNOGDI
-#build:vs2022 --cxxopt=/std:c++20
-#build:vs2022 --host_copt=-DNOGDI
+# Visual Studio 2026
+#build:vs2026 --copt=-DNOGDI
+#build:vs2026 --cxxopt=/std:c++20
+#build:vs2026 --host_copt=-DNOGDI
 
 
-build:vs2022 --copt=-DWIN32_LEAN_AND_MEAN
-build:vs2022 --cxxopt=/std:c++latest # Support for C++23 features
-build:vs2022 --cxxopt=/utf-8
-build:vs2022 --cxxopt=/Zc:__cplusplus
-build:vs2022 --cxxopt=/Zc:preprocessor # needed for __VA_OPT__ macro
-build:vs2022 --define compiler=vs2022
-build:vs2022 --enable_runfiles # https://github.com/bazelbuild/bazel/issues/8843
-build:vs2022 --host_copt=-DWIN32_LEAN_AND_MEAN
-build:vs2022 --action_env=PATH # powershell.exe must be reachable for rules_python build_data_writer.ps1
+build:vs2026 --copt=-DWIN32_LEAN_AND_MEAN
+build:vs2026 --cxxopt=/std:c++latest # Support for C++23 features
+build:vs2026 --cxxopt=/utf-8
+build:vs2026 --cxxopt=/Zc:__cplusplus
+build:vs2026 --cxxopt=/Zc:preprocessor # needed for __VA_OPT__ macro
+build:vs2026 --define compiler=vs2026
+build:vs2026 --enable_runfiles # https://github.com/bazelbuild/bazel/issues/8843
+build:vs2026 --host_copt=-DWIN32_LEAN_AND_MEAN
+build:vs2026 --action_env=PATH # powershell.exe must be reachable for rules_python build_data_writer.ps1
 # NOTE: The Bazel server inherits PATH from the invoking shell. If Python targets fail with
 # "powershell.exe not found", ensure C:\Windows\System32\WindowsPowerShell\v1.0 is in PATH,
 # then run: bazel shutdown && bazel build ...
+# Genrules run via MSYS2 bash (BAZEL_SH) also take their tools from this PATH. If they fail with
+# "cp: command not found" (Exit 127), add <MSYS2 root>\usr\bin (e.g. C:\msys64\usr\bin) to PATH.
 
 
-build:windows --config=vs2022
+build:windows --config=vs2026
 
 # Address Sanitizer
 build:asan --config=gcc9
@@ -108,7 +99,7 @@ build:optimized build --copt=-O3
 # IWYU
 # More details here: https://github.com/storypku/bazel_iwyu/pull/12
 #build:iwyu --@bazel_iwyu//:iwyu_mappings=@my_repo//tools:iwyu_mappings
-build:iwyu --config=gcc11
+build:iwyu --config=gcc15
 #build:iwyu --config=clang19
 build:iwyu --aspects @bazel_iwyu//bazel/iwyu:iwyu.bzl%iwyu_aspect
 build:iwyu --output_groups=report
@@ -131,10 +122,29 @@ build:llvm_toolchain_ubuntu --config=llvm_toolchain
 build:llvm_toolchain_ubuntu --extra_toolchains=@llvm_toolchain//:cc-toolchain-x86_64-linux
 build:llvm_toolchain_ubuntu --features=-libtool
 build:llvm_toolchain_ubuntu --cxxopt=-mwaitpkg
-build:llvm_toolchain_ubuntu --define compiler=clang19
+build:llvm_toolchain_ubuntu --define compiler=clang21
 
-build:clang19 --config=llvm_toolchain_ubuntu
+build:clang21 --config=llvm_toolchain_ubuntu
+# Note: On Ubuntu 25.10+/Debian trixie+ the prebuilt LLVM binaries (lld, ...)
+# require libxml2.so.2, which the system no longer ships. Run once:
+#   sudo bazel/llvm_toolchain/setup_libxml2_compat.sh
 
 # LLVM toolchain on macOS
 build:llvm_toolchain_macos --config=llvm_toolchain
 #build:llvm_toolchain_macos --extra_toolchains=@llvm_toolchain//:cc-toolchain-darwin
+
+#-------------------------------------------------------------------------------------
+# Python
+#-------------------------------------------------------------------------------------
+
+# Do not synthesize missing __init__.py files in the runfiles tree. Every Python
+# package must ship its __init__.py explicitly in the srcs of its py_* targets.
+# See https://github.com/bazel-contrib/rules_python/issues/2945
+build --incompatible_default_to_explicit_init_py=true
+
+#-------------------------------------------------------------------------------------
+# Machine-local settings (e.g. output_base, disk_cache) - .bazelrc.local is git-ignored
+#-------------------------------------------------------------------------------------
+
+# Keep this last so that local settings take precedence
+try-import %workspace%/.bazelrc.local
