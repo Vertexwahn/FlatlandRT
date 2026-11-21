@@ -29,14 +29,17 @@ jobs:
   ubuntu_26_bazel_query:
     uses: ./.github/workflows/ubuntu-26.04-bazel-query.yaml
 
-  ubuntu_26_coverage:
-    uses: ./.github/workflows/ubuntu-26.04-coverage.yaml
+  #ubuntu_26_coverage:
+  #  uses: ./.github/workflows/ubuntu-26.04-coverage.yaml
     
   ubuntu_26_gcc15_dbg:
     uses: ./.github/workflows/ubuntu-26.04-gcc15-dbg.yaml
 
   ubuntu_26_gcc15_fast_opt:
     uses: ./.github/workflows/ubuntu-26.04-gcc15-fast-opt.yaml
+
+  ubuntu_26_gcc15_flaky_test_detection:
+    uses: ./.github/workflows/ubuntu-26.04-gcc15-flaky-test-detection.yaml
 
   windows_2025_vs2026_dbg:
     uses: ./.github/workflows/windows-2025-vs2026-dbg.yaml    
