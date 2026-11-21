@@ -1,6 +1,6 @@
 // Formatting library for C++ - printf tests
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -116,6 +116,17 @@ TEST(printf_test, invalid_arg_index) {
                    "argument not found");
 }
 
+TEST(printf_test, zero_positional_width_precision) {
+  // A '0' positional index for a '*' width or precision must be rejected. Use
+  // enough arguments to exercise the unpacked argument storage path.
+  EXPECT_THROW_MSG(test_sprintf("%*0$d", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                                13, 14, 15, 16),
+                   format_error, "argument not found");
+  EXPECT_THROW_MSG(test_sprintf("%.*0$d", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                                13, 14, 15, 16),
+                   format_error, "argument not found");
+}
+
 TEST(printf_test, default_align_right) {
   EXPECT_PRINTF("   42", "%5d", 42);
   EXPECT_PRINTF("  abc", "%5s", "abc");
@@ -158,6 +169,14 @@ TEST(printf_test, plus_flag) {
   // '+' flag and space flag are both ignored for non-numeric types.
   EXPECT_PRINTF("x", "%+ c", 'x');
   EXPECT_PRINTF("x", "% +c", 'x');
+
+  // '+' flag is ignored for unsigned conversions.
+  EXPECT_PRINTF("42", "%+u", 42);
+  EXPECT_PRINTF("42", "%+o", 042);
+  EXPECT_PRINTF("2a", "%+x", 0x2a);
+  EXPECT_PRINTF("2A", "%+X", 0x2a);
+  EXPECT_PRINTF("0x002a", "%+#06x", 0x2a);
+  EXPECT_PRINTF("", "%+.0u", 0);
 }
 
 TEST(printf_test, minus_flag) {
@@ -188,6 +207,10 @@ TEST(printf_test, space_flag) {
 
   // ' ' flag is ignored for non-numeric types.
   EXPECT_PRINTF("x", "% c", 'x');
+
+  // ' ' flag is ignored for unsigned conversions.
+  EXPECT_PRINTF("42", "% u", 42);
+  EXPECT_PRINTF("0002a", "% 05x", 0x2a);
 }
 
 TEST(printf_test, hash_flag) {
@@ -267,6 +290,32 @@ TEST(printf_test, int_precision) {
   EXPECT_PRINTF("00042     ", "%-#10.5o", 042);
 }
 
+// C99 7.21.6.1: the result of converting a zero value with a precision of zero
+// is no characters.
+TEST(printf_test, zero_int_with_zero_precision) {
+  EXPECT_PRINTF("", "%.0d", 0);
+  EXPECT_PRINTF("", "%.d", 0);
+  EXPECT_PRINTF("", "%.0o", 0);
+  EXPECT_PRINTF("", "%.0x", 0);
+
+  // '#' forces a single '0' for octal, but has no effect on other conversions.
+  EXPECT_PRINTF("0", "%#.0o", 0);
+  EXPECT_PRINTF("0", "%#.0hho", 256);
+  EXPECT_PRINTF("", "%#.0x", 0);
+
+  // The sign, space and width still apply.
+  EXPECT_PRINTF("+", "%+.0d", 0);
+  EXPECT_PRINTF(" ", "% .0d", 0);
+  EXPECT_PRINTF("     ", "%5.0d", 0);
+  EXPECT_PRINTF("     ", "%05.0d", 0);
+  EXPECT_PRINTF("    0", "%#5.0o", 0);
+  EXPECT_PRINTF("0    ", "%#-5.0o", 0);
+
+  // A nonzero value or a nonzero precision is unaffected.
+  EXPECT_PRINTF("-42", "%.0d", -42);
+  EXPECT_PRINTF("0", "%.1d", 0);
+}
+
 TEST(printf_test, float_precision) {
   char buffer[256];
   safe_sprintf(buffer, "%.3e", 1234.5678);
@@ -289,6 +338,8 @@ TEST(printf_test, ignore_precision_for_non_numeric_arg) {
 TEST(printf_test, dynamic_precision) {
   EXPECT_EQ("00042", test_sprintf("%.*d", 5, 42));
   EXPECT_EQ("42", test_sprintf("%.*d", -5, 42));
+  EXPECT_EQ("0", test_sprintf("%.*d", -1, 0));
+  EXPECT_EQ("+0", test_sprintf("%+.*d", -1, 0));
   EXPECT_THROW_MSG(test_sprintf("%.*d", 5.0, 42), format_error,
                    "precision is not integer");
   EXPECT_THROW_MSG(test_sprintf("%.*d"), format_error, "argument not found");
@@ -315,6 +366,8 @@ TEST(printf_test, positional_width) {
 TEST(printf_test, positional_precision) {
   EXPECT_EQ("00042", test_sprintf("%2$.*1$d", 5, 42));
   EXPECT_EQ("42", test_sprintf("%2$.*1$d", -5, 42));
+  EXPECT_EQ("0", test_sprintf("%2$.*1$d", -1, 0));
+  EXPECT_EQ("+0", test_sprintf("%2$+.*1$d", -1, 0));
   EXPECT_EQ("Hell", test_sprintf("%2$.*1$s", 4, "Hello"));
   EXPECT_THROW_MSG(test_sprintf("%2$.*1$d", 5.0, 42), format_error,
                    "precision is not integer");
@@ -491,6 +544,11 @@ TEST(printf_test, string) {
   const char* null_str = nullptr;
   EXPECT_PRINTF("(null)", "%s", null_str);
   EXPECT_PRINTF("    (null)", "%10s", null_str);
+  // A precision truncates "(null)" as it would any other string.
+  EXPECT_PRINTF("", "%.0s", null_str);
+  EXPECT_PRINTF("(nu", "%.3s", null_str);
+  EXPECT_PRINTF("(null)", "%.6s", null_str);
+  EXPECT_PRINTF("       (nu", "%10.3s", null_str);
 }
 
 TEST(printf_test, pointer) {
@@ -498,12 +556,12 @@ TEST(printf_test, pointer) {
   void* p = &n;
   EXPECT_PRINTF(fmt::format("{}", p), "%p", p);
   p = nullptr;
-  EXPECT_PRINTF("(nil)", "%p", p);
-  EXPECT_PRINTF("     (nil)", "%10p", p);
+  EXPECT_PRINTF("0x0", "%p", p);
+  EXPECT_PRINTF("       0x0", "%10p", p);
   const char* s = "test";
   EXPECT_PRINTF(fmt::format("{:p}", s), "%p", s);
   const char* null_str = nullptr;
-  EXPECT_PRINTF("(nil)", "%p", null_str);
+  EXPECT_PRINTF("0x0", "%p", null_str);
 }
 
 enum test_enum { answer = 42 };
@@ -550,7 +608,7 @@ TEST(printf_test, check_format_string_regression) {
 }
 
 TEST(printf_test, fixed_large_exponent) {
-  EXPECT_EQ("1000000000000000000000", fmt::sprintf("%.*f", -13, 1e21));
+  EXPECT_EQ("1000000000000000000000.000000", fmt::sprintf("%.*f", -13, 1e21));
 }
 
 TEST(printf_test, make_printf_args) {

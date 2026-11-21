@@ -1,6 +1,6 @@
 // Formatting library for C++ - optional OS-specific functionality
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -31,7 +31,9 @@
       (!defined(WINAPI_FAMILY) ||                          \
        (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)) &&    \
       !defined(__wasm__)
-#    include <fcntl.h>  // for O_RDONLY
+#    ifndef FMT_MODULE
+#      include <fcntl.h>  // for O_RDONLY
+#    endif
 #    define FMT_USE_FCNTL 1
 #  else
 #    define FMT_USE_FCNTL 0
@@ -374,9 +376,15 @@ class ostream : private detail::buffer<char> {
   }
 
   inline void flush() {
-    if (size() == 0) return;
-    file_.write(data(), size() * sizeof(data()[0]));
+    size_t n = size();
+    // Clear before writing to not write the data again if the write fails.
     clear();
+    // Write in a loop because write may write fewer bytes than requested.
+    for (const char* p = data(); n != 0;) {
+      size_t written = file_.write(p, n);
+      p += written;
+      n -= written;
+    }
   }
 
   template <typename... T>

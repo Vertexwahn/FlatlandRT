@@ -15,19 +15,25 @@
 #include "absl/random/internal/chi_square.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <numeric>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/algorithm/container.h"
 #include "absl/base/macros.h"
 
 using absl::random_internal::ChiSquare;
 using absl::random_internal::ChiSquarePValue;
 using absl::random_internal::ChiSquareValue;
 using absl::random_internal::ChiSquareWithExpected;
+using ::testing::DoubleEq;
+using ::testing::DoubleNear;
 
 namespace {
 
@@ -160,7 +166,7 @@ TEST(ChiSquareTest, CalcChiSquare) {
   for (const auto& spec : specs) {
     SCOPED_TRACE(spec.line);
     double chi_square = 0;
-    for (int i = 0; i < spec.expected.size(); ++i) {
+    for (size_t i = 0; i < spec.expected.size(); ++i) {
       const double diff = spec.actual[i] - spec.expected[i];
       chi_square += (diff * diff) / spec.expected[i];
     }
@@ -176,8 +182,8 @@ TEST(ChiSquareTest, CalcChiSquareInt64) {
   // $ python -c "import scipy.stats
   // > print scipy.stats.chisquare([910293487, 910292491, 910216780])[0]"
   // 4.25410123524
-  double sum = std::accumulate(std::begin(data), std::end(data), double{0});
-  size_t n = std::distance(std::begin(data), std::end(data));
+  double sum = absl::c_accumulate(data, double{0});
+  size_t n = absl::c_distance(data);
   double a = ChiSquareWithExpected(std::begin(data), std::end(data), sum / n);
   EXPECT_NEAR(4.254101, a, 1e-6);
 
@@ -294,7 +300,7 @@ TEST(ChiSquareTest, TableData) {
       /*100*/ {118.498, 124.342, 129.561, 135.807, 149.449} /**/};
 
   //    0.90      0.95     0.975      0.99     0.999
-  for (int i = 0; i < ABSL_ARRAYSIZE(data); i++) {
+  for (size_t i = 0; i < std::size(data); i++) {
     const double E = 0.0001;
     EXPECT_NEAR(ChiSquarePValue(data[i][0], i + 1), 0.10, E)
         << i << " " << data[i][0];
@@ -343,8 +349,8 @@ TEST(ChiSquareTest, DiceRolls) {
   // The dof value of 4, @95% = 9.488 (see above test)
   // The dof value of 5, @95% = 11.070
   const int rolls[6] = {22, 11, 17, 14, 20, 18};
-  double sum = std::accumulate(std::begin(rolls), std::end(rolls), double{0});
-  size_t n = std::distance(std::begin(rolls), std::end(rolls));
+  double sum = absl::c_accumulate(rolls, double{0});
+  size_t n = absl::c_distance(rolls);
 
   double a = ChiSquareWithExpected(std::begin(rolls), std::end(rolls), sum / n);
   EXPECT_NEAR(a, 4.70588, 1e-5);
@@ -359,6 +365,123 @@ TEST(ChiSquareTest, DiceRolls) {
 
   double p_b = ChiSquarePValue(b, 5);
   EXPECT_NEAR(p_b, 0.4528180, 1e-5);  // Accept the null hypothesis.
+}
+
+double WilsonHilfertyChiSquare(int dof, double z) {
+  const double mean = 1.0 - 2.0 / (9.0 * dof);
+  const double stddev = std::sqrt(2.0 / (9.0 * dof));
+  const double term = mean + z * stddev;
+  return dof * (term * term * term);
+}
+
+TEST(ChiSquareTest, LargeDofNormalSurvivalTails) {
+  constexpr int kDof = 200;
+  EXPECT_THAT(ChiSquarePValue(WilsonHilfertyChiSquare(kDof, -5.0), kDof),
+              DoubleNear(0.99999971334842808, 1e-12));
+  EXPECT_THAT(ChiSquarePValue(WilsonHilfertyChiSquare(kDof, -2.0), kDof),
+              DoubleNear(0.97724986805182079, 1e-12));
+  EXPECT_THAT(ChiSquarePValue(WilsonHilfertyChiSquare(kDof, 0.0), kDof),
+              DoubleNear(0.5, 1e-12));
+  // Extreme upper-tail z-scores (normal_survival uses std::erfc).
+  EXPECT_THAT(ChiSquarePValue(WilsonHilfertyChiSquare(kDof, 5.0), kDof),
+              DoubleNear(2.8665157187919455e-7, 1e-12));
+  EXPECT_THAT(ChiSquarePValue(WilsonHilfertyChiSquare(kDof, 8.0), kDof),
+              DoubleNear(6.2209605742718204e-16, 1e-20));
+  EXPECT_THAT(ChiSquarePValue(WilsonHilfertyChiSquare(kDof, 20.0), kDof),
+              DoubleNear(2.7536241186063318e-89, 1e-95));
+
+  EXPECT_THAT(ChiSquarePValue(std::numeric_limits<double>::infinity(), kDof),
+              DoubleEq(0.0));
+  EXPECT_THAT(ChiSquarePValue(-std::numeric_limits<double>::infinity(), kDof),
+              DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(-1.0, kDof), DoubleEq(1.0));
+}
+
+TEST(ChiSquareTest, ExtremeTailNoCliffs) {
+  // Extreme upper tails beyond |z| = 6 (dof = 1) and exp(-20) (dof = 2).
+  EXPECT_THAT(ChiSquareValue(1, 1.0 - 1e-10), DoubleNear(41.821456, 1e-4));
+  EXPECT_THAT(ChiSquareValue(1, 1.0 - 1e-12), DoubleNear(50.844128, 1e-4));
+  EXPECT_THAT(ChiSquareValue(2, 1.0 - 1e-10), DoubleNear(46.051702, 1e-4));
+  EXPECT_THAT(ChiSquareValue(5, 1.0 - 1e-10), DoubleNear(55.562399, 1e-4));
+
+  // Matching p-values in the extreme upper tail should not underflow to 0.0.
+  EXPECT_THAT(ChiSquarePValue(41.821456, 1), DoubleNear(1e-10, 1e-13));
+  EXPECT_THAT(ChiSquarePValue(41.61, 1), DoubleNear(1.11421889e-10, 1e-13));
+  EXPECT_THAT(ChiSquarePValue(46.051702, 2), DoubleNear(1e-10, 1e-13));
+  EXPECT_THAT(ChiSquarePValue(55.562399, 5), DoubleNear(1e-10, 1e-13));
+
+  // Large dof extreme tail round-trip.
+  const double large_dof_val = ChiSquareValue(200, 1.0 - 1e-10);
+  EXPECT_THAT(ChiSquarePValue(large_dof_val, 200), DoubleNear(1e-10, 1e-14));
+
+  // Infinite inputs for small dof.
+  EXPECT_THAT(ChiSquarePValue(std::numeric_limits<double>::infinity(), 1),
+              DoubleEq(0.0));
+  EXPECT_THAT(ChiSquarePValue(std::numeric_limits<double>::infinity(), 10),
+              DoubleEq(0.0));
+  EXPECT_THAT(ChiSquarePValue(-std::numeric_limits<double>::infinity(), 1),
+              DoubleEq(1.0));
+}
+
+TEST(ChiSquareTest, UnsignedIteratorsActualLessThanExpected) {
+  const std::vector<uint64_t> actual_u64 = {10, 20, 30};
+  const std::vector<uint64_t> expected_u64 = {20, 20, 20};
+  EXPECT_THAT(ChiSquare(actual_u64.begin(), actual_u64.end(),
+                        expected_u64.begin(), expected_u64.end()),
+              DoubleNear(10.0, 1e-12));
+
+  const std::vector<size_t> actual_sz = {5, 10, 15};
+  const std::vector<size_t> expected_sz = {10, 20, 30};
+  EXPECT_THAT(ChiSquare(actual_sz.begin(), actual_sz.end(), expected_sz.begin(),
+                        expected_sz.end()),
+              DoubleNear(15.0, 1e-12));
+
+  const std::vector<uint32_t> actual_u32 = {100, 999};
+  const std::vector<uint32_t> expected_u32 = {200, 1000};
+  EXPECT_THAT(ChiSquare(actual_u32.begin(), actual_u32.end(),
+                        expected_u32.begin(), expected_u32.end()),
+              DoubleNear(50.001, 1e-12));
+}
+
+TEST(ChiSquareTest, SubnormalChiSquarePValue) {
+  const double kDenormMin = std::numeric_limits<double>::denorm_min();
+  const double kMinNormal = std::numeric_limits<double>::min();
+
+  // When 0.5 * chi_square underflows to 0.0, odd dof in [3, 150] must return
+  // 1.0 rather than NaN from (+inf) * 0.0.
+  EXPECT_THAT(ChiSquarePValue(kDenormMin, 1), DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(kDenormMin, 2), DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(kDenormMin, 3), DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(kDenormMin, 5), DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(kDenormMin, 7), DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(kDenormMin, 149), DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(kDenormMin, 150), DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(kDenormMin, 200), DoubleEq(1.0));
+
+  EXPECT_THAT(ChiSquarePValue(2.0 * kDenormMin, 3), DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(kMinNormal, 3), DoubleEq(1.0));
+  EXPECT_THAT(ChiSquarePValue(kMinNormal, 149), DoubleEq(1.0));
+}
+
+TEST(ChiSquareTest, VeryLargeDofNoSignedOverflow) {
+  constexpr int kOverflowDof = std::numeric_limits<int>::max() / 9 + 1;
+  constexpr int kMaxDof = std::numeric_limits<int>::max();
+
+  EXPECT_THAT(
+      ChiSquarePValue(WilsonHilfertyChiSquare(kOverflowDof, 0.0), kOverflowDof),
+      DoubleNear(0.5, 1e-12));
+  EXPECT_THAT(
+      ChiSquarePValue(WilsonHilfertyChiSquare(kOverflowDof, 2.0), kOverflowDof),
+      DoubleNear(0.02275013194817921, 1e-12));
+  EXPECT_THAT(ChiSquareValue(kOverflowDof, 0.5),
+              DoubleNear(WilsonHilfertyChiSquare(kOverflowDof, 0.0), 1e-3));
+
+  EXPECT_THAT(ChiSquarePValue(ChiSquareValue(kMaxDof, 0.5), kMaxDof),
+              DoubleNear(0.5, 1e-8));
+  EXPECT_THAT(ChiSquarePValue(ChiSquareValue(kMaxDof, 0.95), kMaxDof),
+              DoubleNear(0.05, 1e-8));
+  EXPECT_THAT(ChiSquarePValue(ChiSquareValue(kMaxDof, 0.999), kMaxDof),
+              DoubleNear(0.001, 1e-8));
 }
 
 }  // namespace

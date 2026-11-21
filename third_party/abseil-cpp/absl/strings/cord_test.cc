@@ -245,8 +245,6 @@ class CordTestPeer {
 ABSL_NAMESPACE_END
 }  // namespace absl
 
-
-
 // The CordTest fixture runs all tests with and without expected CRCs being set
 // on the subject Cords.
 class CordTest : public testing::TestWithParam<bool /*useCrc*/> {
@@ -278,9 +276,9 @@ INSTANTIATE_TEST_SUITE_P(WithParam, CordTest, testing::Bool(),
 
 TEST(CordRepFlat, AllFlatCapacities) {
   // Explicitly and redundantly assert built-in min/max limits
-  static_assert(absl::cord_internal::kFlatOverhead < 32, "");
-  static_assert(absl::cord_internal::kMinFlatSize == 32, "");
-  static_assert(absl::cord_internal::kMaxLargeFlatSize == 256 << 10, "");
+  static_assert(absl::cord_internal::kFlatOverhead < 32);
+  static_assert(absl::cord_internal::kMinFlatSize == 32);
+  static_assert(absl::cord_internal::kMaxLargeFlatSize == 256 << 10);
   EXPECT_EQ(absl::cord_internal::TagToAllocatedSize(FLAT), 32);
   EXPECT_EQ(absl::cord_internal::TagToAllocatedSize(MAX_FLAT_TAG), 256 << 10);
 
@@ -503,6 +501,335 @@ TEST_P(CordTest, StartsEndsWith) {
   ASSERT_TRUE(!empty.EndsWith("xyz"));
 }
 
+TEST_P(CordTest, EndsWith_SingleChunkAndInlined) {
+  // The Cord stores its 11 bytes inline, or in one flat chunk when
+  // MaybeHarden() adds a checksum.
+  absl::Cord cord("hello world");
+  MaybeHarden(cord);
+
+  // Suffixes of five bytes and of one byte
+  EXPECT_TRUE(cord.EndsWith("world"));
+  EXPECT_TRUE(cord.EndsWith("d"));
+  EXPECT_TRUE(cord.EndsWith(absl::Cord("world")));
+  EXPECT_TRUE(cord.EndsWith(absl::Cord("d")));
+
+  // One-byte mismatch
+  EXPECT_FALSE(cord.EndsWith("x"));
+  EXPECT_FALSE(cord.EndsWith(absl::Cord("x")));
+
+  // Five-byte mismatch
+  EXPECT_FALSE(cord.EndsWith("earth"));
+  EXPECT_FALSE(cord.EndsWith(absl::Cord("earth")));
+}
+
+TEST_P(CordTest, EndsWith_MultiChunkStringView) {
+  // Cord of five chunks
+  absl::Cord cord = absl::MakeFragmentedCord(
+      {"The quick ", "brown fox ", "jumps over ", "the lazy ", "dog."});
+  MaybeHarden(cord);
+
+  // Suffix within the last chunk ("dog.")
+  EXPECT_TRUE(cord.EndsWith("."));
+  EXPECT_TRUE(cord.EndsWith("g."));
+  EXPECT_TRUE(cord.EndsWith("dog."));
+
+  // Suffix spanning the last two chunks ("the lazy " and "dog.")
+  EXPECT_TRUE(cord.EndsWith("lazy dog."));
+  EXPECT_TRUE(cord.EndsWith("the lazy dog."));
+
+  // Suffixes spanning three and four chunks
+  EXPECT_TRUE(cord.EndsWith("jumps over the lazy dog."));
+  EXPECT_TRUE(cord.EndsWith("brown fox jumps over the lazy dog."));
+
+  // Suffix equal to the whole Cord
+  EXPECT_TRUE(cord.EndsWith("The quick brown fox jumps over the lazy dog."));
+
+  // Mismatch in the last chunk
+  EXPECT_FALSE(cord.EndsWith("cat."));
+  EXPECT_FALSE(cord.EndsWith("!"));
+
+  // Mismatch in the chunk before the last
+  EXPECT_FALSE(cord.EndsWith("busy dog."));
+  EXPECT_FALSE(cord.EndsWith("the hazy dog."));
+  EXPECT_FALSE(cord.EndsWith("the crazy dog."));
+}
+
+TEST_P(CordTest, EndsWith_CordOperandAsymmetricChunks) {
+  absl::Cord lhs = absl::MakeFragmentedCord(
+      {"The quick ", "brown fox ", "jumps over ", "the lazy ", "dog."});
+  MaybeHarden(lhs);
+
+  // Single-chunk suffixes
+  absl::Cord rhs_single_char(".");
+  absl::Cord rhs_single_chunk("dog.");
+  MaybeHarden(rhs_single_char);
+  MaybeHarden(rhs_single_chunk);
+  EXPECT_TRUE(lhs.EndsWith(rhs_single_char));
+  EXPECT_TRUE(lhs.EndsWith(rhs_single_chunk));
+
+  // Multi-chunk suffix whose chunk boundaries differ from those of `lhs`
+  // LHS: ["The quick ", "brown fox ", "jumps over ", "the lazy ", "dog."]
+  // RHS: ["jumps ", "over the ", "lazy dog."]
+  absl::Cord rhs_multi =
+      absl::MakeFragmentedCord({"jumps ", "over the ", "lazy dog."});
+  MaybeHarden(rhs_multi);
+  EXPECT_TRUE(lhs.EndsWith(rhs_multi));
+
+  // Mismatch in the first chunk of the suffix ("leaps " for "jumps ")
+  absl::Cord rhs_diff_head =
+      absl::MakeFragmentedCord({"leaps ", "over the ", "lazy dog."});
+  MaybeHarden(rhs_diff_head);
+  EXPECT_FALSE(lhs.EndsWith(rhs_diff_head));
+
+  // Mismatch in the middle chunk of the suffix
+  absl::Cord rhs_diff_mid =
+      absl::MakeFragmentedCord({"jumps ", "across the ", "lazy dog."});
+  MaybeHarden(rhs_diff_mid);
+  EXPECT_FALSE(lhs.EndsWith(rhs_diff_mid));
+
+  // Mismatch in the last chunk of the suffix ("lazy cat.")
+  absl::Cord rhs_diff_tail =
+      absl::MakeFragmentedCord({"jumps ", "over the ", "lazy cat."});
+  MaybeHarden(rhs_diff_tail);
+  EXPECT_FALSE(lhs.EndsWith(rhs_diff_tail));
+}
+
+TEST_P(CordTest, EndsWith_SubcordAndExternal) {
+  absl::Cord cord = absl::MakeFragmentedCord(
+      {"The quick ", "brown fox ", "jumps over ", "the lazy ", "dog."});
+  MaybeHarden(cord);
+
+  // `sub` is a B-tree whose first and last chunks are substrings of chunks of
+  // `cord`. It holds "quick brown fox jumps over the".
+  absl::Cord sub = cord.Subcord(4, 30);
+  EXPECT_TRUE(sub.EndsWith("the"));
+  EXPECT_TRUE(sub.EndsWith("over the"));
+  EXPECT_TRUE(sub.EndsWith("brown fox jumps over the"));
+  EXPECT_FALSE(sub.EndsWith("dog."));
+  EXPECT_FALSE(sub.EndsWith("lazy"));
+  EXPECT_FALSE(sub.EndsWith("fox"));
+
+  // External Cord (CordRepExternal node)
+  static const char kStaticBuffer[] = "static external buffer payload 12345";
+  absl::Cord external_cord =
+      absl::MakeCordFromExternal(kStaticBuffer, [](absl::string_view) {});
+  EXPECT_TRUE(external_cord.EndsWith("12345"));
+  EXPECT_TRUE(external_cord.EndsWith("payload 12345"));
+  EXPECT_FALSE(external_cord.EndsWith("67890"));
+  EXPECT_FALSE(external_cord.EndsWith("buffer 67890"));
+}
+
+// Returns 1000 strings of 100 bytes each. A Cord with one chunk per string is
+// a B-tree several levels deep.
+static std::vector<std::string> MakeThousandChunks() {
+  std::vector<std::string> chunks;
+  chunks.reserve(1000);
+  for (int i = 0; i < 1000; ++i) {
+    chunks.push_back(std::string(100, static_cast<char>('A' + (i % 26))));
+  }
+  return chunks;
+}
+
+TEST_P(CordTest, EndsWith_DeepMultiLevelBtree) {
+  // `deep_cord` is a B-tree several levels deep. The suffixes below cover at
+  // most its last two chunks.
+  const std::vector<std::string> deep_chunks = MakeThousandChunks();
+  absl::Cord deep_cord = absl::MakeFragmentedCord(deep_chunks);
+  MaybeHarden(deep_cord);
+
+  // Suffix that is exactly the last chunk
+  std::string deep_suffix = deep_chunks.back();
+  EXPECT_TRUE(deep_cord.EndsWith(deep_suffix));
+  EXPECT_TRUE(deep_cord.EndsWith(absl::Cord(deep_suffix)));
+
+  // Suffix spanning the last two chunks
+  std::string deep_multi_suffix =
+      absl::StrCat(deep_chunks[998], deep_chunks[999]);
+  EXPECT_TRUE(deep_cord.EndsWith(deep_multi_suffix));
+  EXPECT_TRUE(deep_cord.EndsWith(absl::Cord(deep_multi_suffix)));
+
+  // Mismatch in the last chunk
+  std::string deep_mismatch_suffix =
+      absl::StrCat(deep_chunks[998], std::string(100, 'Z'));
+  EXPECT_FALSE(deep_cord.EndsWith(deep_mismatch_suffix));
+  EXPECT_FALSE(deep_cord.EndsWith(absl::Cord(deep_mismatch_suffix)));
+}
+
+TEST_P(CordTest, EndsWith_StringViewSuffixSpanningBtreeNodes) {
+  const std::vector<std::string> chunks = MakeThousandChunks();
+  absl::Cord cord = absl::MakeFragmentedCord(chunks);
+  MaybeHarden(cord);
+  // `suffix` is the second half of chunk 499 and all of chunks 500 to 999. It
+  // covers half of the tree; EndsWith must therefore step back across leaf and
+  // internal nodes.
+  std::string suffix = chunks[499].substr(50);
+  for (size_t i = 500; i < chunks.size(); ++i) {
+    suffix += chunks[i];
+  }
+  std::string wrong_first_byte = suffix;
+  wrong_first_byte[0] = '!';
+  std::string wrong_middle_byte = suffix;
+  wrong_middle_byte[suffix.size() / 2] = '!';
+
+  EXPECT_TRUE(cord.EndsWith(suffix));
+  EXPECT_FALSE(cord.EndsWith(wrong_first_byte));
+  EXPECT_FALSE(cord.EndsWith(wrong_middle_byte));
+}
+
+TEST_P(CordTest, EndsWith_CordSuffixSpanningBtreeNodes) {
+  const std::vector<std::string> chunks = MakeThousandChunks();
+  absl::Cord cord = absl::MakeFragmentedCord(chunks);
+  MaybeHarden(cord);
+  // `suffix_cord` holds the bytes of chunks 500 to 999 in 150-byte chunks, so
+  // that the chunk boundaries of the two B-trees differ.
+  std::string suffix;
+  for (size_t i = 500; i < chunks.size(); ++i) {
+    suffix += chunks[i];
+  }
+  std::vector<std::string> suffix_chunks;
+  for (size_t pos = 0; pos < suffix.size(); pos += 150) {
+    suffix_chunks.push_back(suffix.substr(pos, 150));
+  }
+  absl::Cord suffix_cord = absl::MakeFragmentedCord(suffix_chunks);
+  MaybeHarden(suffix_cord);
+  std::vector<std::string> wrong_chunks = suffix_chunks;
+  wrong_chunks[0][0] = '!';
+  absl::Cord wrong_first_byte = absl::MakeFragmentedCord(wrong_chunks);
+  MaybeHarden(wrong_first_byte);
+
+  EXPECT_TRUE(cord.EndsWith(suffix_cord));
+  EXPECT_FALSE(cord.EndsWith(wrong_first_byte));
+}
+
+TEST_P(CordTest, EndsWith_MultiChunkCordSuffixWithinLastChunk) {
+  absl::Cord cord = absl::MakeFragmentedCord({"abc", "0123456789"});
+  MaybeHarden(cord);
+  // The suffix's two chunks together are shorter than the last chunk of `cord`.
+  absl::Cord suffix = absl::MakeFragmentedCord({"67", "89"});
+  MaybeHarden(suffix);
+  absl::Cord wrong_tail = absl::MakeFragmentedCord({"67", "8X"});
+  MaybeHarden(wrong_tail);
+  absl::Cord wrong_head = absl::MakeFragmentedCord({"X7", "89"});
+  MaybeHarden(wrong_head);
+
+  EXPECT_TRUE(cord.EndsWith(suffix));
+  EXPECT_FALSE(cord.EndsWith(wrong_tail));
+  EXPECT_FALSE(cord.EndsWith(wrong_head));
+}
+
+TEST_P(CordTest, EndsWith_MultiChunkCordSuffixOfSingleChunkCord) {
+  // `cord` is one flat chunk; the suffixes are B-trees of two chunks.
+  absl::Cord cord("The quick brown fox");
+  MaybeHarden(cord);
+  absl::Cord suffix = absl::MakeFragmentedCord({"brown ", "fox"});
+  MaybeHarden(suffix);
+  absl::Cord wrong_tail = absl::MakeFragmentedCord({"brown ", "fax"});
+  MaybeHarden(wrong_tail);
+  absl::Cord wrong_head = absl::MakeFragmentedCord({"crown ", "fox"});
+  MaybeHarden(wrong_head);
+
+  EXPECT_TRUE(cord.EndsWith(suffix));
+  EXPECT_FALSE(cord.EndsWith(wrong_tail));
+  EXPECT_FALSE(cord.EndsWith(wrong_head));
+}
+
+TEST_P(CordTest, EndsWith_StringViewSuffixStartingAtLastByteOfChunk) {
+  absl::Cord cord = absl::MakeFragmentedCord({"abc", "0123456789", "xy"});
+  MaybeHarden(cord);
+
+  // The first byte of each suffix is the last byte of a chunk of `cord`.
+  EXPECT_TRUE(cord.EndsWith("9xy"));
+  EXPECT_FALSE(cord.EndsWith("8xy"));
+  EXPECT_TRUE(cord.EndsWith("c0123456789xy"));
+  EXPECT_FALSE(cord.EndsWith("d0123456789xy"));
+}
+
+TEST_P(CordTest, EndsWith_CordSuffixStartingWithOneByteChunk) {
+  absl::Cord cord = absl::MakeFragmentedCord({"abc", "0123456789", "xy"});
+  MaybeHarden(cord);
+  // The first chunk of each suffix is one byte; that byte is therefore the
+  // last piece that EndsWith compares.
+  absl::Cord suffix = absl::MakeFragmentedCord({"9", "xy"});
+  MaybeHarden(suffix);
+  absl::Cord not_suffix = absl::MakeFragmentedCord({"8", "xy"});
+  MaybeHarden(not_suffix);
+
+  EXPECT_TRUE(cord.EndsWith(suffix));
+  EXPECT_FALSE(cord.EndsWith(not_suffix));
+}
+
+TEST_P(CordTest, EndsWith_SuffixSharingChunksWithCord) {
+  absl::Cord cord = absl::MakeFragmentedCord(
+      {std::string(20, 'a'), std::string(20, 'b'), std::string(20, 'c'),
+       std::string(20, 'd'), std::string(20, 'e')});
+  MaybeHarden(cord);
+  // A Subcord references the chunks of `cord` instead of copying them; the
+  // last 50 bytes are therefore the same memory in both Cords.
+  absl::Cord suffix = cord.Subcord(cord.size() - 50, 50);
+  MaybeHarden(suffix);
+  // This Subcord references the same chunks but stops 10 bytes before the end
+  // of `cord`.
+  absl::Cord not_suffix = cord.Subcord(cord.size() - 60, 50);
+  MaybeHarden(not_suffix);
+
+  EXPECT_TRUE(cord.EndsWith(suffix));
+  EXPECT_FALSE(cord.EndsWith(not_suffix));
+}
+
+TEST_P(CordTest, EndsWith_SubstringRoot) {
+  // The root of `cord` is a substring node that stops before the end of the
+  // flat buffer under it: the buffer goes on with "yyyy...".
+  absl::Cord flat(
+      absl::StrCat(std::string(100, 'x'), "tail", std::string(20, 'y')));
+  absl::Cord cord = absl::CordTestPeer::MakeSubstring(flat, 10, 94);
+  MaybeHarden(cord);
+
+  EXPECT_TRUE(cord.EndsWith("tail"));
+  EXPECT_FALSE(cord.EndsWith("tall"));
+  EXPECT_FALSE(cord.EndsWith("yyyy"));
+}
+
+TEST_P(CordTest, EndsWith_BoundaryAndEmptyEdgeCases) {
+  absl::Cord cord = absl::MakeFragmentedCord({"foo", "bar", "baz"});
+  MaybeHarden(cord);
+  absl::Cord empty("");
+  MaybeHarden(empty);
+
+  // The empty string is a suffix of every Cord.
+  EXPECT_TRUE(cord.EndsWith(""));
+  EXPECT_TRUE(cord.EndsWith(absl::string_view()));
+  EXPECT_TRUE(cord.EndsWith(absl::Cord("")));
+  EXPECT_TRUE(cord.EndsWith(empty));
+  EXPECT_TRUE(empty.EndsWith(""));
+  EXPECT_TRUE(empty.EndsWith(absl::string_view()));
+  EXPECT_TRUE(empty.EndsWith(absl::Cord("")));
+  EXPECT_TRUE(empty.EndsWith(empty));
+
+  // An empty Cord ends only with the empty string.
+  EXPECT_FALSE(empty.EndsWith("a"));
+  EXPECT_FALSE(empty.EndsWith(absl::Cord("a")));
+  EXPECT_FALSE(empty.EndsWith("foobarbaz"));
+
+  // No Cord ends with a longer string.
+  EXPECT_FALSE(cord.EndsWith("extra_prefix_foobarbaz"));
+  EXPECT_FALSE(cord.EndsWith(absl::Cord("extra_prefix_foobarbaz")));
+  EXPECT_FALSE(
+      cord.EndsWith(absl::MakeFragmentedCord({"extra_prefix_", "foobarbaz"})));
+
+  // A Cord ends with itself, even when one side carries an expected checksum
+  // or a distinct Cordz sample.
+  EXPECT_TRUE(cord.EndsWith(cord));
+  absl::Cord copy = cord;
+  copy.SetExpectedChecksum(1);
+  EXPECT_TRUE(cord.EndsWith(copy));
+#ifdef ABSL_INTERNAL_CORDZ_ENABLED
+  absl::CordzSamplingIntervalHelper always_sample(/*interval=*/1);
+  absl::Cord sampled = absl::MakeFragmentedCord({"foo", "bar", "baz"});
+  absl::Cord sampled_copy = sampled;
+  EXPECT_TRUE(sampled.EndsWith(sampled_copy));
+#endif
+}
+
 TEST_P(CordTest, Contains) {
   auto flat_haystack = absl::Cord("this is a flat cord");
   auto fragmented_haystack = absl::MakeFragmentedCord(
@@ -588,6 +915,482 @@ TEST_P(CordTest, Find) {
   EXPECT_EQ(
       fragmented_haystack.Find(absl::MakeFragmentedCord({"is", " ", "a"})),
       std::next(fragmented_haystack.char_begin(), 5));
+}
+
+TEST_P(CordTest, FindLinearScaling) {
+  // Verifies that finding a mismatching string in an adversarial haystack
+  // scales sub-linearly/linearly via Boyer-Moore-Horspool without quadratic
+  // DoS.  This uses a 1MB haystack and a slightly smaller needle that should
+  // timeout for quadratic behavior.
+  constexpr size_t kSize = 256 * 1024;
+  std::string haystack_str(kSize, 'a');
+  absl::Cord haystack = absl::MakeFragmentedCord(
+      {haystack_str.substr(0, kSize / 2), haystack_str.substr(kSize / 2)});
+
+  std::string needle_str(kSize / 2 - 1, 'a');
+  needle_str.push_back('b');
+  absl::Cord needle_cord =
+      absl::MakeFragmentedCord({needle_str.substr(0, needle_str.size() / 2),
+                                needle_str.substr(needle_str.size() / 2)});
+
+  EXPECT_EQ(haystack.Find(needle_str), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_str));
+  EXPECT_EQ(haystack.Find(needle_cord), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindBMHCrossChunkMatch) {
+  // Test finding a large needle (M >= 256) in a fragmented Cord haystack where
+  // the match spans across chunk boundaries.
+  const size_t kChunkSize = 512;
+  const size_t kNeedleSize = 300;
+
+  std::string needle_str(kNeedleSize, 'x');
+  for (size_t i = 0; i < kNeedleSize; ++i) {
+    needle_str[i] = static_cast<char>('A' + (i % 26));
+  }
+
+  std::vector<std::string> chunks;
+  chunks.push_back(std::string(kChunkSize, '.'));
+  chunks.push_back(std::string(kChunkSize, '.'));
+  chunks.push_back(std::string(kChunkSize, '.'));
+  absl::Cord haystack = absl::MakeFragmentedCord(chunks);
+
+  std::string flat_haystack(haystack);
+  flat_haystack.replace(400, kNeedleSize, needle_str);
+
+  std::vector<std::string> modified_chunks = {
+      flat_haystack.substr(0, kChunkSize),
+      flat_haystack.substr(kChunkSize, kChunkSize),
+      flat_haystack.substr(2 * kChunkSize, kChunkSize)};
+  haystack = absl::MakeFragmentedCord(modified_chunks);
+
+  // Test string_view needle
+  auto it = haystack.Find(needle_str);
+  EXPECT_NE(it, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it), 400);
+  EXPECT_TRUE(haystack.Contains(needle_str));
+
+  // Test Cord needle
+  absl::Cord needle_cord = absl::MakeFragmentedCord(
+      {needle_str.substr(0, 150), needle_str.substr(150)});
+  auto it_cord = haystack.Find(needle_cord);
+  EXPECT_NE(it_cord, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it_cord), 400);
+  EXPECT_TRUE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindBMHChunkBoundaryPrefixMismatch) {
+  // Test BMH search when the first character of needle matches near the end of
+  // a chunk (chunk_rem < M), but the rest of the chunk prefix mismatches.
+  // Exercises the `chunk.substr(idx) != needle.substr(0, chunk_rem)` branch in
+  // FindImplBMH and FindCordBMH.
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'A');
+  needle_str[0] = 'Z';
+  needle_str[1] = 'B';
+
+  std::string chunk0(512, '.');
+  chunk0[500] = 'Z';
+  std::string chunk1(512, '.');
+
+  absl::Cord haystack = absl::MakeFragmentedCord({chunk0, chunk1});
+
+  EXPECT_EQ(haystack.Find(needle_str), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_str));
+
+  absl::Cord needle_cord(needle_str);
+  EXPECT_EQ(haystack.Find(needle_cord), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindBMHCrossChunkLastByteMismatch) {
+  // Test BMH search when the first character and chunk prefix match near the
+  // end of a chunk, but the last byte across the chunk boundary mismatches.
+  // Exercises `last_hay != last_needle` after CharacterAt(it, m - 1) in
+  // FindImplBMH and FindCordBMH.
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'A');
+  needle_str[0] = 'Z';
+  needle_str.back() = 'Y';
+
+  std::string chunk0(512, '.');
+  chunk0.replace(500, 12, 12, 'A');
+  chunk0[500] = 'Z';
+
+  std::string chunk1(512, '.');
+  chunk1[287] = 'W';  // Mismatches needle_str.back() ('Y')
+
+  absl::Cord haystack = absl::MakeFragmentedCord({chunk0, chunk1});
+
+  EXPECT_EQ(haystack.Find(needle_str), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_str));
+
+  absl::Cord needle_cord(needle_str);
+  EXPECT_EQ(haystack.Find(needle_cord), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindBMHCrossChunkInteriorMismatch) {
+  // Test BMH search when first and last characters match across chunk
+  // boundaries, but an interior character inside the second chunk mismatches.
+  // Exercises IsSubstringInCordAt / IsSubcordInCordAt returning false across
+  // chunks.
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'A');
+  needle_str[0] = 'Z';
+  needle_str.back() = 'Y';
+
+  std::string chunk0(512, '.');
+  chunk0.replace(500, 12, 12, 'A');
+  chunk0[500] = 'Z';
+
+  std::string chunk1(512, 'A');
+  chunk1[287] = 'Y';  // Last char matches
+  chunk1[100] = 'W';  // Interior byte mismatches
+
+  absl::Cord haystack = absl::MakeFragmentedCord({chunk0, chunk1});
+
+  EXPECT_EQ(haystack.Find(needle_str), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_str));
+
+  // Verify valid match when interior byte is restored
+  chunk1[100] = 'A';
+  haystack = absl::MakeFragmentedCord({chunk0, chunk1});
+  auto it = haystack.Find(needle_str);
+  EXPECT_NE(it, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it), 500);
+  EXPECT_TRUE(haystack.Contains(needle_str));
+}
+
+TEST_P(CordTest, FindBMHNearEndRemainingBytesBreak) {
+  // Test BMH search when the first character of needle matches near the end of
+  // haystack, but remaining bytes are less than needle size (bytes_remaining <
+  // M). Exercises the `idx + m > bytes_remaining` break condition in
+  // FindImplBMH and FindCordBMH.
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'A');
+  needle_str[0] = 'Z';
+
+  std::string chunk0(500, '.');
+  std::string chunk1(500, '.');
+  chunk1[300] = 'Z';  // Offset 800 in haystack, remaining bytes = 200 (< 300)
+
+  absl::Cord haystack = absl::MakeFragmentedCord({chunk0, chunk1});
+
+  EXPECT_EQ(haystack.Find(needle_str), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_str));
+
+  absl::Cord needle_cord = absl::MakeFragmentedCord(
+      {needle_str.substr(0, 150), needle_str.substr(150)});
+  EXPECT_EQ(haystack.Find(needle_cord), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindCordBMHCrossChunkInteriorMismatch) {
+  // Test FindCordBMH when needle is a fragmented Cord (M >= 256), last byte
+  // matches, but IsSubcordInCordAt returns false due to an interior mismatch
+  // across chunks. Exercises lazy shift table initialization after
+  // IsSubcordInCordAt failure in FindCordBMH.
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'A');
+  needle_str[0] = 'Z';
+  needle_str.back() = 'Y';
+
+  std::string chunk0(512, '.');
+  chunk0.replace(500, 12, 12, 'A');
+  chunk0[500] = 'Z';
+
+  std::string chunk1(512, 'A');
+  chunk1[287] = 'Y';  // Last char matches
+  chunk1[150] = 'W';  // Interior mismatch in chunk 1
+
+  absl::Cord haystack = absl::MakeFragmentedCord({chunk0, chunk1});
+  absl::Cord needle_cord = absl::MakeFragmentedCord(
+      {needle_str.substr(0, 150), needle_str.substr(150)});
+
+  EXPECT_EQ(haystack.Find(needle_cord), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_cord));
+
+  // Restore interior byte and verify match
+  chunk1[150] = 'A';
+  haystack = absl::MakeFragmentedCord({chunk0, chunk1});
+  auto it = haystack.Find(needle_cord);
+  EXPECT_NE(it, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it), 500);
+  EXPECT_TRUE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindBMHNonAsciiBytes) {
+  // Test BMH search with high-bit non-ASCII bytes (values > 127) in Cord
+  // haystack and needle across chunk boundaries.
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, '\0');
+  for (size_t i = 0; i < kNeedleSize; ++i) {
+    needle_str[i] = static_cast<char>(128 + (i % 128));
+  }
+
+  std::string chunk0(512, '\x7F');
+  std::string chunk1(512, '\x7F');
+
+  // Place needle straddling chunk 0 and chunk 1 at offset 400
+  std::string flat_haystack = chunk0 + chunk1;
+  flat_haystack.replace(400, kNeedleSize, needle_str);
+
+  absl::Cord haystack = absl::MakeFragmentedCord(
+      {flat_haystack.substr(0, 512), flat_haystack.substr(512)});
+
+  auto it = haystack.Find(needle_str);
+  EXPECT_NE(it, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it), 400);
+  EXPECT_TRUE(haystack.Contains(needle_str));
+
+  absl::Cord needle_cord = absl::MakeFragmentedCord(
+      {needle_str.substr(0, 150), needle_str.substr(150)});
+  auto it_cord = haystack.Find(needle_cord);
+  EXPECT_NE(it_cord, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it_cord), 400);
+  EXPECT_TRUE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindSingleCharNeedle) {
+  // Test single-character string_view and Cord needles (M = 1) in fragmented
+  // Cord, exercising the FindChar fast path.
+  absl::Cord haystack = absl::MakeFragmentedCord({"hello", " ", "world"});
+
+  // string_view needle
+  auto it_sv = haystack.Find("w");
+  EXPECT_NE(it_sv, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it_sv), 6);
+  EXPECT_TRUE(haystack.Contains("w"));
+
+  EXPECT_EQ(haystack.Find("z"), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains("z"));
+
+  // Cord needle
+  auto it_cord = haystack.Find(absl::Cord("w"));
+  EXPECT_NE(it_cord, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it_cord), 6);
+  EXPECT_TRUE(haystack.Contains(absl::Cord("w")));
+
+  EXPECT_EQ(haystack.Find(absl::Cord("z")), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(absl::Cord("z")));
+}
+
+TEST_P(CordTest, FindStringViewNeedleSizeLargerThanHaystack) {
+  absl::Cord haystack("hello");
+  EXPECT_EQ(haystack.Find("hello world"), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains("hello world"));
+}
+
+TEST_P(CordTest, FindStringViewNeedleSizeEqualToHaystack) {
+  absl::Cord haystack("hello world");
+  EXPECT_EQ(haystack.Find("hello world"), haystack.char_begin());
+  EXPECT_TRUE(haystack.Contains("hello world"));
+
+  EXPECT_EQ(haystack.Find("hello WOrld"), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains("hello WOrld"));
+}
+
+TEST_P(CordTest, FindCordNeedleSizeEqualToHaystack) {
+  absl::Cord haystack("hello world");
+  absl::Cord needle_match("hello world");
+  absl::Cord needle_mismatch("hello WOrld");
+
+  EXPECT_EQ(haystack.Find(needle_match), haystack.char_begin());
+  EXPECT_TRUE(haystack.Contains(needle_match));
+
+  EXPECT_EQ(haystack.Find(needle_mismatch), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_mismatch));
+}
+
+TEST_P(CordTest, FindImplNearEndRemainingBytesBreak) {
+  std::string haystack_str(50, '.');
+  haystack_str[47] = 'a';
+  absl::Cord haystack = absl::MakeFragmentedCord(
+      {haystack_str.substr(0, 25), haystack_str.substr(25)});
+
+  EXPECT_EQ(haystack.Find("abcde"), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains("abcde"));
+}
+
+TEST_P(CordTest, FindCordNearEndRemainingBytesBreak) {
+  std::string haystack_str(50, '.');
+  haystack_str[47] = 'a';
+  absl::Cord haystack = absl::MakeFragmentedCord(
+      {haystack_str.substr(0, 25), haystack_str.substr(25)});
+  absl::Cord needle_cord("abcde");
+
+  EXPECT_EQ(haystack.Find(needle_cord), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindImplBMHSingleChunkInteriorMismatch) {
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'A');
+  needle_str[0] = 'Z';
+  needle_str.back() = 'Y';
+
+  std::string haystack_str(1000, 'A');
+  haystack_str.replace(100, kNeedleSize, needle_str);
+  haystack_str[100 + 10] = 'W';
+
+  absl::Cord haystack(haystack_str);
+  EXPECT_EQ(haystack.Find(needle_str), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_str));
+}
+
+TEST_P(CordTest, FindCordBMHSingleChunkInteriorMismatch) {
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'A');
+  needle_str[0] = 'Z';
+  needle_str.back() = 'Y';
+
+  std::string haystack_str(1000, 'A');
+  haystack_str.replace(100, kNeedleSize, needle_str);
+  haystack_str[100 + 10] = 'W';
+
+  absl::Cord haystack(haystack_str);
+  absl::Cord needle_cord(needle_str);
+
+  EXPECT_EQ(haystack.Find(needle_cord), haystack.char_end());
+  EXPECT_FALSE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindBMHDuplicateCharsInNeedle) {
+  // Test BMH shift table calculation when needle contains duplicate characters
+  // at different distances from the end. Verifies that the smallest shift
+  // distance (rightmost occurrence) is preserved and prevents over-shifting.
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'A');
+  needle_str[0] = 'Z';
+  needle_str[kNeedleSize - 50] = 'Q';
+  needle_str[kNeedleSize - 3] = 'Q';
+  needle_str.back() = 'Y';
+
+  std::string haystack_str(1000, '.');
+  haystack_str.replace(202, kNeedleSize, needle_str);
+  haystack_str[200] = 'Z';
+  haystack_str[499] = 'Q';
+
+  absl::Cord haystack = absl::MakeFragmentedCord(
+      {haystack_str.substr(0, 500), haystack_str.substr(500)});
+
+  auto it = haystack.Find(needle_str);
+  EXPECT_NE(it, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it), 202);
+  EXPECT_TRUE(haystack.Contains(needle_str));
+
+  absl::Cord needle_cord = absl::MakeFragmentedCord(
+      {needle_str.substr(0, 150), needle_str.substr(150)});
+  auto it_cord = haystack.Find(needle_cord);
+  EXPECT_NE(it_cord, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it_cord), 202);
+  EXPECT_TRUE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindBMHBoundaryThreshold256) {
+  // Test BMH search at the exact boundary size of 256 bytes for string_view
+  // and Cord needles. Verifies correct shift table boundary bounds.
+  const size_t kNeedleSize = 256;
+  std::string needle_str(kNeedleSize, 'B');
+  needle_str[0] = 'X';
+  needle_str[kNeedleSize - 2] = 'Y';
+  needle_str.back() = 'Z';
+
+  std::string haystack_str(1000, '.');
+  haystack_str.replace(500, kNeedleSize, needle_str);
+
+  absl::Cord haystack = absl::MakeFragmentedCord(
+      {haystack_str.substr(0, 400), haystack_str.substr(400)});
+
+  auto it = haystack.Find(needle_str);
+  EXPECT_NE(it, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it), 500);
+  EXPECT_TRUE(haystack.Contains(needle_str));
+
+  absl::Cord needle_cord = absl::MakeFragmentedCord(
+      {needle_str.substr(0, 100), needle_str.substr(100)});
+  auto it_cord = haystack.Find(needle_cord);
+  EXPECT_NE(it_cord, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it_cord), 500);
+  EXPECT_TRUE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindBMHMatchAtVeryEndOfCord) {
+  // Test BMH search when the needle is located at the very end of haystack
+  // (idx + m == bytes_remaining_). Verifies that boundary check uses > instead
+  // of >=.
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'M');
+  needle_str[0] = 'S';
+  needle_str.back() = 'E';
+
+  std::string haystack_str = std::string(500, '.') + needle_str;
+  absl::Cord haystack = absl::MakeFragmentedCord(
+      {haystack_str.substr(0, 400), haystack_str.substr(400)});
+
+  auto it = haystack.Find(needle_str);
+  EXPECT_NE(it, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it), 500);
+  EXPECT_TRUE(haystack.Contains(needle_str));
+
+  absl::Cord needle_cord = absl::MakeFragmentedCord(
+      {needle_str.substr(0, 150), needle_str.substr(150)});
+  auto it_cord = haystack.Find(needle_cord);
+  EXPECT_NE(it_cord, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it_cord), 500);
+  EXPECT_TRUE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindBMHMatchInLaterChunkAfterEmptyChunk) {
+  // Test BMH search when the first chunk of a fragmented Cord haystack does NOT
+  // contain needle[0]. Verifies that idx == npos advances past the entire first
+  // chunk and continues searching subsequent chunks.
+  const size_t kNeedleSize = 300;
+  std::string needle_str(kNeedleSize, 'A');
+  needle_str[0] = 'Z';
+
+  std::string chunk0(512, '.');
+  std::string chunk1 = needle_str + std::string(212, '.');
+
+  absl::Cord haystack = absl::MakeFragmentedCord({chunk0, chunk1});
+
+  auto it = haystack.Find(needle_str);
+  EXPECT_NE(it, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it), 512);
+  EXPECT_TRUE(haystack.Contains(needle_str));
+
+  absl::Cord needle_cord = absl::MakeFragmentedCord(
+      {needle_str.substr(0, 150), needle_str.substr(150)});
+  auto it_cord = haystack.Find(needle_cord);
+  EXPECT_NE(it_cord, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it_cord), 512);
+  EXPECT_TRUE(haystack.Contains(needle_cord));
+}
+
+TEST_P(CordTest, FindShortNeedleConsecutiveCandidates) {
+  // Test short needle (2 <= M < 256) when consecutive positions in haystack
+  // start with needle.front(), where position 10 mismatches but position 11
+  // matches. Verifies that failing IsSubstringInCordAt advances by exactly 1.
+  std::string needle = "ABZ";
+  std::string haystack_str(100, '.');
+  haystack_str.replace(10, 3, "ABW");
+  haystack_str.replace(11, 3, "ABZ");
+
+  absl::Cord haystack = absl::MakeFragmentedCord(
+      {haystack_str.substr(0, 50), haystack_str.substr(50)});
+
+  auto it = haystack.Find(needle);
+  EXPECT_NE(it, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it), 11);
+  EXPECT_TRUE(haystack.Contains(needle));
+
+  absl::Cord needle_cord(needle);
+  auto it_cord = haystack.Find(needle_cord);
+  EXPECT_NE(it_cord, haystack.char_end());
+  EXPECT_EQ(std::distance(haystack.char_begin(), it_cord), 11);
+  EXPECT_TRUE(haystack.Contains(needle_cord));
 }
 
 TEST_P(CordTest, Subcord) {
@@ -1630,8 +2433,8 @@ TEST_P(CordTest, CompareRandomComparisons) {
   for (int i = 0; i < kIters; i++) {
     absl::Cord c, d;
     for (int j = 0; j < (i % 7) + 1; j++) {
-      c.Append(a[GetUniformRandomUpTo(&rng, ABSL_ARRAYSIZE(a))]);
-      d.Append(a[GetUniformRandomUpTo(&rng, ABSL_ARRAYSIZE(a))]);
+      c.Append(a[GetUniformRandomUpTo(&rng, std::size(a))]);
+      d.Append(a[GetUniformRandomUpTo(&rng, std::size(a))]);
     }
     std::bernoulli_distribution coin_flip(0.5);
     MaybeHarden(c);
@@ -1649,8 +2452,8 @@ void CompareOperators() {
   EXPECT_TRUE(a == a);
   // For pointer type (i.e. `const char*`), operator== compares the address
   // instead of the string, so `a == const char*("a")` isn't necessarily true.
-  EXPECT_TRUE(std::is_pointer<T1>::value || a == T1("a"));
-  EXPECT_TRUE(std::is_pointer<T2>::value || a == T2("a"));
+  EXPECT_TRUE(std::is_pointer_v<T1> || a == T1("a"));
+  EXPECT_TRUE(std::is_pointer_v<T2> || a == T2("a"));
   EXPECT_FALSE(a == b);
 
   EXPECT_TRUE(a != b);
@@ -2365,37 +3168,30 @@ TEST_P(CordTest, MakeFragmentedCordFromVector) {
 }
 
 TEST_P(CordTest, CordChunkIteratorTraits) {
-  static_assert(std::is_copy_constructible<absl::Cord::ChunkIterator>::value,
-                "");
-  static_assert(std::is_copy_assignable<absl::Cord::ChunkIterator>::value, "");
+  static_assert(std::is_copy_constructible_v<absl::Cord::ChunkIterator>);
+  static_assert(std::is_copy_assignable_v<absl::Cord::ChunkIterator>);
 
   // Move semantics to satisfy swappable via std::swap
-  static_assert(std::is_move_constructible<absl::Cord::ChunkIterator>::value,
-                "");
-  static_assert(std::is_move_assignable<absl::Cord::ChunkIterator>::value, "");
+  static_assert(std::is_move_constructible_v<absl::Cord::ChunkIterator>);
+  static_assert(std::is_move_assignable_v<absl::Cord::ChunkIterator>);
 
   static_assert(
-      std::is_same<
+      std::is_same_v<
           std::iterator_traits<absl::Cord::ChunkIterator>::iterator_category,
-          std::input_iterator_tag>::value,
-      "");
+          std::input_iterator_tag>);
+  static_assert(std::is_same_v<
+                std::iterator_traits<absl::Cord::ChunkIterator>::value_type,
+                absl::string_view>);
   static_assert(
-      std::is_same<std::iterator_traits<absl::Cord::ChunkIterator>::value_type,
-                   absl::string_view>::value,
-      "");
-  static_assert(
-      std::is_same<
+      std::is_same_v<
           std::iterator_traits<absl::Cord::ChunkIterator>::difference_type,
-          ptrdiff_t>::value,
-      "");
+          ptrdiff_t>);
   static_assert(
-      std::is_same<std::iterator_traits<absl::Cord::ChunkIterator>::pointer,
-                   const absl::string_view*>::value,
-      "");
+      std::is_same_v<std::iterator_traits<absl::Cord::ChunkIterator>::pointer,
+                     const absl::string_view*>);
   static_assert(
-      std::is_same<std::iterator_traits<absl::Cord::ChunkIterator>::reference,
-                   absl::string_view>::value,
-      "");
+      std::is_same_v<std::iterator_traits<absl::Cord::ChunkIterator>::reference,
+                     absl::string_view>);
 }
 
 static void VerifyChunkIterator(const absl::Cord& cord,
@@ -2554,37 +3350,29 @@ TEST_P(CordTest, AdvanceAndReadOnSubstringDataEdge) {
 }
 
 TEST_P(CordTest, CharIteratorTraits) {
-  static_assert(std::is_copy_constructible<absl::Cord::CharIterator>::value,
-                "");
-  static_assert(std::is_copy_assignable<absl::Cord::CharIterator>::value, "");
+  static_assert(std::is_copy_constructible_v<absl::Cord::CharIterator>);
+  static_assert(std::is_copy_assignable_v<absl::Cord::CharIterator>);
 
   // Move semantics to satisfy swappable via std::swap
-  static_assert(std::is_move_constructible<absl::Cord::CharIterator>::value,
-                "");
-  static_assert(std::is_move_assignable<absl::Cord::CharIterator>::value, "");
+  static_assert(std::is_move_constructible_v<absl::Cord::CharIterator>);
+  static_assert(std::is_move_assignable_v<absl::Cord::CharIterator>);
 
   static_assert(
-      std::is_same<
+      std::is_same_v<
           std::iterator_traits<absl::Cord::CharIterator>::iterator_category,
-          std::input_iterator_tag>::value,
-      "");
+          std::input_iterator_tag>);
   static_assert(
-      std::is_same<std::iterator_traits<absl::Cord::CharIterator>::value_type,
-                   char>::value,
-      "");
+      std::is_same_v<std::iterator_traits<absl::Cord::CharIterator>::value_type,
+                     char>);
+  static_assert(std::is_same_v<
+                std::iterator_traits<absl::Cord::CharIterator>::difference_type,
+                ptrdiff_t>);
   static_assert(
-      std::is_same<
-          std::iterator_traits<absl::Cord::CharIterator>::difference_type,
-          ptrdiff_t>::value,
-      "");
+      std::is_same_v<std::iterator_traits<absl::Cord::CharIterator>::pointer,
+                     const char*>);
   static_assert(
-      std::is_same<std::iterator_traits<absl::Cord::CharIterator>::pointer,
-                   const char*>::value,
-      "");
-  static_assert(
-      std::is_same<std::iterator_traits<absl::Cord::CharIterator>::reference,
-                   const char&>::value,
-      "");
+      std::is_same_v<std::iterator_traits<absl::Cord::CharIterator>::reference,
+                     const char&>);
 }
 
 static void VerifyCharIterator(const absl::Cord& cord) {
@@ -3048,6 +3836,11 @@ CordMutator cord_mutators[] = {
     [](absl::Cord& c) { c.RemoveSuffix(10); }
   },
   {
+    "append large string",
+    [](absl::Cord& c) { c.Append(std::string(1000, 'x')); },
+    [](absl::Cord& c) { c.RemoveSuffix(1000); }
+  },
+  {
     "append cord",
     [](absl::Cord& c) {
       c.Append(absl::MakeFragmentedCord({"12345", "67890"}));
@@ -3091,6 +3884,11 @@ CordMutator cord_mutators[] = {
     "prepend string",
     [](absl::Cord& c) { c.Prepend("9876543210"); },
     [](absl::Cord& c) { c.RemovePrefix(10); }
+  },
+  {
+    "prepend large string",
+    [](absl::Cord& c) { c.Prepend(std::string(1000, 'x')); },
+    [](absl::Cord& c) { c.RemovePrefix(1000); }
   },
   {
     "prepend cord",
@@ -3429,69 +4227,3 @@ TEST(CordThreeWayComparisonTest, CompareCordsAndStringViews) {
             std::strong_ordering::greater);
 #endif
 }
-
-#if defined(GTEST_HAS_DEATH_TEST) && defined(ABSL_INTERNAL_CORD_HAVE_SANITIZER)
-
-// Returns an expected poison / uninitialized death message expression.
-const char* MASanDeathExpr() {
-  return "(use-after-poison|use-of-uninitialized-value)";
-}
-
-TEST(CordSanitizerTest, SanitizesEmptyCord) {
-  absl::Cord cord;
-  const char* data = cord.Flatten().data();
-  EXPECT_DEATH(EXPECT_EQ(data[0], 0), MASanDeathExpr());
-}
-
-TEST(CordSanitizerTest, SanitizesSmallCord) {
-  absl::Cord cord("Hello");
-  const char* data = cord.Flatten().data();
-  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
-}
-
-TEST(CordSanitizerTest, SanitizesCordOnSetSSOValue) {
-  absl::Cord cord("String that is too big to be an SSO value");
-  cord = "Hello";
-  const char* data = cord.Flatten().data();
-  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
-}
-
-TEST(CordSanitizerTest, SanitizesCordOnCopyCtor) {
-  absl::Cord src("hello");
-  absl::Cord dst(src);
-  const char* data = dst.Flatten().data();
-  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
-}
-
-TEST(CordSanitizerTest, SanitizesCordOnMoveCtor) {
-  absl::Cord src("hello");
-  absl::Cord dst(std::move(src));
-  const char* data = dst.Flatten().data();
-  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
-}
-
-TEST(CordSanitizerTest, SanitizesCordOnAssign) {
-  absl::Cord src("hello");
-  absl::Cord dst;
-  dst = src;
-  const char* data = dst.Flatten().data();
-  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
-}
-
-TEST(CordSanitizerTest, SanitizesCordOnMoveAssign) {
-  absl::Cord src("hello");
-  absl::Cord dst;
-  dst = std::move(src);
-  const char* data = dst.Flatten().data();
-  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
-}
-
-TEST(CordSanitizerTest, SanitizesCordOnSsoAssign) {
-  absl::Cord src("hello");
-  absl::Cord dst("String that is too big to be an SSO value");
-  dst = src;
-  const char* data = dst.Flatten().data();
-  EXPECT_DEATH(EXPECT_EQ(data[5], 0), MASanDeathExpr());
-}
-
-#endif  // GTEST_HAS_DEATH_TEST && ABSL_INTERNAL_CORD_HAVE_SANITIZER

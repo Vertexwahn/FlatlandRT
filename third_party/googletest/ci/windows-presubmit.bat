@@ -1,6 +1,6 @@
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-SET BAZEL_EXE=%KOKORO_GFILE_DIR%\bazel-9.0.0-windows-x86_64.exe
+SET BAZEL_EXE=%KOKORO_GFILE_DIR%\bazel-9.1.0-windows-x86_64.exe
 
 SET PATH=C:\Python34;%PATH%
 SET BAZEL_PYTHON=C:\python34\python.exe
@@ -19,6 +19,7 @@ IF %errorlevel% neq 0 EXIT /B 1
 SET CMAKE_BUILD_PATH=cmake_msvc2022
 MKDIR %CMAKE_BUILD_PATH%
 CD %CMAKE_BUILD_PATH%
+SET CXXFLAGS="/WX"
 
 %CMAKE_BIN% %GTEST_ROOT% ^
   -G "Visual Studio 17 2022" ^
@@ -37,6 +38,7 @@ IF %errorlevel% neq 0 EXIT /B 1
 %CTEST_BIN% -C Debug --timeout 600
 IF %errorlevel% neq 0 EXIT /B 1
 
+SET "CXXFLAGS="
 CD %GTEST_ROOT%
 RMDIR /S /Q %CMAKE_BUILD_PATH%
 
@@ -67,7 +69,7 @@ IF EXIST "%KOKORO_GFILE_DIR%\distdir\googletest_vendor.tar.gz" (
   --keep_going ^
   --per_file_copt=external/.*@/w ^
   --test_output=errors ^
-  --test_tag_filters=-no_test_msvc2017 ^
+  --test_tag_filters=-no_test_msvc2022 ^
   %VENDOR_FLAG%
 IF %errorlevel% neq 0 EXIT /B 1
 
@@ -82,6 +84,6 @@ IF %errorlevel% neq 0 EXIT /B 1
   --keep_going ^
   --per_file_copt=external/.*@/w ^
   --test_output=errors ^
-  --test_tag_filters=-no_test_msvc2017 ^
+  --test_tag_filters=-no_test_msvc2022 ^
   %VENDOR_FLAG%
 IF %errorlevel% neq 0 EXIT /B 1

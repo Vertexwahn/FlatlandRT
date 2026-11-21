@@ -379,6 +379,37 @@ TEST_XML(dom_node_append_attribute, "<node><child/></node>")
 	CHECK_NODE(doc, STR("<node a1=\"v1\" a2=\"v2\"><child a3=\"v3\"/></node>"));
 }
 
+TEST_XML(dom_node_ensure_attribute, "<node a1='v1'><child/></node>")
+{
+	CHECK(xml_node().ensure_attribute(STR("a")) == xml_attribute());
+	CHECK(doc.ensure_attribute(STR("a")) == xml_attribute());
+
+	xml_node node = doc.child(STR("node"));
+
+	// existing attribute is returned as is
+	xml_attribute a1 = node.ensure_attribute(STR("a1"));
+	CHECK(a1 && a1 == node.attribute(STR("a1")));
+	CHECK_STRING(a1.value(), STR("v1"));
+
+	// missing attribute is appended
+	xml_attribute a2 = node.ensure_attribute(STR("a2"));
+	CHECK(a2 && a2 != a1);
+	a2 = STR("v2");
+
+	// ensuring an existing attribute does not add a duplicate
+	CHECK(node.ensure_attribute(STR("a2")) == a2);
+
+#ifdef PUGIXML_HAS_STRING_VIEW
+	xml_attribute a3 = node.child(STR("child")).ensure_attribute(string_view_t(STR("a3")));
+#else
+	xml_attribute a3 = node.child(STR("child")).ensure_attribute(STR("a3"));
+#endif
+	CHECK(a3 && a3 != a1 && a3 != a2);
+	a3 = STR("v3");
+
+	CHECK_NODE(doc, STR("<node a1=\"v1\" a2=\"v2\"><child a3=\"v3\"/></node>"));
+}
+
 TEST_XML(dom_node_insert_attribute_after, "<node a1='v1'><child a2='v2'/></node>")
 {
 	CHECK(xml_node().insert_attribute_after(STR("a"), xml_attribute()) == xml_attribute());
@@ -836,6 +867,34 @@ TEST_XML(dom_node_append_child_name, "<node>foo<child/></node>")
 	CHECK(n3 && n3 != n2 && n3 != n1);
 
 	CHECK_NODE(doc, STR("<node>foo<child/><n1/><n2/></node><n3/>"));
+}
+
+TEST_XML(dom_node_ensure_child, "<node>foo<child/></node>")
+{
+	CHECK(xml_node().ensure_child(STR("")) == xml_node());
+	CHECK(doc.child(STR("node")).first_child().ensure_child(STR("n")) == xml_node());
+
+	xml_node node = doc.child(STR("node"));
+
+	// existing child is returned as is
+	xml_node child = node.ensure_child(STR("child"));
+	CHECK(child && child == node.child(STR("child")));
+
+	// missing child is appended
+	xml_node n1 = node.ensure_child(STR("n1"));
+	CHECK(n1 && n1 != child);
+
+	// ensuring an existing child does not add a duplicate
+	CHECK(node.ensure_child(STR("child")) == child);
+
+#ifdef PUGIXML_HAS_STRING_VIEW
+	xml_node n2 = doc.ensure_child(string_view_t(STR("n2")));
+#else
+	xml_node n2 = doc.ensure_child(STR("n2"));
+#endif
+	CHECK(n2 && n2 != child && n2 != n1);
+
+	CHECK_NODE(doc, STR("<node>foo<child/><n1/></node><n2/>"));
 }
 
 TEST_XML(dom_node_insert_child_after_name, "<node>foo<child/></node>")

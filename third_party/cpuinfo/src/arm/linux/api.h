@@ -119,6 +119,8 @@ struct cpuinfo_arm_linux_proc_cpuinfo_cache {
 #define CPUINFO_ARM_LINUX_FEATURE_SB UINT32_C(0x20000000)
 #define CPUINFO_ARM_LINUX_FEATURE_PACA UINT32_C(0x40000000)
 #define CPUINFO_ARM_LINUX_FEATURE_PACG UINT32_C(0x80000000)
+#define CPUINFO_ARM_LINUX_FEATURE_F8MM UINT64_C(0x0000000800000000)
+#define CPUINFO_ARM_LINUX_FEATURE_SME_MOP4 UINT64_C(0x0000800000000000)
 
 #define CPUINFO_ARM_LINUX_FEATURE2_DCPODP UINT32_C(0x00000001)
 #define CPUINFO_ARM_LINUX_FEATURE2_SVE2 UINT32_C(0x00000002)
@@ -139,12 +141,15 @@ struct cpuinfo_arm_linux_proc_cpuinfo_cache {
 #define CPUINFO_ARM_LINUX_FEATURE2_RNG UINT32_C(0x00010000)
 #define CPUINFO_ARM_LINUX_FEATURE2_BTI UINT32_C(0x00020000)
 #define CPUINFO_ARM_LINUX_FEATURE2_SME UINT32_C(0x00800000)
+#define CPUINFO_ARM_LINUX_FEATURE2_SVE2P1 UINT64_C(0x0000001000000000)
 #define CPUINFO_ARM_LINUX_FEATURE2_SME2 UINT64_C(0x0000002000000000)
 #define CPUINFO_ARM_LINUX_FEATURE2_SME2P1 UINT64_C(0x0000004000000000)
 #define CPUINFO_ARM_LINUX_FEATURE2_SME_I16I32 UINT64_C(0x0000008000000000)
 #define CPUINFO_ARM_LINUX_FEATURE2_SME_BI32I32 UINT64_C(0x0000010000000000)
 #define CPUINFO_ARM_LINUX_FEATURE2_SME_B16B16 UINT64_C(0x0000020000000000)
 #define CPUINFO_ARM_LINUX_FEATURE2_SME_F16F16 UINT64_C(0x0000040000000000)
+#define CPUINFO_ARM_LINUX_FEATURE2_FP8 UINT64_C(0x0008000000000000)
+#define CPUINFO_ARM_LINUX_FEATURE2_F8DOT UINT64_C(0x0020000000000000)
 #endif
 
 #define CPUINFO_ARM_LINUX_VALID_ARCHITECTURE UINT32_C(0x00010000)
@@ -179,7 +184,7 @@ struct cpuinfo_arm_linux_processor {
 	uint32_t architecture_flags;
 	struct cpuinfo_arm_linux_proc_cpuinfo_cache proc_cpuinfo_cache;
 #endif
-	uint32_t features;
+	uint64_t features;
 	uint64_t features2;
 	/**
 	 * Main ID Register value.
@@ -302,14 +307,14 @@ CPUINFO_INTERNAL bool cpuinfo_arm_linux_parse_proc_cpuinfo(
 
 #if CPUINFO_ARCH_ARM
 CPUINFO_INTERNAL bool cpuinfo_arm_linux_hwcap_from_getauxval(
-	uint32_t hwcap[restrict static 1],
+	uint64_t hwcap[restrict static 1],
 	uint64_t hwcap2[restrict static 1]);
 CPUINFO_INTERNAL bool cpuinfo_arm_linux_hwcap_from_procfs(
-	uint32_t hwcap[restrict static 1],
+	uint64_t hwcap[restrict static 1],
 	uint64_t hwcap2[restrict static 1]);
 
 CPUINFO_INTERNAL void cpuinfo_arm_linux_decode_isa_from_proc_cpuinfo(
-	uint32_t features,
+	uint64_t features,
 	uint64_t features2,
 	uint32_t midr,
 	uint32_t architecture_version,
@@ -318,11 +323,11 @@ CPUINFO_INTERNAL void cpuinfo_arm_linux_decode_isa_from_proc_cpuinfo(
 	struct cpuinfo_arm_isa isa[restrict static 1]);
 #elif CPUINFO_ARCH_ARM64
 CPUINFO_INTERNAL void cpuinfo_arm_linux_hwcap_from_getauxval(
-	uint32_t hwcap[restrict static 1],
+	uint64_t hwcap[restrict static 1],
 	uint64_t hwcap2[restrict static 1]);
 
 CPUINFO_INTERNAL void cpuinfo_arm64_linux_decode_isa_from_proc_cpuinfo(
-	uint32_t features,
+	uint64_t features,
 	uint64_t features2,
 	uint32_t midr,
 	const struct cpuinfo_arm_chipset chipset[restrict static 1],
@@ -366,7 +371,7 @@ CPUINFO_INTERNAL struct cpuinfo_arm_chipset cpuinfo_arm_android_decode_chipset_f
 CPUINFO_INTERNAL struct cpuinfo_arm_chipset cpuinfo_arm_android_decode_chipset_from_ro_hardware_chipname(
 	const char ro_hardware_chipname[restrict static CPUINFO_BUILD_PROP_VALUE_MAX]);
 CPUINFO_INTERNAL struct cpuinfo_arm_chipset cpuinfo_arm_android_decode_chipset_from_ro_soc_model(
-	const char ro_soc_model[restrict static CPUINFO_BUILD_PROP_VALUE_MAX]);
+	const char soc_model[restrict static CPUINFO_BUILD_PROP_VALUE_MAX]);
 #else
 CPUINFO_INTERNAL struct cpuinfo_arm_chipset cpuinfo_arm_linux_decode_chipset_from_proc_cpuinfo_revision(
 	const char proc_cpuinfo_revision[restrict static CPUINFO_REVISION_VALUE_MAX]);

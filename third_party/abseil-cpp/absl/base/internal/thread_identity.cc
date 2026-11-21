@@ -14,7 +14,17 @@
 
 #include "absl/base/internal/thread_identity.h"
 
-#if !defined(_WIN32) || defined(__MINGW32__)
+#include <atomic>
+#include <cassert>
+#include <memory>
+
+#include "absl/base/attributes.h"
+#include "absl/base/call_once.h"
+#include "absl/base/config.h"
+#include "absl/base/internal/raw_logging.h"
+#include "absl/base/internal/spinlock.h"
+
+#if ABSL_THREAD_IDENTITY_MODE != ABSL_THREAD_IDENTITY_MODE_USE_CPP11
 #include <pthread.h>
 #ifndef __wasi__
 // WASI does not provide this header, either way we disable use
@@ -22,15 +32,6 @@
 #include <signal.h>
 #endif
 #endif
-
-#include <atomic>
-#include <cassert>
-#include <memory>
-
-#include "absl/base/attributes.h"
-#include "absl/base/call_once.h"
-#include "absl/base/internal/raw_logging.h"
-#include "absl/base/internal/spinlock.h"
 
 namespace absl {
 ABSL_NAMESPACE_BEGIN
@@ -86,7 +87,7 @@ void SetCurrentThreadIdentity(ThreadIdentity* identity,
 
 #if defined(__wasi__) || defined(__EMSCRIPTEN__) || defined(__MINGW32__) || \
     defined(__hexagon__)
-  // Emscripten, WASI and MinGW pthread implementations does not support
+  // Emscripten, WASI and MinGW pthread implementations do not support
   // signals. See
   // https://kripken.github.io/emscripten-site/docs/porting/pthreads.html for
   // more information.
@@ -116,8 +117,18 @@ void SetCurrentThreadIdentity(ThreadIdentity* identity,
                       reinterpret_cast<void*>(identity));
   thread_identity_ptr = identity;
 #elif ABSL_THREAD_IDENTITY_MODE == ABSL_THREAD_IDENTITY_MODE_USE_CPP11
+  // `holder`'s destructor intentionally reclaims `identity` on thread exit.
+  // -Wexit-time-destructors was added for Chromium's interests, but this one
+  // doesn't affect the Chromium build, so we disable this warning.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#endif
   thread_local std::unique_ptr<ThreadIdentity, ThreadIdentityReclaimerFunction>
       holder(identity, reclaimer);
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
   thread_identity_ptr = identity;
 #else
 #error Unimplemented ABSL_THREAD_IDENTITY_MODE

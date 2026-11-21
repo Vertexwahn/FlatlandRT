@@ -19,7 +19,7 @@
 #include <string>
 #include <tuple>
 
-namespace spdlog {
+SPDLOG_NAMESPACE_BEGIN
 namespace sinks {
 
 template <typename Mutex>
@@ -28,7 +28,8 @@ SPDLOG_INLINE rotating_file_sink<Mutex>::rotating_file_sink(
     std::size_t max_size,
     std::size_t max_files,
     bool rotate_on_open,
-    const file_event_handlers &event_handlers)
+    const file_event_handlers &event_handlers,
+    std::size_t buffer_size)
     : base_filename_(std::move(base_filename)),
       max_size_(max_size),
       max_files_(max_files),
@@ -40,11 +41,11 @@ SPDLOG_INLINE rotating_file_sink<Mutex>::rotating_file_sink(
     if (max_files > MaxFiles) {
         throw_spdlog_ex("rotating sink constructor: max_files arg cannot exceed MaxFiles");
     }
+    file_helper_.set_buffer_size(buffer_size);
     file_helper_.open(calc_filename(base_filename_, 0));
     current_size_ = file_helper_.size();  // expensive. called only once
     if (rotate_on_open && current_size_ > 0) {
         rotate_();
-        current_size_ = 0;
     }
 }
 
@@ -102,6 +103,29 @@ template <typename Mutex>
 std::size_t rotating_file_sink<Mutex>::get_max_files() {
     std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
     return max_files_;
+}
+
+template <typename Mutex>
+std::size_t rotating_file_sink<Mutex>::get_current_size() {
+    std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+    return current_size_;
+}
+
+template <typename Mutex>
+SPDLOG_INLINE void rotating_file_sink<Mutex>::set_buffer_size(std::size_t buffer_size) {
+    std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+    // Reopen callbacks may append data, so refresh the rotation size estimate.
+    if (file_helper_.buffer_size() != buffer_size) {
+        file_helper_.set_buffer_size(buffer_size);
+        file_helper_.flush();
+        current_size_ = file_helper_.size();
+    }
+}
+
+template <typename Mutex>
+SPDLOG_INLINE std::size_t rotating_file_sink<Mutex>::buffer_size() {
+    std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+    return file_helper_.buffer_size();
 }
 
 template <typename Mutex>
@@ -163,6 +187,7 @@ SPDLOG_INLINE void rotating_file_sink<Mutex>::rotate_() {
         }
     }
     file_helper_.reopen(true);
+    current_size_ = 0;
 }
 
 // delete the target if exists, and rename the src file  to target
@@ -176,4 +201,4 @@ SPDLOG_INLINE bool rotating_file_sink<Mutex>::rename_file_(const filename_t &src
 }
 
 }  // namespace sinks
-}  // namespace spdlog
+SPDLOG_NAMESPACE_END

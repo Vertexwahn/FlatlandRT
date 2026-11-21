@@ -1,6 +1,6 @@
 // Formatting library for C++ - formatting library tests
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -82,6 +82,7 @@ TEST(xchar_test, format) {
   if (sizeof(wchar_t) == 4)
     EXPECT_EQ(fmt::format(fmt::runtime(L"{:𓀨>3}"), 42), L"𓀨42");
   EXPECT_EQ(fmt::format(L"{}c{}", L"ab", 1), L"abc1");
+  EXPECT_EQ(std::wstring(600, L'\u03a9'), fmt::format(L"{:\u03a9>600}", L""));
 }
 
 TEST(xchar_test, is_formattable) {
@@ -162,6 +163,16 @@ TEST(format_test, wide_format_to_n_runtime) {
   EXPECT_EQ(3u, result.size);
   EXPECT_EQ(buffer + 3, result.out);
   EXPECT_EQ(L"BC x", fmt::wstring_view(buffer, 4));
+}
+
+TEST(format_test, wide_formatted_size) {
+  EXPECT_EQ(5u, fmt::formatted_size(L"{}", 12345));
+  fmt::wformat_string<int> wfmt = L"{}";
+  EXPECT_EQ(2u, fmt::formatted_size(wfmt, 42));
+}
+
+TEST(format_test, wide_formatted_size_runtime) {
+  EXPECT_EQ(5u, fmt::formatted_size(fmt::runtime(L"{}"), 12345));
 }
 
 TEST(xchar_test, named_arg_udl) {
@@ -299,8 +310,6 @@ TEST(xchar_test, escape_string) {
 
 TEST(xchar_test, to_wstring) { EXPECT_EQ(L"42", fmt::to_wstring(42)); }
 
-#ifndef FMT_STATIC_THOUSANDS_SEPARATOR
-
 template <typename Char> struct numpunct : std::numpunct<Char> {
  protected:
   Char do_decimal_point() const override { return '?'; }
@@ -339,6 +348,8 @@ TEST(locale_test, localized_double) {
   EXPECT_EQ(fmt::format(loc, "{:15.6Lf}", 0.1), "       0?100000");
   EXPECT_EQ(fmt::format(loc, "{:15.6Lf}", 1.0), "       1?000000");
   EXPECT_EQ(fmt::format(loc, "{:15.6Lf}", 1e3), "   1~000?000000");
+  EXPECT_EQ(fmt::format(loc, "{:La}", 1234.5), "0x1?34ap+10");
+  EXPECT_EQ(fmt::format(loc, "{:+012La}", 1.5), "+0x0001?8p+0");
 }
 
 TEST(locale_test, format) {
@@ -384,7 +395,11 @@ TEST(locale_test, wformat) {
   int n = 1234567;
   EXPECT_EQ(L"1~234~567",
             fmt::vformat(loc, L"{:L}", fmt::make_wformat_args(n)));
+  EXPECT_EQ(9u, fmt::formatted_size(loc, L"{:L}", 1234567));
+  fmt::wformat_string<int> loc_wfmt = L"{:L}";
+  EXPECT_EQ(9u, fmt::formatted_size(loc, loc_wfmt, 1234567));
   EXPECT_EQ(L"1234567", fmt::format(std::locale("C"), L"{:L}", 1234567));
+  EXPECT_EQ(L"0x1?8p+0", fmt::format(loc, L"{:La}", 1.5));
 
   auto no_grouping_loc = std::locale(std::locale(), new no_grouping<wchar_t>());
   EXPECT_EQ(L"1234567", fmt::format(no_grouping_loc, L"{:L}", 1234567));
@@ -447,11 +462,37 @@ TEST(std_test_xchar, complex) {
 }
 
 TEST(std_test_xchar, optional) {
-#  ifdef __cpp_lib_optional
+#ifdef __cpp_lib_optional
   EXPECT_EQ(fmt::format(L"{}", std::optional{L'C'}), L"optional(\'C\')");
   EXPECT_EQ(fmt::format(L"{}", std::optional{std::wstring{L"wide string"}}),
             L"optional(\"wide string\")");
-#  endif
+#endif
 }
 
-#endif  // FMT_STATIC_THOUSANDS_SEPARATOR
+TEST(std_test_xchar, variant) {
+#ifdef __cpp_lib_variant
+  EXPECT_EQ(fmt::format(L"{}", std::monostate{}), L"monostate");
+  EXPECT_EQ(fmt::format(L"{}", std::variant<int, std::wstring>{L"wide"}),
+            L"variant(\"wide\")");
+#endif
+}
+
+TEST(std_test_xchar, expected) {
+#ifdef __cpp_lib_expected
+  EXPECT_EQ(fmt::format(L"{}", std::expected<int, int>{1}), L"expected(1)");
+  EXPECT_EQ(fmt::format(L"{}", std::unexpected(1)), L"unexpected(1)");
+#endif
+}
+
+TEST(std_test_xchar, path) {
+#ifdef __cpp_lib_filesystem
+  using std::filesystem::path;
+  // libstdc++ collapses repeated separators in the generic format.
+  auto p = path("a//b");
+  EXPECT_EQ(fmt::format(L"{:g}", p), p.generic_wstring());
+  EXPECT_EQ(fmt::format(L"{:?g}", p), L"\"" + p.generic_wstring() + L"\"");
+  // The generic format uses slashes on Windows.
+  auto q = path("C:\\foo");
+  EXPECT_EQ(fmt::format(L"{:g}", q), q.generic_wstring());
+#endif
+}

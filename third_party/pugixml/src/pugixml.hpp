@@ -1,5 +1,5 @@
 /**
- * pugixml parser - version 1.15
+ * pugixml parser - version 1.16
  * --------------------------------------------------------
  * Report bugs and download new versions at https://pugixml.org/
  *
@@ -12,7 +12,7 @@
 // Define version macro; evaluates to major * 1000 + minor * 10 + patch so that it's safe to use in less-than comparisons
 // Note: pugixml used major * 100 + minor * 10 + patch format up until 1.9 (which had version identifier 190); starting from pugixml 1.10, the minor version number is two digits
 #ifndef PUGIXML_VERSION
-#	define PUGIXML_VERSION 1150 // 1.15
+#	define PUGIXML_VERSION 1160 // 1.16
 #endif
 
 // Include user configuration file (this can define various configuration macros)
@@ -234,12 +234,12 @@ namespace pugi
 	// is a valid document. This flag is off by default.
 	PUGIXML_INLINE_VAR const unsigned int parse_fragment = 0x1000;
 
-	// This flag determines if plain character data is be stored in the parent element's value. This significantly changes the structure of
+	// This flag determines if plain character data is stored in the parent element's value. This significantly changes the structure of
 	// the document; this flag is only recommended for parsing documents with many PCDATA nodes in memory-constrained environments.
 	// This flag is off by default.
 	PUGIXML_INLINE_VAR const unsigned int parse_embed_pcdata = 0x2000;
 
-	// This flag determines whether determines whether the the two pcdata should be merged or not, if no intermediatory data are parsed in the document.
+	// This flag determines whether two adjacent pcdata should be merged or not, if no intermediary data are parsed in the document.
 	// This flag is off by default.
 	PUGIXML_INLINE_VAR const unsigned int parse_merge_pcdata = 0x4000;
 
@@ -265,7 +265,7 @@ namespace pugi
 		encoding_utf32_be,	// Big-endian UTF32
 		encoding_utf32,		// UTF32 with native endianness
 		encoding_wchar,		// The same encoding wchar_t has (either UTF16 or UTF32)
-		encoding_latin1
+		encoding_latin1		// Latin1 encoding (ISO-8859-1)
 	};
 
 	// Formatting flags
@@ -625,6 +625,12 @@ namespace pugi
 		xml_attribute insert_attribute_before(string_view_t name, const xml_attribute& attr);
 	#endif
 
+		// Get attribute with specified name, adding one if it does not exist. Returns the existing or added attribute, or empty attribute on errors.
+		xml_attribute ensure_attribute(const char_t* name);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		xml_attribute ensure_attribute(string_view_t name);
+	#endif
+
 		// Add a copy of the specified attribute. Returns added attribute, or empty attribute on errors.
 		xml_attribute append_copy(const xml_attribute& proto);
 		xml_attribute prepend_copy(const xml_attribute& proto);
@@ -645,8 +651,14 @@ namespace pugi
 	#ifdef PUGIXML_HAS_STRING_VIEW
 		xml_node append_child(string_view_t name);
 		xml_node prepend_child(string_view_t name);
-		xml_node insert_child_after(string_view_t, const xml_node& node);
+		xml_node insert_child_after(string_view_t name, const xml_node& node);
 		xml_node insert_child_before(string_view_t name, const xml_node& node);
+	#endif
+
+		// Get child with specified name, adding one if it does not exist. Returns the existing or added node, or empty node on errors.
+		xml_node ensure_child(const char_t* name);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		xml_node ensure_child(string_view_t name);
 	#endif
 
 		// Add a copy of the specified node as a child. Returns added node, or empty node on errors.
@@ -1348,7 +1360,7 @@ namespace pugi
 		// Evaluate expression as string value in the specified context; performs type conversion if necessary.
 		// At most capacity characters are written to the destination buffer, full result size is returned (includes terminating zero).
 		// If PUGIXML_NO_EXCEPTIONS is not defined, throws std::bad_alloc on out of memory errors.
-		// If PUGIXML_NO_EXCEPTIONS is defined, returns empty  set instead.
+		// If PUGIXML_NO_EXCEPTIONS is defined, returns empty string instead.
 		size_t evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const;
 
 		// Evaluate expression as node set in the specified context.

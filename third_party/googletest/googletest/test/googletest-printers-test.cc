@@ -39,6 +39,7 @@
 #include <deque>
 #include <forward_list>
 #include <functional>
+#include <iterator>
 #include <limits>
 #include <list>
 #include <map>
@@ -94,10 +95,12 @@ void PrintTo(EnumWithPrintTo e, std::ostream* os) {
   *os << (e == kEWPT1 ? "kEWPT1" : "invalid");
 }
 
-// A class implicitly convertible to BiggestInt.
+// A class implicitly convertible to intmax_t.
 class BiggestIntConvertible {
  public:
-  operator ::testing::internal::BiggestInt() const { return 42; }
+  operator intmax_t() const {  // NOLINT(google-explicit-constructor)
+    return 42;
+  }
 };
 
 // A parent class with two child classes. The parent and one of the kids have
@@ -355,7 +358,7 @@ TEST(PrintEnumTest, EnumWithPrintTo) {
 TEST(PrintClassTest, AbslStringify) { EXPECT_EQ("(10, 20)", Print(Point())); }
 #endif
 
-// Tests printing a class implicitly convertible to BiggestInt.
+// Tests printing a class implicitly convertible to intmax_t.
 
 TEST(PrintClassTest, BiggestIntConvertible) {
   EXPECT_EQ("42", Print(BiggestIntConvertible()));
@@ -395,12 +398,24 @@ TEST(PrintCharTest, UnsignedChar) {
   EXPECT_EQ("'b' (98, 0x62)", Print(static_cast<unsigned char>('b')));
 }
 
-TEST(PrintCharTest, Char16) { EXPECT_EQ("U+0041", Print(u'A')); }
+TEST(PrintCharTest, Char16) {
+  EXPECT_EQ("U+0041", Print(u'A'));
+  EXPECT_EQ("U+754C", Print(u'界'));
+  // Surrogates are not code points, so they are printed as code units.
+  EXPECT_EQ("u'\\xD800' (55296)", Print(static_cast<char16_t>(0xD800)));
+  EXPECT_EQ("u'\\xDFFF' (57343)", Print(static_cast<char16_t>(0xDFFF)));
+}
 
 TEST(PrintCharTest, Char32) { EXPECT_EQ("U+0041", Print(U'A')); }
 
 #ifdef __cpp_lib_char8_t
-TEST(PrintCharTest, Char8) { EXPECT_EQ("U+0041", Print(u8'A')); }
+TEST(PrintCharTest, Char8) {
+  EXPECT_EQ("U+0041", Print(u8'A'));
+  // Only ASCII code units encode a code point on their own; the rest are
+  // printed as code units.
+  EXPECT_EQ("u8'\\x80' (128)", Print(static_cast<char8_t>(0x80)));
+  EXPECT_EQ("u8'\\xFF' (255)", Print(static_cast<char8_t>(0xFF)));
+}
 #endif
 
 // Tests printing other simple, built-in types.
@@ -455,7 +470,7 @@ TEST(PrintBuiltInTypeTest, Integer) {
 #ifdef __cpp_lib_char8_t
   EXPECT_EQ("U+0000",
             Print(std::numeric_limits<char8_t>::min()));  // char8_t
-  EXPECT_EQ("U+00FF",
+  EXPECT_EQ("u8'\\xFF' (255)",
             Print(std::numeric_limits<char8_t>::max()));  // char8_t
 #endif
   EXPECT_EQ("U+0000",
@@ -647,13 +662,8 @@ TEST(PrintU32StringTest, EscapesProperly) {
             Print(p));
 }
 
-// MSVC compiler can be configured to define whar_t as a typedef
-// of unsigned short. Defining an overload for const wchar_t* in that case
-// would cause pointers to unsigned shorts be printed as wide strings,
-// possibly accessing more memory than intended and causing invalid
-// memory accesses. MSVC defines _NATIVE_WCHAR_T_DEFINED symbol when
-// wchar_t is implemented as a native type.
-#if !defined(_MSC_VER) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if GTEST_HAS_NATIVE_WCHAR
+#if GTEST_HAS_STD_WSTRING
 
 // const wchar_t*.
 TEST(PrintWideCStringTest, Const) {
@@ -684,7 +694,8 @@ TEST(PrintWideCStringTest, EscapesProperly) {
                 "\\n\\r\\t\\v\\xD3\\x576\\x8D3\\xC74D a\"",
             Print(static_cast<const wchar_t*>(s)));
 }
-#endif  // native wchar_t
+#endif  // GTEST_HAS_STD_WSTRING
+#endif  // GTEST_HAS_NATIVE_WCHAR
 
 // Tests printing pointers to other char types.
 
@@ -764,7 +775,7 @@ TEST(PrintPointerTest, NonMemberFunctionPointer) {
   // pointers to objects, and some compilers (e.g. GCC 3.4) enforce
   // this limitation.
   EXPECT_EQ(PrintPointer(reinterpret_cast<const void*>(
-                reinterpret_cast<internal::BiggestInt>(&MyFunction))),
+                reinterpret_cast<intmax_t>(&MyFunction))),
             Print(&MyFunction));
   int (*p)(bool) = NULL;  // NOLINT
   EXPECT_EQ("NULL", Print(p));
@@ -939,7 +950,7 @@ TEST(PrintStringTest, StringInStdNamespace) {
 
 TEST(PrintStringTest, StringViewInStdNamespace) {
   const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
-  const ::std::string_view str(s, sizeof(s));
+  const std::string_view str(s, sizeof(s));
   EXPECT_EQ("\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
             Print(str));
 }
@@ -1090,8 +1101,6 @@ TEST(PrintTypeWithGenericStreamingTest, TypeImplicitlyConvertible) {
   EXPECT_EQ("AllowsGenericStreamingAndImplicitConversionTemplate", Print(a));
 }
 
-#if GTEST_INTERNAL_HAS_STRING_VIEW
-
 // Tests printing internal::StringView.
 
 TEST(PrintStringViewTest, SimpleStringView) {
@@ -1104,8 +1113,6 @@ TEST(PrintStringViewTest, UnprintableCharacters) {
   const internal::StringView sp(str, sizeof(str) - 1);
   EXPECT_EQ("\"NUL (\\0) and \\r\\t\"", Print(sp));
 }
-
-#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 // Tests printing STL containers.
 
@@ -1469,8 +1476,8 @@ TEST(PrintReferenceTest, HandlesFunctionPointer) {
   // standard disallows casting between pointers to functions and
   // pointers to objects, and some compilers (e.g. GCC 3.4) enforce
   // this limitation.
-  const std::string fp_string = PrintPointer(reinterpret_cast<const void*>(
-      reinterpret_cast<internal::BiggestInt>(fp)));
+  const std::string fp_string = PrintPointer(
+      reinterpret_cast<const void*>(reinterpret_cast<intmax_t>(fp)));
   EXPECT_EQ("@" + fp_pointer_string + " " + fp_string, PrintByRef(fp));
 }
 
@@ -1784,7 +1791,7 @@ TEST(IsValidUTF8Test, IllFormedUTF8) {
       // too.
       {"\xEE\x80\x80", "\"\\xEE\\x80\\x80\"\n    As Text: \"\""}};
 
-  for (int i = 0; i < int(sizeof(kTestdata) / sizeof(kTestdata[0])); ++i) {
+  for (int i = 0; i < int(std::size(kTestdata)); ++i) {
     EXPECT_PRINT_TO_STRING_(kTestdata[i][0], kTestdata[i][1]);
   }
 }
@@ -1879,7 +1886,7 @@ TEST(UniversalPrintTest, IncompleteType) {
 
 TEST(UniversalPrintTest, SmartPointers) {
   EXPECT_EQ("(nullptr)", PrintToString(std::unique_ptr<int>()));
-  std::unique_ptr<int> p(new int(17));
+  std::unique_ptr<int> p = std::make_unique<int>(17);
   EXPECT_EQ("(ptr = " + PrintPointer(p.get()) + ", value = 17)",
             PrintToString(p));
   std::unique_ptr<int[]> p2(new int[2]);
@@ -1939,7 +1946,7 @@ TEST(UniversalPrintTest, StringViewNonZeroTerminated) {
   // `strlen` instead of `str.size()`, it will include 'X' and cause a visible
   // difference (in addition to ASAN tests detecting a buffer overflow due to
   // the missing 0 at the end).
-  const ::std::string_view str(s, 3);
+  const std::string_view str(s, 3);
   ::std::stringstream ss;
   UniversalPrint(str, &ss);
   EXPECT_EQ("\"\\xEF\\xA3\\xA2\"\n    As Text: \"\xEF\xA3\xA2\"", ss.str());
@@ -2027,6 +2034,27 @@ TEST(PrintOneofTest, Basic) {
       "('testing::gtest_printers_test::NonPrintable(index = 2)' with value "
       "1-byte object <11>)",
       PrintToString(Type(NonPrintable{})));
+}
+
+TEST(PrintVariantTest, Monostate) {
+  EXPECT_EQ("(monostate)", PrintToString(std::monostate()));
+
+#if GTEST_HAS_EXCEPTIONS
+  struct ThrowOnMove {
+    ThrowOnMove() = default;
+    ThrowOnMove(ThrowOnMove&& other) { *this = std::move(other); }
+    ThrowOnMove& operator=(ThrowOnMove&&) {
+      (void)std::vector<bool>().at(0);
+      return *this;
+    }
+  };
+  std::variant<std::monostate, ThrowOnMove> v = std::monostate();
+  std::string res = PrintToString(v);
+  EXPECT_NE(res.find("::monostate(index = 0)' with value (monostate))"),
+            res.npos);
+  EXPECT_THROW(v = ThrowOnMove(), std::out_of_range);
+  EXPECT_EQ("(valueless)", PrintToString(v));
+#endif
 }
 
 #if GTEST_INTERNAL_HAS_COMPARE_LIB

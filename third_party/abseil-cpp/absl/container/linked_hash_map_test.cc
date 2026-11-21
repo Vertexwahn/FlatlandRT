@@ -16,7 +16,11 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <iterator>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -30,6 +34,7 @@
 #include "absl/container/internal/hash_generator_testing.h"
 #include "absl/container/internal/hash_policy_testing.h"
 #include "absl/container/internal/heterogeneous_lookup_testing.h"
+#include "absl/container/internal/test_allocator.h"
 #include "absl/container/internal/test_instance_tracker.h"
 #include "absl/container/internal/unordered_map_constructor_test.h"
 #include "absl/container/internal/unordered_map_lookup_test.h"
@@ -43,6 +48,7 @@ namespace container_internal {
 namespace {
 
 using ::testing::ElementsAre;
+using ::testing::IsEmpty;
 using ::testing::Pair;
 using ::testing::Pointee;
 
@@ -50,7 +56,7 @@ template <class K, class V>
 using Map = linked_hash_map<K, V, StatefulTestingHash, StatefulTestingEqual,
                             Alloc<std::pair<const K, V>>>;
 
-static_assert(!std::is_standard_layout<NonStandardLayout>(), "");
+static_assert(!std::is_standard_layout<NonStandardLayout>());
 
 using MapTypes =
     ::testing::Types<Map<int, int>, Map<std::string, int>,
@@ -152,6 +158,15 @@ TEST(LinkedHashMapTest, CanEmplaceMoveOnly) {
   auto found = m.find(2);
   ASSERT_TRUE(found != m.end());
   EXPECT_EQ(234, *found->second);
+}
+
+TEST(LinkedHashMapTest, CanRangeConstructMoveOnly) {
+  std::vector<std::pair<int, std::unique_ptr<int>>> vec;
+  vec.emplace_back(1, std::make_unique<int>(10));
+  vec.emplace_back(2, std::make_unique<int>(20));
+  linked_hash_map<int, std::unique_ptr<int>> ranged(
+      std::make_move_iterator(vec.begin()), std::make_move_iterator(vec.end()));
+  EXPECT_THAT(ranged, ElementsAre(Pair(1, Pointee(10)), Pair(2, Pointee(20))));
 }
 
 struct NoCopy {
@@ -790,6 +805,166 @@ TEST(LinkedHashMap, ExtractInsert) {
   EXPECT_EQ(node.key(), 1);
   EXPECT_EQ(node.mapped(), 17);
   EXPECT_THAT(m, ElementsAre(Pair(2, 9)));
+
+  node.mapped() = 19;
+  auto it = m.insert(m.begin(), std::move(node));
+  EXPECT_EQ(it, m.find(1));
+  EXPECT_THAT(m, ElementsAre(Pair(2, 9), Pair(1, 19)));
+}
+
+// Verify that emplacing and extracting nodes results in the same stateful
+// allocator being used for splicing purposes, rather than another instance
+// (say, a default-constructed one), which could otherwise silently corrupt
+// memory.
+TEST(LinkedHashMap, ExtractAndEmplaceUseSameStatefulAllocator) {
+  using Alloc =
+      absl::container_internal::CountingAllocator<std::pair<const int, int>>;
+  int64_t bytes_used = 0;
+  Alloc alloc(&bytes_used);
+  linked_hash_map<int, int, linked_hash_map<int, int>::hasher, std::equal_to<>,
+                  Alloc>
+      map(alloc);
+
+  map.emplace(1, 10);
+  EXPECT_GT(bytes_used, 0) << "emplace() failed to use the same allocator";
+
+  auto node = map.extract(map.begin());
+  EXPECT_EQ(node.get_allocator(), alloc)
+      << "extract(iter) failed to use the same allocator";
+
+  map.insert(std::move(node));
+  EXPECT_EQ(map.extract(1).get_allocator(), alloc)
+      << "extract(key) failed to use the same allocator";
+}
+
+// Move-assigning with an unequal, non-propagating allocator must move each
+// element into a node allocated with the destination's allocator and rebuild
+// the index over those nodes. Previously the index kept pointing at the
+// source's nodes, which the source then freed, so the first lookup read freed
+// memory (heap-use-after-free).
+TEST(LinkedHashMap, MoveAssignWithUnequalNonPropagatingAllocator) {
+  using Alloc =
+      absl::container_internal::CountingAllocator<std::pair<const int, int>>;
+  int64_t bytes_used_a = 0;
+  int64_t bytes_used_b = 0;
+  Alloc alloc_a(&bytes_used_a);
+  Alloc alloc_b(&bytes_used_b);
+  ASSERT_NE(alloc_a, alloc_b);
+  using Map = linked_hash_map<int, int, linked_hash_map<int, int>::hasher,
+                              std::equal_to<>, Alloc>;
+
+  {
+    Map a(alloc_a);
+    a.insert({11, 110});
+    a.insert({22, 220});
+    a.insert({33, 330});
+    const int64_t bytes_used_a_before = bytes_used_a;
+    EXPECT_GT(bytes_used_a_before, 0);
+    EXPECT_EQ(bytes_used_b, 0);
+
+    // Move-assign into an empty map.
+    Map b(alloc_b);
+    b = std::move(a);
+    EXPECT_EQ(b.get_allocator(), alloc_b);
+    EXPECT_LT(bytes_used_a, bytes_used_a_before);
+    EXPECT_GT(bytes_used_b, 0);
+    EXPECT_THAT(b, ElementsAre(Pair(11, 110), Pair(22, 220), Pair(33, 330)));
+    auto found = b.find(22);
+    ASSERT_NE(found, b.end());
+    EXPECT_EQ(found->second, 220);
+    EXPECT_EQ(b.erase(22), 1);
+    EXPECT_THAT(b, ElementsAre(Pair(11, 110), Pair(33, 330)));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(a, IsEmpty());
+
+    // Move-assign into a non-empty map: the old elements must be gone.
+    Map c(alloc_b);
+    c.insert({1, 10});
+    c.insert({2, 20});
+    a.clear();
+    a.insert({44, 440});
+    a.insert({55, 550});
+    c = std::move(a);
+    EXPECT_EQ(c.get_allocator(), alloc_b);
+    EXPECT_THAT(c, ElementsAre(Pair(44, 440), Pair(55, 550)));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(a, IsEmpty());
+  }
+  EXPECT_EQ(bytes_used_a, 0);
+  EXPECT_EQ(bytes_used_b, 0);
+}
+
+// Move-assigning with equal allocators must keep taking over the source's
+// nodes (and its index) without allocating.
+TEST(LinkedHashMap, MoveAssignWithEqualAllocatorTakesOverNodes) {
+  using Alloc =
+      absl::container_internal::CountingAllocator<std::pair<const int, int>>;
+  int64_t bytes_used = 0;
+  Alloc alloc(&bytes_used);
+  using Map = linked_hash_map<int, int, linked_hash_map<int, int>::hasher,
+                              std::equal_to<>, Alloc>;
+
+  {
+    // Note: some STL implementations (e.g. MSVC) allocate a sentinel node
+    // (and debug proxy) in std::list's default constructor.
+    Map a(alloc);
+    const int64_t empty_map_bytes = bytes_used;
+    a.insert({11, 110});
+    a.insert({22, 220});
+    Map b(alloc);
+    const int64_t bytes_used_before = bytes_used;
+    b = std::move(a);
+    EXPECT_EQ(bytes_used, bytes_used_before);
+    EXPECT_THAT(b, ElementsAre(Pair(11, 110), Pair(22, 220)));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(a, IsEmpty());
+
+    // Move-assign into a non-empty map: the old elements must be freed and the
+    // source's nodes taken over without new allocations.
+    Map c(alloc);
+    c.insert({1, 10});
+    c.insert({2, 20});
+    c.insert({3, 30});
+    EXPECT_GT(bytes_used, bytes_used_before + empty_map_bytes);
+    c = std::move(b);
+    EXPECT_EQ(bytes_used, bytes_used_before + empty_map_bytes);
+    EXPECT_THAT(c, ElementsAre(Pair(11, 110), Pair(22, 220)));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(b, IsEmpty());
+  }
+  EXPECT_EQ(bytes_used, 0);
+}
+
+// Move-assigning with an allocator that propagates on move assignment must
+// propagate the allocator, even when the allocators are unequal.
+TEST(LinkedHashMap, MoveAssignWithPropagatingAllocatorPropagates) {
+  using Alloc = absl::container_internal::MoveAssignPropagatingCountingAlloc<
+      std::pair<const int, int>>;
+  int64_t bytes_used_a = 0;
+  int64_t bytes_used_b = 0;
+  Alloc alloc_a(&bytes_used_a);
+  Alloc alloc_b(&bytes_used_b);
+  ASSERT_NE(alloc_a, alloc_b);
+  using Map = linked_hash_map<int, int, linked_hash_map<int, int>::hasher,
+                              std::equal_to<>, Alloc>;
+
+  {
+    Map a(alloc_a);
+    a.insert({11, 110});
+    a.insert({22, 220});
+    const int64_t bytes_used_a_before = bytes_used_a;
+    Map b(alloc_b);
+    const int64_t empty_map_bytes = bytes_used_b;
+    b = std::move(a);
+    EXPECT_EQ(b.get_allocator(), alloc_a);
+    EXPECT_EQ(bytes_used_a, bytes_used_a_before + empty_map_bytes);
+    EXPECT_EQ(bytes_used_b, 0);
+    EXPECT_THAT(b, ElementsAre(Pair(11, 110), Pair(22, 220)));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(a, IsEmpty());
+  }
+  EXPECT_EQ(bytes_used_a, 0);
+  EXPECT_EQ(bytes_used_b, 0);
 }
 
 TEST(LinkedHashMap, Merge) {

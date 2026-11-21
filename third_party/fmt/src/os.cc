@@ -1,6 +1,6 @@
 // Formatting library for C++ - optional OS-specific functionality
 //
-// Copyright (c) 2012 - 2016, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -383,7 +383,9 @@ void ostream::grow(buffer<char>& buf, size_t) {
 
 ostream::ostream(cstring_view path, const detail::ostream_params& params)
     : buffer<char>(grow), file_(path, params.oflag) {
-  set(new char[params.buffer_size], params.buffer_size);
+  // Flushing is the only way to make room, so the capacity can't be zero.
+  size_t size = max_of<size_t>(params.buffer_size, 1);
+  set(new char[size], size);
 }
 
 ostream::ostream(ostream&& other) noexcept
@@ -394,7 +396,8 @@ ostream::ostream(ostream&& other) noexcept
 }
 
 ostream::~ostream() {
-  flush();
+  FMT_TRY { flush(); }
+  FMT_CATCH(...) { report_system_error(errno, "cannot write to file"); }
   delete[] data();
 }
 #endif  // FMT_USE_FCNTL

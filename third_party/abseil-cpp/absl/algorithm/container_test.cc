@@ -42,6 +42,10 @@
 #include "absl/random/random.h"
 #include "absl/types/span.h"
 
+#ifdef __cpp_lib_span
+#include <span>  // NOLINT(build/c++20)
+#endif
+
 namespace {
 
 using ::testing::Each;
@@ -76,13 +80,37 @@ bool BinPredicate(int v1, int v2) { return v1 < v2; }
 bool Equals(int v1, int v2) { return v1 == v2; }
 bool IsOdd(int x) { return x % 2 != 0; }
 
+TEST(Span, IsSpan) {
+  static_assert(
+      absl::container_algorithm_internal::IsSpan<absl::Span<int>>::value);
+  static_assert(
+      absl::container_algorithm_internal::IsSpan<const absl::Span<int>>::value);
+  static_assert(absl::container_algorithm_internal::IsSpan<
+                volatile absl::Span<int>>::value);
+  static_assert(absl::container_algorithm_internal::IsSpan<
+                const volatile absl::Span<int>>::value);
+
+  static_assert(
+      !absl::container_algorithm_internal::IsSpan<absl::Span<int>&>::value);
+  static_assert(
+      !absl::container_algorithm_internal::IsSpan<absl::Span<int>&&>::value);
+
+#ifdef __cpp_lib_span
+  static_assert(
+      absl::container_algorithm_internal::IsSpan<std::span<int>>::value);
+  static_assert(
+      !absl::container_algorithm_internal::IsSpan<std::span<int>&>::value);
+  static_assert(
+      !absl::container_algorithm_internal::IsSpan<std::span<int>&&>::value);
+#endif
+}
+
 TEST_F(NonMutatingTest, Distance) {
   EXPECT_EQ(container_.size(),
             static_cast<size_t>(absl::c_distance(container_)));
   EXPECT_EQ(sequence_.size(), static_cast<size_t>(absl::c_distance(sequence_)));
   EXPECT_EQ(vector_.size(), static_cast<size_t>(absl::c_distance(vector_)));
-  EXPECT_EQ(ABSL_ARRAYSIZE(array_),
-            static_cast<size_t>(absl::c_distance(array_)));
+  EXPECT_EQ(std::size(array_), static_cast<size_t>(absl::c_distance(array_)));
 
   // Works with a temporary argument.
   EXPECT_EQ(vector_.size(),
@@ -343,6 +371,12 @@ TEST_F(NonMutatingTest, LowerBound) {
   EXPECT_EQ(3, *i);
 }
 
+TEST_F(NonMutatingTest, LowerBoundTemporarySpan) {
+  int* i = absl::c_lower_bound(absl::MakeSpan(vector_), 3);
+  EXPECT_EQ(2, std::distance(vector_.data(), i));
+  EXPECT_EQ(3, *i);
+}
+
 TEST_F(NonMutatingTest, LowerBoundWithPredicate) {
   std::vector<int> v(vector_);
   std::sort(v.begin(), v.end(), std::greater<int>());
@@ -351,10 +385,24 @@ TEST_F(NonMutatingTest, LowerBoundWithPredicate) {
   EXPECT_EQ(3, *i);
 }
 
+TEST_F(NonMutatingTest, LowerBoundTemporarySpanWithPredicate) {
+  std::vector<int> v(vector_);
+  std::sort(v.begin(), v.end(), std::greater<int>());
+  int* i = absl::c_lower_bound(absl::MakeSpan(v), 3, std::greater<int>());
+  EXPECT_TRUE(i == v.data());
+  EXPECT_EQ(3, *i);
+}
+
 TEST_F(NonMutatingTest, UpperBound) {
   std::list<int>::iterator i = absl::c_upper_bound(sequence_, 1);
   ASSERT_TRUE(i != sequence_.end());
   EXPECT_EQ(1, std::distance(sequence_.begin(), i));
+  EXPECT_EQ(2, *i);
+}
+
+TEST_F(NonMutatingTest, UpperBoundTemporarySpan) {
+  int* i = absl::c_upper_bound(absl::MakeSpan(vector_), 1);
+  EXPECT_EQ(1, std::distance(vector_.data(), i));
   EXPECT_EQ(2, *i);
 }
 
@@ -366,11 +414,25 @@ TEST_F(NonMutatingTest, UpperBoundWithPredicate) {
   EXPECT_TRUE(i == v.end());
 }
 
+TEST_F(NonMutatingTest, UpperBoundTemporarySpanWithPredicate) {
+  std::vector<int> v(vector_);
+  std::sort(v.begin(), v.end(), std::greater<int>());
+  int* i = absl::c_upper_bound(absl::MakeSpan(v), 1, std::greater<int>());
+  EXPECT_EQ(3, i - v.data());
+  EXPECT_TRUE(i == std::next(v.data(), v.size()));
+}
+
 TEST_F(NonMutatingTest, EqualRange) {
   std::pair<std::list<int>::iterator, std::list<int>::iterator> p =
       absl::c_equal_range(sequence_, 2);
   EXPECT_EQ(1, std::distance(sequence_.begin(), p.first));
   EXPECT_EQ(2, std::distance(sequence_.begin(), p.second));
+}
+
+TEST_F(NonMutatingTest, EqualRangeTemporarySpan) {
+  std::pair<int*, int*> p = absl::c_equal_range(absl::MakeSpan(vector_), 2);
+  EXPECT_EQ(1, std::distance(vector_.data(), p.first));
+  EXPECT_EQ(2, std::distance(vector_.data(), p.second));
 }
 
 TEST_F(NonMutatingTest, EqualRangeArray) {
@@ -386,6 +448,15 @@ TEST_F(NonMutatingTest, EqualRangeWithPredicate) {
       absl::c_equal_range(v, 2, std::greater<int>());
   EXPECT_EQ(1, std::distance(v.begin(), p.first));
   EXPECT_EQ(2, std::distance(v.begin(), p.second));
+}
+
+TEST_F(NonMutatingTest, EqualRangeTemporarySpanWithPredicate) {
+  std::vector<int> v(vector_);
+  std::sort(v.begin(), v.end(), std::greater<int>());
+  std::pair<int*, int*> p =
+      absl::c_equal_range(absl::MakeSpan(v), 2, std::greater<int>());
+  EXPECT_EQ(1, std::distance(v.data(), p.first));
+  EXPECT_EQ(2, std::distance(v.data(), p.second));
 }
 
 TEST_F(NonMutatingTest, BinarySearch) {
@@ -407,10 +478,22 @@ TEST_F(NonMutatingTest, MinElement) {
   EXPECT_EQ(*i, 1);
 }
 
+TEST_F(NonMutatingTest, MinElementTemporarySpan) {
+  int* i = absl::c_min_element(absl::MakeSpan(vector_));
+  ASSERT_TRUE(i != std::next(vector_.data(), vector_.size()));
+  EXPECT_EQ(*i, 1);
+}
+
 TEST_F(NonMutatingTest, MinElementWithPredicate) {
   std::list<int>::iterator i =
       absl::c_min_element(sequence_, std::greater<int>());
   ASSERT_TRUE(i != sequence_.end());
+  EXPECT_EQ(*i, 3);
+}
+
+TEST_F(NonMutatingTest, MinElementTemporarySpanWithPredicate) {
+  int* i = absl::c_min_element(absl::MakeSpan(vector_), std::greater<int>());
+  ASSERT_TRUE(i != std::next(vector_.data(), vector_.size()));
   EXPECT_EQ(*i, 3);
 }
 
@@ -420,10 +503,22 @@ TEST_F(NonMutatingTest, MaxElement) {
   EXPECT_EQ(*i, 3);
 }
 
+TEST_F(NonMutatingTest, MaxElementTemporarySpan) {
+  int* i = absl::c_max_element(absl::MakeSpan(vector_));
+  ASSERT_TRUE(i != std::next(vector_.data(), vector_.size()));
+  EXPECT_EQ(*i, 3);
+}
+
 TEST_F(NonMutatingTest, MaxElementWithPredicate) {
   std::list<int>::iterator i =
       absl::c_max_element(sequence_, std::greater<int>());
   ASSERT_TRUE(i != sequence_.end());
+  EXPECT_EQ(*i, 1);
+}
+
+TEST_F(NonMutatingTest, MaxElementTemporarySpanWithPredicate) {
+  int* i = absl::c_max_element(absl::MakeSpan(vector_), std::greater<int>());
+  ASSERT_TRUE(i != std::next(vector_.data(), vector_.size()));
   EXPECT_EQ(*i, 1);
 }
 
@@ -733,10 +828,24 @@ TEST(MutatingTest, CopyToContainer) {
   EXPECT_THAT(actual, ElementsAre(1, 2, 3, 4, 5));
 }
 
+TEST(MutatingTest, CopyToSpanRvalue) {
+  const std::vector<int> input = {1, 2, 3};
+  std::vector<int> actual = {0, 0, 0, 4, 5};
+  absl::c_copy(input, absl::MakeSpan(actual));
+  EXPECT_THAT(actual, ElementsAre(1, 2, 3, 4, 5));
+}
+
 TEST(MutatingTest, CopyNToContainer) {
   const std::vector<int> input = {1, 2, 3, 4, 5};
   std::vector<int> actual = {0, 0, 0, 0, 0};
   absl::c_copy_n(input, 2, actual);
+  EXPECT_THAT(actual, ElementsAre(1, 2, 0, 0, 0));
+}
+
+TEST(MutatingTest, CopyNToSpanRvalue) {
+  const std::vector<int> input = {1, 2, 3, 4, 5};
+  std::vector<int> actual = {0, 0, 0, 0, 0};
+  absl::c_copy_n(input, 2, absl::MakeSpan(actual));
   EXPECT_THAT(actual, ElementsAre(1, 2, 0, 0, 0));
 }
 
@@ -814,8 +923,6 @@ TEST(MutatingTest, CopyNContainerWithNoSizeMethod) {
   EXPECT_THAT(actual, ElementsAre(1, 2, 0, 0, 0));
 }
 
-#if GTEST_HAS_DEATH_TEST
-
 bool IsHardened() {
   bool hardened = false;
   ABSL_HARDENING_ASSERT([&hardened]() {
@@ -828,76 +935,95 @@ bool IsHardened() {
 TEST(MutatingTest, CopyToCArrayInvalidSize) {
   const std::vector<int> input = {1, 2, 3};
   int actual[2] = {0, 0};
+  (void)actual;
+#if GTEST_HAS_DEATH_TEST
   if (IsHardened()) {
     EXPECT_DEATH(absl::c_copy(input, actual), "");
   }
+#endif
 }
 
 TEST(MutatingTest, CopyNToCArrayInvalidSize) {
   const std::vector<int> input = {1, 2, 3};
   int actual[2] = {0, 0};
+  (void)actual;
+#if GTEST_HAS_DEATH_TEST
   if (IsHardened()) {
     EXPECT_DEATH(absl::c_copy_n(input, 3, actual), "");
   }
+#endif
 }
 
 TEST(MutatingTest, CopyNToCArrayNGreaterThanInput) {
   const std::vector<int> input = {1, 2, 3};
   int actual[4] = {0, 0, 0, 0};
+  (void)actual;
+#if GTEST_HAS_DEATH_TEST
   if (IsHardened()) {
     EXPECT_DEATH(absl::c_copy_n(input, 4, actual), "");
   }
+#endif
 }
 
 TEST(MutatingTest, CopyToContainerInvalidSize) {
   const std::list<int> input = {1, 2, 3, 4, 5};
   std::list<int> actual = {0, 0, 0};
+#if GTEST_HAS_DEATH_TEST
   if (IsHardened()) {
     EXPECT_DEATH(absl::c_copy(input, actual), "");
   }
+#endif
 }
 
 TEST(MutatingTest, CopyNToContainerNGreaterThanInput) {
   const std::vector<int> input = {1, 2, 3};
   std::vector<int> actual = {0, 0, 0, 0};
+#if GTEST_HAS_DEATH_TEST
   if (IsHardened()) {
     EXPECT_DEATH(absl::c_copy_n(input, 4, actual), "");
   }
+#endif
 }
 
 TEST(MutatingTest, CopyNToContainerNGreaterThanOutput) {
   const std::vector<int> input = {1, 2, 3};
   std::vector<int> actual = {0, 0};
+#if GTEST_HAS_DEATH_TEST
   if (IsHardened()) {
     EXPECT_DEATH(absl::c_copy_n(input, 3, actual), "");
   }
+#endif
 }
 
 TEST(MutatingTest, CopyToForwardListInvalidSize) {
   const std::forward_list<int> input = {1, 2, 3, 4, 5};
   std::forward_list<int> actual = {0, 0, 0};
+#if GTEST_HAS_DEATH_TEST
   if (IsHardened()) {
     EXPECT_DEATH(absl::c_copy(input, actual), "");
   }
+#endif
 }
 
 TEST(MutatingTest, CopyNToForwardListNGreaterThanInput) {
   const std::forward_list<int> input = {1, 2, 3};
   std::forward_list<int> actual = {0, 0, 0, 0};
+#if GTEST_HAS_DEATH_TEST
   if (IsHardened()) {
     EXPECT_DEATH(absl::c_copy_n(input, 4, actual), "");
   }
+#endif
 }
 
 TEST(MutatingTest, CopyNToForwardListNGreaterThanOutput) {
   const std::forward_list<int> input = {1, 2, 3};
   std::forward_list<int> actual = {0, 0};
+#if GTEST_HAS_DEATH_TEST
   if (IsHardened()) {
     EXPECT_DEATH(absl::c_copy_n(input, 3, actual), "");
   }
+#endif
 }
-
-#endif  // GTEST_HAS_DEATH_TEST
 
 TEST(MutatingTest, CopyIf) {
   const std::list<int> input = {1, 2, 3};
@@ -957,6 +1083,120 @@ TEST(MutatingTest, MoveWithRvalue) {
                                 Pointee(2), Pointee(3)));
 }
 
+TEST(MutatingTest, MoveToContainer) {
+  std::vector<std::unique_ptr<int>> input;
+  input.push_back(std::make_unique<int>(1));
+  input.push_back(std::make_unique<int>(2));
+  input.push_back(std::make_unique<int>(3));
+
+  std::vector<std::unique_ptr<int>> actual(5);
+  absl::c_move(input, actual);
+
+  EXPECT_EQ(input[0], nullptr);
+  EXPECT_EQ(input[1], nullptr);
+  EXPECT_EQ(input[2], nullptr);
+
+  ASSERT_NE(actual[0], nullptr);
+  EXPECT_EQ(*actual[0], 1);
+  ASSERT_NE(actual[1], nullptr);
+  EXPECT_EQ(*actual[1], 2);
+  ASSERT_NE(actual[2], nullptr);
+  EXPECT_EQ(*actual[2], 3);
+  EXPECT_EQ(actual[3], nullptr);
+}
+
+TEST(MutatingTest, MoveToSpanRvalue) {
+  std::vector<std::unique_ptr<int>> input;
+  input.push_back(std::make_unique<int>(1));
+  input.push_back(std::make_unique<int>(2));
+  input.push_back(std::make_unique<int>(3));
+
+  std::vector<std::unique_ptr<int>> actual(5);
+  absl::c_move(input, absl::MakeSpan(actual));
+
+  EXPECT_EQ(input[0], nullptr);
+  EXPECT_EQ(input[1], nullptr);
+  EXPECT_EQ(input[2], nullptr);
+
+  ASSERT_NE(actual[0], nullptr);
+  EXPECT_EQ(*actual[0], 1);
+  ASSERT_NE(actual[1], nullptr);
+  EXPECT_EQ(*actual[1], 2);
+  ASSERT_NE(actual[2], nullptr);
+  EXPECT_EQ(*actual[2], 3);
+  EXPECT_EQ(actual[3], nullptr);
+}
+
+TEST(MutatingTest, MoveToDifferentContainerType) {
+  std::list<std::unique_ptr<int>> input;
+  input.push_back(std::make_unique<int>(1));
+  input.push_back(std::make_unique<int>(2));
+
+  std::array<std::unique_ptr<int>, 3> actual;
+  absl::c_move(input, actual);
+
+  EXPECT_EQ(input.front(), nullptr);
+  ASSERT_NE(actual[0], nullptr);
+  EXPECT_EQ(*actual[0], 1);
+}
+
+TEST(MutatingTest, MoveToCArray) {
+  std::vector<std::unique_ptr<int>> input;
+  input.push_back(std::make_unique<int>(1));
+  input.push_back(std::make_unique<int>(2));
+
+  std::unique_ptr<int> actual[3];
+  absl::c_move(input, actual);
+
+  EXPECT_EQ(input.front(), nullptr);
+  ASSERT_NE(actual[0], nullptr);
+  EXPECT_EQ(*actual[0], 1);
+}
+
+TEST(MutatingTest, MoveFromCArray) {
+  std::unique_ptr<int> input[2];
+  input[0] = std::make_unique<int>(1);
+  input[1] = std::make_unique<int>(2);
+
+  std::vector<std::unique_ptr<int>> actual(3);
+  absl::c_move(input, actual);
+
+  EXPECT_EQ(input[0], nullptr);
+  ASSERT_NE(actual[0], nullptr);
+  EXPECT_EQ(*actual[0], 1);
+}
+
+TEST(MutatingTest, MoveToCArrayInvalidSize) {
+  std::vector<int> input = {1, 2, 3};
+  int actual[2] = {0, 0};
+  (void)actual;
+#if GTEST_HAS_DEATH_TEST
+  if (IsHardened()) {
+    EXPECT_DEATH(absl::c_move(input, actual), "");
+  }
+#endif
+}
+
+TEST(MutatingTest, MoveToContainerInvalidSize) {
+  std::list<int> input = {1, 2, 3, 4, 5};
+  std::list<int> actual = {0, 0, 0};
+#if GTEST_HAS_DEATH_TEST
+  if (IsHardened()) {
+    EXPECT_DEATH(absl::c_move(input, actual), "");
+  }
+#endif
+}
+
+TEST(MutatingTest, MoveToForwardListInvalidSize) {
+  std::forward_list<int> input = {1, 2, 3, 4, 5};
+  std::forward_list<int> actual = {0, 0, 0};
+#if GTEST_HAS_DEATH_TEST
+  if (IsHardened()) {
+    EXPECT_DEATH(absl::c_move(input, actual), "");
+  }
+#endif
+}
+
 TEST(MutatingTest, SwapRanges) {
   std::vector<int> odds = {2, 4, 6};
   std::vector<int> evens = {1, 3, 5};
@@ -987,19 +1227,138 @@ TEST_F(NonMutatingTest, Transform) {
   *end = 7;
   EXPECT_EQ(std::vector<int>({1, 5, 4, 7}), z);
 
-  z.clear();
-  y.pop_back();
-  end = absl::c_transform(x, y, std::back_inserter(z), std::plus<int>());
-  EXPECT_EQ(std::vector<int>({1, 5}), z);
-  *end = 7;
-  EXPECT_EQ(std::vector<int>({1, 5, 7}), z);
+  std::vector<int> x2{1, 2, 3};
+  std::vector<int> y2{10, 20, 30};
+  std::vector<int> z2(3);
+  auto out_it = z2.begin();
+  absl::c_transform(x2, y2, out_it, std::plus<int>());
+  // The caller's iterator should not be modified.
+  EXPECT_EQ(out_it, z2.begin());
+  EXPECT_EQ(z2, std::vector<int>({11, 22, 33}));
+}
 
-  z.clear();
-  std::swap(x, y);
-  end = absl::c_transform(x, y, std::back_inserter(z), std::plus<int>());
-  EXPECT_EQ(std::vector<int>({1, 5}), z);
-  *end = 7;
-  EXPECT_EQ(std::vector<int>({1, 5, 7}), z);
+TEST(MutatingTest, TransformToContainer) {
+  const std::vector<int> input = {1, 2, 3};
+  std::vector<int> actual = {0, 0, 0, 4, 5};
+  absl::c_transform(input, actual, [](int x) { return x * 2; });
+  EXPECT_THAT(actual, ElementsAre(2, 4, 6, 4, 5));
+}
+
+TEST(MutatingTest, BinaryTransformToContainer) {
+  {
+    const std::vector<int> input1 = {1, 2, 3};
+    const std::vector<int> input2 = {10, 20, 30};
+    std::vector<int> actual = {0, 0, 0, 4, 5};
+    absl::c_transform(input1, input2, actual, std::plus<int>());
+    EXPECT_THAT(actual, ElementsAre(11, 22, 33, 4, 5));
+  }
+  {
+    const std::vector<int> input1 = {1, 2, 3, 4};
+    const std::vector<int> input2 = {10, 20};
+    std::vector<int> actual = {0, 0, 0, 4, 5};
+    absl::c_transform(input1, input2, actual, std::plus<int>());
+    EXPECT_THAT(actual, ElementsAre(11, 22, 0, 4, 5));
+  }
+  {
+    const std::vector<int> input1 = {1, 2};
+    const std::vector<int> input2 = {10, 20, 30, 40};
+    std::vector<int> actual = {0, 0, 0, 4, 5};
+    absl::c_transform(input1, input2, actual, std::plus<int>());
+    EXPECT_THAT(actual, ElementsAre(11, 22, 0, 4, 5));
+  }
+}
+
+TEST(MutatingTest, TransformToDifferentContainerType) {
+  const std::list<int> input = {1, 2, 3};
+  std::array<int, 5> actual = {0, 0, 0, 4, 5};
+  absl::c_transform(input, actual, [](int x) { return x * 2; });
+  EXPECT_THAT(actual, ElementsAre(2, 4, 6, 4, 5));
+}
+
+TEST(MutatingTest, TransformToCArray) {
+  const std::vector<int> input = {1, 2, 3};
+  int actual[5] = {0, 0, 0, 4, 5};
+  absl::c_transform(input, actual, [](int x) { return x * 2; });
+  EXPECT_THAT(actual, ElementsAre(2, 4, 6, 4, 5));
+}
+
+TEST(MutatingTest, TransformFromCArray) {
+  const int input[5] = {1, 2, 3, 4, 5};
+  std::vector<int> actual = {0, 0, 0, 0, 0};
+  absl::c_transform(input, actual, [](int x) { return x * 2; });
+  EXPECT_THAT(actual, ElementsAre(2, 4, 6, 8, 10));
+}
+
+TEST(MutatingTest, TransformToCArrayInvalidSize) {
+  const std::vector<int> input = {1, 2, 3};
+  int actual[2] = {0, 0};
+  (void)actual;
+#if GTEST_HAS_DEATH_TEST
+  if (IsHardened()) {
+    EXPECT_DEATH(absl::c_transform(input, actual, [](int x) { return x * 2; }),
+                 "");
+  }
+#endif
+}
+
+TEST(MutatingTest, BinaryTransformToCArrayInvalidSize) {
+  const std::vector<int> input1 = {1, 2, 3};
+  const std::vector<int> input2 = {10, 20, 30};
+  int actual[2] = {0, 0};
+  (void)actual;
+#if GTEST_HAS_DEATH_TEST
+  if (IsHardened()) {
+    EXPECT_DEATH(absl::c_transform(input1, input2, actual, std::plus<int>()),
+                 "");
+  }
+#endif
+}
+
+TEST(MutatingTest, TransformToContainerInvalidSize) {
+  const std::list<int> input = {1, 2, 3, 4, 5};
+  std::list<int> actual = {0, 0, 0};
+#if GTEST_HAS_DEATH_TEST
+  if (IsHardened()) {
+    EXPECT_DEATH(absl::c_transform(input, actual, [](int x) { return x * 2; }),
+                 "");
+  }
+#endif
+}
+
+TEST(MutatingTest, BinaryTransformToContainerInvalidSize) {
+  const std::vector<int> input1 = {1, 2, 3, 4, 5};
+  const std::vector<int> input2 = {10, 20, 30, 40, 50};
+  std::vector<int> actual = {0, 0, 0};
+#if GTEST_HAS_DEATH_TEST
+  if (IsHardened()) {
+    EXPECT_DEATH(absl::c_transform(input1, input2, actual, std::plus<int>()),
+                 "");
+  }
+#endif
+}
+
+TEST(MutatingTest, BinaryTransformInput2InvalidSize) {
+  const std::vector<int> input1 = {1, 2, 3};
+  const std::vector<int> input2 = {10, 20};
+  std::vector<int> actual = {0};
+#if GTEST_HAS_DEATH_TEST
+  if (IsHardened()) {
+    EXPECT_DEATH(absl::c_transform(input1, input2, actual, std::plus<int>()),
+                 "");
+  }
+#endif
+}
+
+TEST(MutatingTest, BinaryTransformInput1InvalidSize) {
+  const std::vector<int> input1 = {1, 2};
+  const std::vector<int> input2 = {10, 20, 30};
+  std::vector<int> actual = {0};
+#if GTEST_HAS_DEATH_TEST
+  if (IsHardened()) {
+    EXPECT_DEATH(absl::c_transform(input1, input2, actual, std::plus<int>()),
+                 "");
+  }
+#endif
 }
 
 TEST(MutatingTest, Replace) {
@@ -1044,6 +1403,18 @@ TEST(MutatingTest, SortWithPredicate) {
   EXPECT_THAT(test_vector, ElementsAre(4, 3, 2, 1));
 }
 
+TEST(MutatingTest, SortTemporarySpan) {
+  std::vector<int> test_vector = {2, 3, 1, 4};
+  absl::c_sort(absl::MakeSpan(test_vector));
+  EXPECT_THAT(test_vector, ElementsAre(1, 2, 3, 4));
+}
+
+TEST(MutatingTest, SortTemporarySpanWithPredicate) {
+  std::vector<int> test_vector = {2, 3, 1, 4};
+  absl::c_sort(absl::MakeSpan(test_vector), std::greater<int>());
+  EXPECT_THAT(test_vector, ElementsAre(4, 3, 2, 1));
+}
+
 // For absl::c_stable_sort tests. Needs an operator< that does not cover all
 // fields so that the test can check the sort preserves order of equal elements.
 struct Element {
@@ -1080,6 +1451,24 @@ TEST(MutatingTest, StableSortWithPredicate) {
                           IsElement(1, 1), IsElement(1, 0)));
 }
 
+TEST(MutatingTest, StableSortTemporarySpan) {
+  std::vector<Element> test_vector = {{1, 1}, {2, 1}, {2, 0}, {1, 0}, {2, 2}};
+  absl::c_stable_sort(absl::MakeSpan(test_vector));
+  EXPECT_THAT(test_vector,
+              ElementsAre(IsElement(1, 1), IsElement(1, 0), IsElement(2, 1),
+                          IsElement(2, 0), IsElement(2, 2)));
+}
+
+TEST(MutatingTest, StableSortTemporarySpanWithPredicate) {
+  std::vector<Element> test_vector = {{1, 1}, {2, 1}, {2, 0}, {1, 0}, {2, 2}};
+  absl::c_stable_sort(
+      absl::MakeSpan(test_vector),
+      [](const Element& e1, const Element& e2) { return e2 < e1; });
+  EXPECT_THAT(test_vector,
+              ElementsAre(IsElement(2, 1), IsElement(2, 0), IsElement(2, 2),
+                          IsElement(1, 1), IsElement(1, 0)));
+}
+
 TEST(MutatingTest, ReplaceCopyIf) {
   const std::vector<int> initial = {1, 2, 3, 4, 5};
   const std::vector<int> expected = {0, 2, 0, 4, 0};
@@ -1095,9 +1484,21 @@ TEST(MutatingTest, Fill) {
   EXPECT_THAT(actual, ElementsAre(1, 1, 1, 1, 1));
 }
 
+TEST(MutatingTest, FillWithRvalue) {
+  std::vector<int> actual(5);
+  absl::c_fill(absl::MakeSpan(actual), 1);
+  EXPECT_THAT(actual, ElementsAre(1, 1, 1, 1, 1));
+}
+
 TEST(MutatingTest, FillN) {
   std::vector<int> actual(5, 0);
   absl::c_fill_n(actual, 2, 1);
+  EXPECT_THAT(actual, ElementsAre(1, 1, 0, 0, 0));
+}
+
+TEST(MutatingTest, FillNWithRvalue) {
+  std::vector<int> actual(5, 0);
+  absl::c_fill_n(absl::MakeSpan(actual), 2, 1);
   EXPECT_THAT(actual, ElementsAre(1, 1, 0, 0, 0));
 }
 
@@ -1195,6 +1596,15 @@ TEST(MutatingTest, PartialSort) {
   EXPECT_THAT(absl::MakeSpan(sequence.data(), 2), ElementsAre(0, 3));
   absl::c_partial_sort(sequence, sequence.begin() + 2, std::greater<int>());
   EXPECT_THAT(absl::MakeSpan(sequence.data(), 2), ElementsAre(42, 5));
+}
+
+TEST(MutatingTest, PartialSortTemporarySpan) {
+  std::vector<int> sequence{5, 3, 42, 0};
+  absl::c_partial_sort(absl::MakeSpan(sequence), std::next(sequence.data(), 2));
+  EXPECT_THAT(absl::MakeSpan(sequence).first(2), ElementsAre(0, 3));
+  absl::c_partial_sort(absl::MakeSpan(sequence), std::next(sequence.data(), 2),
+                       std::greater<int>());
+  EXPECT_THAT(absl::MakeSpan(sequence).first(2), ElementsAre(42, 5));
 }
 
 TEST(MutatingTest, PartialSortCopy) {
@@ -1328,6 +1738,23 @@ TEST(HeapOperationsTest, WithComparator) {
   EXPECT_FALSE(absl::c_is_heap(heap, greater()));
 }
 
+TEST(HeapOperationsTest, SortHeapTemporarySpan) {
+  std::vector<int> heap = {1, 2, 3, 4};
+  absl::c_make_heap(heap);
+  absl::c_sort_heap(absl::MakeSpan(heap));
+  EXPECT_THAT(heap, ElementsAre(1, 2, 3, 4));
+  EXPECT_FALSE(absl::c_is_heap(heap));
+}
+
+TEST(HeapOperationsTest, SortHeapTemporarySpanWithComparator) {
+  using greater = std::greater<int>;
+  std::vector<int> heap = {4, 3, 2, 1};
+  absl::c_make_heap(heap, greater());
+  absl::c_sort_heap(absl::MakeSpan(heap), greater());
+  EXPECT_THAT(heap, ElementsAre(4, 3, 2, 1));
+  EXPECT_FALSE(absl::c_is_heap(heap, greater()));
+}
+
 TEST(MutatingTest, PermutationOperations) {
   std::vector<int> initial = {1, 2, 3, 4};
   std::vector<int> permuted = initial;
@@ -1440,7 +1867,7 @@ TEST(ConstexprTest, Contains) {
 TEST(ConstexprTest, FindIf) {
   static constexpr std::array<int, 3> kArray = {1, 2, 3};
   static_assert(absl::c_find_if(kArray, [](int x) { return x > 2; }) ==
-                kArray.begin() + 2);
+                std::next(kArray.begin(), 2));
   static_assert(absl::c_find_if(kArray, [](int x) { return x > 5; }) ==
                 kArray.end());
 }
@@ -1456,7 +1883,8 @@ TEST(ConstexprTest, FindIfNot) {
 TEST(ConstexprTest, FindEnd) {
   static constexpr std::array<int, 5> kHaystack = {1, 2, 3, 2, 3};
   static constexpr std::array<int, 2> kNeedle = {2, 3};
-  static_assert(absl::c_find_end(kHaystack, kNeedle) == kHaystack.begin() + 3);
+  static_assert(absl::c_find_end(kHaystack, kNeedle) ==
+                std::next(kHaystack.begin(), 3));
 }
 
 TEST(ConstexprTest, FindFirstOf) {
@@ -1466,7 +1894,7 @@ TEST(ConstexprTest, FindFirstOf) {
 
 TEST(ConstexprTest, AdjacentFind) {
   static constexpr std::array<int, 4> kArray = {1, 2, 2, 3};
-  static_assert(absl::c_adjacent_find(kArray) == kArray.begin() + 1);
+  static_assert(absl::c_adjacent_find(kArray) == std::next(kArray.begin(), 1));
 }
 
 TEST(ConstexprTest, AdjacentFindWithPredicate) {
@@ -1581,14 +2009,14 @@ TEST(ConstexprTest, ContainsSubrangeWithPredicate) {
 TEST(ConstexprTest, SearchN) {
   static constexpr std::array<int, 4> kArray = {1, 2, 2, 3};
   static_assert(absl::c_search_n(kArray, 1, 1) == kArray.begin());
-  static_assert(absl::c_search_n(kArray, 2, 2) == kArray.begin() + 1);
+  static_assert(absl::c_search_n(kArray, 2, 2) == std::next(kArray.begin(), 1));
   static_assert(absl::c_search_n(kArray, 1, 4) == kArray.end());
 }
 
 TEST(ConstexprTest, SearchNWithPredicate) {
   static constexpr std::array<int, 4> kArray = {1, 2, 2, 3};
   static_assert(absl::c_search_n(kArray, 1, 1, std::not_equal_to<int>()) ==
-                kArray.begin() + 1);
+                std::next(kArray.begin(), 1));
   static_assert(absl::c_search_n(kArray, 2, 2, std::not_equal_to<int>()) ==
                 kArray.end());
   static_assert(absl::c_search_n(kArray, 1, 4, std::not_equal_to<int>()) ==
@@ -1821,7 +2249,7 @@ TEST(ConstexprTest, Rotate) {
   static constexpr std::array kArray = {1, 2, 3};
   static constexpr auto kArrayRotate = [] {
     std::array array = kArray;
-    absl::c_rotate(array, array.begin() + 1);
+    absl::c_rotate(array, std::next(array.begin(), 1));
     return array;
   }();
   static_assert(kArrayRotate == std::array{2, 3, 1});
@@ -1831,7 +2259,7 @@ TEST(ConstexprTest, RotateCopy) {
   static constexpr std::array kArray = {1, 2, 3};
   static constexpr auto kArrayRotateCopy = [] {
     std::array<int, 3> array;
-    absl::c_rotate_copy(kArray, kArray.begin() + 1, array.begin());
+    absl::c_rotate_copy(kArray, std::next(kArray.begin(), 1), array.begin());
     return array;
   }();
   static_assert(kArrayRotateCopy == std::array{2, 3, 1});
@@ -1915,7 +2343,7 @@ TEST(ConstexprTest, PartialSort) {
   static constexpr std::array kArray = {3, 1, 4, 2};
   static constexpr auto kArrayPartialSort = [] {
     std::array array = kArray;
-    absl::c_partial_sort(array, array.begin() + 2);
+    absl::c_partial_sort(array, std::next(array.begin(), 2));
     return array;
   }();
   static_assert(kArrayPartialSort[0] == 1);
@@ -1926,7 +2354,7 @@ TEST(ConstexprTest, PartialSortWithPredicate) {
   static constexpr std::array kArray = {3, 1, 4, 2};
   static constexpr auto kArrayPartialSort = [] {
     std::array array = kArray;
-    absl::c_partial_sort(array, array.begin() + 2, std::greater<>());
+    absl::c_partial_sort(array, std::next(array.begin(), 2), std::greater<>());
     return array;
   }();
   static_assert(kArrayPartialSort[0] == 4);
@@ -1960,7 +2388,7 @@ TEST(ConstexprTest, IsSortedUntil) {
   static_assert(absl::c_is_sorted_until(kSortedArray) == kSortedArray.end());
   static constexpr std::array kUnsortedArray = {1, 3, 2};
   static_assert(absl::c_is_sorted_until(kUnsortedArray) ==
-                kUnsortedArray.begin() + 2);
+                std::next(kUnsortedArray.begin(), 2));
 }
 
 TEST(ConstexprTest, IsSortedUntilWithPredicate) {
@@ -1969,14 +2397,14 @@ TEST(ConstexprTest, IsSortedUntilWithPredicate) {
                 kSortedArray.end());
   static constexpr std::array kUnsortedArray = {1, 3, 2};
   static_assert(absl::c_is_sorted_until(kUnsortedArray, std::greater<>()) ==
-                kUnsortedArray.begin() + 1);
+                std::next(kUnsortedArray.begin(), 1));
 }
 
 TEST(ConstexprTest, NthElement) {
   static constexpr std::array kArray = {2, 1, 3, 4};
   static constexpr auto kArrayNthElement = [] {
     std::array array = kArray;
-    absl::c_nth_element(array, array.begin() + 2);
+    absl::c_nth_element(array, std::next(array.begin(), 2));
     return array;
   }();
   static_assert(kArrayNthElement[2] == 3);
@@ -1989,7 +2417,7 @@ TEST(ConstexprTest, NthElementWithPredicate) {
   static constexpr std::array kArray = {1, 2, 3, 4};
   static constexpr auto kArrayNthElement = [] {
     std::array array = kArray;
-    absl::c_nth_element(array, array.begin() + 2, std::greater<>());
+    absl::c_nth_element(array, std::next(array.begin(), 2), std::greater<>());
     return array;
   }();
   static_assert(kArrayNthElement[2] == 2);
@@ -2004,42 +2432,42 @@ TEST(ConstexprTest, NthElementWithPredicate) {
 TEST(ConstexprTest, LowerBound) {
   static constexpr std::array kArray = {1, 2, 3, 4};
   static constexpr auto kLowerBound = absl::c_lower_bound(kArray, 2);
-  static_assert(kLowerBound == kArray.begin() + 1);
+  static_assert(kLowerBound == std::next(kArray.begin(), 1));
 }
 
 TEST(ConstexprTest, LowerBoundWithPredicate) {
   static constexpr std::array kArray = {4, 3, 2, 1};
   static constexpr auto kLowerBound =
       absl::c_lower_bound(kArray, 2, std::greater<>());
-  static_assert(kLowerBound == kArray.begin() + 2);
+  static_assert(kLowerBound == std::next(kArray.begin(), 2));
 }
 
 TEST(ConstexprTest, UpperBound) {
   static constexpr std::array kArray = {1, 2, 3, 4};
   static constexpr auto kUpperBound = absl::c_upper_bound(kArray, 2);
-  static_assert(kUpperBound == kArray.begin() + 2);
+  static_assert(kUpperBound == std::next(kArray.begin(), 2));
 }
 
 TEST(ConstexprTest, UpperBoundWithPredicate) {
   static constexpr std::array kArray = {4, 3, 2, 1};
   static constexpr auto kUpperBound =
       absl::c_upper_bound(kArray, 2, std::greater<>());
-  static_assert(kUpperBound == kArray.begin() + 3);
+  static_assert(kUpperBound == std::next(kArray.begin(), 3));
 }
 
 TEST(ConstexprTest, EqualRange) {
   static constexpr std::array kArray = {1, 2, 3, 4};
   static constexpr auto kEqualRange = absl::c_equal_range(kArray, 2);
-  static_assert(kEqualRange.first == kArray.begin() + 1);
-  static_assert(kEqualRange.second == kArray.begin() + 2);
+  static_assert(kEqualRange.first == std::next(kArray.begin(), 1));
+  static_assert(kEqualRange.second == std::next(kArray.begin(), 2));
 }
 
 TEST(ConstexprTest, EqualRangeWithPredicate) {
   static constexpr std::array kArray = {4, 3, 2, 1};
   static constexpr auto kEqualRange =
       absl::c_equal_range(kArray, 2, std::greater<>());
-  static_assert(kEqualRange.first == kArray.begin() + 2);
-  static_assert(kEqualRange.second == kArray.begin() + 3);
+  static_assert(kEqualRange.first == std::next(kArray.begin(), 2));
+  static_assert(kEqualRange.second == std::next(kArray.begin(), 3));
 }
 
 TEST(ConstexprTest, BinarySearch) {
@@ -2273,7 +2701,8 @@ TEST(ConstexprTest, IsHeapUntil) {
   static constexpr std::array kHeap = {4, 2, 3, 1};
   static_assert(absl::c_is_heap_until(kHeap) == kHeap.end());
   static constexpr std::array kNotHeap = {4, 2, 3, 5};
-  static_assert(absl::c_is_heap_until(kNotHeap) == kNotHeap.begin() + 3);
+  static_assert(absl::c_is_heap_until(kNotHeap) ==
+                std::next(kNotHeap.begin(), 3));
 }
 
 TEST(ConstexprTest, IsHeapUntilWithPredicate) {
@@ -2281,7 +2710,7 @@ TEST(ConstexprTest, IsHeapUntilWithPredicate) {
   static_assert(absl::c_is_heap_until(kHeap, std::greater<>()) == kHeap.end());
   static constexpr std::array kNotHeap = {1, 2, 3, 0};
   static_assert(absl::c_is_heap_until(kNotHeap, std::greater<>()) ==
-                kNotHeap.begin() + 3);
+                std::next(kNotHeap.begin(), 3));
 }
 
 TEST(ConstexprTest, LexicographicalCompare) {
@@ -2447,17 +2876,46 @@ template <typename Container, typename Output, typename = void>
 struct CanCopy : std::false_type {};
 template <typename Container, typename Output>
 struct CanCopy<Container, Output,
-               absl::void_t<decltype(absl::c_copy(std::declval<Container>(),
-                                                  std::declval<Output>()))>>
+               std::void_t<decltype(absl::c_copy(std::declval<Container>(),
+                                                 std::declval<Output>()))>>
     : std::true_type {};
 
 template <typename Container, typename Output, typename = void>
 struct CanCopyN : std::false_type {};
 template <typename Container, typename Output>
 struct CanCopyN<Container, Output,
-                absl::void_t<decltype(absl::c_copy_n(
+                std::void_t<decltype(absl::c_copy_n(
                     std::declval<Container>(), std::declval<ptrdiff_t>(),
                     std::declval<Output>()))>> : std::true_type {};
+
+template <typename Container, typename Output, typename = void>
+struct CanMove : std::false_type {};
+template <typename Container, typename Output>
+struct CanMove<Container, Output,
+               std::void_t<decltype(absl::c_move(std::declval<Container>(),
+                                                 std::declval<Output>()))>>
+    : std::true_type {};
+
+template <typename Container, typename Output, typename UnaryOp,
+          typename = void>
+struct CanTransformUnary : std::false_type {};
+template <typename Container, typename Output, typename UnaryOp>
+struct CanTransformUnary<Container, Output, UnaryOp,
+                         absl::void_t<decltype(absl::c_transform(
+                             std::declval<Container>(), std::declval<Output>(),
+                             std::declval<UnaryOp>()))>> : std::true_type {};
+
+template <typename Container1, typename Container2, typename Output,
+          typename BinaryOp, typename = void>
+struct CanTransformBinary : std::false_type {};
+template <typename Container1, typename Container2, typename Output,
+          typename BinaryOp>
+struct CanTransformBinary<
+    Container1, Container2, Output, BinaryOp,
+    absl::void_t<decltype(absl::c_transform(
+        std::declval<Container1>(), std::declval<Container2>(),
+        std::declval<Output>(), std::declval<BinaryOp>()))>> : std::true_type {
+};
 
 TEST(CanCopyTest, CopyToMultiDimArray) {
   static_assert(CanCopy<std::vector<int>, int (&)[10]>::value);
@@ -2486,9 +2944,115 @@ TEST(CanCopyTest, AmbiguousTypeFailsToCompile) {
   using Vec = std::vector<int>;
   // Because AmbiguousType is both an iterator and a container,
   // the compiler should fail to resolve the c_copy overload.
-  static_assert(!CanCopy<Vec, AmbiguousType>::value,
+  static_assert(!CanCopy<Vec, AmbiguousType&>::value,
                 "Ambiguous types should not compile!");
-  static_assert(!CanCopyN<Vec, AmbiguousType>::value,
+  static_assert(!CanCopyN<Vec, AmbiguousType&>::value,
                 "Ambiguous types should not compile!");
+}
+
+TEST(CanCopyTest, CopyToRValue) {
+  using Vec = std::vector<int>;
+  using Span = absl::Span<int>;
+  static_assert(CanCopy<Vec, Span>::value,
+                "Should be able to copy to rvalue Span");
+  static_assert(!CanCopy<Vec, Vec>::value,
+                "Should not be able to copy to rvalue vector");
+  static_assert(CanCopyN<Vec, Span>::value,
+                "Should be able to copy_n to rvalue Span");
+  static_assert(!CanCopyN<Vec, Vec>::value,
+                "Should not be able to copy_n to rvalue vector");
+}
+
+TEST(CanMoveTest, MoveToMultiDimArray) {
+  static_assert(CanMove<std::vector<int>, int (&)[10]>::value);
+  static_assert(!CanMove<std::vector<int>, int (&)[2][2]>::value);
+
+  static_assert(CanMove<int[10], int (&)[10]>::value);
+  static_assert(!CanMove<int[10], int (&)[2][2]>::value);
+  static_assert(!CanMove<int[2][2], int (&)[4]>::value);
+  static_assert(!CanMove<int[2][2], int (&)[2][2]>::value);
+}
+
+TEST(CanMoveTest, AmbiguousTypeFailsToCompile) {
+  using Vec = std::vector<int>;
+  // Because AmbiguousType is both an iterator and a container,
+  // the compiler should fail to resolve the c_move overload.
+  static_assert(!CanMove<Vec, AmbiguousType&>::value,
+                "Ambiguous types should not compile!");
+}
+
+TEST(CanMoveTest, MoveToRValue) {
+  using Vec = std::vector<std::unique_ptr<int>>;
+  using Span = absl::Span<std::unique_ptr<int>>;
+  static_assert(CanMove<Vec, Span>::value,
+                "Should be able to move to rvalue Span");
+  static_assert(!CanMove<Vec, Vec>::value,
+                "Should not be able to move to rvalue vector");
+}
+
+TEST(CanTransformTest, TransformToMultiDimArray) {
+  using Negate = std::negate<int>;
+  using Plus = std::plus<int>;
+
+  static_assert(
+      CanTransformUnary<std::vector<int>, int (&)[10], Negate>::value);
+  static_assert(
+      !CanTransformUnary<std::vector<int>, int (&)[2][2], Negate>::value);
+
+  static_assert(CanTransformUnary<int[10], int (&)[10], Negate>::value);
+  static_assert(!CanTransformUnary<int[10], int (&)[2][2], Negate>::value);
+  static_assert(!CanTransformUnary<int[2][2], int (&)[4], Negate>::value);
+  static_assert(!CanTransformUnary<int[2][2], int (&)[2][2], Negate>::value);
+
+  static_assert(CanTransformBinary<std::vector<int>, std::vector<int>,
+                                   int (&)[10], Plus>::value);
+  static_assert(!CanTransformBinary<std::vector<int>, std::vector<int>,
+                                    int (&)[2][2], Plus>::value);
+
+  static_assert(CanTransformBinary<int[10], int[10], int (&)[10], Plus>::value);
+  static_assert(
+      !CanTransformBinary<int[10], int[10], int (&)[2][2], Plus>::value);
+  static_assert(
+      !CanTransformBinary<int[2][2], int[4], int (&)[4], Plus>::value);
+  static_assert(
+      !CanTransformBinary<int[2][2], int[2][2], int (&)[2][2], Plus>::value);
+}
+
+TEST(CanTransformTest, AmbiguousTypeFailsToCompile) {
+  using Vec = std::vector<int>;
+  using Negate = std::negate<int>;
+  using Plus = std::plus<int>;
+
+  // Because AmbiguousType is both an iterator and a container,
+  // the compiler should fail to resolve the c_transform overload.
+  static_assert(!CanTransformUnary<Vec, AmbiguousType&, Negate>::value,
+                "Ambiguous types should not compile!");
+  static_assert(!CanTransformBinary<Vec, Vec, AmbiguousType&, Plus>::value,
+                "Ambiguous types should not compile!");
+}
+
+template <typename C, typename T, typename = void>
+struct CanFill : std::false_type {};
+
+template <typename C, typename T>
+struct CanFill<C, T,
+               std::void_t<decltype(absl::c_fill(std::declval<C (*)()>()(),
+                                                 std::declval<T (*)()>()()))>>
+    : std::true_type {};
+
+TEST(CanFillTest, NonSpans) {
+  using T = int;
+
+  struct AbslSpanSubclass : absl::Span<T> {};
+  static_assert(!CanFill<std::vector<T>, T>::value,
+                "non-spans must not be allowed");
+  static_assert(!CanFill<AbslSpanSubclass, T>::value,
+                "subclasses must not be allowed");
+
+#ifdef __cpp_lib_span
+  struct StdSpanSubclass : std::span<T> {};
+  static_assert(!CanFill<StdSpanSubclass, T>::value,
+                "std::span must not be allowed");
+#endif
 }
 }  // namespace

@@ -55,9 +55,9 @@ class ExponentialDistributionTypedTest : public ::testing::Test {};
 // https://bugs.llvm.org/show_bug.cgi?id=49132. Don't bother running these tests
 // with double doubles until compiler support is better.
 using RealTypes =
-    std::conditional<absl::numeric_internal::IsDoubleDouble(),
-                     ::testing::Types<float, double>,
-                     ::testing::Types<float, double, long double>>::type;
+    std::conditional_t<absl::numeric_internal::IsDoubleDouble(),
+                       ::testing::Types<float, double>,
+                       ::testing::Types<float, double, long double>>;
 TYPED_TEST_SUITE(ExponentialDistributionTypedTest, RealTypes);
 
 TYPED_TEST(ExponentialDistributionTypedTest, SerializeTest) {
@@ -114,7 +114,7 @@ TYPED_TEST(ExponentialDistributionTypedTest, SerializeTest) {
       if (sample > sample_max) sample_max = sample;
       if (sample < sample_min) sample_min = sample;
     }
-    if (!std::is_same<TypeParam, long double>::value) {
+    if (!std::is_same_v<TypeParam, long double>) {
       LOG(INFO) << "Range {" << lambda << "}: " << sample_min << ", "
                 << sample_max << ", lambda=" << lambda;
     }
@@ -421,6 +421,52 @@ TEST(ExponentialDistributionTest, AlgorithmBounds) {
     double a = dist(urbg);
     EXPECT_EQ(a, 36.7368005696771007251);
   }
+}
+
+MATCHER(FailsLeavingUnchanged,
+        "fails stream extraction and leaves target and stream flags "
+        "unchanged") {
+  return arg.failed && arg.flags_preserved && arg.value == arg.initial;
+}
+
+MATCHER_P(ParsesEqualTo, expected,
+          "succeeds, updates target, and preserves stream flags") {
+  return !arg.failed && arg.flags_preserved && arg.value == expected;
+}
+
+TEST(ExponentialDistributionTest, StreamRejectsInvalidParameters) {
+  using absl::random_internal::ParseFromStream;
+  const absl::exponential_distribution<double> kInitial(2.5);
+  const absl::exponential_distribution<float> kFloatInitial(2.5f);
+
+  // Valid positive and subnormal lambdas.
+  EXPECT_THAT(ParseFromStream(kInitial, "1.0"),
+              ParsesEqualTo(absl::exponential_distribution<double>(1.0)));
+  EXPECT_THAT(ParseFromStream(kInitial, "1e-320"),
+              ParsesEqualTo(absl::exponential_distribution<double>(1e-320)));
+
+  // Empty, non-positive, overflowing, and non-finite inputs.
+  EXPECT_THAT(ParseFromStream(kInitial, ""), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0.0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-1.0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "nan"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "inf"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-inf"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "1e400"), FailsLeavingUnchanged());
+
+  // Non-finite values delivered with goodbit by a custom num_get facet.
+  EXPECT_THAT(ParseFromStream(kInitial, "nan", /*use_non_finite_facet=*/true),
+              FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "inf", /*use_non_finite_facet=*/true),
+              FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-inf", /*use_non_finite_facet=*/true),
+              FailsLeavingUnchanged());
+  EXPECT_THAT(
+      ParseFromStream(kFloatInitial, "nan", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
+  EXPECT_THAT(
+      ParseFromStream(kFloatInitial, "inf", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
 }
 
 }  // namespace

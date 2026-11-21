@@ -361,6 +361,14 @@ enum cpuinfo_uarch {
 	cpuinfo_uarch_raptor_cove = 0x0010020F,
 	/** Intel Redwood Cove microarchitecture (Granite Rapids). */
 	cpuinfo_uarch_redwood_cove = 0x00100210,
+	/** Intel Coyote Cove microarchitecture. */
+	cpuinfo_uarch_coyote_cove = 0x00100211,
+	/** Intel Lion Cove microarchitecture (Arrow Lake, Lunar Lake). */
+	cpuinfo_uarch_lion_cove = 0x00100212,
+	/** Intel Cougar Cove microarchitecture (Panther Lake, Wildcat Lake). */
+	cpuinfo_uarch_cougar_cove = 0x00100213,
+	/** Intel Panther Cove microarchitecture (Diamond Rapids). */
+	cpuinfo_uarch_panther_cove = 0x00100214,
 
 	/** Pentium 4 with Willamette, Northwood, or Foster cores. */
 	cpuinfo_uarch_willamette = 0x00100300,
@@ -387,6 +395,10 @@ enum cpuinfo_uarch {
 	cpuinfo_uarch_crestmont = 0x00100408,
 	/** Intel Darkmont microarchitecture (e-core used in Clearwater Forest). */
 	cpuinfo_uarch_darkmont = 0x00100409,
+	/** Intel Skymont microarchitecture (Arrow Lake, Lunar Lake). */
+	cpuinfo_uarch_skymont = 0x0010040A,
+	/** Intel Arctic Wolf microarchitecture (Nova Lake). */
+	cpuinfo_uarch_arctic_wolf = 0x0010040B,
 
 	/** Intel Knights Ferry HPC boards. */
 	cpuinfo_uarch_knights_ferry = 0x00100500,
@@ -439,6 +451,10 @@ enum cpuinfo_uarch {
 	cpuinfo_uarch_zen5 = 0x0020010D,
 	/** AMD Zen 6 microarchitecture. */
 	cpuinfo_uarch_zen6 = 0x0020010E,
+	/** Sony PlayStation 5 (Oberon) microarchitecture (custom Zen 2 with 128-bit FPU). */
+	cpuinfo_uarch_oberon = 0x0020010F,
+	/** Microsoft Xbox Series X/S (Arden) microarchitecture (custom Zen 2 with 256-bit FPU). */
+	cpuinfo_uarch_arden = 0x00200110,
 
 	/** NSC Geode and AMD Geode GX and LX. */
 	cpuinfo_uarch_geode = 0x00200200,
@@ -509,6 +525,8 @@ enum cpuinfo_uarch {
 	cpuinfo_uarch_neoverse_n2 = 0x00300403,
 	/** ARM Neoverse V2. */
 	cpuinfo_uarch_neoverse_v2 = 0x00300404,
+	/** ARM Neoverse V3 and V3AE. */
+	cpuinfo_uarch_neoverse_v3 = 0x00300405,
 
 	/** ARM Cortex-X1. */
 	cpuinfo_uarch_cortex_x1 = 0x00300501,
@@ -544,6 +562,12 @@ enum cpuinfo_uarch {
 	cpuinfo_uarch_lumex_c1_pro = 0x00300602,
 	/** ARM Lumex-C1-Nano. */
 	cpuinfo_uarch_lumex_c1_nano = 0x00300603,
+	/**
+	 * ARM C2-Ultra (MIDR part 0xD96; Arm C2-Ultra Core TRM 109736, LLVM
+	 * Host.cpp). Named with the lumex_ prefix for consistency with
+	 * cpuinfo_uarch_lumex_c1_*.
+	 */
+	cpuinfo_uarch_lumex_c2_ultra = 0x00300604,
 
 	/** Qualcomm Scorpion. */
 	cpuinfo_uarch_scorpion = 0x00400100,
@@ -559,6 +583,8 @@ enum cpuinfo_uarch {
 	cpuinfo_uarch_oryon = 0x00400105,
 	/** Qualcomm Oryon V3. */
 	cpuinfo_uarch_oryon_v3 = 0x00400106,
+	/** Qualcomm Oryon V4. */
+	cpuinfo_uarch_oryon_v4 = 0x00400107,
 
 	/** Nvidia Denver. */
 	cpuinfo_uarch_denver = 0x00500100,
@@ -642,6 +668,11 @@ enum cpuinfo_uarch {
 	cpuinfo_uarch_donan_everest = 0x00700308,
 	/** Apple M4 processor (little cores). */
 	cpuinfo_uarch_donan_sawtooth = 0x00700309,
+
+	/** Apple M5 Pro / Max processor (super cores). */
+	cpuinfo_uarch_sotra_super = 0x0070030A,
+	/** Apple M5 Pro / Max processor (performance cores). */
+	cpuinfo_uarch_sotra_performance = 0x0070030B,
 
 	/** Cavium ThunderX. */
 	cpuinfo_uarch_thunderx = 0x00800100,
@@ -889,6 +920,8 @@ struct cpuinfo_x86_isa {
 	bool amx_tile;
 	bool amx_int8;
 	bool amx_fp16;
+	bool amx_fp8;
+	bool amx_avx512;
 	bool avx_vnni_int8;
 	bool avx_vnni_int16;
 	bool avx_ne_convert;
@@ -1460,6 +1493,22 @@ static inline bool cpuinfo_has_x86_amx_fp16(void) {
 #endif
 }
 
+static inline bool cpuinfo_has_x86_amx_fp8(void) {
+#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+	return cpuinfo_isa.amx_fp8;
+#else
+	return false;
+#endif
+}
+
+static inline bool cpuinfo_has_x86_amx_avx512(void) {
+#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
+	return cpuinfo_isa.amx_avx512;
+#else
+	return false;
+#endif
+}
+
 /*
  * Intel AVX Vector Neural Network Instructions (VNNI) INT8
  * Supported Platfroms: Sierra Forest, Arrow Lake, Lunar Lake
@@ -1752,14 +1801,19 @@ struct cpuinfo_arm_isa {
 	bool bf16;
 	bool sve;
 	bool sve2;
+	bool sve2p1;
 	bool i8mm;
 	bool sme;
 	bool sme2;
 	bool sme2p1;
+	bool sme_mop4;
 	bool sme_i16i32;
 	bool sme_bi32i32;
 	bool sme_b16b16;
 	bool sme_f16f16;
+	bool fp8;
+	bool f8dot;
+	bool f8mm;
 	uint32_t svelen;
 	uint32_t smelen;
 #endif
@@ -2070,6 +2124,34 @@ static inline bool cpuinfo_has_arm_i8mm(void) {
 #endif
 }
 
+static inline bool cpuinfo_has_arm_fp8(void) {
+#if CPUINFO_ARCH_ARM64
+	return cpuinfo_isa.fp8;
+#else
+	return false;
+#endif
+}
+
+/* For backward compatibility */
+#define cpuinfo_has_arm_f8dot cpuinfo_has_arm_neon_f8dot4
+#define cpuinfo_has_arm_f8mm cpuinfo_has_arm_neon_f8mm
+
+static inline bool cpuinfo_has_arm_neon_f8dot4(void) {
+#if CPUINFO_ARCH_ARM64
+	return cpuinfo_isa.f8dot;
+#else
+	return false;
+#endif
+}
+
+static inline bool cpuinfo_has_arm_neon_f8mm(void) {
+#if CPUINFO_ARCH_ARM64
+	return cpuinfo_isa.f8mm;
+#else
+	return false;
+#endif
+}
+
 static inline bool cpuinfo_has_arm_aes(void) {
 #if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
 	return cpuinfo_isa.aes;
@@ -2134,6 +2216,14 @@ static inline bool cpuinfo_has_arm_sve2(void) {
 #endif
 }
 
+static inline bool cpuinfo_has_arm_sve2p1(void) {
+#if CPUINFO_ARCH_ARM64
+	return cpuinfo_isa.sve2p1;
+#else
+	return false;
+#endif
+}
+
 // Function to get the max SVE vector length on ARM CPU's which support SVE.
 static inline uint32_t cpuinfo_get_max_arm_sve_length(void) {
 #if CPUINFO_ARCH_ARM64
@@ -2171,6 +2261,14 @@ static inline bool cpuinfo_has_arm_sme2(void) {
 static inline bool cpuinfo_has_arm_sme2p1(void) {
 #if CPUINFO_ARCH_ARM64
 	return cpuinfo_isa.sme2p1;
+#else
+	return false;
+#endif
+}
+
+static inline bool cpuinfo_has_arm_sme_mop4(void) {
+#if CPUINFO_ARCH_ARM64
+	return cpuinfo_isa.sme_mop4;
 #else
 	return false;
 #endif

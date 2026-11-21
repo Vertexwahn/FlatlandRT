@@ -21,7 +21,7 @@
 // spdlog::info("Hello, {}", "World!");  // => [2024-04-26 02:08:05.040] [info]
 // [mdc_key_1:mdc_value_1] Hello, World!
 
-namespace spdlog {
+SPDLOG_NAMESPACE_BEGIN
 class SPDLOG_API mdc {
 public:
     using mdc_map_t = std::map<std::string, std::string>;
@@ -45,8 +45,20 @@ public:
 
     static mdc_map_t &get_context() {
         static thread_local mdc_map_t context;
+        context_created() = true;
         return context;
+    }
+
+    // Returns whether the calling thread's mdc context has been created. Unlike get_context(),
+    // it does not create the context, so it can be used on the hot path to skip mdc formatting
+    // for threads that never used mdc.
+    static bool has_context() noexcept { return context_created(); }
+
+private:
+    static bool &context_created() noexcept {
+        static thread_local bool created = false;
+        return created;
     }
 };
 
-}  // namespace spdlog
+SPDLOG_NAMESPACE_END

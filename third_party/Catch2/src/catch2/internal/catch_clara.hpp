@@ -36,6 +36,7 @@
 
 #include <cassert>
 #include <memory>
+#include <new>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -377,8 +378,9 @@ namespace Catch {
                     -> ParserResult override {
                     T temp;
                     auto result = convertInto( arg, temp );
-                    if ( result )
-                        m_ref.push_back( temp );
+                    if ( result ) {
+                        m_ref.push_back( CATCH_MOVE( temp ) );
+                    }
                     return result;
                 }
             };

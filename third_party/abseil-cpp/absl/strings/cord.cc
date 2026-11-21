@@ -15,6 +15,7 @@
 #include "absl/strings/cord.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -50,6 +51,7 @@
 #include "absl/strings/internal/cord_data_edge.h"
 #include "absl/strings/internal/cord_internal.h"
 #include "absl/strings/internal/cord_rep_btree.h"
+#include "absl/strings/internal/cord_rep_btree_navigator.h"
 #include "absl/strings/internal/cord_rep_crc.h"
 #include "absl/strings/internal/cord_rep_flat.h"
 #include "absl/strings/internal/cordz_update_tracker.h"
@@ -71,11 +73,9 @@ using ::absl::cord_internal::CordRepFlat;
 using ::absl::cord_internal::CordRepSubstring;
 using ::absl::cord_internal::CordzUpdateTracker;
 using ::absl::cord_internal::InlineData;
+using ::absl::cord_internal::kMaxBytesToCopy;
 using ::absl::cord_internal::kMaxFlatLength;
 using ::absl::cord_internal::kMinFlatLength;
-
-using ::absl::cord_internal::kInlinedVectorSize;
-using ::absl::cord_internal::kMaxBytesToCopy;
 
 static void DumpNode(CordRep* absl_nonnull nonnull_rep, bool include_data,
                      std::ostream* absl_nonnull os, int indent = 0);
@@ -162,35 +162,6 @@ static CordRep* absl_nonnull CordRepFromString(std::string&& src) {
 
 // --------------------------------------------------------------------
 // Cord::InlineRep functions
-
-inline void Cord::InlineRep::set_data(const char* absl_nullable data,
-                                      size_t n) {
-  static_assert(kMaxInline == 15, "set_data is hard-coded for a length of 15");
-  assert(data != nullptr || n == 0);
-  data_.set_inline_data(data, n);
-}
-
-inline char* absl_nonnull Cord::InlineRep::set_data(size_t n) {
-  assert(n <= kMaxInline);
-  ResetToEmpty();
-  set_inline_size(n);
-  return data_.as_chars();
-}
-
-inline void Cord::InlineRep::reduce_size(size_t n) {
-  size_t tag = inline_size();
-  assert(tag <= kMaxInline);
-  assert(tag >= n);
-  tag -= n;
-  memset(data_.as_chars() + tag, 0, n);
-  set_inline_size(tag);
-}
-
-inline void Cord::InlineRep::remove_prefix(size_t n) {
-  cord_internal::SmallMemmove(data_.as_chars(), data_.as_chars() + n,
-                              inline_size() - n);
-  reduce_size(n);
-}
 
 // Returns `rep` converted into a CordRepBtree.
 // Directly returns `rep` if `rep` is already a CordRepBtree.
@@ -332,8 +303,13 @@ void Cord::InlineRep::UnrefTree() {
 // --------------------------------------------------------------------
 // Constructors and destructors
 
-Cord::Cord(absl::string_view src, MethodIdentifier method)
-    : contents_(InlineData::kDefaultInit) {
+Cord::Cord(const Cord&) = default;
+
+Cord& Cord::operator=(const Cord&) = default;
+
+Cord& Cord::operator=(Cord&&) = default;
+
+Cord::Cord(absl::string_view src, MethodIdentifier method) {
   const size_t n = src.size();
   if (n <= InlineRep::kMaxInline) {
     contents_.set_data(src.data(), n);
@@ -344,7 +320,7 @@ Cord::Cord(absl::string_view src, MethodIdentifier method)
 }
 
 template <typename T, Cord::EnableIfString<T>>
-Cord::Cord(T&& src) : contents_(InlineData::kDefaultInit) {
+Cord::Cord(T&& src) {
   if (src.size() <= InlineRep::kMaxInline) {
     contents_.set_data(src.data(), src.size());
   } else {
@@ -486,6 +462,9 @@ inline void Cord::AppendImpl(C&& src) {
 
   contents_.MaybeRemoveEmptyCrcNode();
   if (src.empty()) return;
+  ABSL_RAW_CHECK(src.contents_.size() <=
+                     std::numeric_limits<size_t>::max() - contents_.size(),
+                 "Cord length overflow");
 
   if (empty()) {
     // Since destination is empty, we can avoid allocating a node,
@@ -587,6 +566,7 @@ void Cord::Append(T&& src) {
   if (src.size() <= kMaxBytesToCopy) {
     Append(absl::string_view(src));
   } else {
+    contents_.MaybeRemoveEmptyCrcNode();
     CordRep* rep = CordRepFromString(std::forward<T>(src));
     contents_.AppendTree(rep, CordzUpdateTracker::kAppendString);
   }
@@ -597,6 +577,9 @@ template void Cord::Append(std::string&& src);
 void Cord::Prepend(const Cord& src) {
   contents_.MaybeRemoveEmptyCrcNode();
   if (src.empty()) return;
+  ABSL_RAW_CHECK(src.contents_.size() <=
+                     std::numeric_limits<size_t>::max() - contents_.size(),
+                 "Cord length overflow");
 
   CordRep* src_tree = src.contents_.tree();
   if (src_tree != nullptr) {
@@ -619,7 +602,7 @@ void Cord::PrependArray(absl::string_view src, MethodIdentifier method) {
     size_t cur_size = contents_.inline_size();
     if (cur_size + src.size() <= InlineRep::kMaxInline) {
       // Use embedded storage.
-      InlineData data;
+      InlineData data{};
       data.set_inline_size(cur_size + src.size());
       memcpy(data.as_chars(), src.data(), src.size());
       memcpy(data.as_chars() + src.size(), contents_.data(), cur_size);
@@ -648,7 +631,7 @@ void Cord::PrependPrecise(absl::string_view src, MethodIdentifier method) {
   assert(src.size() <= cord_internal::kMaxFlatLength);
   if (contents_.remaining_inline_capacity() >= src.size()) {
     const size_t cur_size = contents_.inline_size();
-    InlineData data;
+    InlineData data{};
     data.set_inline_size(cur_size + src.size());
     memcpy(data.as_chars(), src.data(), src.size());
     memcpy(data.as_chars() + src.size(), contents_.data(), cur_size);
@@ -663,6 +646,7 @@ inline void Cord::Prepend(T&& src) {
   if (src.size() <= kMaxBytesToCopy) {
     Prepend(absl::string_view(src));
   } else {
+    contents_.MaybeRemoveEmptyCrcNode();
     CordRep* rep = CordRepFromString(std::forward<T>(src));
     contents_.PrependTree(rep, CordzUpdateTracker::kPrependString);
   }
@@ -1022,15 +1006,111 @@ int Cord::CompareImpl(const Cord& rhs) const {
   return SharedCompareImpl(*this, rhs);
 }
 
+namespace {
+
+// Tests whether the bytes of `tree` end with `suffix`.
+//
+// REQUIRES: `tree` holds at least `suffix.size()` bytes.
+ABSL_ATTRIBUTE_NOINLINE bool BtreeEndsWith(CordRepBtree* absl_nonnull tree,
+                                           absl::string_view suffix) {
+  assert(tree->length >= suffix.size());
+  cord_internal::CordRepBtreeNavigator nav;
+  absl::string_view chunk = cord_internal::EdgeData(nav.InitLast(tree));
+  // While `suffix` is longer than the current chunk, the whole chunk must
+  // match the end of `suffix`. The precondition guarantees that a previous
+  // chunk exists.
+  while (suffix.size() > chunk.size()) {
+    if (!absl::EndsWith(suffix, chunk)) {
+      return false;
+    }
+    suffix.remove_suffix(chunk.size());
+    chunk = cord_internal::EdgeData(nav.Previous());
+  }
+  return absl::EndsWith(chunk, suffix);
+}
+
+// Tests whether the bytes of `lhs` end with the bytes of `rhs`.
+//
+// REQUIRES: `lhs` holds at least as many bytes as `rhs`.
+ABSL_ATTRIBUTE_NOINLINE bool BtreeEndsWith(CordRepBtree* absl_nonnull lhs,
+                                           CordRepBtree* absl_nonnull rhs) {
+  assert(lhs->length >= rhs->length);
+  if (lhs == rhs) return true;
+  cord_internal::CordRepBtreeNavigator lhs_nav;
+  cord_internal::CordRepBtreeNavigator rhs_nav;
+  absl::string_view lhs_piece = cord_internal::EdgeData(lhs_nav.InitLast(lhs));
+  absl::string_view rhs_piece = cord_internal::EdgeData(rhs_nav.InitLast(rhs));
+  size_t remaining = rhs->length;
+  while (remaining > 0) {
+    // Replaces an empty piece with the previous chunk of its tree. The
+    // precondition guarantees that this chunk exists.
+    if (lhs_piece.empty()) {
+      lhs_piece = cord_internal::EdgeData(lhs_nav.Previous());
+    }
+    if (rhs_piece.empty()) {
+      rhs_piece = cord_internal::EdgeData(rhs_nav.Previous());
+    }
+    // As the chunk boundaries of the two trees may differ, each step compares
+    // as many bytes as the shorter piece holds.
+    size_t n = std::min(lhs_piece.size(), rhs_piece.size());
+    absl::string_view lhs_tail = lhs_piece.substr(lhs_piece.size() - n);
+    absl::string_view rhs_tail = rhs_piece.substr(rhs_piece.size() - n);
+    // Pieces at the same address are the same bytes: the Cords share a chunk.
+    if (lhs_tail.data() != rhs_tail.data() && lhs_tail != rhs_tail) {
+      return false;
+    }
+    lhs_piece.remove_suffix(n);
+    rhs_piece.remove_suffix(n);
+    remaining -= n;
+  }
+  return true;
+}
+
+}  // namespace
+
+// Helper routine. Locates the last flat or external chunk of the Cord without
+// initializing the iterator, and returns a string_view referencing the data.
+// Returns an empty string_view if the Cord is empty.
+inline absl::string_view Cord::InlineRep::FindFlatEndPiece() const {
+  if (!is_tree()) {
+    return absl::string_view(data_.as_chars(), data_.inline_size());
+  }
+
+  CordRep* node = cord_internal::SkipCrcNode(tree());
+  // An empty Cord with an expected checksum is a CRC node without a child.
+  if (ABSL_PREDICT_FALSE(node == nullptr)) return {};
+
+  if (node->IsBtree()) {
+    CordRepBtree* tree = node->btree();
+    int height = tree->height();
+    while (--height >= 0) {
+      tree = tree->Edge(CordRepBtree::kBack)->btree();
+    }
+    return tree->Data(tree->back());
+  }
+
+  return cord_internal::EdgeData(node);
+}
+
 bool Cord::EndsWith(absl::string_view rhs) const {
   size_t my_size = size();
   size_t rhs_size = rhs.size();
 
   if (my_size < rhs_size) return false;
 
-  Cord tmp(*this);
-  tmp.RemovePrefix(my_size - rhs_size);
-  return tmp.EqualsImpl(rhs, rhs_size);
+  absl::string_view last_chunk = contents_.FindFlatEndPiece();
+  if (rhs_size <= last_chunk.size()) {
+    // Compares a one-byte suffix, such as "\n", without calling memcmp.
+    if (rhs_size == 1) {
+      return last_chunk.back() == rhs[0];
+    }
+    return absl::EndsWith(last_chunk, rhs);
+  }
+
+  // The suffix is longer than the last chunk; the Cord therefore has more than
+  // one chunk and is a B-tree.
+  return BtreeEndsWith(cord_internal::SkipCrcNode(contents_.tree())->btree(),
+                       rhs);
 }
 
 bool Cord::EndsWith(const Cord& rhs) const {
@@ -1038,10 +1118,26 @@ bool Cord::EndsWith(const Cord& rhs) const {
   size_t rhs_size = rhs.size();
 
   if (my_size < rhs_size) return false;
+  if (contents_.IsSame(rhs.contents_)) return true;
 
-  Cord tmp(*this);
-  tmp.RemovePrefix(my_size - rhs_size);
-  return tmp.EqualsImpl(rhs, rhs_size);
+  // Compares an empty or single-chunk `rhs` as a string_view.
+  absl::string_view rhs_last = rhs.contents_.FindFlatEndPiece();
+  if (rhs_size == rhs_last.size()) {
+    return EndsWith(rhs_last);
+  }
+
+  // Compares an `rhs` that fits in `last_chunk` with the end of that chunk.
+  absl::string_view last_chunk = contents_.FindFlatEndPiece();
+  if (rhs_size <= last_chunk.size()) {
+    return BtreeEndsWith(
+        cord_internal::SkipCrcNode(rhs.contents_.tree())->btree(),
+        last_chunk.substr(last_chunk.size() - rhs_size));
+  }
+
+  // Both Cords have more than one chunk and are therefore B-trees.
+  return BtreeEndsWith(
+      cord_internal::SkipCrcNode(contents_.tree())->btree(),
+      cord_internal::SkipCrcNode(rhs.contents_.tree())->btree());
 }
 
 // --------------------------------------------------------------------
@@ -1227,81 +1323,6 @@ bool IsSubstringInCordAt(absl::Cord::CharIterator position,
   }
 }
 
-}  // namespace
-
-// A few options how this could be implemented:
-// (a) Flatten the Cord and find, i.e.
-//       haystack.Flatten().find(needle)
-//     For large 'haystack' (where Cord makes sense to be used), this copies
-//     the whole 'haystack' and can be slow.
-// (b) Use std::search, i.e.
-//       std::search(haystack.char_begin(), haystack.char_end(),
-//                   needle.begin(), needle.end())
-//     This avoids the copy, but compares one byte at a time, and branches a
-//     lot every time it has to advance. It is also not possible to use
-//     std::search as is, because CharIterator is only an input iterator, not a
-//     forward iterator.
-// (c) Use string_view::find in each fragment, and specifically handle fragment
-//     boundaries.
-//
-// This currently implements option (b).
-absl::Cord::CharIterator absl::Cord::FindImpl(CharIterator it,
-                                              absl::string_view needle) const {
-  // Ensure preconditions are met by callers first.
-
-  // Needle must not be empty.
-  assert(!needle.empty());
-  // Haystack must be at least as large as needle.
-  assert(it.chunk_iterator_.bytes_remaining_ >= needle.size());
-
-  // Cord is a sequence of chunks. To find `needle` we go chunk by chunk looking
-  // for the first char of needle, up until we have advanced `N` defined as
-  // `haystack.size() - needle.size()`. If we find the first char of needle at
-  // `P` and `P` is less than `N`, we then call `IsSubstringInCordAt` to
-  // see if this is the needle. If not, we advance to `P + 1` and try again.
-  while (it.chunk_iterator_.bytes_remaining_ >= needle.size()) {
-    auto haystack_chunk = Cord::ChunkRemaining(it);
-    assert(!haystack_chunk.empty());
-    // Look for the first char of `needle` in the current chunk.
-    auto idx = haystack_chunk.find(needle.front());
-    if (idx == absl::string_view::npos) {
-      // No potential match in this chunk, advance past it.
-      Cord::Advance(&it, haystack_chunk.size());
-      continue;
-    }
-    // We found the start of a potential match in the chunk. Advance the
-    // iterator and haystack chunk to the match the position.
-    Cord::Advance(&it, idx);
-    // Check if there is enough haystack remaining to actually have a match.
-    if (it.chunk_iterator_.bytes_remaining_ < needle.size()) {
-      break;
-    }
-    // Check if this is `needle`.
-    if (IsSubstringInCordAt(it, needle)) {
-      return it;
-    }
-    // No match, increment the iterator for the next attempt.
-    Cord::Advance(&it, 1);
-  }
-  // If we got here, we did not find `needle`.
-  return char_end();
-}
-
-absl::Cord::CharIterator absl::Cord::Find(absl::string_view needle) const {
-  if (needle.empty()) {
-    return char_begin();
-  }
-  if (needle.size() > size()) {
-    return char_end();
-  }
-  if (needle.size() == size()) {
-    return *this == needle ? char_begin() : char_end();
-  }
-  return FindImpl(char_begin(), needle);
-}
-
-namespace {
-
 // Tests whether the sequence of chunks beginning at `haystack` starts with the
 // sequence of chunks beginning at `needle_begin` and extending to `needle_end`.
 //
@@ -1330,55 +1351,243 @@ bool IsSubcordInCordAt(absl::Cord::CharIterator haystack,
 //
 // REQUIRES: remaining `absl::Cord` starting at `position` is greater than or
 // equal to `needle.size()`.
-bool IsSubcordInCordAt(absl::Cord::CharIterator position,
-                       const absl::Cord& needle) {
+bool IsSubstringInCordAt(absl::Cord::CharIterator position,
+                         const absl::Cord& needle) {
   return IsSubcordInCordAt(position, needle.char_begin(), needle.char_end());
+}
+
+// Returns the character located `offset` bytes past `it`.
+char CharacterAt(absl::Cord::CharIterator it, size_t offset) {
+  absl::Cord::Advance(&it, offset);
+  return *it;
+}
+
+inline size_t BytesRemaining(const absl::Cord::CharIterator& it) {
+  return static_cast<size_t>(
+      absl::Cord::Distance(it, absl::Cord::CharIterator()));
+}
+
+// Returns whether the sequence of chunks beginning at `chunk` + `idx` starts
+// with the first `chunk_rem` bytes of `needle`.
+//
+// REQUIRES: `chunk.size() - idx >= chunk_rem`.
+inline bool IsPrefixMatch(absl::string_view chunk, size_t idx, size_t chunk_rem,
+                          absl::string_view needle) {
+  return chunk.substr(idx) == needle.substr(0, chunk_rem);
+}
+
+// Returns whether the sequence of chunks beginning at `chunk` + `idx` starts
+// with the first `chunk_rem` bytes of `needle`, where `needle` is a Cord.
+//
+// REQUIRES: `chunk.size() - idx >= chunk_rem` and `needle` is not empty.
+inline bool IsPrefixMatch(absl::string_view chunk, size_t idx, size_t chunk_rem,
+                          const absl::Cord& needle) {
+  auto needle_chunk = absl::Cord::ChunkRemaining(needle.char_begin());
+  size_t check_len = std::min(chunk_rem, needle_chunk.size());
+  return chunk.substr(idx, check_len) == needle_chunk.substr(0, check_len);
+}
+
+// Initializes the Boyer-Moore-Horspool shift table for a string_view needle
+// with a maximum scan length of `kMaxScan`.
+inline void InitShift(std::array<uint16_t, 256>& shift,
+                      absl::string_view needle, uint16_t default_shift,
+                      size_t kMaxScan) {
+  shift.fill(default_shift);
+  const size_t m = needle.size();
+  for (size_t i = kMaxScan; i > 0; --i) {
+    shift[static_cast<unsigned char>(needle[m - 1 - i])] =
+        static_cast<uint16_t>(i);
+  }
+}
+
+// Initializes the Boyer-Moore-Horspool shift table for a Cord needle with a
+// maximum scan length of `kMaxScan`.
+inline void InitShift(std::array<uint16_t, 256>& shift,
+                      const absl::Cord& needle, uint16_t default_shift,
+                      size_t kMaxScan) {
+  shift.fill(default_shift);
+  auto needle_it = needle.char_begin();
+  const size_t needle_size = needle.size();
+  absl::Cord::Advance(&needle_it, needle_size - 1 - kMaxScan);
+  for (size_t i = 0; i < kMaxScan; ++i) {
+    shift[static_cast<unsigned char>(*needle_it)] =
+        static_cast<uint16_t>(kMaxScan - i);
+    absl::Cord::Advance(&needle_it, 1);
+  }
+}
+
+template <typename Needle>
+absl::Cord::CharIterator FindBMH(absl::Cord::CharIterator it,
+                                 const Needle& needle) {
+  const size_t needle_size = needle.size();
+  const char first_needle = needle[0];
+  std::array<uint16_t, 256> shift;
+  bool shift_initialized = false;
+  const size_t kMaxScan = std::min(needle_size - 1, size_t{256});
+  const uint16_t default_shift = static_cast<uint16_t>(kMaxScan + 1);
+  const unsigned char last_needle =
+      static_cast<unsigned char>(needle[needle_size - 1]);
+
+  while (BytesRemaining(it) >= needle_size) {
+    absl::string_view chunk = absl::Cord::ChunkRemaining(it);
+    auto idx = chunk.find(first_needle);
+    if (idx == absl::string_view::npos) {
+      // No potential match in this chunk, advance past it.
+      absl::Cord::Advance(&it, chunk.size());
+      continue;
+    }
+    // Check if there is enough haystack remaining to actually have a match.
+    if (BytesRemaining(it) - idx < needle_size) {
+      break;
+    }
+    // We found the start of a potential match in the chunk. Advance the
+    // iterator to the match position.
+    absl::Cord::Advance(&it, idx);
+    size_t chunk_rem = chunk.size() - idx;
+    unsigned char last_hay;
+    if (chunk_rem >= needle_size) {
+      last_hay = static_cast<unsigned char>(chunk[idx + needle_size - 1]);
+    } else {
+      if (!IsPrefixMatch(chunk, idx, chunk_rem, needle)) {
+        absl::Cord::Advance(&it, 1);
+        continue;
+      }
+      last_hay = static_cast<unsigned char>(CharacterAt(it, needle_size - 1));
+    }
+    // Check if the rightmost byte of the candidate window (`last_hay`) matches
+    // the rightmost byte of `needle` before performing a full equality check.
+    if (last_hay != last_needle) {
+      if (!shift_initialized) {
+        InitShift(shift, needle, default_shift, kMaxScan);
+        shift_initialized = true;
+      }
+      // Mismatch on the rightmost byte. Advance candidate position according
+      // to the Boyer-Moore-Horspool shift table.
+      absl::Cord::Advance(&it, shift[last_hay]);
+      continue;
+    }
+    // Check if this is `needle`.
+    if (IsSubstringInCordAt(it, needle)) {
+      return it;
+    }
+    if (!shift_initialized) {
+      InitShift(shift, needle, default_shift, kMaxScan);
+      shift_initialized = true;
+    }
+    last_hay = last_needle;
+    // Match check failed; advance candidate position according to the shift
+    // table.
+    absl::Cord::Advance(&it, shift[last_hay]);
+  }
+  // If we got here, we did not find `needle`.
+  return absl::Cord::CharIterator();
+}
+
+absl::Cord::CharIterator FindChar(absl::Cord::CharIterator it, char target) {
+  while (BytesRemaining(it) > 0) {
+    absl::string_view chunk = absl::Cord::ChunkRemaining(it);
+    auto idx = chunk.find(target);
+    if (idx != absl::string_view::npos) {
+      // Found target inside the current chunk. Advance the iterator to its
+      // position.
+      absl::Cord::Advance(&it, idx);
+      return it;
+    }
+    // Target is not inside this chunk; advance past the entire chunk.
+    absl::Cord::Advance(&it, chunk.size());
+  }
+  return absl::Cord::CharIterator();
 }
 
 }  // namespace
 
-absl::Cord::CharIterator absl::Cord::Find(const absl::Cord& needle) const {
+// A few options how this could be implemented:
+// (a) Flatten the Cord and find, i.e.
+//       haystack.Flatten().find(needle)
+//     For large 'haystack' (where Cord makes sense to be used), this copies
+//     the whole 'haystack' and can be slow.
+// (b) Use std::search, i.e.
+//       std::search(haystack.char_begin(), haystack.char_end(),
+//                   needle.begin(), needle.end())
+//     This avoids the copy, but compares one byte at a time, and branches a
+//     lot every time it has to advance. It is also not possible to use
+//     std::search as is, because CharIterator is only an input iterator, not a
+//     forward iterator.
+// (c) Use string_view::find in each fragment, and specifically handle fragment
+//     boundaries.
+//
+// This currently implements option (b).
+template <typename T>
+absl::Cord::CharIterator absl::Cord::FindImpl(CharIterator it,
+                                              const T& needle) const {
+  // Ensure preconditions are met by callers first.
+
   if (needle.empty()) {
     return char_begin();
   }
-  const auto needle_size = needle.size();
-  if (needle_size > size()) {
+  if (needle.size() > size()) {
     return char_end();
   }
-  if (needle_size == size()) {
+  if (needle.size() == size()) {
     return *this == needle ? char_begin() : char_end();
   }
-  const auto needle_chunk = Cord::ChunkRemaining(needle.char_begin());
-  auto haystack_it = char_begin();
-  while (true) {
-    haystack_it = FindImpl(haystack_it, needle_chunk);
-    if (haystack_it == char_end() ||
-        haystack_it.chunk_iterator_.bytes_remaining_ < needle_size) {
-      break;
-    }
-    // We found the first chunk of `needle` at `haystack_it` but not the entire
-    // subcord. Advance past the first chunk and check for the remainder.
-    auto haystack_advanced_it = haystack_it;
-    auto needle_it = needle.char_begin();
-    Cord::Advance(&haystack_advanced_it, needle_chunk.size());
-    Cord::Advance(&needle_it, needle_chunk.size());
-    if (IsSubcordInCordAt(haystack_advanced_it, needle_it, needle.char_end())) {
-      return haystack_it;
-    }
-    Cord::Advance(&haystack_it, 1);
-    if (haystack_it.chunk_iterator_.bytes_remaining_ < needle_size) {
-      break;
-    }
-    if (haystack_it.chunk_iterator_.bytes_remaining_ == needle_size) {
-      // Special case, if there is exactly `needle_size` bytes remaining, the
-      // subcord is either at `haystack_it` or not at all.
-      if (IsSubcordInCordAt(haystack_it, needle)) {
-        return haystack_it;
-      }
-      break;
-    }
+
+  // Needle must not be empty.
+  assert(!needle.empty());
+  // Haystack must be at least as large as needle.
+  assert(it.chunk_iterator_.bytes_remaining_ >= needle.size());
+
+  const size_t m = needle.size();
+  const char first_needle = needle[0];
+  // Fast path for single-character needles.
+  if (m == 1) {
+    return FindChar(it, first_needle);
   }
+
+  // Fast path for long needles.
+  if (m >= 256) {
+    return FindBMH(it, needle);
+  }
+
+  // Cord is a sequence of chunks. To find `needle` we go chunk by chunk looking
+  // for the first char of needle, up until we have advanced `N` defined as
+  // `haystack.size() - needle.size()`. If we find the first char of needle at
+  // `P` and `P` is less than `N`, we then call `IsSubstringInCordAt` to
+  // see if this is the needle. If not, we advance to `P + 1` and try again.
+  while (it.chunk_iterator_.bytes_remaining_ >= needle.size()) {
+    auto haystack_chunk = Cord::ChunkRemaining(it);
+    assert(!haystack_chunk.empty());
+    // Look for the first char of `needle` in the current chunk.
+    auto idx = haystack_chunk.find(first_needle);
+    if (idx == absl::string_view::npos) {
+      // No potential match in this chunk, advance past it.
+      Cord::Advance(&it, haystack_chunk.size());
+      continue;
+    }
+    // We found the start of a potential match in the chunk. Advance the
+    // iterator and haystack chunk to the match the position.
+    Cord::Advance(&it, idx);
+    // Check if there is enough haystack remaining to actually have a match.
+    if (it.chunk_iterator_.bytes_remaining_ < needle.size()) {
+      break;
+    }
+    // Check if this is `needle`.
+    if (IsSubstringInCordAt(it, needle)) {
+      return it;
+    }
+    // No match, increment the iterator for the next attempt.
+    Cord::Advance(&it, 1);
+  }
+  // If we got here, we did not find `needle`.
   return char_end();
+}
+
+absl::Cord::CharIterator absl::Cord::Find(absl::string_view needle) const {
+  return FindImpl(char_begin(), needle);
+}
+
+absl::Cord::CharIterator absl::Cord::Find(const absl::Cord& needle) const {
+  return FindImpl(char_begin(), needle);
 }
 
 bool Cord::Contains(absl::string_view rhs) const {

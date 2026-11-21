@@ -15,18 +15,22 @@
 #include <stdint.h>
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
 #include <functional>
 #include <map>
+#include <memory>
 #include <numeric>
 #include <random>
 #include <set>
 #include <string>
-#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "absl/algorithm/container.h"
+#include "absl/base/config.h"
 #include "absl/base/internal/raw_logging.h"
 #include "absl/container/btree_map.h"
 #include "absl/container/btree_set.h"
@@ -36,7 +40,6 @@
 #include "absl/container/internal/hashtable_debug.h"
 #include "absl/hash/hash.h"
 #include "absl/log/log.h"
-#include "absl/memory/memory.h"
 #include "absl/random/random.h"
 #include "absl/strings/cord.h"
 #include "absl/strings/str_format.h"

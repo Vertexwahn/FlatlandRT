@@ -1,3 +1,10 @@
+// Formatting library for C++ - C++20 module
+//
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
+// All rights reserved.
+//
+// For the license information refer to format.h.
+
 module;
 
 #define FMT_MODULE
@@ -12,6 +19,7 @@ module;
 // to prevent attachment to this module.
 #ifndef FMT_IMPORT_STD
 #  include <algorithm>
+#  include <atomic>
 #  include <bitset>
 #  include <chrono>
 #  include <cmath>
@@ -54,15 +62,31 @@ module;
 #  include <string.h>
 #  include <time.h>
 #endif
+#include <cassert>
 #include <cerrno>
+#include <cfloat>
 #include <climits>
 #include <version>
+
+// fmt/enum.h uses C++26 reflection if it is available.
+#if defined(__cpp_impl_reflection) && __has_include(<meta>)
+#  include <array>
+#  include <meta>
+#endif
 
 #if __has_include(<cxxabi.h>)
 #  include <cxxabi.h>
 #endif
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #  include <intrin.h>
+#endif
+// fmt/format-inl.h uses SIMD intrinsics if they are available.
+#if (defined(__ARM_NEON) && defined(__aarch64__)) || defined(_M_ARM64)
+#  include <arm_neon.h>
+#endif
+#if defined(__SSE2__) || defined(_M_AMD64) || \
+    (defined(_M_IX86_FP) && _M_IX86_FP == 2)
+#  include <smmintrin.h>
 #endif
 #if defined __APPLE__ || defined(__FreeBSD__)
 #  include <xlocale.h>
@@ -120,6 +144,7 @@ extern "C++" {
 #include "fmt/chrono.h"
 #include "fmt/color.h"
 #include "fmt/compile.h"
+#include "fmt/enum.h"
 #include "fmt/format.h"
 #if FMT_OS
 #  include "fmt/os.h"

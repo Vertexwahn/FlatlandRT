@@ -31,6 +31,7 @@
 #include "absl/container/internal/unordered_map_lookup_test.h"
 #include "absl/container/internal/unordered_map_members_test.h"
 #include "absl/container/internal/unordered_map_modifiers_test.h"
+#include "absl/hash/hash.h"
 
 #if ABSL_INTERNAL_CPLUSPLUS_LANG >= 202002L
 #include <ranges>  // NOLINT(build/c++20)
@@ -77,7 +78,6 @@ TEST(NodeHashMap, Emplace) {
   ASSERT_EQ(0, t.num_moves());
   ASSERT_EQ(1, t.num_copies());
 
-  const std::string ca("a");
   m.emplace(a, t);
   ASSERT_EQ(0, t.num_moves());
   ASSERT_EQ(1, t.num_copies());
@@ -196,7 +196,7 @@ TEST(NodeHashMap, MergeExtractInsert) {
 
   // NonMovableKey is neither copyable nor movable. We should still be able to
   // move nodes around.
-  static_assert(!std::is_move_constructible<NonMovableKey>::value, "");
+  static_assert(!std::is_move_constructible_v<NonMovableKey>);
   set1.merge(set2);
 
   EXPECT_THAT(set1,
@@ -274,58 +274,6 @@ TEST(NodeHashMap, EraseIf) {
   }
 }
 
-TEST(NodeHashMap, CForEach) {
-  node_hash_map<int, int> m;
-  std::vector<std::pair<int, int>> expected;
-  for (int i = 0; i < 100; ++i) {
-    {
-      SCOPED_TRACE("mutable object iteration");
-      std::vector<std::pair<int, int>> v;
-      absl::container_internal::c_for_each_fast(
-          m, [&v](std::pair<const int, int>& p) { v.push_back(p); });
-      EXPECT_THAT(v, UnorderedElementsAreArray(expected));
-    }
-    {
-      SCOPED_TRACE("const object iteration");
-      std::vector<std::pair<int, int>> v;
-      const node_hash_map<int, int>& cm = m;
-      absl::container_internal::c_for_each_fast(
-          cm, [&v](const std::pair<const int, int>& p) { v.push_back(p); });
-      EXPECT_THAT(v, UnorderedElementsAreArray(expected));
-    }
-    {
-      SCOPED_TRACE("const object iteration");
-      std::vector<std::pair<int, int>> v;
-      absl::container_internal::c_for_each_fast(
-          node_hash_map<int, int>(m),
-          [&v](std::pair<const int, int>& p) { v.push_back(p); });
-      EXPECT_THAT(v, UnorderedElementsAreArray(expected));
-    }
-    m[i] = i;
-    expected.emplace_back(i, i);
-  }
-}
-
-TEST(NodeHashMap, CForEachMutate) {
-  node_hash_map<int, int> s;
-  std::vector<std::pair<int, int>> expected;
-  for (int i = 0; i < 100; ++i) {
-    std::vector<std::pair<int, int>> v;
-    absl::container_internal::c_for_each_fast(
-        s, [&v](std::pair<const int, int>& p) {
-          v.push_back(p);
-          p.second++;
-        });
-    EXPECT_THAT(v, UnorderedElementsAreArray(expected));
-    for (auto& p : expected) {
-      p.second++;
-    }
-    EXPECT_THAT(s, UnorderedElementsAreArray(expected));
-    s[i] = i;
-    expected.emplace_back(i, i);
-  }
-}
-
 TEST(NodeHashMap, NodeHandleMutableKeyAccess) {
   node_hash_map<std::string, std::string> map;
 
@@ -344,6 +292,13 @@ TEST(NodeHashMap, RecursiveTypeCompiles) {
   };
   RecursiveType t;
   t.m[0] = RecursiveType{};
+}
+
+TEST(NodeHashMap, NonStandardLayoutValueUsesTypeErasedSlotFns) {
+  using Policy = NodeHashMapPolicy<int, NonStandardLayout>;
+  EXPECT_NE((Policy::get_hash_slot_fn<absl::Hash<int>, /*kIsAbsl=*/true,
+                                      /*kSeedShift=*/0>()),
+            nullptr);
 }
 
 #if defined(__cpp_lib_containers_ranges) && \

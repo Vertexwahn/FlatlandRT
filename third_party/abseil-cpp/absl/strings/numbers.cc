@@ -21,6 +21,8 @@
 #include <array>
 #include <cassert>
 #include <cfloat>  // for DBL_DIG and FLT_DIG
+#include <charconv>
+#include <clocale>  // for localeconv
 #include <cmath>   // for HUGE_VAL
 #include <cstdint>
 #include <cstdio>
@@ -255,7 +257,7 @@ inline char* EncodePadded16(uint64_t v, char* absl_nonnull buffer) {
   return buffer + 16;
 }
 
-inline ABSL_ATTRIBUTE_ALWAYS_INLINE char* absl_nonnull EncodeFullU32(
+ABSL_ATTRIBUTE_ALWAYS_INLINE inline char* absl_nonnull EncodeFullU32(
     uint32_t n, char* absl_nonnull out_str) {
   if (n < 10) {
     *out_str = static_cast<char>('0' + n);
@@ -278,7 +280,7 @@ inline ABSL_ATTRIBUTE_ALWAYS_INLINE char* absl_nonnull EncodeFullU32(
   return out_str + sizeof(bottom);
 }
 
-inline ABSL_ATTRIBUTE_ALWAYS_INLINE char* absl_nonnull EncodeFullU64(
+ABSL_ATTRIBUTE_ALWAYS_INLINE inline char* absl_nonnull EncodeFullU64(
     uint64_t i, char* absl_nonnull buffer) {
   if (i <= std::numeric_limits<uint32_t>::max()) {
     return EncodeFullU32(static_cast<uint32_t>(i), buffer);
@@ -303,7 +305,7 @@ inline ABSL_ATTRIBUTE_ALWAYS_INLINE char* absl_nonnull EncodeFullU64(
   return buffer + sizeof(mod_result);
 }
 
-inline ABSL_ATTRIBUTE_ALWAYS_INLINE char* absl_nonnull EncodeFullU128(
+ABSL_ATTRIBUTE_ALWAYS_INLINE inline char* absl_nonnull EncodeFullU128(
     uint128 i, char* absl_nonnull buffer) {
   if (absl::Uint128High64(i) == 0) {
     return EncodeFullU64(absl::Uint128Low64(i), buffer);
@@ -410,6 +412,25 @@ char* absl_nonnull numbers_internal::FastIntToBuffer(
 static constexpr double kDoublePrecisionCheckMax =
     std::numeric_limits<double>::max() / 1.000000000000001;
 
+// __cpp_lib_to_chars is defined only when both integer and floating-point
+// <charconv> overloads are available. libc++ 14+ provides floating-point
+// std::to_chars for double, but leaves __cpp_lib_to_chars undefined because
+// floating-point std::from_chars is still incomplete. On Apple platforms,
+// floating-point std::to_chars also requires macOS 13.3+ / iOS 16.3+ dylib
+// support (tracked via _LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT in
+// libc++ 16+ / Xcode 14.3+, and marked unavailable on Apple in libc++ 14-15).
+#if defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
+#define ABSL_INTERNAL_HAVE_STD_TO_CHARS_FLOAT 1
+#elif defined(_LIBCPP_VERSION) && _LIBCPP_VERSION >= 14000 &&       \
+    ((defined(_LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT) &&  \
+      _LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT) ||          \
+     (!defined(_LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT) && \
+      !defined(__APPLE__)))
+#define ABSL_INTERNAL_HAVE_STD_TO_CHARS_FLOAT 1
+#else
+#define ABSL_INTERNAL_HAVE_STD_TO_CHARS_FLOAT 0
+#endif
+
 char* absl_nonnull numbers_internal::RoundTripDoubleToBuffer(
     double d, char* absl_nonnull buffer) {
   // DBL_DIG is 15 for IEEE-754 doubles, which are used on almost all
@@ -419,12 +440,49 @@ char* absl_nonnull numbers_internal::RoundTripDoubleToBuffer(
   static_assert(std::numeric_limits<double>::digits10 < 20,
                 "std::numeric_limits<double>::digits10 is too big");
 
-  // We avoid snprintf for NaNs because it inconsistently outputs "-nan"
-  // or "nan" when given a nan with the sign bit set.
-  if (std::isnan(d)) {
-    strcpy(buffer, "nan");  // NOLINT(runtime/printf)
+  if (ABSL_PREDICT_FALSE(!std::isfinite(d))) {
+    // Avoid snprintf/to_chars for NaNs because they can output "-nan" when
+    // given a NaN with the sign bit set.
+    if (std::isnan(d)) {
+      std::memcpy(buffer, "nan", sizeof("nan"));
+    } else if (std::signbit(d)) {
+      std::memcpy(buffer, "-inf", sizeof("-inf"));
+    } else {
+      std::memcpy(buffer, "inf", sizeof("inf"));
+    }
     return buffer;
   }
+
+#if ABSL_INTERNAL_HAVE_STD_TO_CHARS_FLOAT
+  // std::to_chars is locale-independent, rounding-mode-independent (matching
+  // absl::SimpleAtod), and substantially faster than the snprintf/strtod
+  // fallback below.
+  auto to_chars = [buffer, d](int precision) {
+    std::to_chars_result result =
+        std::to_chars(buffer, buffer + numbers_internal::kFastToBufferSize - 1,
+                      d, std::chars_format::general, precision);
+    ABSL_ASSERT(result.ec == std::errc());
+    *result.ptr = '\0';
+    return result.ptr;
+  };
+
+  bool full_precision_needed = true;
+  if (std::abs(d) <= kDoublePrecisionCheckMax) {
+    char* end = to_chars(std::numeric_limits<double>::digits10);
+    double parsed_value = 0;
+    absl::from_chars_result parse_result =
+        absl::from_chars(buffer, end, parsed_value);
+    full_precision_needed = parse_result.ec != std::errc() ||
+                            parse_result.ptr != end || parsed_value != d;
+  }
+
+  if (full_precision_needed) {
+    to_chars(std::numeric_limits<double>::digits10 + 2);
+  }
+  return buffer;
+#else
+  // TODO(b/526633099) - Once all supported standard libraries ship
+  // std::to_chars with floating-point support, remove this fallback.
   bool full_precision_needed = true;
   if (std::abs(d) <= kDoublePrecisionCheckMax) {
     int snprintf_result =
@@ -448,8 +506,33 @@ char* absl_nonnull numbers_internal::RoundTripDoubleToBuffer(
     ABSL_ASSERT(snprintf_result > 0 &&
                 snprintf_result < numbers_internal::kFastToBufferSize);
   }
+
+  // snprintf() writes the radix character chosen by the global C locale's
+  // LC_NUMERIC category, so a process that has called setlocale() can end up
+  // with a separator other than '.' here. The rest of Abseil's float formatting
+  // (RoundTripFloatToBuffer, SixDigitsToBuffer) is locale- independent and
+  // SimpleAtod() only accepts '.', so rewrite the radix back to '.' to keep
+  // absl::HighPrecision(double) locale-independent and round-trippable through
+  // SimpleAtod().
+  const char* radix = localeconv()->decimal_point;
+  // Skip an empty decimal_point (some minimal environments leave it ""), which
+  // would otherwise match the beginning of the buffer and corrupt it.
+  if (radix[0] != '\0' && std::strcmp(radix, ".") != 0) {
+    if (char* p = std::strstr(buffer, radix)) {
+      const size_t radix_len = std::strlen(radix);
+      *p = '.';
+      // A multibyte radix (rare, but possible in some locales) leaves trailing
+      // bytes behind; collapse them so the output is a single '.'.
+      if (radix_len > 1) {
+        std::memmove(p + 1, p + radix_len, std::strlen(p + radix_len) + 1);
+      }
+    }
+  }
   return buffer;
+#endif
 }
+
+#undef ABSL_INTERNAL_HAVE_STD_TO_CHARS_FLOAT
 
 namespace {
 
@@ -1099,15 +1182,15 @@ size_t numbers_internal::SixDigitsToBuffer(double d,
     case -4:
       out[2] = '0';
       ++out;
-      ABSL_FALLTHROUGH_INTENDED;
+      [[fallthrough]];
     case -3:
       out[2] = '0';
       ++out;
-      ABSL_FALLTHROUGH_INTENDED;
+      [[fallthrough]];
     case -2:
       out[2] = '0';
       ++out;
-      ABSL_FALLTHROUGH_INTENDED;
+      [[fallthrough]];
     case -1:
       out += 2;
       memcpy(out, &digits[0], 6);

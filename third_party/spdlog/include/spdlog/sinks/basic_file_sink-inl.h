@@ -10,14 +10,16 @@
 #include <spdlog/common.h>
 #include <spdlog/details/os.h>
 
-namespace spdlog {
+SPDLOG_NAMESPACE_BEGIN
 namespace sinks {
 
 template <typename Mutex>
 SPDLOG_INLINE basic_file_sink<Mutex>::basic_file_sink(const filename_t &filename,
                                                       bool truncate,
-                                                      const file_event_handlers &event_handlers)
+                                                      const file_event_handlers &event_handlers,
+                                                      size_t buffer_size)
     : file_helper_{event_handlers} {
+    file_helper_.set_buffer_size(buffer_size);
     file_helper_.open(filename, truncate);
 }
 
@@ -33,6 +35,18 @@ SPDLOG_INLINE void basic_file_sink<Mutex>::truncate() {
 }
 
 template <typename Mutex>
+SPDLOG_INLINE void basic_file_sink<Mutex>::set_buffer_size(size_t buffer_size) {
+    std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+    file_helper_.set_buffer_size(buffer_size);
+}
+
+template <typename Mutex>
+SPDLOG_INLINE size_t basic_file_sink<Mutex>::buffer_size() {
+    std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+    return file_helper_.buffer_size();
+}
+
+template <typename Mutex>
 SPDLOG_INLINE void basic_file_sink<Mutex>::sink_it_(const details::log_msg &msg) {
     memory_buf_t formatted;
     base_sink<Mutex>::formatter_->format(msg, formatted);
@@ -45,4 +59,4 @@ SPDLOG_INLINE void basic_file_sink<Mutex>::flush_() {
 }
 
 }  // namespace sinks
-}  // namespace spdlog
+SPDLOG_NAMESPACE_END

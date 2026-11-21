@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include <atomic>
+#include <iterator>
 #include <optional>
 #include <string>
 #include <thread>  // NOLINT
@@ -50,6 +51,7 @@ ABSL_DECLARE_FLAG(std::vector<std::string>, mistyped_string_flag);
 namespace {
 
 namespace flags = absl::flags_internal;
+constexpr bool kStrippedFlagNames = ABSL_FLAGS_STRIP_NAMES != 0;
 
 std::string TestHelpMsg() { return "dynamic help"; }
 #if defined(_MSC_VER) && !defined(__clang__)
@@ -135,6 +137,17 @@ TEST_F(FlagTest, Traits) {
             flags::FlagValueStorageKind::kSequenceLocked);
   EXPECT_EQ(flags::StorageKind<absl::uint128>(),
             flags::FlagValueStorageKind::kSequenceLocked);
+
+  // These sizes are not hard limits, but we want to keep per-flag size as
+  // small as possible because production binaries may define thousands of
+  // flags.
+  if (sizeof(void*) == 8) {
+    EXPECT_EQ(sizeof(flags::FlagImpl), 56);
+    EXPECT_EQ(sizeof(absl::Flag<bool>), 64);
+    EXPECT_EQ(sizeof(absl::Flag<int>), 64);
+    EXPECT_EQ(sizeof(absl::Flag<int64_t>), 64);
+    EXPECT_EQ(sizeof(absl::Flag<double>), 64);
+  }
 }
 
 // --------------------------------------------------------------------
@@ -146,17 +159,16 @@ using String = std::string;
 using int128 = absl::int128;
 using uint128 = absl::uint128;
 
-#define DEFINE_CONSTRUCTED_FLAG(T, dflt, dflt_kind)                        \
-  constexpr flags::FlagDefaultArg f1default##T{                            \
-      flags::FlagDefaultSrc{dflt}, flags::FlagDefaultKind::dflt_kind};     \
-  constexpr absl::Flag<T> f1##T{"f1", #T, "file", help_arg, f1default##T}; \
-  ABSL_CONST_INIT absl::Flag<T> f2##T {                                    \
-    "f2", #T, "file",                                                      \
-        {flags::FlagHelpMsg(&TestHelpMsg), flags::FlagHelpKind::kGenFunc}, \
-        flags::FlagDefaultArg {                                            \
-      flags::FlagDefaultSrc(&TestMakeDflt<T>),                             \
-          flags::FlagDefaultKind::kGenFunc                                 \
-    }                                                                      \
+#define DEFINE_CONSTRUCTED_FLAG(T, dflt, dflt_kind)                          \
+  constexpr flags::FlagDefaultArg f1default##T{                              \
+      flags::FlagDefaultSrc{dflt}, flags::FlagDefaultKind::dflt_kind};       \
+  constexpr absl::Flag<T> f1##T{"f1", help_arg, f1default##T};               \
+  ABSL_CONST_INIT absl::Flag<T> f2##T {                                      \
+    "f2", {flags::FlagHelpMsg(&TestHelpMsg), flags::FlagHelpKind::kGenFunc}, \
+        flags::FlagDefaultArg {                                              \
+      flags::FlagDefaultSrc(&TestMakeDflt<T>),                               \
+          flags::FlagDefaultKind::kGenFunc                                   \
+    }                                                                        \
   }
 
 DEFINE_CONSTRUCTED_FLAG(bool, true, kOneWord);
@@ -173,13 +185,18 @@ DEFINE_CONSTRUCTED_FLAG(UDT, &TestMakeDflt<UDT>, kGenFunc);
 DEFINE_CONSTRUCTED_FLAG(int128, 13, kGenFunc);
 DEFINE_CONSTRUCTED_FLAG(uint128, 14, kGenFunc);
 
+constexpr absl::Flag<String> f_compat_5arg{
+    "f_compat", "std::string", "file", help_arg,
+    flags::FlagDefaultArg{flags::FlagDefaultSrc(&TestMakeDflt<String>),
+                          flags::FlagDefaultKind::kGenFunc}};
+
 template <typename T>
 bool TestConstructionFor(const absl::Flag<T>& f1, absl::Flag<T>& f2) {
   EXPECT_EQ(absl::GetFlagReflectionHandle(f1).Name(), "f1");
   EXPECT_EQ(absl::GetFlagReflectionHandle(f1).Help(), "literal help");
-  EXPECT_EQ(absl::GetFlagReflectionHandle(f1).Filename(), "file");
+  EXPECT_EQ(absl::GetFlagReflectionHandle(f1).Filename(), "");
 
-  flags::FlagRegistrar<T, false>(ABSL_FLAG_IMPL_FLAG_PTR(f2), nullptr)
+  flags::FlagRegistrar<T, false>(ABSL_FLAG_IMPL_FLAG_PTR(f2), "file")
       .OnUpdate(TestCallback);
 
   EXPECT_EQ(absl::GetFlagReflectionHandle(f2).Name(), "f2");
@@ -205,6 +222,10 @@ TEST_F(FlagTest, TestConstruction) {
   TEST_CONSTRUCTED_FLAG(UDT);
   TEST_CONSTRUCTED_FLAG(int128);
   TEST_CONSTRUCTED_FLAG(uint128);
+  EXPECT_EQ(absl::GetFlagReflectionHandle(f_compat_5arg).Name(), "f_compat");
+  EXPECT_EQ(absl::GetFlagReflectionHandle(f_compat_5arg).Help(),
+            "literal help");
+  EXPECT_EQ(absl::GetFlagReflectionHandle(f_compat_5arg).Filename(), "");
 }
 
 // --------------------------------------------------------------------
@@ -229,9 +250,9 @@ ABSL_DECLARE_FLAG(absl::uint128, test_flag_14);
 namespace {
 
 TEST_F(FlagTest, TestFlagDeclaration) {
-#if ABSL_FLAGS_STRIP_NAMES
-  GTEST_SKIP() << "This test requires flag names to be present";
-#endif
+  if constexpr (kStrippedFlagNames) {
+    GTEST_SKIP() << "This test requires flag names to be present";
+  }
   // test that we can access flag objects.
   EXPECT_EQ(absl::GetFlagReflectionHandle(FLAGS_test_flag_01).Name(),
             "test_flag_01");
@@ -265,7 +286,7 @@ TEST_F(FlagTest, TestFlagDeclaration) {
 
 }  // namespace
 
-#if ABSL_FLAGS_STRIP_NAMES
+#if ABSL_FLAGS_STRIP_NAMES && defined(__cpp_consteval)
 // The intent of this helper struct and an expression below is to make sure that
 // in the configuration where ABSL_FLAGS_STRIP_NAMES=1 registrar construction
 // (in cases of no Tail calls like OnUpdate) is constexpr and thus can and
@@ -279,7 +300,7 @@ struct VerifyConsteval {
 };
 
 ABSL_FLAG(int, test_registrar_const_init, 0, "") + VerifyConsteval();
-#endif
+#endif  // ABSL_FLAGS_STRIP_NAMES && defined(__cpp_consteval)
 
 // --------------------------------------------------------------------
 
@@ -302,9 +323,9 @@ ABSL_FLAG(absl::uint128, test_flag_14, absl::MakeUint128(0, 0xFFFAAABBBCCCDDD),
 namespace {
 
 TEST_F(FlagTest, TestFlagDefinition) {
-#if ABSL_FLAGS_STRIP_NAMES
-  GTEST_SKIP() << "This test requires flag names to be present";
-#endif
+  if constexpr (kStrippedFlagNames) {
+    GTEST_SKIP() << "This test requires flag names to be present";
+  }
   absl::string_view expected_file_name = "absl/flags/flag_test.cc";
 
   EXPECT_EQ(absl::GetFlagReflectionHandle(FLAGS_test_flag_01).Name(),
@@ -625,9 +646,9 @@ TEST_F(FlagTest, TestGetSet) {
 // --------------------------------------------------------------------
 
 TEST_F(FlagTest, TestGetViaReflection) {
-#if ABSL_FLAGS_STRIP_NAMES
-  GTEST_SKIP() << "This test requires flag names to be present";
-#endif
+  if constexpr (kStrippedFlagNames) {
+    GTEST_SKIP() << "This test requires flag names to be present";
+  }
   auto* handle = absl::FindCommandLineFlag("test_flag_01");
   EXPECT_EQ(*handle->TryGet<bool>(), true);
   handle = absl::FindCommandLineFlag("test_flag_02");
@@ -662,9 +683,9 @@ TEST_F(FlagTest, TestGetViaReflection) {
 // --------------------------------------------------------------------
 
 TEST_F(FlagTest, ConcurrentSetAndGet) {
-#if ABSL_FLAGS_STRIP_NAMES
-  GTEST_SKIP() << "This test requires flag names to be present";
-#endif
+  if constexpr (kStrippedFlagNames) {
+    GTEST_SKIP() << "This test requires flag names to be present";
+  }
   static constexpr int kNumThreads = 8;
   // Two arbitrary durations. One thread will concurrently flip the flag
   // between these two values, while the other threads read it and verify
@@ -690,10 +711,10 @@ TEST_F(FlagTest, ConcurrentSetAndGet) {
     });
   }
   absl::Time end_time = absl::Now() + absl::Seconds(1);
-  int i = 0;
+  size_t i = 0;
   while (absl::Now() < end_time) {
     absl::SetFlag(&FLAGS_test_flag_12,
-                  kValidDurations[i++ % ABSL_ARRAYSIZE(kValidDurations)]);
+                  kValidDurations[i++ % std::size(kValidDurations)]);
   }
   stop.store(true, std::memory_order_relaxed);
   for (auto& t : threads) t.join();
@@ -815,9 +836,9 @@ TEST_F(FlagTest, TestCustomUDT) {
 using FlagDeathTest = FlagTest;
 
 TEST_F(FlagDeathTest, TestTypeMismatchValidations) {
-#if ABSL_FLAGS_STRIP_NAMES
-  GTEST_SKIP() << "This test requires flag names to be present";
-#endif
+  if constexpr (kStrippedFlagNames) {
+    GTEST_SKIP() << "This test requires flag names to be present";
+  }
 #if !defined(NDEBUG)
   EXPECT_DEATH_IF_SUPPORTED(
       static_cast<void>(absl::GetFlag(FLAGS_mistyped_int_flag)),
@@ -936,7 +957,7 @@ ABSL_RETIRED_FLAG(std::string, old_str_flag, "", absl::StrCat("old ", "descr"));
 
 namespace {
 
-bool initialization_order_fiasco_test ABSL_ATTRIBUTE_UNUSED = [] {
+bool initialization_order_fiasco_test [[maybe_unused]] = [] {
   // Iterate over all the flags during static initialization.
   // This should not trigger ASan's initialization-order-fiasco.
   auto* handle1 = absl::FindCommandLineFlag("flag_on_separate_file");
@@ -949,14 +970,23 @@ bool initialization_order_fiasco_test ABSL_ATTRIBUTE_UNUSED = [] {
 
 TEST_F(FlagTest, TestRetiredFlagRegistration) {
   auto* handle = absl::FindCommandLineFlag("old_bool_flag");
-  EXPECT_TRUE(handle->IsOfType<bool>());
-  EXPECT_TRUE(handle->IsRetired());
-  handle = absl::FindCommandLineFlag("old_int_flag");
-  EXPECT_TRUE(handle->IsOfType<int>());
-  EXPECT_TRUE(handle->IsRetired());
-  handle = absl::FindCommandLineFlag("old_str_flag");
-  EXPECT_TRUE(handle->IsOfType<std::string>());
-  EXPECT_TRUE(handle->IsRetired());
+  if constexpr (kStrippedFlagNames) {
+    EXPECT_EQ(handle, nullptr);
+    EXPECT_EQ(absl::FindCommandLineFlag("old_int_flag"), nullptr);
+    EXPECT_EQ(absl::FindCommandLineFlag("old_str_flag"), nullptr);
+  } else {
+    ASSERT_NE(handle, nullptr);
+    EXPECT_TRUE(handle->IsOfType<bool>());
+    EXPECT_TRUE(handle->IsRetired());
+    handle = absl::FindCommandLineFlag("old_int_flag");
+    ASSERT_NE(handle, nullptr);
+    EXPECT_TRUE(handle->IsOfType<int>());
+    EXPECT_TRUE(handle->IsRetired());
+    handle = absl::FindCommandLineFlag("old_str_flag");
+    ASSERT_NE(handle, nullptr);
+    EXPECT_TRUE(handle->IsOfType<std::string>());
+    EXPECT_TRUE(handle->IsRetired());
+  }
 }
 
 }  // namespace
@@ -1011,13 +1041,11 @@ struct NonTriviallyCopyableUDT {
   NonTriviallyCopyableUDT(const NonTriviallyCopyableUDT& rhs) : c(rhs.c) {
     s_num_instance++;
   }
-  NonTriviallyCopyableUDT& operator=(const NonTriviallyCopyableUDT& rhs) {
-    c = rhs.c;
-    return *this;
-  }
+  NonTriviallyCopyableUDT& operator=(const NonTriviallyCopyableUDT& rhs) =
+      default;
   ~NonTriviallyCopyableUDT() { s_num_instance--; }
 
-  static uint64_t s_num_instance;
+  static uint64_t s_num_instance [[maybe_unused]];
   char c;
 };
 
@@ -1068,7 +1096,7 @@ TEST_F(FlagTest, TestNonTriviallyCopyableGetSetSet) {
             absl::GetFlag(FLAGS_test_flag_ntc_udt1);
         EXPECT_EQ(value.c, 'A');
       },
-      0);
+      0, kStrippedFlagNames ? 1 : 0);
 
   TestExpectedLeaks<1>(
       [&] {
@@ -1089,6 +1117,9 @@ TEST_F(FlagTest, TestNonTriviallyCopyableGetSetSet) {
 }
 
 TEST_F(FlagTest, TestNonTriviallyCopyableParseSet) {
+  if constexpr (kStrippedFlagNames) {
+    GTEST_SKIP() << "This test requires flag names to be present";
+  }
   TestExpectedLeaks<2>(
       [&] {
         const char* in_argv[] = {"testbin", "--test_flag_ntc_udt2=A"};
@@ -1114,7 +1145,7 @@ TEST_F(FlagTest, TestNonTriviallyCopyableSet) {
         absl::SetFlag(&FLAGS_test_flag_ntc_udt3, value);
         EXPECT_EQ(value.c, 'B');
       },
-      0);
+      0, kStrippedFlagNames ? 1 : 0);
 }
 
 // One new instance created during initialization and stored in the flag.
@@ -1124,6 +1155,9 @@ auto premain_utd4_get =
      false);
 
 TEST_F(FlagTest, TestNonTriviallyCopyableGetBeforeMainParseGet) {
+  if constexpr (kStrippedFlagNames) {
+    GTEST_SKIP() << "This test requires flag names to be present";
+  }
   TestExpectedLeaks<4>(
       [&] {
         const char* in_argv[] = {"testbin", "--test_flag_ntc_udt4=C"};
@@ -1152,6 +1186,9 @@ auto premain_utd5_set = (TestExpectedLeaks<5>(
                          false);
 
 TEST_F(FlagTest, TestNonTriviallyCopyableSetParseGet) {
+  if constexpr (kStrippedFlagNames) {
+    GTEST_SKIP() << "This test requires flag names to be present";
+  }
   TestExpectedLeaks<5>(
       [&] {
         const char* in_argv[] = {"testbin", "--test_flag_ntc_udt5=C"};
@@ -1377,5 +1414,54 @@ TEST_F(FlagTest, TestStdOptional) {
 // --------------------------------------------------------------------
 
 #endif
+
+}  // namespace
+
+ABSL_FLAG(int, concurrent_saver_test_flag, 0,
+          "test flag for concurrent FlagSaver");
+
+namespace {
+
+TEST_F(FlagTest, ConcurrentFlagSaverAndSetFlag) {
+  std::atomic<bool> stop{false};
+  std::thread writer([&stop]() {
+    int i = 1;
+    while (!stop.load(std::memory_order_relaxed)) {
+      absl::SetFlag(&FLAGS_concurrent_saver_test_flag, i++);
+    }
+  });
+  // Run an arbitrary small number of FlagSaver save/restore cycles while the
+  // writer thread mutates the flag past the 7-update inline modification
+  // counter limit, checking under ThreadSanitizer that concurrent SaveState,
+  // RestoreState, and SetFlag calls do not race. Each FlagSaver snapshots
+  // every registered flag in the binary, so keep the cycle count small.
+  constexpr int kSaveRestoreCycles = 50;
+  for (int iter = 0; iter < kSaveRestoreCycles; ++iter) {
+    absl::FlagSaver saver;
+    (void)absl::GetFlag(FLAGS_concurrent_saver_test_flag);
+  }
+  stop.store(true, std::memory_order_relaxed);
+  writer.join();
+  EXPECT_GE(absl::GetFlag(FLAGS_concurrent_saver_test_flag), 0);
+}
+
+TEST_F(FlagTest, FilenameInterning) {
+  constexpr const char* kFileA = "dir/intern_test_a.cc";
+  constexpr const char* kFileB = "dir/intern_test_b.cc";
+
+  absl::Flag<int32_t> f_a1{"fa1", help_arg, f1defaultint32_t};
+  absl::Flag<int32_t> f_a2{"fa2", help_arg, f1defaultint32_t};
+  absl::Flag<int32_t> f_b{"fb", help_arg, f1defaultint32_t};
+
+  flags::FlagRegistrar<int32_t, false>(ABSL_FLAG_IMPL_FLAG_PTR(f_a1), kFileA);
+  flags::FlagRegistrar<int32_t, false>(ABSL_FLAG_IMPL_FLAG_PTR(f_a2), kFileA);
+  flags::FlagRegistrar<int32_t, false>(ABSL_FLAG_IMPL_FLAG_PTR(f_b), kFileB);
+  // Duplicate registration preserves the first filename for ODR diagnostics.
+  flags::FlagRegistrar<int32_t, false>(ABSL_FLAG_IMPL_FLAG_PTR(f_a1), kFileB);
+
+  EXPECT_EQ(f_a1.Filename(), "dir/intern_test_a.cc");
+  EXPECT_EQ(f_a2.Filename(), "dir/intern_test_a.cc");
+  EXPECT_EQ(f_b.Filename(), "dir/intern_test_b.cc");
+}
 
 }  // namespace

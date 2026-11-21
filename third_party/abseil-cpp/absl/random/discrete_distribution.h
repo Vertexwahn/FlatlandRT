@@ -15,9 +15,12 @@
 #ifndef ABSL_RANDOM_DISCRETE_DISTRIBUTION_H_
 #define ABSL_RANDOM_DISCRETE_DISTRIBUTION_H_
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <initializer_list>
+#include <ios>
 #include <istream>
 #include <limits>
 #include <ostream>
@@ -105,7 +108,7 @@ class discrete_distribution {
     std::vector<double> p_;                     // normalized probabilities
     std::vector<std::pair<double, size_t>> q_;  // (acceptance, alternate) pairs
 
-    static_assert(std::is_integral<result_type>::value,
+    static_assert(std::is_integral_v<result_type>,
                   "Class-template absl::discrete_distribution<> must be "
                   "parameterized using an integral type.");
   };
@@ -226,18 +229,41 @@ std::basic_istream<CharT, Traits>& operator>>(
   using param_type = typename discrete_distribution<IntType>::param_type;
   auto saver = random_internal::make_istream_state_saver(is);
 
-  size_t n;
-  std::vector<double> p;
-
-  is >> n;
-  if (is.fail()) return is;
-  if (n > 0) {
-    p.reserve(n);
-    for (IntType i = 0; i < n && !is.fail(); ++i) {
-      auto tmp = random_internal::read_floating_point<double>(is);
-      if (is.fail()) return is;
-      p.push_back(tmp);
+  size_t n = 0;
+  if (!random_internal::read_integral(is, n)) {
+    return is;
+  }
+  if (n == 0) {
+    is.setstate(std::ios_base::failbit);
+    return is;
+  }
+  if constexpr (std::numeric_limits<IntType>::digits <
+                std::numeric_limits<size_t>::digits) {
+    if (n - 1 > static_cast<size_t>((std::numeric_limits<IntType>::max)())) {
+      is.setstate(std::ios_base::failbit);
+      return is;
     }
+  }
+  std::vector<double> p;
+  p.reserve((std::min)(n, size_t{1024}));
+  double sum = 0.0;
+  for (size_t i = 0; i < n; ++i) {
+    auto tmp = random_internal::read_floating_point<double>(is);
+    if (is.fail()) return is;
+    if (!(tmp >= 0.0 && std::isfinite(tmp))) {
+      is.setstate(std::ios_base::failbit);
+      return is;
+    }
+    sum += tmp;
+    if (!std::isfinite(sum)) {
+      is.setstate(std::ios_base::failbit);
+      return is;
+    }
+    p.push_back(tmp);
+  }
+  if (!(sum > 0.0)) {
+    is.setstate(std::ios_base::failbit);
+    return is;
   }
   x.param(param_type(p.begin(), p.end()));
   return is;

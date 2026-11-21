@@ -21,9 +21,12 @@ else()
     include(FetchContent)
     FetchContent_Declare(
         Catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG 53d0d913a422d356b23dd927547febdf69ee9081 # v3.5.0
+        GIT_TAG 08092139210881f01a34e60c5f2fd6afa0ea4024 # v3.16.1
     )
     FetchContent_MakeAvailable(Catch2)
+    # Treat Catch2 headers as system headers so our strict warnings don't apply to them
+    get_target_property(catch2_include_dirs Catch2 INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(Catch2 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${catch2_include_dirs}")
 endif()
 
 set(SPDLOG_UTESTS_SOURCES
@@ -47,6 +50,7 @@ set(SPDLOG_UTESTS_SOURCES
     test_custom_callbacks.cpp
     test_cfg.cpp
     test_time_point.cpp
+    test_tcp_client.cpp
     test_stopwatch.cpp
     test_circular_q.cpp
     test_bin_to_hex.cpp
@@ -93,4 +97,15 @@ endif()
 # The header-only library version tests
 if(SPDLOG_BUILD_TESTS_HO OR SPDLOG_BUILD_ALL)
     spdlog_prepare_test(spdlog-utests-ho spdlog::spdlog_header_only)
+endif()
+
+if(SPDLOG_MASTER_PROJECT AND NOT CMAKE_CROSSCOMPILING)
+    add_test(
+        NAME spdlog-cmake-tweakme
+        COMMAND
+            ${CMAKE_COMMAND} -DSPDLOG_TEST_SOURCE_DIR=${CMAKE_CURRENT_LIST_DIR}/..
+            -DSPDLOG_TEST_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/cmake-tweakme
+            -DSPDLOG_TEST_GENERATOR=${CMAKE_GENERATOR} -DSPDLOG_TEST_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
+            -DSPDLOG_TEST_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET} -DSPDLOG_TEST_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+            -DSPDLOG_TEST_CONFIG=$<CONFIG> -P ${CMAKE_CURRENT_LIST_DIR}/cmake/tweakme_test.cmake)
 endif()

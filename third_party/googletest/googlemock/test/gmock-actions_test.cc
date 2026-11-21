@@ -53,11 +53,6 @@
 // Silence C4100 (unreferenced formal parameter) and C4503 (decorated name
 // length exceeded) for MSVC.
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100 4503)
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-// and silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 15
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800)
-#endif
 
 namespace testing {
 namespace {
@@ -66,30 +61,30 @@ using ::testing::internal::BuiltInDefaultValue;
 
 TEST(TypeTraits, Negation) {
   // Direct use with std types.
-  static_assert(std::is_base_of<std::false_type,
-                                internal::negation<std::true_type>>::value,
-                "");
+  static_assert(
+      std::is_base_of_v<std::false_type, internal::negation<std::true_type>>,
+      "");
 
-  static_assert(std::is_base_of<std::true_type,
-                                internal::negation<std::false_type>>::value,
-                "");
+  static_assert(
+      std::is_base_of_v<std::true_type, internal::negation<std::false_type>>,
+      "");
 
   // With other types that fit the requirement of a value member that is
   // convertible to bool.
-  static_assert(std::is_base_of<
-                    std::true_type,
-                    internal::negation<std::integral_constant<int, 0>>>::value,
-                "");
+  static_assert(
+      std::is_base_of_v<std::true_type,
+                        internal::negation<std::integral_constant<int, 0>>>,
+      "");
 
-  static_assert(std::is_base_of<
-                    std::false_type,
-                    internal::negation<std::integral_constant<int, 1>>>::value,
-                "");
+  static_assert(
+      std::is_base_of_v<std::false_type,
+                        internal::negation<std::integral_constant<int, 1>>>,
+      "");
 
-  static_assert(std::is_base_of<
-                    std::false_type,
-                    internal::negation<std::integral_constant<int, -1>>>::value,
-                "");
+  static_assert(
+      std::is_base_of_v<std::false_type,
+                        internal::negation<std::integral_constant<int, -1>>>,
+      "");
 }
 
 // Weird false/true types that aren't actually bool constants (but should still
@@ -108,79 +103,76 @@ struct MyTrue : std::integral_constant<int, -1> {};
 
 TEST(TypeTraits, Conjunction) {
   // Base case: always true.
-  static_assert(std::is_base_of<std::true_type, internal::conjunction<>>::value,
-                "");
+  static_assert(std::is_base_of_v<std::true_type, internal::conjunction<>>, "");
 
   // One predicate: inherits from that predicate, regardless of value.
   static_assert(
-      std::is_base_of<MyFalse<0>, internal::conjunction<MyFalse<0>>>::value,
-      "");
+      std::is_base_of_v<MyFalse<0>, internal::conjunction<MyFalse<0>>>, "");
 
-  static_assert(
-      std::is_base_of<MyTrue<0>, internal::conjunction<MyTrue<0>>>::value, "");
+  static_assert(std::is_base_of_v<MyTrue<0>, internal::conjunction<MyTrue<0>>>,
+                "");
 
   // Multiple predicates, with at least one false: inherits from that one.
   static_assert(
-      std::is_base_of<MyFalse<1>, internal::conjunction<MyTrue<0>, MyFalse<1>,
-                                                        MyTrue<2>>>::value,
+      std::is_base_of_v<
+          MyFalse<1>, internal::conjunction<MyTrue<0>, MyFalse<1>, MyTrue<2>>>,
       "");
 
   static_assert(
-      std::is_base_of<MyFalse<1>, internal::conjunction<MyTrue<0>, MyFalse<1>,
-                                                        MyFalse<2>>>::value,
+      std::is_base_of_v<
+          MyFalse<1>, internal::conjunction<MyTrue<0>, MyFalse<1>, MyFalse<2>>>,
       "");
 
   // Short circuiting: in the case above, additional predicates need not even
   // define a value member.
   struct Empty {};
   static_assert(
-      std::is_base_of<MyFalse<1>, internal::conjunction<MyTrue<0>, MyFalse<1>,
-                                                        Empty>>::value,
+      std::is_base_of_v<MyFalse<1>,
+                        internal::conjunction<MyTrue<0>, MyFalse<1>, Empty>>,
       "");
 
   // All predicates true: inherits from the last.
   static_assert(
-      std::is_base_of<MyTrue<2>, internal::conjunction<MyTrue<0>, MyTrue<1>,
-                                                       MyTrue<2>>>::value,
+      std::is_base_of_v<MyTrue<2>,
+                        internal::conjunction<MyTrue<0>, MyTrue<1>, MyTrue<2>>>,
       "");
 }
 
 TEST(TypeTraits, Disjunction) {
   // Base case: always false.
-  static_assert(
-      std::is_base_of<std::false_type, internal::disjunction<>>::value, "");
+  static_assert(std::is_base_of_v<std::false_type, internal::disjunction<>>,
+                "");
 
   // One predicate: inherits from that predicate, regardless of value.
   static_assert(
-      std::is_base_of<MyFalse<0>, internal::disjunction<MyFalse<0>>>::value,
-      "");
+      std::is_base_of_v<MyFalse<0>, internal::disjunction<MyFalse<0>>>, "");
 
-  static_assert(
-      std::is_base_of<MyTrue<0>, internal::disjunction<MyTrue<0>>>::value, "");
+  static_assert(std::is_base_of_v<MyTrue<0>, internal::disjunction<MyTrue<0>>>,
+                "");
 
   // Multiple predicates, with at least one true: inherits from that one.
   static_assert(
-      std::is_base_of<MyTrue<1>, internal::disjunction<MyFalse<0>, MyTrue<1>,
-                                                       MyFalse<2>>>::value,
+      std::is_base_of_v<
+          MyTrue<1>, internal::disjunction<MyFalse<0>, MyTrue<1>, MyFalse<2>>>,
       "");
 
   static_assert(
-      std::is_base_of<MyTrue<1>, internal::disjunction<MyFalse<0>, MyTrue<1>,
-                                                       MyTrue<2>>>::value,
+      std::is_base_of_v<
+          MyTrue<1>, internal::disjunction<MyFalse<0>, MyTrue<1>, MyTrue<2>>>,
       "");
 
   // Short circuiting: in the case above, additional predicates need not even
   // define a value member.
   struct Empty {};
   static_assert(
-      std::is_base_of<MyTrue<1>, internal::disjunction<MyFalse<0>, MyTrue<1>,
-                                                       Empty>>::value,
+      std::is_base_of_v<MyTrue<1>,
+                        internal::disjunction<MyFalse<0>, MyTrue<1>, Empty>>,
       "");
 
   // All predicates false: inherits from the last.
   static_assert(
-      std::is_base_of<MyFalse<2>, internal::disjunction<MyFalse<0>, MyFalse<1>,
-                                                        MyFalse<2>>>::value,
+      std::is_base_of_v<MyFalse<2>, internal::disjunction<
+                                        MyFalse<0>, MyFalse<1>, MyFalse<2>>>,
       "");
 }
 
@@ -273,7 +265,7 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<signed char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<char>::Get());
-#if GMOCK_WCHAR_T_IS_NATIVE_
+#if GTEST_HAS_NATIVE_WCHAR
 #if !defined(__WCHAR_UNSIGNED__)
   EXPECT_EQ(0, BuiltInDefaultValue<wchar_t>::Get());
 #else
@@ -302,7 +294,7 @@ TEST(BuiltInDefaultValueTest, ExistsForNumericTypes) {
   EXPECT_TRUE(BuiltInDefaultValue<unsigned char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<signed char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<char>::Exists());
-#if GMOCK_WCHAR_T_IS_NATIVE_
+#if GTEST_HAS_NATIVE_WCHAR
   EXPECT_TRUE(BuiltInDefaultValue<wchar_t>::Exists());
 #endif
   EXPECT_TRUE(BuiltInDefaultValue<unsigned short>::Exists());  // NOLINT
@@ -747,8 +739,8 @@ TEST(ReturnTest, ConversionRequiresConstLvalueReference) {
   using R = int;
   using U = std::reference_wrapper<const int>;
 
-  static_assert(std::is_convertible<const R&, U>::value, "");
-  static_assert(!std::is_convertible<R, U>::value, "");
+  static_assert(std::is_convertible_v<const R&, U>, "");
+  static_assert(!std::is_convertible_v<R, U>, "");
 
   MockFunction<U()> mock;
   EXPECT_CALL(mock, Call).WillOnce(Return(17)).WillRepeatedly(Return(19));
@@ -771,11 +763,11 @@ TEST(ReturnTest, ConversionRequiresMutableLvalueReference) {
     S(std::string&) {}  // NOLINT
   };
 
-  static_assert(std::is_convertible<std::string&, S>::value, "");
+  static_assert(std::is_convertible_v<std::string&, S>, "");
 #ifndef _MSC_VER
-  static_assert(!std::is_convertible<std::string&&, S>::value, "");
+  static_assert(!std::is_convertible_v<std::string&&, S>, "");
 #endif
-  static_assert(!std::is_convertible<const std::string&, S>::value, "");
+  static_assert(!std::is_convertible_v<const std::string&, S>, "");
 
   // It shouldn't be possible to use the result of Return(std::string) in a
   // context where an S is needed.
@@ -784,9 +776,9 @@ TEST(ReturnTest, ConversionRequiresMutableLvalueReference) {
   // implementation of is_convertible causes our SFINAE to be wrong.
   using RA = decltype(Return(std::string()));
 
-  static_assert(!std::is_convertible<RA, Action<S()>>::value, "");
+  static_assert(!std::is_convertible_v<RA, Action<S()>>, "");
 #ifndef _MSC_VER
-  static_assert(!std::is_convertible<RA, OnceAction<S()>>::value, "");
+  static_assert(!std::is_convertible_v<RA, OnceAction<S()>>, "");
 #endif
 }
 
@@ -803,8 +795,8 @@ TEST(ReturnTest, MoveOnlyResultType) {
 
   // The result of Return should not be convertible to Action (so it can't be
   // used with WillRepeatedly).
-  static_assert(!std::is_convertible<decltype(Return(std::unique_ptr<int>())),
-                                     Action<std::unique_ptr<int>()>>::value,
+  static_assert(!std::is_convertible_v<decltype(Return(std::unique_ptr<int>())),
+                                       Action<std::unique_ptr<int>()>>,
                 "");
 }
 
@@ -1104,6 +1096,7 @@ TEST(SetArgPointeeTest, AcceptsStringLiteral) {
   EXPECT_STREQ("world", ptr);
 }
 
+#if GTEST_HAS_STD_WSTRING
 TEST(SetArgPointeeTest, AcceptsWideStringLiteral) {
   typedef void MyFunction(const wchar_t**);
   Action<MyFunction> a = SetArgPointee<0>(L"world");
@@ -1111,16 +1104,13 @@ TEST(SetArgPointeeTest, AcceptsWideStringLiteral) {
   a.Perform(std::make_tuple(&ptr));
   EXPECT_STREQ(L"world", ptr);
 
-#if GTEST_HAS_STD_WSTRING
-
   typedef void MyStringFunction(std::wstring*);
   Action<MyStringFunction> a2 = SetArgPointee<0>(L"world");
   std::wstring str = L"";
   a2.Perform(std::make_tuple(&str));
   EXPECT_EQ(L"world", str);
-
-#endif
 }
+#endif
 
 // Tests that SetArgPointee<N>() accepts a char pointer.
 TEST(SetArgPointeeTest, AcceptsCharPointer) {
@@ -1225,37 +1215,41 @@ class Foo {
 
 // Tests InvokeWithoutArgs(function).
 TEST(InvokeWithoutArgsTest, Function) {
+  GTEST_DISABLE_DEPRECATED_PUSH_()
   // As an action that takes one argument.
-  Action<int(int)> a = InvokeWithoutArgs(Nullary);  // NOLINT
+  Action<int(int)> a = Nullary;  // NOLINT
   EXPECT_EQ(1, a.Perform(std::make_tuple(2)));
 
   // As an action that takes two arguments.
-  Action<int(int, double)> a2 = InvokeWithoutArgs(Nullary);  // NOLINT
+  Action<int(int, double)> a2 = Nullary;  // NOLINT
   EXPECT_EQ(1, a2.Perform(std::make_tuple(2, 3.5)));
 
   // As an action that returns void.
-  Action<void(int)> a3 = InvokeWithoutArgs(VoidNullary);  // NOLINT
+  Action<void(int)> a3 = VoidNullary;  // NOLINT
   g_done = false;
   a3.Perform(std::make_tuple(1));
   EXPECT_TRUE(g_done);
+  GTEST_DISABLE_DEPRECATED_POP_()
 }
 
 // Tests InvokeWithoutArgs(functor).
 TEST(InvokeWithoutArgsTest, Functor) {
+  GTEST_DISABLE_DEPRECATED_PUSH_()
   // As an action that takes no argument.
-  Action<int()> a = InvokeWithoutArgs(NullaryFunctor());  // NOLINT
+  Action<int()> a = NullaryFunctor();  // NOLINT
   EXPECT_EQ(2, a.Perform(std::make_tuple()));
 
   // As an action that takes three arguments.
   Action<int(int, double, char)> a2 =  // NOLINT
-      InvokeWithoutArgs(NullaryFunctor());
+      NullaryFunctor();
   EXPECT_EQ(2, a2.Perform(std::make_tuple(3, 3.5, 'a')));
 
   // As an action that returns void.
-  Action<void()> a3 = InvokeWithoutArgs(VoidNullaryFunctor());
+  Action<void()> a3 = VoidNullaryFunctor();
   g_done = false;
   a3.Perform(std::make_tuple());
   EXPECT_TRUE(g_done);
+  GTEST_DISABLE_DEPRECATED_POP_()
 }
 
 // Tests InvokeWithoutArgs(obj_ptr, method).
@@ -2196,7 +2190,7 @@ TEST(MoveOnlyArgumentsTest, ReturningActions) {
   EXPECT_EQ(x, 3);
 }
 
-ACTION(ReturnArity) { return std::tuple_size<args_type>::value; }
+ACTION(ReturnArity) { return std::tuple_size_v<args_type>; }
 
 TEST(ActionMacro, LargeArity) {
   EXPECT_EQ(
@@ -2218,7 +2212,4 @@ TEST(ActionMacro, LargeArity) {
 }  // namespace
 }  // namespace testing
 
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4800
-#endif
 GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100 4503

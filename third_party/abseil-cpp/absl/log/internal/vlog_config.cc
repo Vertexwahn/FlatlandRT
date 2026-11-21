@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <atomic>
 #include <functional>
-#include <memory>
 #include <optional>
 #include <string>
 #include <utility>
@@ -27,13 +26,12 @@
 
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
-#include "absl/base/const_init.h"
+#include "absl/base/internal/scheduling_mode.h"
 #include "absl/base/internal/spinlock.h"
 #include "absl/base/no_destructor.h"
 #include "absl/base/optimization.h"
 #include "absl/base/thread_annotations.h"
 #include "absl/log/internal/fnmatch.h"
-#include "absl/memory/memory.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
@@ -66,23 +64,21 @@ absl::string_view Basename(absl::string_view file) {
 
 }  // namespace
 
-bool VLogSite::SlowIsEnabled(int stale_v, int level) {
+bool VLogSite::SlowIsEnabled(int level) {
+  int stale_v = v_.load(std::memory_order_relaxed);
   if (ABSL_PREDICT_TRUE(stale_v != kUninitialized)) {
-    // Because of the prerequisites to this function, we know that stale_v is
-    // either uninitialized or >= level. If it's not uninitialized, that means
-    // it must be >= level, thus we should log.
-    return true;
+    return stale_v >= level;
   }
   stale_v = log_internal::RegisterAndInitialize(this);
   return ABSL_PREDICT_FALSE(stale_v >= level);
 }
 
-bool VLogSite::SlowIsEnabled0(int stale_v) { return SlowIsEnabled(stale_v, 0); }
-bool VLogSite::SlowIsEnabled1(int stale_v) { return SlowIsEnabled(stale_v, 1); }
-bool VLogSite::SlowIsEnabled2(int stale_v) { return SlowIsEnabled(stale_v, 2); }
-bool VLogSite::SlowIsEnabled3(int stale_v) { return SlowIsEnabled(stale_v, 3); }
-bool VLogSite::SlowIsEnabled4(int stale_v) { return SlowIsEnabled(stale_v, 4); }
-bool VLogSite::SlowIsEnabled5(int stale_v) { return SlowIsEnabled(stale_v, 5); }
+bool VLogSite::SlowIsEnabled0() { return SlowIsEnabled(0); }
+bool VLogSite::SlowIsEnabled1() { return SlowIsEnabled(1); }
+bool VLogSite::SlowIsEnabled2() { return SlowIsEnabled(2); }
+bool VLogSite::SlowIsEnabled3() { return SlowIsEnabled(3); }
+bool VLogSite::SlowIsEnabled4() { return SlowIsEnabled(4); }
+bool VLogSite::SlowIsEnabled5() { return SlowIsEnabled(5); }
 
 namespace {
 struct VModuleInfo final {

@@ -32,7 +32,7 @@
 #include <utility>
 #include <vector>
 
-namespace spdlog {
+SPDLOG_NAMESPACE_BEGIN
 namespace details {
 
 ///////////////////////////////////////////////////////////////////////
@@ -146,7 +146,7 @@ public:
 
 static const char *ampm(const tm &t) { return t.tm_hour >= 12 ? "PM" : "AM"; }
 
-static int to12h(const tm &t) { return t.tm_hour > 12 ? t.tm_hour - 12 : t.tm_hour; }
+static int to12h(const tm &t) { return t.tm_hour % 12 == 0 ? 12 : t.tm_hour % 12; }
 
 // Abbreviated weekday name
 static std::array<const char *, 7> days{{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}};
@@ -224,7 +224,8 @@ public:
         : flag_formatter(padinfo) {}
 
     void format(const details::log_msg &, const std::tm &tm_time, memory_buf_t &dest) override {
-        const size_t field_size = 24;
+        const size_t field_size = 18 + ScopedPadder::count_digits(tm_time.tm_mday) +
+                                  ScopedPadder::count_digits(tm_time.tm_year + 1900);
         ScopedPadder p(field_size, padinfo_, dest);
 
         fmt_helper::append_string_view(days[static_cast<size_t>(tm_time.tm_wday)], dest);
@@ -430,10 +431,10 @@ public:
         : flag_formatter(padinfo) {}
 
     void format(const details::log_msg &msg, const std::tm &, memory_buf_t &dest) override {
-        const size_t field_size = 10;
-        ScopedPadder p(field_size, padinfo_, dest);
         auto duration = msg.time.time_since_epoch();
         auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+        const auto field_size = ScopedPadder::count_digits(seconds);
+        ScopedPadder p(field_size, padinfo_, dest);
         fmt_helper::append_int(seconds, dest);
     }
 };
@@ -526,6 +527,8 @@ public:
         const size_t field_size = 6;
         ScopedPadder p(field_size, padinfo_, dest);
 #ifdef SPDLOG_NO_TZ_OFFSET
+        (void)msg;
+        (void)tm_time;
         const char *str = "+??:??";
         dest.append(str, str + 6);
 #else
@@ -922,13 +925,16 @@ public:
         }
 
 #ifndef SPDLOG_NO_TLS
-        // add mdc if present
-        auto &mdc_map = mdc::get_context();
-        if (!mdc_map.empty()) {
-            dest.push_back('[');
-            mdc_formatter_.format_mdc(mdc_map, dest);
-            dest.push_back(']');
-            dest.push_back(' ');
+        // add mdc if present, but avoid constructing the thread local context when mdc was never
+        // used on this thread
+        if (mdc::has_context()) {
+            auto &mdc_map = mdc::get_context();
+            if (!mdc_map.empty()) {
+                dest.push_back('[');
+                mdc_formatter_.format_mdc(mdc_map, dest);
+                dest.push_back(']');
+                dest.push_back(' ');
+            }
         }
 #endif
         // fmt_helper::append_string_view(msg.msg(), dest);
@@ -990,7 +996,7 @@ SPDLOG_INLINE void pattern_formatter::format(const details::log_msg &msg, memory
     if (need_localtime_) {
         const auto secs =
             std::chrono::duration_cast<std::chrono::seconds>(msg.time.time_since_epoch());
-        if (secs != last_log_secs_) {
+        if (secs != last_log_secs_ || cached_tm_.tm_mday == 0) {
             cached_tm_ = get_time_(msg);
             last_log_secs_ = secs;
         }
@@ -1347,4 +1353,4 @@ SPDLOG_INLINE void pattern_formatter::compile_pattern_(const std::string &patter
         formatters_.push_back(std::move(user_chars));
     }
 }
-}  // namespace spdlog
+SPDLOG_NAMESPACE_END

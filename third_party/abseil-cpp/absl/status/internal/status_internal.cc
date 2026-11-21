@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <string>
@@ -32,8 +33,8 @@
 #include "absl/debugging/leak_check.h"
 #include "absl/debugging/stacktrace.h"
 #include "absl/debugging/symbolize.h"
+#include "absl/functional/function_ref.h"
 #include "absl/hash/hash.h"
-#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/status/status_payload_printer.h"
 #include "absl/strings/cord.h"
@@ -42,6 +43,7 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional_ref.h"
 #include "absl/types/source_location.h"
 #include "absl/types/span.h"
 
@@ -99,9 +101,12 @@ StatusRep::EraseResult StatusRep::ErasePayload(absl::string_view type_url) {
       status_internal::FindPayloadIndexByUrl(payloads_.get(), type_url);
   if (!index.has_value()) return {false, Status::PointerToRep(this)};
   payloads_->erase(payloads_->begin() + index.value());
-  if (payloads_->empty() && message_.empty()) {
+  if (payloads_->empty() && message_.empty() &&
+      code_ != absl::StatusCode::kOk) {
     // Special case: If this can be represented inlined, it MUST be inlined
-    // (== depends on this behavior).
+    // (== depends on this behavior). An out-of-line StatusRep with
+    // StatusCode::kOk originates from Status::MakeNonOkStatusWithOkCode and
+    // must stay out-of-line so it does not become OkStatus().
     EraseResult result = {true, Status::CodeToInlinedRep(code_)};
     Unref();
     return result;
@@ -211,9 +216,12 @@ bool StatusRep::operator==(const StatusRep& other) const {
   return true;
 }
 
-StatusRep* absl_nonnull StatusRep::CloneAndUnref() const {
+StatusRep* absl_nonnull StatusRep::Clone(
+    absl::optional_ref<absl::string_view> new_message, bool include_payloads,
+    bool include_source_locations) const {
   // Optimization: no need to create a clone if we already have a refcount of 1.
-  if (ref_.load(std::memory_order_acquire) == 1) {
+  if (ref_.load(std::memory_order_acquire) == 1 && !new_message.has_value() &&
+      include_payloads && include_source_locations) {
     // All StatusRep instances are heap allocated and mutable, therefore this
     // const_cast will never cast away const from a stack instance.
     //
@@ -222,12 +230,30 @@ StatusRep* absl_nonnull StatusRep::CloneAndUnref() const {
     return const_cast<StatusRep*>(this);
   }
   std::unique_ptr<status_internal::Payloads> payloads;
-  if (payloads_) {
+  if (include_payloads && payloads_) {
     payloads = std::make_unique<status_internal::Payloads>(*payloads_);
   }
-  auto* new_rep = new StatusRep(code_, message_, std::move(payloads));
-  new_rep->source_locations_ = source_locations_;
-  Unref();
+  auto* new_rep =
+      new StatusRep(code_, new_message.value_or(message_), std::move(payloads));
+  if (include_source_locations) {
+    new_rep->source_locations_ = source_locations_;
+  }
+  return new_rep;
+}
+
+StatusRep* absl_nonnull StatusRep::CloneAndUnref() const {
+  return CloneAndUnref(std::nullopt, true, true);
+}
+
+StatusRep* absl_nonnull StatusRep::CloneAndUnref(
+    absl::optional_ref<absl::string_view> new_message, bool include_payloads,
+    bool include_source_locations) const {
+  StatusRep* new_rep =
+      Clone(new_message, /*include_payloads=*/include_payloads,
+            /*include_source_locations=*/include_source_locations);
+  if (new_rep != this) {
+    Unref();
+  }
   return new_rep;
 }
 

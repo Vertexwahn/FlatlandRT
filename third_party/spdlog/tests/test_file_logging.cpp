@@ -110,7 +110,65 @@ TEST_CASE("rotating_file_logger2", "[rotating_logger]") {
     REQUIRE(get_filesize(ROTATING_LOG ".1") <= max_size);
 }
 
+// test that get_current_size() tracks the file size, including across rotations
+TEST_CASE("rotating_file_logger_get_current_size", "[rotating_logger]") {
+    prepare_logdir();
+    size_t max_size = 1024 * 10;
+    spdlog::filename_t basename = SPDLOG_FILENAME_T(ROTATING_LOG);
+    auto sink = std::make_shared<spdlog::sinks::rotating_file_sink_st>(basename, max_size, 2);
+    auto logger = std::make_shared<spdlog::logger>("rotating_sink_logger", sink);
+
+    REQUIRE(sink->get_current_size() == 0);
+    logger->info("Test message");
+    logger->flush();
+    REQUIRE(sink->get_current_size() == get_filesize(ROTATING_LOG));
+    REQUIRE(sink->get_current_size() > 0);
+
+    sink->rotate_now();
+    REQUIRE(sink->get_current_size() == 0);
+}
+
+// test that a manual rotate_now() does not cause later writes to rotate the file
+// prematurely, well before max_size is actually reached.
+TEST_CASE("rotating_file_logger_no_premature_rotation_after_manual_rotate",
+          "[rotating_logger]") {
+    prepare_logdir();
+    using spdlog::details::os::default_eol;
+    const size_t eol_len = strlen(default_eol);
+    const size_t max_size = 100;
+    spdlog::filename_t basename = SPDLOG_FILENAME_T(ROTATING_LOG);
+    auto sink = std::make_shared<spdlog::sinks::rotating_file_sink_st>(basename, max_size, 2);
+    auto logger = std::make_shared<spdlog::logger>("rotating_sink_logger", sink);
+    logger->set_pattern("%v");
+
+    // fill the file close to (but under) max_size, then rotate it away manually.
+    const std::string msg1(89, 'a');
+    logger->info(msg1);
+    logger->flush();
+    REQUIRE(sink->get_current_size() == msg1.size() + eol_len);
+
+    sink->rotate_now();
+    REQUIRE(get_filesize(ROTATING_LOG ".1") == msg1.size() + eol_len);
+
+    // write two small messages whose combined real size stays well under max_size.
+    const std::string msg2(4, 'b');
+    logger->info(msg2);
+    logger->flush();
+
+    const std::string msg3(5, 'c');
+    logger->info(msg3);
+    logger->flush();
+
+    // combined real bytes written since rotate_now() (13ish bytes) never approached
+    // max_size (100), so no further rotation should have happened: ROTATING_LOG.2
+    // should not exist, and ROTATING_LOG.1 should still hold only msg1.
+    REQUIRE_THROWS(get_filesize(ROTATING_LOG ".2"));
+    REQUIRE(get_filesize(ROTATING_LOG ".1") == msg1.size() + eol_len);
+    REQUIRE(get_filesize(ROTATING_LOG) == msg2.size() + msg3.size() + 2 * eol_len);
+}
+
 // test that passing max_size=0 throws
+#ifndef SPDLOG_NO_EXCEPTIONS
 TEST_CASE("rotating_file_logger3", "[rotating_logger]") {
     prepare_logdir();
     size_t max_size = 0;
@@ -118,6 +176,7 @@ TEST_CASE("rotating_file_logger3", "[rotating_logger]") {
     REQUIRE_THROWS_AS(spdlog::rotating_logger_mt("logger", basename, max_size, 0),
                       spdlog::spdlog_ex);
 }
+#endif  // SPDLOG_NO_EXCEPTIONS
 
 // test on-demand rotation of logs
 TEST_CASE("rotating_file_logger4", "[rotating_logger]") {
@@ -184,4 +243,120 @@ TEST_CASE("rotating_file_logger5", "[rotating_logger]") {
             REQUIRE(filesize >= max_size - message.size() - 2);
         }
     }
+}
+
+TEST_CASE("custom_buffer_size_basic", "[file_helper]") {
+    prepare_logdir();
+    spdlog::filename_t filename = SPDLOG_FILENAME_T(SIMPLE_LOG);
+    size_t custom_buf_size = 64 * 1024;
+
+    auto logger = spdlog::basic_logger_mt("custom_buf_logger", filename, false, {}, custom_buf_size);
+    logger->set_pattern("%v");
+
+    auto sink = std::dynamic_pointer_cast<spdlog::sinks::basic_file_sink_mt>(logger->sinks().front());
+    REQUIRE(sink != nullptr);
+    REQUIRE(sink->buffer_size() == custom_buf_size);
+
+    logger->info("Buffered message 1");
+    logger->info("Buffered message 2");
+    logger->flush();
+
+    require_message_count(SIMPLE_LOG, 2);
+    using spdlog::details::os::default_eol;
+    REQUIRE(file_contents(SIMPLE_LOG) ==
+            spdlog::fmt_lib::format("Buffered message 1{}Buffered message 2{}", default_eol, default_eol));
+
+    sink->set_buffer_size(128 * 1024);
+    REQUIRE(sink->buffer_size() == 128 * 1024);
+}
+
+TEST_CASE("custom_buffer_size_rotating", "[rotating_logger]") {
+    prepare_logdir();
+    spdlog::filename_t basename = SPDLOG_FILENAME_T(ROTATING_LOG);
+    size_t custom_buf_size = 32 * 1024;
+
+    auto logger = spdlog::rotating_logger_mt("custom_buf_rotating", basename, 1024 * 1024, 2, false, {}, custom_buf_size);
+    logger->set_pattern("%v");
+
+    auto sink = std::dynamic_pointer_cast<spdlog::sinks::rotating_file_sink_mt>(logger->sinks().front());
+    REQUIRE(sink != nullptr);
+    REQUIRE(sink->buffer_size() == custom_buf_size);
+
+    logger->info("Rotating buffered message");
+    logger->flush();
+
+    REQUIRE(get_filesize(ROTATING_LOG) > 0);
+}
+
+TEST_CASE("custom_buffer_size_daily", "[daily_logger]") {
+    prepare_logdir();
+    spdlog::filename_t basename = SPDLOG_FILENAME_T("test_logs/daily_buf_log.txt");
+    size_t custom_buf_size = 16 * 1024;
+
+    auto logger = spdlog::daily_logger_mt("custom_buf_daily", basename, 23, 59, false, 0, {}, custom_buf_size);
+    logger->set_pattern("%v");
+
+    auto sink = std::dynamic_pointer_cast<spdlog::sinks::daily_file_sink_mt>(logger->sinks().front());
+    REQUIRE(sink != nullptr);
+    REQUIRE(sink->buffer_size() == custom_buf_size);
+
+    logger->info("Daily buffered message");
+    logger->flush();
+
+    auto actual_filename = spdlog::details::os::filename_to_str(sink->filename());
+    REQUIRE(get_filesize(actual_filename) > 0);
+}
+
+TEST_CASE("custom_buffer_size_preserves_pending_output", "[file_helper]") {
+    prepare_logdir();
+    const size_t initial_size = GENERATE(size_t{0}, size_t{64 * 1024});
+    const size_t updated_size =
+        GENERATE(size_t{0}, size_t{32 * 1024}, size_t{64 * 1024}, size_t{128 * 1024});
+    auto sink = std::make_shared<spdlog::sinks::basic_file_sink_st>(
+        SPDLOG_FILENAME_T("test_logs/buffer_resize.txt"), true, spdlog::file_event_handlers{},
+        initial_size);
+    spdlog::logger logger("buffer_resize", sink);
+    logger.set_pattern("%v");
+
+    logger.info("before resize");
+    sink->set_buffer_size(updated_size);
+    REQUIRE(sink->buffer_size() == updated_size);
+    logger.info("after resize");
+    logger.flush();
+
+    REQUIRE(file_contents("test_logs/buffer_resize.txt") ==
+            spdlog::fmt_lib::format("before resize{}after resize{}", spdlog::details::os::default_eol,
+                                   spdlog::details::os::default_eol));
+}
+
+TEST_CASE("custom_buffer_size_rotating_tracks_reopen_callbacks", "[rotating_logger]") {
+    prepare_logdir();
+    spdlog::file_event_handlers handlers;
+    int opens = 0;
+    handlers.after_open = [&](spdlog::filename_t, std::FILE *stream) {
+        std::fputs("header\n", stream);
+        if (++opens == 1) {
+            std::fflush(stream);
+        }
+    };
+    handlers.before_close = [](spdlog::filename_t, std::FILE *stream) {
+        std::fputs("footer\n", stream);
+    };
+    auto sink = std::make_shared<spdlog::sinks::rotating_file_sink_st>(
+        SPDLOG_FILENAME_T("test_logs/buffer_resize.txt"), 1024, 2, false, handlers, 64 * 1024);
+    spdlog::logger logger("buffer_resize", sink);
+    logger.set_pattern("%v");
+    logger.info("before resize");
+    const auto size_before_resize = sink->get_current_size();
+    sink->set_buffer_size(64 * 1024);
+    REQUIRE(sink->get_current_size() == size_before_resize);
+    sink->set_buffer_size(128 * 1024);
+    REQUIRE(sink->get_current_size() == get_filesize("test_logs/buffer_resize.txt"));
+    logger.info("after resize");
+    logger.flush();
+    REQUIRE(sink->get_current_size() == get_filesize("test_logs/buffer_resize.txt"));
+    REQUIRE(file_contents("test_logs/buffer_resize.txt") ==
+            spdlog::fmt_lib::format("header\nbefore resize{}footer\nheader\nafter resize{}",
+                                   spdlog::details::os::default_eol,
+                                   spdlog::details::os::default_eol));
 }

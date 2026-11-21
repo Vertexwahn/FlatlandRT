@@ -39,7 +39,7 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 
-#include "gtest/internal/gtest-port.h"
+#include "gtest/internal/gtest-port.h"  // IWYU pragma: export
 
 #ifdef GTEST_OS_LINUX
 #include <stdlib.h>
@@ -96,6 +96,12 @@
 
 namespace proto2 {
 class [[nodiscard]] MessageLite;
+
+// Dummy forward declaration of `DynamicCastMessage`. Does not match any actual
+// overloads of `DynamicCastMessage`, but can be used to assist name resolution
+// in templates.
+template <typename T>
+T DynamicCastMessage() = delete;
 }
 
 namespace testing {
@@ -571,50 +577,86 @@ GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)
 
 // State of the definition of a type-parameterized test suite.
+// Uses an intrusive linked list of caller-allocated POD RegisteredTest nodes
+// rather than an STL container.
+// REQUIRES: TypedTestSuitePState must be constexpr-constructible and trivially
+// destructible so that namespace-scope static instances defined by
+// TYPED_TEST_SUITE_P avoid -Wglobal-constructors and -Wexit-time-destructors.
 class GTEST_API_ [[nodiscard]] TypedTestSuitePState {
  public:
-  TypedTestSuitePState() : registered_(false) {}
+  // Caller-owned POD node linked into registered_tests_; must outlive this
+  // TypedTestSuitePState instance.
+  struct RegisteredTest {
+    const char* name;
+    const char* file;
+    int line;
+    RegisteredTest* next;
+  };
 
-  // Adds the given test name to defined_test_names_ and return true
-  // if the test suite hasn't been registered; otherwise aborts the
-  // program.
-  bool AddTestName(const char* file, int line, const char* case_name,
-                   const char* test_name) {
+  constexpr TypedTestSuitePState() = default;
+
+  // Adds the given test to registered_tests_ and returns true if the test
+  // suite hasn't been registered; otherwise aborts the program.
+  bool AddTest(RegisteredTest* test, const char* case_name) {
     if (registered_) {
       fprintf(stderr,
               "%s Test %s must be defined before "
               "REGISTER_TYPED_TEST_SUITE_P(%s, ...).\n",
-              FormatFileLocation(file, line).c_str(), test_name, case_name);
+              FormatFileLocation(test->file, test->line).c_str(), test->name,
+              case_name);
       fflush(stderr);
       posix::Abort();
     }
-    registered_tests_.emplace(test_name, CodeLocation(file, line));
+    // Insert into registered_tests_ in lexicographical order by test name
+    // (ignoring duplicates) so VerifyRegisteredTestNames reports missing tests
+    // in deterministic sorted order.
+    RegisteredTest** p = &registered_tests_;
+    while (*p != nullptr && strcmp((*p)->name, test->name) < 0) {
+      p = &(*p)->next;
+    }
+    if (*p == nullptr || strcmp((*p)->name, test->name) != 0) {
+      test->next = *p;
+      *p = test;
+    }
     return true;
   }
 
   bool TestExists(const std::string& test_name) const {
-    return registered_tests_.count(test_name) > 0;
+    return FindTest(test_name) != nullptr;
   }
 
-  const CodeLocation& GetCodeLocation(const std::string& test_name) const {
-    RegisteredTestsMap::const_iterator it = registered_tests_.find(test_name);
-    GTEST_CHECK_(it != registered_tests_.end());
-    return it->second;
+  CodeLocation GetCodeLocation(const std::string& test_name) const {
+    const RegisteredTest* test = FindTest(test_name);
+    GTEST_CHECK_(test != nullptr);
+    return CodeLocation(test->file, test->line);
   }
 
   // Verifies that registered_tests match the test names in
-  // defined_test_names_; returns registered_tests if successful, or
+  // registered_tests_; returns registered_tests if successful, or
   // aborts the program otherwise.
   const char* VerifyRegisteredTestNames(const char* test_suite_name,
                                         const char* file, int line,
                                         const char* registered_tests);
 
  private:
-  typedef ::std::map<std::string, CodeLocation, std::less<>> RegisteredTestsMap;
+  const RegisteredTest* FindTest(const std::string& test_name) const {
+    for (const RegisteredTest* it = registered_tests_; it != nullptr;
+         it = it->next) {
+      if (test_name == it->name) {
+        return it;
+      }
+    }
+    return nullptr;
+  }
 
-  bool registered_;
-  RegisteredTestsMap registered_tests_;
+  bool registered_ = false;
+  RegisteredTest* registered_tests_ = nullptr;
 };
+
+static_assert((static_cast<void>(TypedTestSuitePState{}), true),
+              "TypedTestSuitePState must be constexpr-constructible");
+static_assert(std::is_trivially_destructible_v<TypedTestSuitePState>,
+              "TypedTestSuitePState must be trivially destructible");
 
 //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -1445,14 +1487,14 @@ class [[nodiscard]] NeverThrown {
 // Implements Boolean test assertions such as EXPECT_TRUE. expression can be
 // either a boolean expression or an AssertionResult. text is a textual
 // representation of expression as it was passed into the EXPECT_TRUE.
-#define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                       \
-  if (const ::testing::AssertionResult gtest_ar_ =                    \
-          ::testing::AssertionResult(expression))                     \
-    ;                                                                 \
-  else                                                                \
-    fail(::testing::internal::GetBoolAssertionFailureMessage(         \
-        gtest_ar_, text, #actual, #expected))
+#define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail)      \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                            \
+  if (const ::testing::internal::AssertionResultExpectation gtest_are_ = { \
+          ::testing::AssertionResult(expression), expected})               \
+    ;                                                                      \
+  else /* NOLINT */                                                        \
+    fail(::testing::internal::GetBoolAssertionFailureMessage(              \
+        gtest_are_.assertion_result, text, #actual, #expected))
 
 #define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail)               \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                     \
@@ -1510,8 +1552,9 @@ class [[nodiscard]] NeverThrown {
               parent_class>::GetSetUpCaseOrSuite(__FILE__, __LINE__),          \
           ::testing::internal::SuiteApiResolver<                               \
               parent_class>::GetTearDownCaseOrSuite(__FILE__, __LINE__),       \
-          new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_(     \
-              test_suite_name, test_name)>);                                   \
+          ::std::make_unique<::testing::internal::TestFactoryImpl<             \
+              GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)>>()           \
+              .release());                                                     \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_

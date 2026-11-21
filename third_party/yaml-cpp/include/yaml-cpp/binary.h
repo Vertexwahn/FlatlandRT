@@ -1,11 +1,20 @@
 #ifndef BASE64_H_62B23520_7C8E_11DE_8A39_0800200C9A66
 #define BASE64_H_62B23520_7C8E_11DE_8A39_0800200C9A66
 
+
+
+
 #if defined(_MSC_VER) ||                                            \
     (defined(__GNUC__) && (__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || \
      (__GNUC__ >= 4))  // GCC supports "pragma once" correctly since 3.4
 #pragma once
+
+
 #endif
+
+// IWYU pragma: private, include "yaml-cpp/yaml.h"
+// IWYU pragma: friend "yaml-cpp/.*"
+
 
 #include <string>
 #include <vector>
@@ -30,7 +39,7 @@ class YAML_CPP_API Binary {
   bool owned() const { return !m_unownedData; }
   std::size_t size() const { return owned() ? m_data.size() : m_unownedSize; }
   const unsigned char *data() const {
-    return owned() ? &m_data[0] : m_unownedData;
+    return owned() ? m_data.data() : m_unownedData;
   }
 
   void swap(std::vector<unsigned char> &rhs) {

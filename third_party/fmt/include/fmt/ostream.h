@@ -1,6 +1,6 @@
 // Formatting library for C++ - std::ostream support
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -30,6 +30,17 @@
 #  define FMT_MSVC_STL_UPDATE 0
 #endif
 
+// Check if RTTI is disabled.
+#ifdef FMT_USE_RTTI
+// Use the provided definition.
+#elif defined(__GXX_RTTI) || FMT_HAS_FEATURE(cxx_rtti) || defined(_CPPRTTI) || \
+    defined(__INTEL_RTTI__) || defined(__RTTI)
+// __RTTI is for EDG compilers. _CPPRTTI is for MSVC.
+#  define FMT_USE_RTTI 1
+#else
+#  define FMT_USE_RTTI 0
+#endif
+
 FMT_BEGIN_NAMESPACE
 namespace detail {
 
@@ -51,12 +62,14 @@ auto get_file(std::filebuf&) -> FILE*;
 
 // Write the content of buf to os.
 // It is a separate function rather than a part of vprint to simplify testing.
+// max_size must be positive and no greater than the maximum streamsize.
 template <typename Char>
-void write_buffer(std::basic_ostream<Char>& os, buffer<Char>& buf) {
+void write_buffer(std::basic_ostream<Char>& os, buffer<Char>& buf,
+                  make_unsigned_t<std::streamsize> max_size =
+                      to_unsigned(max_value<std::streamsize>())) {
   const Char* buf_data = buf.data();
   using unsigned_streamsize = make_unsigned_t<std::streamsize>;
   unsigned_streamsize size = buf.size();
-  unsigned_streamsize max_size = to_unsigned(max_value<std::streamsize>());
   do {
     unsigned_streamsize n = size <= max_size ? size : max_size;
     os.write(buf_data, static_cast<std::streamsize>(n));
@@ -69,6 +82,8 @@ template <typename T> struct streamed_view {
   const T& value;
 };
 }  // namespace detail
+
+FMT_BEGIN_EXPORT
 
 // Formats an object of type T that has an overloaded ostream operator<<.
 template <typename Char>
@@ -147,7 +162,7 @@ inline void vprint(std::ostream& os, string_view fmt, format_args args) {
  *
  *     fmt::print(cerr, "Don't {}!", "panic");
  */
-FMT_EXPORT template <typename... T>
+template <typename... T>
 void print(std::ostream& os, format_string<T...> fmt, T&&... args) {
   fmt::vargs<T...> vargs = {{args...}};
   if FMT_CONSTEXPR20 (detail::use_utf8) return vprint(os, fmt.str, vargs);
@@ -156,12 +171,13 @@ void print(std::ostream& os, format_string<T...> fmt, T&&... args) {
   detail::write_buffer(os, buffer);
 }
 
-FMT_EXPORT template <typename... T>
+template <typename... T>
 void println(std::ostream& os, format_string<T...> fmt, T&&... args) {
   fmt::print(os, FMT_STRING("{}\n"),
              fmt::format(fmt, std::forward<T>(args)...));
 }
 
+FMT_END_EXPORT
 FMT_END_NAMESPACE
 
 #endif  // FMT_OSTREAM_H_

@@ -11,7 +11,7 @@
 #include <mutex>
 #include <string>
 
-namespace spdlog {
+SPDLOG_NAMESPACE_BEGIN
 namespace sinks {
 /*
  * Trivial file sink with single file as target
@@ -21,9 +21,12 @@ class basic_file_sink final : public base_sink<Mutex> {
 public:
     explicit basic_file_sink(const filename_t &filename,
                              bool truncate = false,
-                             const file_event_handlers &event_handlers = {});
+                             const file_event_handlers &event_handlers = {},
+                             size_t buffer_size = 0);
     const filename_t &filename() const;
     void truncate();
+    void set_buffer_size(size_t buffer_size);
+    size_t buffer_size();
 
 protected:
     void sink_it_(const details::log_msg &msg) override;
@@ -41,25 +44,27 @@ using basic_file_sink_st = basic_file_sink<details::null_mutex>;
 //
 // factory functions
 //
-template <typename Factory = spdlog::synchronous_factory>
+template <typename Factory = synchronous_factory>
 inline std::shared_ptr<logger> basic_logger_mt(const std::string &logger_name,
                                                const filename_t &filename,
                                                bool truncate = false,
-                                               const file_event_handlers &event_handlers = {}) {
+                                               const file_event_handlers &event_handlers = {},
+                                               size_t buffer_size = 0) {
     return Factory::template create<sinks::basic_file_sink_mt>(logger_name, filename, truncate,
-                                                               event_handlers);
+                                                               event_handlers, buffer_size);
 }
 
-template <typename Factory = spdlog::synchronous_factory>
+template <typename Factory = synchronous_factory>
 inline std::shared_ptr<logger> basic_logger_st(const std::string &logger_name,
                                                const filename_t &filename,
                                                bool truncate = false,
-                                               const file_event_handlers &event_handlers = {}) {
+                                               const file_event_handlers &event_handlers = {},
+                                               size_t buffer_size = 0) {
     return Factory::template create<sinks::basic_file_sink_st>(logger_name, filename, truncate,
-                                                               event_handlers);
+                                                               event_handlers, buffer_size);
 }
 
-}  // namespace spdlog
+SPDLOG_NAMESPACE_END
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "basic_file_sink-inl.h"

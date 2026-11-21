@@ -24,6 +24,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <ios>
 #include <istream>
 #include <limits>
 #include <ostream>
@@ -116,7 +117,7 @@ class gaussian_distribution : random_internal::gaussian_distribution_base {
     result_type stddev_;
 
     static_assert(
-        std::is_floating_point<RealType>::value,
+        std::is_floating_point_v<RealType>,
         "Class-template absl::gaussian_distribution<> must be parameterized "
         "using a floating-point type.");
   };
@@ -197,11 +198,15 @@ std::basic_istream<CharT, Traits>& operator>>(
   using param_type = typename gaussian_distribution<RealType>::param_type;
 
   auto saver = random_internal::make_istream_state_saver(is);
-  auto mean = random_internal::read_floating_point<result_type>(is);
+  const auto mean = random_internal::read_floating_point<result_type>(is);
   if (is.fail()) return is;
-  auto stddev = random_internal::read_floating_point<result_type>(is);
+  const auto stddev = random_internal::read_floating_point<result_type>(is);
   if (!is.fail()) {
-    x.param(param_type(mean, stddev));
+    if (std::isfinite(mean) && std::isfinite(stddev)) {
+      x.param(param_type(mean, stddev));
+    } else {
+      is.setstate(std::ios_base::failbit);
+    }
   }
   return is;
 }

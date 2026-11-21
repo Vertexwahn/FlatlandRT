@@ -1,6 +1,6 @@
 // Formatting library for C++ - tests of formatters for standard library types
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -32,6 +32,9 @@ TEST(std_test, path) {
   EXPECT_EQ(fmt::format("{:?}", path("foo\"bar")), "\"foo\\\"bar\"");
 
   EXPECT_EQ(fmt::format("{:g}", path("/usr/bin")), "/usr/bin");
+
+  // libstdc++ collapses repeated separators in the generic format.
+  EXPECT_EQ(fmt::format("{:g}", path("a//b")), path("a//b").generic_string());
 #  ifdef _WIN32
   EXPECT_EQ(fmt::format("{}", path("C:\\foo")), "C:\\foo");
   EXPECT_EQ(fmt::format("{:g}", path("C:\\foo")), "C:/foo");
@@ -349,6 +352,16 @@ TEST(std_test, error_code) {
             "{\"generic:42\": 0}");
 }
 
+TEST(std_test, error_code_truncated_alignment) {
+  // No null terminator: reading past the format string must be detectable.
+  const char format[] = {'{', ':', '>'};
+  auto ec = std::error_code(42, std::generic_category());
+  EXPECT_THROW(
+      (void)fmt::vformat(fmt::string_view(format, sizeof(format)),
+                         fmt::make_format_args(ec)),
+      fmt::format_error);
+}
+
 template <typename Catch> void exception_test() {
   try {
     throw std::runtime_error("Test Exception");
@@ -402,14 +415,106 @@ TEST(std_test, exception) {
                 StartsWith("std::filesystem::filesystem_error: "));
   }
 #endif
+
+#if FMT_USE_RTTI
+  // Nested exceptions (e.g. from std::throw_with_nested) are unwound.
+  try {
+    try {
+      throw std::runtime_error("inner");
+    } catch (...) {
+      std::throw_with_nested(std::runtime_error("outer"));
+    }
+  } catch (const std::exception& ex) {
+    EXPECT_EQ("outer: inner", fmt::format("{}", ex));
+  }
+
+  // Multiple levels of nesting.
+  try {
+    try {
+      try {
+        throw std::runtime_error("level 3");
+      } catch (...) {
+        std::throw_with_nested(std::runtime_error("level 2"));
+      }
+    } catch (...) {
+      std::throw_with_nested(std::runtime_error("level 1"));
+    }
+  } catch (const std::exception& ex) {
+    EXPECT_EQ("level 1: level 2: level 3", fmt::format("{}", ex));
+  }
+#endif  // FMT_USE_RTTI
 }
 
+TEST(std_test, exception_ptr) {
+  std::exception_ptr p1 = nullptr;
+  std::exception_ptr p2;
+
+  try {
+    using namespace my_ns1::my_ns2;
+    throw my_exception("My Exception");
+  } catch (...) {
+    p2 = std::current_exception();
+  }
+
+  EXPECT_EQ(fmt::format("{}", p1), "none");
+  EXPECT_EQ(fmt::format("{}", p2), "My Exception");
+
+#if FMT_USE_RTTI
+  EXPECT_EQ(fmt::format("{:t}", p2),
+            "my_ns1::my_ns2::my_exception: My Exception");
+
+  // Nested exceptions are unwound through an exception_ptr too.
+  std::exception_ptr p3;
+  try {
+    try {
+      throw std::runtime_error("inner");
+    } catch (...) {
+      std::throw_with_nested(std::runtime_error("outer"));
+    }
+  } catch (...) {
+    p3 = std::current_exception();
+  }
+  EXPECT_EQ(fmt::format("{}", p3), "outer: inner");
+#endif  // FMT_USE_RTTI
+}
+
+TEST(std_test, exception_align) {
+  auto ex = std::runtime_error("boom");
+
+  // Static width, fill and alignment.
+  EXPECT_EQ(fmt::format("{:*^8}", ex), "**boom**");
+
+  // Dynamic width.
+  EXPECT_EQ(fmt::format("{:{}}", ex, 8), "boom    ");
+
+  // Sign-aware zero padding is not applicable to exceptions.
+  EXPECT_THROW((void)fmt::format(fmt::runtime("{:08}"), ex), fmt::format_error);
+
+#if FMT_USE_RTTI
+  // Formatting specs followed by the exception-specific 't'.
+  EXPECT_EQ(fmt::format("{:*<40t}", ex),
+            "std::runtime_error: boom****************");
+#endif  // FMT_USE_RTTI
+
+  // exception_ptr takes a distinct path: null formats directly as "none", while
+  // a non-null pointer is rethrown and delegated to the exception formatter.
+  std::exception_ptr ep;
+  try {
+    throw std::runtime_error("bang");
+  } catch (...) {
+    ep = std::current_exception();
+  }
+  EXPECT_EQ(fmt::format("{:>8}", ep), "    bang");
+
+  std::exception_ptr enull;
+  EXPECT_EQ(fmt::format("{:>8}", enull), "    none");
+}
 #if FMT_USE_RTTI
 TEST(std_test, type_info) {
   EXPECT_EQ(fmt::format("{}", typeid(std::runtime_error)),
             "std::runtime_error");
 }
-#endif
+#endif  // FMT_USE_RTTI
 
 #if FMT_USE_BITINT
 FMT_PRAGMA_CLANG(diagnostic ignored "-Wbit-int-extension")

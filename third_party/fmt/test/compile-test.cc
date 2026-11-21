@@ -1,19 +1,22 @@
 // Formatting library for C++ - formatting library tests
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
 
 #include "fmt/compile.h"
 
+#include <array>
 #include <iterator>
 #include <list>
 #include <type_traits>
 #include <vector>
 
 #include "fmt/chrono.h"
+#include "fmt/color.h"
 #include "fmt/ranges.h"
+#include "fmt/std.h"
 #include "gmock/gmock.h"
 #include "gtest-extra.h"
 
@@ -73,6 +76,7 @@ TEST(compile_test, format_default) {
   EXPECT_EQ("foo", fmt::format(FMT_COMPILE("{}"), "foo"));
   EXPECT_EQ("foo", fmt::format(FMT_COMPILE("{}"), std::string("foo")));
   EXPECT_EQ("foo", fmt::format(FMT_COMPILE("{}"), test_formattable()));
+  EXPECT_EQ("0x0", fmt::format(FMT_COMPILE("{}"), nullptr));
   auto t = std::chrono::system_clock::now();
   EXPECT_EQ(fmt::format("{}", t), fmt::format(FMT_COMPILE("{}"), t));
 }
@@ -86,7 +90,6 @@ TEST(compile_test, format_escape) {
   EXPECT_EQ("\"abc\"", fmt::format(FMT_COMPILE("{0:<5?}"), "abc"));
   EXPECT_EQ("\"abc\"  ", fmt::format(FMT_COMPILE("{0:<7?}"), "abc"));
 }
-
 
 TEST(compile_test, format_specs) {
   EXPECT_EQ("42", fmt::format(FMT_COMPILE("{:x}"), 0x42));
@@ -161,6 +164,10 @@ TEST(compile_test, named) {
             fmt::format(FMT_COMPILE("{a0} {a1}"), "a0"_a = 41, "a1"_a = 43));
   EXPECT_EQ("41 43",
             fmt::format(FMT_COMPILE("{a1} {a0}"), "a0"_a = 43, "a1"_a = 41));
+
+  // A statically-named argument with a format spec compiles to spec_field,
+  // which passes the argument to make_format_args as const (#4866).
+  EXPECT_EQ("4.2", fmt::format(FMT_COMPILE("{arg:3.1f}"), "arg"_a = 4.2));
 #  endif
 }
 
@@ -177,6 +184,42 @@ TEST(compile_test, format_to) {
   end = fmt::format_to(buf, FMT_COMPILE("{:x}"), 42);
   *end = '\0';
   EXPECT_STREQ("2a", buf);
+}
+
+TEST(compile_test, format_variant) {
+#  ifdef __cpp_lib_variant
+  char buffer[100];
+  auto end =
+      fmt::format_to(buffer, FMT_COMPILE("<{}> {}"), std::variant<int>{42}, 7);
+  EXPECT_EQ("<variant(42)> 7", std::string(buffer, end));
+
+  end =
+      fmt::format_to(buffer, FMT_COMPILE("{}"), std::variant<std::monostate>{});
+  EXPECT_EQ("variant(monostate)", std::string(buffer, end));
+
+  end = fmt::format_to(buffer, FMT_COMPILE("{}"),
+                       std::variant<std::variant<int>>{std::variant<int>{42}});
+  EXPECT_EQ("variant(variant(42))", std::string(buffer, end));
+#  endif  // __cpp_lib_variant
+}
+
+TEST(compile_test, format_expected) {
+#  ifdef __cpp_lib_expected
+  char buffer[100];
+  auto end = fmt::format_to(buffer, FMT_COMPILE("<{}> {}"),
+                            std::expected<int, int>{42}, 7);
+  EXPECT_EQ("<expected(42)> 7", std::string(buffer, end));
+
+  end = fmt::format_to(buffer, FMT_COMPILE("{}"),
+                       std::expected<int, int>{std::unexpected(42)});
+  EXPECT_EQ("unexpected(42)", std::string(buffer, end));
+
+  // std::unexpected has its own formatter, separate from the error branch of
+  // the std::expected one checked above.
+  end = fmt::format_to(buffer, FMT_COMPILE("<{}> {}"), std::unexpected<int>{42},
+                       7);
+  EXPECT_EQ("<unexpected(42)> 7", std::string(buffer, end));
+#  endif  // __cpp_lib_expected
 }
 
 TEST(compile_test, format_to_n) {
@@ -205,7 +248,21 @@ TEST(compile_test, output_iterators) {
   EXPECT_EQ("42.000043", s2.str());
 }
 
-#  if FMT_USE_CONSTEVAL && (!FMT_MSC_VERSION || FMT_MSC_VERSION >= 1940)
+TEST(compile_test, format_range) {
+  // https://github.com/fmtlib/fmt/issues/4949
+  std::array<int, 3> values{1, 2, 3};
+  EXPECT_EQ("array=[1, 2, 3]", fmt::format(FMT_COMPILE("array={}"), values));
+  EXPECT_EQ("***********[1, 2, 3]",
+            fmt::format(FMT_COMPILE("{:*>20}"), values));
+  EXPECT_EQ("*****[  1,   2,   3]",
+            fmt::format(FMT_COMPILE("{:*>20:{}}"), values, 3));
+
+  std::list<char> out;
+  fmt::format_to(std::back_inserter(out), FMT_COMPILE("{:*>20}"), values);
+  EXPECT_EQ("***********[1, 2, 3]", std::string(out.begin(), out.end()));
+}
+
+#  if FMT_USE_CONSTEVAL
 TEST(compile_test, constexpr_formatted_size) {
   FMT_CONSTEXPR20 size_t size = fmt::formatted_size(FMT_COMPILE("{}"), 42);
   EXPECT_EQ(size, 2);
@@ -224,6 +281,19 @@ TEST(compile_test, constexpr_formatted_size) {
   FMT_CONSTEXPR20 size_t str_size =
       fmt::formatted_size(FMT_COMPILE("{:s}"), "abc");
   EXPECT_EQ(str_size, 3);
+  FMT_CONSTEXPR20 size_t tuple_size = fmt::formatted_size(
+      FMT_COMPILE("{}"), fmt::join(std::tuple(1, 2, 3), ","));
+  EXPECT_EQ(tuple_size, 5);
+  FMT_CONSTEXPR20 size_t array_size = fmt::formatted_size(
+      FMT_COMPILE("{}"), fmt::join(std::array<int, 3>{1, 2, 3}, ","));
+  EXPECT_EQ(array_size, 5);
+  FMT_CONSTEXPR20 size_t styled_size = fmt::formatted_size(
+      FMT_COMPILE("{}"),
+      fmt::styled(std::array{1, 2, 3}, fmt::bg(fmt::color::green)));
+  EXPECT_EQ(styled_size, 32);
+  FMT_CONSTEXPR20 size_t variant_size = fmt::formatted_size(
+      FMT_COMPILE("{}"), std::variant<std::monostate, char>{});
+  EXPECT_EQ(variant_size, 18);
 }
 
 TEST(compile_test, static_format) {
@@ -231,11 +301,21 @@ TEST(compile_test, static_format) {
   EXPECT_STREQ(result.c_str(), "42");
   EXPECT_EQ(result.str(), "42");
 }
-#  endif
+
+TEST(compile_test, static_format_high_precision) {
+  // 0x1p-900 has 900 nonzero fractional digits, more than the 767 produced by
+  // the fast path.
+  constexpr auto result = FMT_STATIC_FORMAT("{:.1000f}", 0x1p-900);
+  EXPECT_EQ(1002u, result.str().size());
+  EXPECT_EQ("43174959877427608893241125591038",
+            fmt::string_view(result.c_str() + 768, 32));
+}
+#  endif  // FMT_USE_CONSTEVAL
 
 TEST(compile_test, text_and_arg) {
   EXPECT_EQ(">>>42<<<", fmt::format(FMT_COMPILE(">>>{}<<<"), 42));
   EXPECT_EQ("42!", fmt::format(FMT_COMPILE("{}!"), 42));
+  EXPECT_EQ("0x0!", fmt::format(FMT_COMPILE("{}!"), nullptr));
 }
 
 TEST(compile_test, unknown_format_fallback) {
@@ -376,6 +456,13 @@ TEST(compile_time_formatting_test, integer) {
   EXPECT_EQ("   42", test_format<6>(FMT_COMPILE("{:5}"), 42l));
   EXPECT_EQ("   42", test_format<6>(FMT_COMPILE("{:5}"), 42ll));
   EXPECT_EQ("   42", test_format<6>(FMT_COMPILE("{:5}"), 42ull));
+#  if FMT_USE_INT128
+  EXPECT_EQ("18446744073709551616",
+            test_format<21>(FMT_COMPILE("{}"),
+                            static_cast<__uint128_t>(UINT64_MAX) + 1));
+  EXPECT_EQ("340282366920938463463374607431768211455",
+            test_format<40>(FMT_COMPILE("{}"), ~static_cast<__uint128_t>(0)));
+#  endif
 
   EXPECT_EQ("42  ", test_format<5>(FMT_COMPILE("{:<4}"), 42));
   EXPECT_EQ("  42", test_format<5>(FMT_COMPILE("{:>4}"), 42));
@@ -434,6 +521,9 @@ TEST(compile_time_formatting_test, floating_point) {
   EXPECT_EQ("+0000392.6", test_format<11>(FMT_COMPILE("{0:+010.4g}"), 392.65));
   EXPECT_EQ("9223372036854775808.000000",
             test_format<27>(FMT_COMPILE("{:f}"), 9223372036854775807.0));
+  EXPECT_EQ("1e+23", test_format<6>(FMT_COMPILE("{}"), 1e23));
+  EXPECT_EQ("9.99999999999999916114e+22",
+            test_format<27>(FMT_COMPILE("{:.20e}"), 1e23));
 
   constexpr double nan = std::numeric_limits<double>::quiet_NaN();
   EXPECT_EQ("nan", test_format<4>(FMT_COMPILE("{}"), nan));
@@ -464,3 +554,14 @@ TEST(compile_test, constexpr_string_format) {
   EXPECT_TRUE(big);
 }
 #endif  // FMT_USE_CONSTEXPR_STRING
+
+struct type_with_format_as {
+  int value;
+};
+int format_as(type_with_format_as v) { return v.value; }
+
+TEST(compile_test, format_as) {
+  // Use a format string other than "{}" so that formatting goes through the
+  // compiled field path rather than the to_string fast path.
+  EXPECT_EQ("[42]", fmt::format(FMT_COMPILE("[{}]"), type_with_format_as{42}));
+}

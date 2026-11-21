@@ -1,6 +1,6 @@
 // Formatting library for C++ - formatters for standard library types
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -89,9 +89,11 @@ namespace detail {
 #endif
 
 #if FMT_USE_BITINT
+FMT_PRAGMA_CLANG(diagnostic push)
 FMT_PRAGMA_CLANG(diagnostic ignored "-Wbit-int-extension")
 template <int N> using bitint = _BitInt(N);
 template <int N> using ubitint = unsigned _BitInt(N);
+FMT_PRAGMA_CLANG(diagnostic pop)
 #else
 template <int N> struct bitint {};
 template <int N> struct ubitint {};
@@ -100,19 +102,19 @@ template <int N> struct ubitint {};
 #if FMT_CPP_LIB_FILESYSTEM
 
 template <typename Char, typename PathChar>
-auto get_path_string(const std::filesystem::path& p,
-                     const std::basic_string<PathChar>& native) {
+auto get_path_string(const std::basic_string<PathChar>& native) {
   if constexpr (std::is_same_v<Char, char> &&
                 std::is_same_v<PathChar, wchar_t>) {
     return to_utf8<wchar_t>(native, to_utf8_error_policy::wtf);
+  } else if constexpr (std::is_same_v<Char, PathChar>) {
+    return basic_string_view<Char>(native);
   } else {
-    return p.string<Char>();
+    return std::filesystem::path(native).string<Char>();
   }
 }
 
 template <typename Char, typename PathChar>
 void write_escaped_path(basic_memory_buffer<Char>& quoted,
-                        const std::filesystem::path& p,
                         const std::basic_string<PathChar>& native) {
   if constexpr (std::is_same_v<Char, char> &&
                 std::is_same_v<PathChar, wchar_t>) {
@@ -124,7 +126,8 @@ void write_escaped_path(basic_memory_buffer<Char>& quoted,
     write_escaped_string<std::filesystem::path::value_type>(
         std::back_inserter(quoted), native);
   } else {
-    write_escaped_string<Char>(std::back_inserter(quoted), p.string<Char>());
+    write_escaped_string<Char>(std::back_inserter(quoted),
+                               std::filesystem::path(native).string<Char>());
   }
 }
 
@@ -133,14 +136,15 @@ void write_escaped_path(basic_memory_buffer<Char>& quoted,
 #if defined(__cpp_lib_expected) || FMT_CPP_LIB_VARIANT
 
 template <typename Char, typename OutputIt, typename T, typename FormatContext>
-auto write_escaped_alternative(OutputIt out, const T& v, FormatContext& ctx)
-    -> OutputIt {
+FMT_CONSTEXPR auto write_escaped_alternative(OutputIt out, const T& v,
+                                             FormatContext& ctx) -> OutputIt {
   if constexpr (has_to_string_view<T>::value)
     return write_escaped_string<Char>(out, detail::to_string_view(v));
   if constexpr (std::is_same_v<T, Char>) return write_escaped_char(out, v);
 
   formatter<std::remove_cv_t<T>, Char> underlying;
   maybe_set_debug_format(underlying, true);
+  ctx.advance_to(out);
   return underlying.format(v, ctx);
 }
 #endif
@@ -278,12 +282,6 @@ struct is_bit_reference_like<std::__bit_const_reference<C>> {
 #endif
 
 template <typename T, typename Enable = void>
-struct has_format_as : std::false_type {};
-template <typename T>
-struct has_format_as<T, void_t<decltype(format_as(std::declval<const T&>()))>>
-    : std::true_type {};
-
-template <typename T, typename Enable = void>
 struct has_format_as_member : std::false_type {};
 template <typename T>
 struct has_format_as_member<
@@ -320,7 +318,7 @@ template <typename Char> struct formatter<std::filesystem::path, Char> {
     if (it == end) return it;
 
     Char c = *it;
-    if ((c >= '0' && c <= '9') || c == '{')
+    if ((c >= '1' && c <= '9') || c == '{')
       it = detail::parse_width(it, end, specs_, width_ref_, ctx);
     if (it != end && *it == '?') {
       debug_ = true;
@@ -340,30 +338,15 @@ template <typename Char> struct formatter<std::filesystem::path, Char> {
     detail::handle_dynamic_spec(specs.dynamic_width(), specs.width, width_ref_,
                                 ctx);
     if (!debug_) {
-      auto s = detail::get_path_string<Char>(p, path_string);
+      auto s = detail::get_path_string<Char>(path_string);
       return detail::write(ctx.out(), basic_string_view<Char>(s), specs);
     }
     auto quoted = basic_memory_buffer<Char>();
-    detail::write_escaped_path(quoted, p, path_string);
+    detail::write_escaped_path(quoted, path_string);
     return detail::write(ctx.out(),
                          basic_string_view<Char>(quoted.data(), quoted.size()),
                          specs);
   }
-};
-
-class path : public std::filesystem::path {
- public:
-  auto display_string() const -> std::string {
-    const std::filesystem::path& base = *this;
-    return fmt::format(FMT_STRING("{}"), base);
-  }
-  auto system_string() const -> std::string { return string(); }
-
-  auto generic_display_string() const -> std::string {
-    const std::filesystem::path& base = *this;
-    return fmt::format(FMT_STRING("{:g}"), base);
-  }
-  auto generic_system_string() const -> std::string { return generic_string(); }
 };
 
 #endif  // FMT_CPP_LIB_FILESYSTEM
@@ -371,24 +354,13 @@ class path : public std::filesystem::path {
 template <size_t N, typename Char>
 struct formatter<std::bitset<N>, Char>
     : nested_formatter<basic_string_view<Char>, Char> {
- private:
-  // This is a functor because C++11 doesn't support generic lambdas.
-  struct writer {
-    const std::bitset<N>& bs;
-
-    template <typename OutputIt>
-    FMT_CONSTEXPR auto operator()(OutputIt out) -> OutputIt {
-      for (auto pos = N; pos > 0; --pos)
-        out = detail::write<Char>(out, bs[pos - 1] ? Char('1') : Char('0'));
-      return out;
-    }
-  };
-
  public:
   template <typename FormatContext>
   auto format(const std::bitset<N>& bs, FormatContext& ctx) const
       -> decltype(ctx.out()) {
-    return this->write_padded(ctx, writer{bs});
+    auto str = bs.template to_string<Char>();
+    auto view = basic_string_view<Char>(str);
+    return this->write(ctx, this->nested(view));
   }
 };
 
@@ -401,11 +373,6 @@ struct formatter<std::optional<T>, Char,
                  std::enable_if_t<is_formattable<T, Char>::value>> {
  private:
   formatter<std::remove_cv_t<T>, Char> underlying_;
-  static constexpr basic_string_view<Char> optional =
-      detail::string_literal<Char, 'o', 'p', 't', 'i', 'o', 'n', 'a', 'l',
-                             '('>{};
-  static constexpr basic_string_view<Char> none =
-      detail::string_literal<Char, 'n', 'o', 'n', 'e'>{};
 
  public:
   FMT_CONSTEXPR auto parse(parse_context<Char>& ctx) {
@@ -416,10 +383,10 @@ struct formatter<std::optional<T>, Char,
   template <typename FormatContext>
   auto format(const std::optional<T>& opt, FormatContext& ctx) const
       -> decltype(ctx.out()) {
-    if (!opt) return detail::write<Char>(ctx.out(), none);
+    if (!opt) return detail::write_bytes<Char>(ctx.out(), "none");
 
     auto out = ctx.out();
-    out = detail::write<Char>(out, optional);
+    out = detail::write_bytes<Char>(out, "optional(");
     ctx.advance_to(out);
     out = underlying_.format(*opt, ctx);
     return detail::write(out, ')');
@@ -443,11 +410,11 @@ struct formatter<std::expected<T, E>, Char,
     auto out = ctx.out();
 
     if (value.has_value()) {
-      out = detail::write<Char>(out, "expected(");
+      out = detail::write_bytes<Char>(out, "expected(");
       if constexpr (!std::is_void<T>::value)
         out = detail::write_escaped_alternative<Char>(out, *value, ctx);
     } else {
-      out = detail::write<Char>(out, "unexpected(");
+      out = detail::write_bytes<Char>(out, "unexpected(");
       out = detail::write_escaped_alternative<Char>(out, value.error(), ctx);
     }
     *out++ = ')';
@@ -467,7 +434,7 @@ struct formatter<std::unexpected<E>, Char,
       -> decltype(ctx.out()) {
     auto out = ctx.out();
 
-    out = detail::write<Char>(out, "unexpected(");
+    out = detail::write_bytes<Char>(out, "unexpected(");
     out = detail::write_escaped_alternative<Char>(out, value.error(), ctx);
 
     *out++ = ')';
@@ -508,9 +475,9 @@ template <typename Char> struct formatter<std::monostate, Char> {
   }
 
   template <typename FormatContext>
-  auto format(const std::monostate&, FormatContext& ctx) const
+  FMT_CONSTEXPR auto format(const std::monostate&, FormatContext& ctx) const
       -> decltype(ctx.out()) {
-    return detail::write<Char>(ctx.out(), "monostate");
+    return detail::write_bytes<Char>(ctx.out(), "monostate");
   }
 };
 
@@ -524,11 +491,11 @@ struct formatter<Variant, Char,
   }
 
   template <typename FormatContext>
-  auto format(const Variant& value, FormatContext& ctx) const
+  FMT_CONSTEXPR20 auto format(const Variant& value, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     auto out = ctx.out();
 
-    out = detail::write<Char>(out, "variant(");
+    out = detail::write_bytes<Char>(out, "variant(");
     FMT_TRY {
       std::visit(
           [&](const auto& v) {
@@ -537,7 +504,7 @@ struct formatter<Variant, Char,
           value);
     }
     FMT_CATCH(const std::bad_variant_access&) {
-      detail::write<Char>(out, "valueless by exception");
+      out = detail::write_bytes<Char>(out, "valueless by exception");
     }
     *out++ = ')';
     return out;
@@ -560,9 +527,10 @@ template <> struct formatter<std::error_code> {
     if (it == end) return it;
 
     it = detail::parse_align(it, end, specs_);
+    if (it == end) return it;
 
     char c = *it;
-    if (it != end && ((c >= '0' && c <= '9') || c == '{'))
+    if ((c >= '1' && c <= '9') || c == '{')
       it = detail::parse_width(it, end, specs_, width_ref_, ctx);
 
     if (it != end && *it == '?') {
@@ -620,6 +588,8 @@ struct formatter<
     T, char,
     typename std::enable_if<std::is_base_of<std::exception, T>::value>::type> {
  private:
+  format_specs specs_;
+  detail::arg_ref<char> width_ref_;
   bool with_typename_ = false;
 
  public:
@@ -627,7 +597,14 @@ struct formatter<
     auto it = ctx.begin();
     auto end = ctx.end();
     if (it == end || *it == '}') return it;
-    if (*it == 't') {
+
+    it = detail::parse_align(it, end, specs_);
+    if (it == end) return it;
+
+    char c = *it;
+    if ((c >= '1' && c <= '9') || c == '{')
+      it = detail::parse_width(it, end, specs_, width_ref_, ctx);
+    if (it != end && *it == 't') {
       ++it;
       with_typename_ = FMT_USE_RTTI != 0;
     }
@@ -637,15 +614,70 @@ struct formatter<
   template <typename Context>
   auto format(const std::exception& ex, Context& ctx) const
       -> decltype(ctx.out()) {
-    auto out = ctx.out();
+    // Common case: no width requested, so write directly without buffering.
+    if (specs_.width == 0 && specs_.dynamic_width() == arg_id_kind::none)
+      return write(ctx.out(), ex);
+    auto buf = memory_buffer();
+    write(appender(buf), ex);
+    return write_padded(ctx, string_view(buf.data(), buf.size()));
+  }
+
+ protected:
+  // Applies the parsed fill/align/width to an already-formatted message.
+  template <typename Context>
+  auto write_padded(Context& ctx, string_view message) const
+      -> decltype(ctx.out()) {
+    auto specs = specs_;
+    detail::handle_dynamic_spec(specs.dynamic_width(), specs.width, width_ref_,
+                                ctx);
+    return detail::write(ctx.out(), message, specs);
+  }
+
+ private:
+  template <typename OutputIt>
+  auto write(OutputIt out, const std::exception& ex) const -> OutputIt {
 #if FMT_USE_RTTI
     if (with_typename_) {
       out = detail::write_demangled_name(out, typeid(ex));
       *out++ = ':';
       *out++ = ' ';
     }
-#endif
-    return detail::write_bytes<char>(out, string_view(ex.what()));
+#endif  // FMT_USE_RTTI
+    out = detail::write_bytes<char>(out, string_view(ex.what()));
+#if FMT_USE_RTTI && FMT_USE_EXCEPTIONS
+    // If the exception carries a nested exception (e.g. via
+    // std::throw_with_nested), format the whole chain.
+    if (auto* nested = dynamic_cast<const std::nested_exception*>(&ex)) {
+      if (auto ep = nested->nested_ptr()) {
+        out = detail::write(out, string_view(": "));
+        try {
+          std::rethrow_exception(ep);
+        } catch (const std::exception& nested_ex) {
+          out = write(out, nested_ex);
+        } catch (...) {
+          out = detail::write(out, string_view("unknown exception"));
+        }
+      }
+    }
+#endif  // FMT_USE_RTTI && FMT_USE_EXCEPTIONS
+    return out;
+  }
+};
+
+template <> struct formatter<std::exception_ptr> : formatter<std::exception> {
+  template <typename FormatContext>
+  auto format(const std::exception_ptr& ep, FormatContext& ctx) const
+      -> decltype(ctx.out()) {
+    if (!ep) return this->write_padded(ctx, string_view("none"));
+#if FMT_USE_EXCEPTIONS
+    try {
+      std::rethrow_exception(ep);
+    } catch (const std::exception& e) {
+      return formatter<std::exception>::format(e, ctx);
+    } catch (...) {
+    }
+#endif  // FMT_USE_EXCEPTIONS
+    return this->write_padded(ctx, string_view("unknown exception"));
   }
 };
 
@@ -690,11 +722,12 @@ struct formatter<BitRef, Char,
 #ifdef __cpp_lib_byte
 template <typename Char>
 struct formatter<std::byte, Char> : formatter<unsigned, Char> {
-  static auto format_as(std::byte b) -> unsigned char {
+  FMT_CONSTEXPR static auto format_as(std::byte b) -> unsigned char {
     return static_cast<unsigned char>(b);
   }
   template <typename Context>
-  auto format(std::byte b, Context& ctx) const -> decltype(ctx.out()) {
+  FMT_CONSTEXPR auto format(std::byte b, Context& ctx) const
+      -> decltype(ctx.out()) {
     return formatter<unsigned, Char>::format(format_as(b), ctx);
   }
 };

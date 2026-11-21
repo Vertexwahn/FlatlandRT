@@ -85,10 +85,59 @@ TEST_CASE("splitString", "[string-manip]") {
     CHECK_THAT(splitStringRef("abc,def", ','), Equals(std::vector<StringRef>{"abc", "def"}));
 }
 
+TEST_CASE( "Splitting preserves empty and single-character fields",
+           "[string-manip][approvals]" ) {
+    using namespace Catch::Matchers;
+    using Catch::splitStringRef;
+    using Catch::StringRef;
+    CHECK_THAT( splitStringRef( "a,b,c", ',' ),
+                Equals( std::vector<StringRef>{ "a", "b", "c" } ) );
+    CHECK_THAT( splitStringRef( "a,", ',' ),
+                Equals( std::vector<StringRef>{ "a", "" } ) );
+    CHECK_THAT( splitStringRef( ",a,,b,", ',' ),
+                Equals( std::vector<StringRef>{ "", "a", "", "b", "" } ) );
+    CHECK_THAT( splitStringRef( "a,,,b", ',' ),
+                Equals( std::vector<StringRef>{ "a", "", "", "b" } ) );
+    CHECK_THAT( splitStringRef( ",", ',' ),
+                Equals( std::vector<StringRef>{ "", "" } ) );
+}
+
 TEST_CASE("startsWith", "[string-manip]") {
     using Catch::startsWith;
 
     CHECK_FALSE(startsWith("", 'c'));
     CHECK(startsWith(std::string("abc"), 'a'));
     CHECK(startsWith("def"_catch_sr, 'd'));
+}
+
+TEST_CASE( "toLower( char )", "[string-manip]" ) {
+    using Catch::toLower;
+
+    SECTION( "ASCII letters are lowercased" ) {
+        CHECK( toLower( 'A' ) == 'a' );
+        CHECK( toLower( 'Z' ) == 'z' );
+        CHECK( toLower( 'a' ) == 'a' );
+        CHECK( toLower( 'z' ) == 'z' );
+    }
+    SECTION( "Chars outside 'A'-'Z' are left alone" ) {
+        CHECK( toLower( '@' ) == '@' );
+        CHECK( toLower( '[' ) == '[' );
+        CHECK( toLower( '`' ) == '`' );
+        CHECK( toLower( '{' ) == '{' );
+        CHECK( toLower( '0' ) == '0' );
+        CHECK( toLower( ' ' ) == ' ' );
+        CHECK( toLower( '\0' ) == '\0' );
+    }
+    SECTION( "Non-ASCII chars are left alone" ) {
+        // toLower is deliberately ASCII-only, so that Catch2's handling of
+        // test names and tags does not depend on the current locale.
+        CHECK( toLower( static_cast<char>( 0xC4 ) ) ==
+               static_cast<char>( 0xC4 ) );
+        CHECK( toLower( static_cast<char>( 0xFF ) ) ==
+               static_cast<char>( 0xFF ) );
+    }
+    SECTION( "Is usable in constant expressions" ) {
+        STATIC_CHECK( toLower( 'A' ) == 'a' );
+        STATIC_CHECK( toLower( '0' ) == '0' );
+    }
 }

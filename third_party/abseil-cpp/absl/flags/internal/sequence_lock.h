@@ -23,6 +23,7 @@
 #include <cassert>
 #include <cstring>
 
+#include "absl/base/config.h"
 #include "absl/base/optimization.h"
 
 namespace absl {
@@ -64,6 +65,7 @@ class SequenceLock {
     assert(lock_.load(std::memory_order_relaxed) == kUninitialized);
     lock_.store(0, std::memory_order_release);
   }
+
 
   // Copy "size" bytes of data from "src" to "dst", protected as a read-side
   // critical section of the sequence lock.
@@ -117,25 +119,6 @@ class SequenceLock {
     lock_.store(orig_seq + 2, std::memory_order_release);
   }
 
-  // Return the number of times that Write() has been called.
-  //
-  // REQUIRES: This must be externally synchronized against concurrent calls to
-  // `Write()` or `IncrementModificationCount()`.
-  // REQUIRES: `MarkInitialized()` must have been previously called.
-  int64_t ModificationCount() const {
-    int64_t val = lock_.load(std::memory_order_relaxed);
-    assert(val != kUninitialized && (val & 1) == 0);
-    return val / 2;
-  }
-
-  // REQUIRES: This must be externally synchronized against concurrent calls to
-  // `Write()` or `ModificationCount()`.
-  // REQUIRES: `MarkInitialized()` must have been previously called.
-  void IncrementModificationCount() {
-    int64_t val = lock_.load(std::memory_order_relaxed);
-    assert(val != kUninitialized);
-    lock_.store(val + 2, std::memory_order_relaxed);
-  }
 
  private:
   // Perform the equivalent of "memcpy(dst, src, size)", but using relaxed

@@ -11,7 +11,7 @@ include(cmake/ide.cmake)
 spdlog_extract_version()
 
 project(spdlog VERSION ${SPDLOG_VERSION} LANGUAGES CXX)
-message(STATUS "Build spdlog: ${SPDLOG_VERSION}")
+spdlog_message_once(VERSION "Build spdlog: ${SPDLOG_VERSION}")
 
 include(GNUInstallDirs)
 
@@ -95,6 +95,7 @@ option(SPDLOG_BUILD_WARNINGS "Enable compiler warnings" OFF)
 # install options
 option(SPDLOG_SYSTEM_INCLUDES "Include as system headers (skip for clang-tidy)." OFF)
 option(SPDLOG_INSTALL "Generate the install target" ${SPDLOG_MASTER_PROJECT})
+option(SPDLOG_GENERATE_TWEAKME_H "Generate tweakme.h from the CMake configuration" OFF)
 option(SPDLOG_USE_STD_FORMAT "Use std::format instead of fmt library." OFF)
 option(SPDLOG_FMT_EXTERNAL "Use external fmt library instead of bundled" OFF)
 option(SPDLOG_FMT_EXTERNAL_HO "Use external fmt header-only library instead of bundled" OFF)
@@ -144,6 +145,19 @@ option(
 option(SPDLOG_DISABLE_DEFAULT_LOGGER "Disable default logger creation" OFF)
 option(SPDLOG_FWRITE_UNLOCKED "Use the unlocked variant of fwrite. Leave this on unless your libc doesn't have it" ON)
 
+set(SPDLOG_WCHAR_TO_UTF8_SUPPORT ${SPDLOG_WCHAR_SUPPORT})
+set(SPDLOG_UTF8_TO_WCHAR_CONSOLE ${SPDLOG_WCHAR_CONSOLE})
+
+if(SPDLOG_GENERATE_TWEAKME_H)
+    if(SPDLOG_FMT_EXTERNAL OR SPDLOG_FMT_EXTERNAL_HO)
+        set(SPDLOG_TWEAKME_FMT_EXTERNAL_DEFINITION "#define SPDLOG_FMT_EXTERNAL")
+    else()
+        set(SPDLOG_TWEAKME_FMT_EXTERNAL_DEFINITION "/* #undef SPDLOG_FMT_EXTERNAL */")
+    endif()
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/spdlog")
+    configure_file(cmake/tweakme.h.in "${CMAKE_CURRENT_BINARY_DIR}/include/spdlog/tweakme.h" @ONLY)
+endif()
+
 # clang-tidy
 option(SPDLOG_TIDY "run clang-tidy" OFF)
 
@@ -158,7 +172,7 @@ if(SPDLOG_BUILD_PIC)
 endif()
 
 find_package(Threads REQUIRED)
-message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
+spdlog_message_once(BUILD_TYPE "Build type: ${CMAKE_BUILD_TYPE}")
 # ---------------------------------------------------------------------------------------
 # Static/Shared library
 # ---------------------------------------------------------------------------------------
@@ -194,6 +208,10 @@ if(SPDLOG_SYSTEM_INCLUDES)
 endif()
 
 target_compile_definitions(spdlog PUBLIC SPDLOG_COMPILED_LIB)
+if(SPDLOG_GENERATE_TWEAKME_H)
+    target_include_directories(
+        spdlog ${SPDLOG_INCLUDES_LEVEL} BEFORE PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
+endif()
 target_include_directories(spdlog ${SPDLOG_INCLUDES_LEVEL} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
                                                                   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 target_link_libraries(spdlog PUBLIC Threads::Threads)
@@ -221,6 +239,11 @@ endif()
 add_library(spdlog_header_only INTERFACE)
 add_library(spdlog::spdlog_header_only ALIAS spdlog_header_only)
 
+if(SPDLOG_GENERATE_TWEAKME_H)
+    target_include_directories(
+        spdlog_header_only ${SPDLOG_INCLUDES_LEVEL} BEFORE INTERFACE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
+endif()
 target_include_directories(
     spdlog_header_only ${SPDLOG_INCLUDES_LEVEL} INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
                                                           "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
@@ -275,8 +298,6 @@ endif()
 # ---------------------------------------------------------------------------------------
 # Misc definitions according to tweak options
 # ---------------------------------------------------------------------------------------
-set(SPDLOG_WCHAR_TO_UTF8_SUPPORT ${SPDLOG_WCHAR_SUPPORT})
-set(SPDLOG_UTF8_TO_WCHAR_CONSOLE ${SPDLOG_WCHAR_CONSOLE})
 foreach(
     SPDLOG_OPTION
     SPDLOG_WCHAR_TO_UTF8_SUPPORT
@@ -299,7 +320,11 @@ endforeach()
 
 if(MSVC)
     target_compile_options(spdlog PRIVATE "/Zc:__cplusplus")
-    target_compile_options(spdlog_header_only INTERFACE "/Zc:__cplusplus")
+    #target_compile_options(spdlog_header_only INTERFACE "/Zc:__cplusplus")
+    target_compile_options(spdlog_header_only INTERFACE
+      $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/Zc:__cplusplus>
+      $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CXX_COMPILER_ID:MSVC>>:-Xcompiler=/Zc:__cplusplus>
+    )
     if(SPDLOG_MSVC_UTF8)
         # fmtlib requires the /utf-8 flag when building with msvc. see https://github.com/fmtlib/fmt/pull/4159 on the
         # purpose of the additional
@@ -363,7 +388,14 @@ if(SPDLOG_INSTALL)
     # ---------------------------------------------------------------------------------------
     # Include files
     # ---------------------------------------------------------------------------------------
-    install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" PATTERN "fmt/bundled" EXCLUDE)
+    if(SPDLOG_GENERATE_TWEAKME_H)
+        install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" PATTERN "fmt/bundled" EXCLUDE
+                PATTERN "tweakme.h" EXCLUDE)
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/spdlog/tweakme.h"
+                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/spdlog")
+    else()
+        install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" PATTERN "fmt/bundled" EXCLUDE)
+    endif()
     install(
         TARGETS spdlog spdlog_header_only
         EXPORT spdlog
@@ -394,6 +426,19 @@ if(SPDLOG_INSTALL)
     string(CONCAT PKG_CONFIG_DEFINES "-D" "${PKG_CONFIG_DEFINES}")
     configure_file("cmake/${PROJECT_NAME}.pc.in" "${pkg_config}" @ONLY)
     install(FILES "${pkg_config}" DESTINATION "${pkgconfig_install_dir}")
+
+    # Header-only pkg-config file: no libspdlog to link and no SPDLOG_COMPILED_LIB,
+    # so header-only consumers get the correct flags.
+    set(pkg_config_header_only "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_header_only.pc")
+    get_target_property(PKG_CONFIG_HO_DEFINES spdlog_header_only INTERFACE_COMPILE_DEFINITIONS)
+    if(PKG_CONFIG_HO_DEFINES)
+        string(REPLACE ";" " -D" PKG_CONFIG_HO_DEFINES "${PKG_CONFIG_HO_DEFINES}")
+        string(CONCAT PKG_CONFIG_HO_DEFINES "-D" "${PKG_CONFIG_HO_DEFINES}")
+    else()
+        set(PKG_CONFIG_HO_DEFINES "")
+    endif()
+    configure_file("cmake/${PROJECT_NAME}_header_only.pc.in" "${pkg_config_header_only}" @ONLY)
+    install(FILES "${pkg_config_header_only}" DESTINATION "${pkgconfig_install_dir}")
 
     # ---------------------------------------------------------------------------------------
     # Install CMake config files

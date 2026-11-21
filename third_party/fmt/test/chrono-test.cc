@@ -1,6 +1,6 @@
 // Formatting library for C++ - time formatting tests
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -332,6 +332,52 @@ TEST(chrono_test, local_time) {
                    fmt::format_error, "no timezone");
   EXPECT_THROW_MSG((void)fmt::format(fmt::runtime("{:%Z}"), time),
                    fmt::format_error, "no timezone");
+
+  auto epoch = fmt::local_time<std::chrono::milliseconds>();
+  auto d = std::chrono::milliseconds(250);
+  EXPECT_EQ(fmt::format("{:%S}", epoch - d), "59.750");
+
+  auto pre_epoch = fmt::local_time<std::chrono::milliseconds>(
+      std::chrono::milliseconds(-14398877));
+  EXPECT_EQ(fmt::format("{:%S}", pre_epoch), "01.123");
+}
+
+TEST(chrono_test, local_time_before_epoch) {
+  using std::chrono::milliseconds;
+  using std::chrono::nanoseconds;
+  using std::chrono::seconds;
+  auto ms = [](long long n) {
+    return fmt::local_time<milliseconds>(milliseconds(n));
+  };
+  // Subseconds are a remainder of a floored second, not a negative offset.
+  EXPECT_EQ(fmt::format("{}", ms(-500)), "1969-12-31 23:59:59.500");
+  EXPECT_EQ(fmt::format("{}", ms(-1000)), "1969-12-31 23:59:59.000");
+  EXPECT_EQ(fmt::format("{}", ms(-1500)), "1969-12-31 23:59:58.500");
+  // Flooring the second also moves to the previous minute.
+  EXPECT_EQ(fmt::format("{}", ms(-61500)), "1969-12-31 23:58:58.500");
+  EXPECT_EQ(fmt::format("{}", fmt::local_time<std::chrono::duration<double>>(
+                                  std::chrono::duration<double>(-1.5))),
+            "1969-12-31 23:59:58.500000");
+  // A whole-second duration has no fractional part to format.
+  EXPECT_EQ(fmt::format("{}", fmt::local_time<seconds>(seconds(-1))),
+            "1969-12-31 23:59:59");
+  // Flooring the seconds must not convert them back to the input precision,
+  // which would overflow. Only a sanitizer detects this, so the result is
+  // irrelevant and gmtime may reject the value on platforms with a narrower
+  // supported range.
+  auto ns_min = nanoseconds((std::numeric_limits<nanoseconds::rep>::min)());
+  try {
+    (void)fmt::format("{}", fmt::local_time<nanoseconds>(ns_min));
+  } catch (const fmt::format_error&) {
+  }
+}
+
+TEST(chrono_test, local_time_narrow_duration) {
+  // int16_t microseconds hold less than a second, so the subsecond remainder
+  // does not fit in the duration itself.
+  using narrow = std::chrono::duration<int16_t, std::micro>;
+  EXPECT_EQ(fmt::format("{}", fmt::local_time<narrow>(narrow(-30000))),
+            "1969-12-31 23:59:59.970000");
 }
 
 template <typename T, FMT_ENABLE_IF(fmt::detail::has_tm_gmtoff<T>::value)>
@@ -358,6 +404,9 @@ TEST(chrono_test, tm) {
   char tz[] = "EET";
   if (fmt::detail::set_tm_zone(time, tz)) {
     EXPECT_EQ(fmt::format(fmt::runtime("{:%Z}"), time), "EET");
+    fmt::detail::set_tm_zone(time, nullptr);
+    EXPECT_THROW_MSG((void)fmt::format(fmt::runtime("{:%Z}"), time),
+                     fmt::format_error, "no timezone");
   } else {
     EXPECT_THROW_MSG((void)fmt::format(fmt::runtime("{:%Z}"), time),
                      fmt::format_error, "no timezone");
@@ -472,6 +521,7 @@ TEST(chrono_test, format_specs) {
   EXPECT_EQ(fmt::format("{:%S}", std::chrono::seconds(60)), "00");
   EXPECT_EQ(fmt::format("{:%S}", std::chrono::seconds(42)), "42");
   EXPECT_EQ(fmt::format("{:%S}", std::chrono::milliseconds(1234)), "01.234");
+  EXPECT_EQ(fmt::format("{:%OS}", std::chrono::milliseconds(1234)), "01.234");
   EXPECT_EQ(fmt::format("{:%M}", std::chrono::minutes(0)), "00");
   EXPECT_EQ(fmt::format("{:%M}", std::chrono::minutes(60)), "00");
   EXPECT_EQ(fmt::format("{:%M}", std::chrono::minutes(42)), "42");
@@ -485,9 +535,14 @@ TEST(chrono_test, format_specs) {
   EXPECT_EQ(fmt::format("{:%I}", std::chrono::hours(24)), "12");
   EXPECT_EQ(fmt::format("{:%I}", std::chrono::hours(4)), "04");
   EXPECT_EQ(fmt::format("{:%I}", std::chrono::hours(14)), "02");
+  EXPECT_EQ(fmt::format("{:%I}", std::chrono::duration<double>(1)), "12");
   EXPECT_EQ(fmt::format("{:%j}", days(12)), "12");
   EXPECT_EQ(fmt::format("{:%j}", days(12345)), "12345");
   EXPECT_EQ(fmt::format("{:%j}", std::chrono::hours(12345 * 24 + 12)), "12345");
+  using signed_days = std::chrono::duration<signed char, std::ratio<86400>>;
+  EXPECT_EQ(fmt::format("{:%j}", signed_days(-128)), "-128");
+  using two_days = std::chrono::duration<unsigned char, std::ratio<172800>>;
+  EXPECT_EQ(fmt::format("{:%j}", two_days(200)), "400");
   EXPECT_EQ(fmt::format("{:%H:%M:%S}", std::chrono::seconds(12345)),
             "03:25:45");
   EXPECT_EQ(fmt::format("{:%R}", std::chrono::seconds(12345)), "03:25");
@@ -691,6 +746,17 @@ TEST(chrono_test, special_durations) {
       "01.234");
 }
 
+TEST(chrono_test, floating_duration_sign) {
+  EXPECT_EQ(fmt::format("{:%S %M}", std::chrono::duration<double>(-61.25)),
+            "-01.250000 01");
+  auto inf =
+      std::chrono::duration<double>(std::numeric_limits<double>::infinity());
+  EXPECT_EQ(fmt::format("{:%Q}", inf), "inf");
+  EXPECT_EQ(fmt::format("{:%Q}", -inf), "-inf");
+  EXPECT_EQ(fmt::format("{:%S}", -inf), "-inf");
+  EXPECT_EQ(fmt::format("{:%R}", -inf), "-inf:inf");
+}
+
 TEST(chrono_test, unsigned_duration) {
   EXPECT_EQ(fmt::format("{}", std::chrono::duration<unsigned>(42)), "42s");
 }
@@ -714,6 +780,9 @@ TEST(chrono_test, weekday) {
     EXPECT_THAT(saturdays, Contains(fmt::format(loc, "{:L}", sat)));
     EXPECT_THAT(saturdays, Contains(fmt::format(loc, "{:L%a}", sat)));
     EXPECT_THAT(saturdays, Contains(fmt::format(loc, "{:L%a}", tm)));
+    // Without an explicit locale the global one is used.
+    EXPECT_THAT(saturdays, Contains(fmt::format("{:L}", sat)));
+    EXPECT_THAT(saturdays, Contains(fmt::format("{:L%a}", tm)));
   }
 }
 
@@ -986,6 +1055,91 @@ TEST(chrono_test, glibc_extensions) {
 TEST(chrono_test, out_of_range) {
   auto d = std::chrono::duration<unsigned long, std::giga>(538976288);
   EXPECT_THROW((void)fmt::format("{:%j}", d), fmt::format_error);
+  // A floating-point day count that doesn't fit in int.
+  auto fd = std::chrono::duration<double>(1e300);
+  EXPECT_THROW((void)fmt::format("{:%j}", fd), fmt::format_error);
+  if (!FMT_SAFE_DURATION_CAST) return;
+  // Floating-point time points whose seconds don't fit in time_t.
+  auto fnan = sys_time<std::chrono::duration<double>>(
+      std::chrono::duration<double>(std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_THROW((void)fmt::format("{:%T}", fnan), fmt::format_error);
+  auto flocal = fmt::local_time<std::chrono::duration<double>>(
+      std::chrono::duration<double>(-1e300));
+  EXPECT_THROW((void)fmt::format("{:%F}", flocal), fmt::format_error);
+}
+
+TEST(chrono_test, float_to_integral_duration_cast) {
+  using fsec = std::chrono::duration<double>;
+  // Values that truncate toward zero into range are valid.
+  EXPECT_EQ(
+      fmt::detail::duration_cast<std::chrono::duration<unsigned>>(fsec(-0.5))
+          .count(),
+      0u);
+  auto min = (std::numeric_limits<int>::min)();
+  EXPECT_EQ(
+      fmt::detail::duration_cast<std::chrono::duration<int>>(fsec(min - 0.5))
+          .count(),
+      min);
+  auto max = (std::numeric_limits<int>::max)();
+  EXPECT_EQ(
+      fmt::detail::duration_cast<std::chrono::duration<int>>(fsec(max + 0.5))
+          .count(),
+      max);
+  // Any nonzero value converts to true.
+  using bool_duration = std::chrono::duration<bool>;
+  EXPECT_TRUE(fmt::detail::duration_cast<bool_duration>(fsec(2)).count());
+  if (!FMT_SAFE_DURATION_CAST) return;
+  EXPECT_THROW(
+      fmt::detail::duration_cast<std::chrono::duration<unsigned>>(fsec(-1)),
+      fmt::format_error);
+  EXPECT_THROW(
+      fmt::detail::duration_cast<std::chrono::duration<int>>(fsec(min - 1.0)),
+      fmt::format_error);
+  // max + 1, which is also what max rounds to in the source type.
+  EXPECT_THROW(fmt::detail::duration_cast<std::chrono::duration<long long>>(
+                   fsec(9223372036854775808.0)),
+               fmt::format_error);
+  EXPECT_THROW(fmt::detail::duration_cast<std::chrono::duration<int>>(
+                   fsec(std::numeric_limits<double>::quiet_NaN())),
+               fmt::format_error);
+}
+
+struct custom_rep {
+  long long value = 0;
+  custom_rep() = default;
+  custom_rep(long long v) : value(v) {}
+  operator long long() const { return value; }
+};
+
+namespace std {
+template <> struct common_type<custom_rep, long long> {
+  using type = long long;
+};
+template <> struct common_type<long long, custom_rep> {
+  using type = long long;
+};
+}  // namespace std
+
+TEST(chrono_test, custom_rep_duration_cast) {
+  auto d = std::chrono::duration<custom_rep, std::milli>(custom_rep(2500));
+  // Use an explicit rep since the rep of std::chrono::seconds varies between
+  // platforms and common_type is only specialized for long long.
+  using to_duration = std::chrono::duration<long long>;
+  EXPECT_EQ(fmt::detail::duration_cast<to_duration>(d).count(), 2);
+}
+
+TEST(chrono_test, calendar_padding) {
+  EXPECT_EQ("05   ", fmt::format("{:5}", fmt::day(5)));
+  EXPECT_EQ("  Jan", fmt::format("{:>5}", fmt::month(1)));
+  EXPECT_EQ("2024 ", fmt::format("{:5}", fmt::year(2024)));
+  EXPECT_EQ("  Sat", fmt::format("{:>5}", fmt::weekday(6)));
+  EXPECT_EQ(" 2024-01-05",
+            fmt::format("{:>11}",
+                        fmt::year_month_day(fmt::year(2024), fmt::month(1),
+                                            fmt::day(5))));
+
+  // An explicit chrono format still overrides the default.
+  EXPECT_EQ("January", fmt::format("{:%B}", fmt::month(1)));
 }
 
 TEST(chrono_test, year_month_day) {
@@ -1018,5 +1172,24 @@ TEST(chrono_test, year_month_day) {
     auto months = std::vector<std::string>{"ene.", "ene"};
     EXPECT_THAT(months, Contains(fmt::format(loc, "{:L}", month)));
     EXPECT_THAT(months, Contains(fmt::format(loc, "{:L%b}", month)));
+    EXPECT_THAT(months, Contains(fmt::format("{:L}", month)));
   }
+}
+
+TEST(chrono_test, year_month_day_weekday_and_day_of_year) {
+  auto ymd = fmt::year_month_day(fmt::year(2024), fmt::month(3), fmt::day(1));
+  EXPECT_EQ(fmt::format("{:%a %A %u %w}", ymd), "Fri Friday 5 5");
+  EXPECT_EQ(fmt::format("{:%j %U %W}", ymd), "061 08 09");
+  EXPECT_EQ(fmt::format("{:%G-W%V}", ymd), "2024-W09");
+
+  ymd = fmt::year_month_day(fmt::year(2021), fmt::month(1), fmt::day(1));
+  EXPECT_EQ(fmt::format("{:%a %j %U %W}", ymd), "Fri 001 00 00");
+  EXPECT_EQ(fmt::format("{:%G-W%V-%u}", ymd), "2020-W53-5");
+
+  ymd = fmt::year_month_day(fmt::year(-23), fmt::month(1), fmt::day(1));
+  EXPECT_EQ(fmt::format("{:%G-W%V}", ymd), "-024-W53");
+
+  ymd = fmt::year_month_day(fmt::year(1969), fmt::month(12), fmt::day(31));
+  EXPECT_EQ(fmt::format("{:%A %j}", ymd), "Wednesday 365");
+  EXPECT_EQ(fmt::format("{:%G-W%V}", ymd), "1970-W01");
 }

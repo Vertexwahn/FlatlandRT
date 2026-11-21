@@ -616,6 +616,13 @@ TEST(document_load_file_special_device)
 	xml_parse_result result = doc.load_file("/dev/tty");
 	CHECK(result.status == status_file_not_found || result.status == status_io_error);
 }
+
+TEST(document_load_file_special_sysfs)
+{
+	xml_document doc;
+	xml_parse_result result = doc.load_file("/sys/kernel/fscaps");
+	CHECK(result.status == status_file_not_found || result.status == status_io_error);
+}
 #endif
 
 TEST_XML(document_save, "<node/>")
@@ -1311,6 +1318,15 @@ TEST(document_load_buffer_empty_fragment)
 	}
 }
 
+TEST(document_load_buffer_empty_encoding)
+{
+	xml_document doc;
+	xml_parse_result result = doc.load_buffer(0, 0, parse_fragment);
+
+	CHECK(result.status == status_ok);
+	CHECK(result.encoding == encoding_utf8);
+}
+
 TEST(document_load_buffer_null)
 {
 	xml_document doc;
@@ -1881,4 +1897,14 @@ TEST(document_load_buffer_own_convert_out_of_memory)
 	CHECK_ALLOC_FAIL(result = doc.load_buffer_inplace_own(buffer, size, pugi::parse_default, pugi::encoding_latin1));
 
 	CHECK(result.status == status_out_of_memory);
+}
+
+TEST(document_load_buffer_wide_truncated)
+{
+	xml_document doc;
+
+	char buf[1] = {};
+	CHECK(doc.load_buffer_inplace(buf, 1, parse_default, encoding_wchar).status == status_no_document_element);
+	CHECK(doc.load_buffer_inplace(buf, 1, parse_fragment, encoding_wchar).status == status_ok);
+	CHECK(!doc.first_child());
 }

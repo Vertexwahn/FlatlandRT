@@ -39,7 +39,7 @@ bool IsAnchorChar(int ch) {  // test for ns-anchor-char
     return false;
   }
 
-  if (ch < 0x7E) {
+  if (ch <= 0x7E) {
     return true;
   }
 
@@ -203,7 +203,7 @@ bool IsValidSingleQuotedScalar(const char* str, std::size_t size, bool escapeNon
   // TODO: check for non-printable characters?
   return std::none_of(str, str + size, [=](char ch) {
     return (escapeNonAscii && (0x80 <= static_cast<unsigned char>(ch))) ||
-           (ch == '\n');
+           (ch == '\n') || (ch == '\r');
   });
 }
 
@@ -214,8 +214,11 @@ bool IsValidLiteralScalar(const char* str, std::size_t size, FlowType::value flo
   }
 
   // TODO: check for non-printable characters?
+  // A carriage return is a line break to the parser, so a block scalar cannot
+  // carry one; leave those to the double-quoted form.
   return std::none_of(str, str + size, [=](char ch) {
-    return (escapeNonAscii && (0x80 <= static_cast<unsigned char>(ch)));
+    return (escapeNonAscii && (0x80 <= static_cast<unsigned char>(ch))) ||
+           (ch == '\r');
   });
 }
 
@@ -229,7 +232,7 @@ std::pair<uint16_t, uint16_t> EncodeUTF16SurrogatePair(int codePoint) {
 }
 
 void WriteDoubleQuoteEscapeSequence(ostream_wrapper& out, int codePoint, StringEscaping::value stringEscapingStyle) {
-  static const char hexDigits[] = "0123456789abcdef";
+  static constexpr char hexDigits[] = "0123456789abcdef";
 
   out << "\\";
   int digits = 8;
@@ -297,12 +300,39 @@ StringFormat::value ComputeStringFormat(const char* str, std::size_t size,
   return StringFormat::DoubleQuoted;
 }
 
+StringFormat::value ComputeBinaryFormat(const Binary &bin,
+                                        EMITTER_MANIP strFormat,
+                                        FlowType::value flowType) {
+  // Equivalent to calling ComputeStringFormat with the base64
+  // encoded form of 'bin'.
+  switch (strFormat) {
+    case Auto:
+      if (bin.size() > 0u) {
+        return StringFormat::Plain;
+      }
+      return StringFormat::DoubleQuoted;
+    case SingleQuoted:
+      return StringFormat::SingleQuoted;
+    case DoubleQuoted:
+      return StringFormat::DoubleQuoted;
+    case Literal:
+      if (flowType == FlowType::Flow) {
+        return StringFormat::DoubleQuoted;
+      }
+      return StringFormat::Literal;
+    default:
+      break;
+  }
+
+  return StringFormat::DoubleQuoted;
+}
+
 bool WriteSingleQuotedString(ostream_wrapper& out, const char* str, std::size_t size) {
   out << "'";
   int codePoint;
   for (const char* i = str;
        GetNextCodePointAndAdvance(codePoint, i, str + size);) {
-    if (codePoint == '\n') {
+    if (codePoint == '\n' || codePoint == '\r') {
       return false;  // We can't handle a new line and the attendant indentation
                      // yet
     }
@@ -436,7 +466,10 @@ bool WriteComment(ostream_wrapper& out, const char* str, std::size_t size,
   int codePoint;
   for (const char* i = str;
        GetNextCodePointAndAdvance(codePoint, i, str + size);) {
-    if (codePoint == '\n') {
+    if (codePoint == '\n' || codePoint == '\r') {
+      if (codePoint == '\r' && i != str + size && *i == '\n') {
+        ++i;  // a CRLF pair is a single break
+      }
       out << "\n"
           << IndentTo(curIndent) << "#" << Indentation(postCommentIndent);
       out.set_comment();
@@ -512,9 +545,34 @@ bool WriteTagWithPrefix(ostream_wrapper& out, const std::string& prefix,
 
 bool WriteBinary(ostream_wrapper& out, const Binary& binary) {
   std::string encoded = EncodeBase64(binary.data(), binary.size());
-  WriteDoubleQuotedString(out, encoded.data(), encoded.size(),
-                          StringEscaping::None);
-  return true;
+  return WriteDoubleQuotedString(out, encoded.data(), encoded.size(),
+                                 StringEscaping::None);
 }
+
+bool WriteLiteralBinary(ostream_wrapper& out, const Binary& binary, std::size_t indent, std::size_t wrap) {
+  std::string encoded = EncodeBase64(binary.data(), binary.size());
+  std::string wrapped = "";
+  if (wrap) {
+    if (wrap <= indent) return false;
+    wrap -= indent;
+    std::size_t point = wrap;
+    for (std::size_t i = 0; i < encoded.size(); i++) {
+      if (i == point) {
+        wrapped += '\n';
+        point += wrap;
+      }
+      wrapped += encoded[i];
+    }
+  }
+  else
+    wrapped = encoded;
+  return WriteLiteralString(out, wrapped.data(), wrapped.size(), indent);
+}
+
+bool WriteSingleQuotedBinary(ostream_wrapper& out, const Binary& binary) {
+  std::string encoded = EncodeBase64(binary.data(), binary.size());
+  return WriteSingleQuotedString(out, encoded.data(), encoded.size());
+}
+
 }  // namespace Utils
 }  // namespace YAML

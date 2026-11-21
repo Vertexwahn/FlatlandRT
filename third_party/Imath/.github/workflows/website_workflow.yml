@@ -39,15 +39,17 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Create build directory
         run: mkdir _build
       - name: Install doxygen 
         run: sudo apt-get install -y doxygen
       - name: Install sphinx requirements
-        run: pip3 install -r website/requirements.txt
-      - name: Configure
-        run: cmake .. -DBUILD_WEBSITE='ON'
+        run: |
+          python3 -m venv _venv
+          source _venv/*/activate
+          pip3 install --require-hashes -r ../website/requirements-lock.txt
+          cmake .. -DBUILD_WEBSITE='ON'
         working-directory: _build
       - name: Build
         run: |

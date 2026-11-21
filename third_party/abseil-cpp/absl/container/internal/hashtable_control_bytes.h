@@ -24,6 +24,9 @@
 #include <type_traits>
 
 #include "absl/base/config.h"
+#include "absl/base/internal/endian.h"
+#include "absl/base/optimization.h"
+#include "absl/numeric/bits.h"
 
 #ifdef ABSL_INTERNAL_HAVE_SSE2
 #include <emmintrin.h>
@@ -41,10 +44,6 @@
 #include <arm_neon.h>
 #endif
 
-#include "absl/base/optimization.h"
-#include "absl/numeric/bits.h"
-#include "absl/base/internal/endian.h"
-
 namespace absl {
 ABSL_NAMESPACE_BEGIN
 namespace container_internal {
@@ -60,7 +59,7 @@ namespace container_internal {
 
 
 template <typename T>
-uint32_t TrailingZeros(T x) {
+constexpr uint32_t TrailingZeros(T x) {
   ABSL_ASSUME(x != 0);
   return static_cast<uint32_t>(countr_zero(x));
 }
@@ -87,9 +86,7 @@ class NonIterableBitMask {
   explicit operator bool() const { return mask_ != 0; }
 
   // Returns the index of the lowest *abstract* bit set in `self`.
-  uint32_t LowestBitSet() const {
-    return container_internal::TrailingZeros(mask_) >> Shift;
-  }
+  uint32_t LowestBitSet() const { return TrailingZeros(); }
 
   // Returns the number of trailing zero *abstract* bits.
   uint32_t TrailingZeros() const {
@@ -125,9 +122,9 @@ template <class T, int SignificantBits, int Shift = 0,
           bool NullifyBitsOnIteration = false>
 class BitMask : public NonIterableBitMask<T, SignificantBits, Shift> {
   using Base = NonIterableBitMask<T, SignificantBits, Shift>;
-  static_assert(std::is_unsigned<T>::value, "");
-  static_assert(Shift == 0 || Shift == 3, "");
-  static_assert(!NullifyBitsOnIteration || Shift == 3, "");
+  static_assert(std::is_unsigned_v<T>);
+  static_assert(Shift == 0 || Shift == 3);
+  static_assert(!NullifyBitsOnIteration || Shift == 3);
 
  public:
   explicit BitMask(T mask) : Base(mask) {
@@ -185,6 +182,8 @@ enum class ctrl_t : int8_t {
   kEmpty = -128,   // 0b10000000
   kDeleted = -2,   // 0b11111110
   kSentinel = -1,  // 0b11111111
+  // Special value used in the slow path of resizing.
+  kMarkedForSlowTransfer = -3,
 };
 static_assert(
     (static_cast<int8_t>(ctrl_t::kEmpty) &
@@ -263,7 +262,7 @@ inline bool IsEmptyOrDeleted(ctrl_t c) { return c < ctrl_t::kSentinel; }
 // when using -funsigned-char under GCC.
 inline __m128i _mm_cmpgt_epi8_fixed(__m128i a, __m128i b) {
 #if defined(__GNUC__) && !defined(__clang__)
-  if (std::is_unsigned<char>::value) {
+  if (std::is_unsigned_v<char>) {
     const __m128i mask = _mm_set1_epi8(0x80);
     const __m128i diff = _mm_subs_epi8(b, a);
     return _mm_cmpeq_epi8(_mm_and_si128(diff, mask), mask);
@@ -288,7 +287,15 @@ struct GroupSse2Impl {
   // Returns a bitmask representing the positions of slots that match hash.
   BitMaskType Match(h2_t hash) const {
     auto match = _mm_set1_epi8(static_cast<char>(hash));
-    return BitMaskType(MoveMask(_mm_cmpeq_epi8(match, ctrl)));
+    auto mask = MoveMask(_mm_cmpeq_epi8(match, ctrl));
+#ifdef __clang__
+    // TODO(b/472522597): Without the inline asm, clang ends up generating an
+    // unnecessary movzx to zero the upper bits of the output when iterating
+    // over matches, even though those bits are already zero. See
+    // https://godbolt.org/z/G6xW1Ecbx.
+    asm("" : "+r"(mask));  // NOLINT
+#endif
+    return BitMaskType(mask);
   }
 
   // Returns a bitmask representing the positions of empty slots.
@@ -319,15 +326,6 @@ struct GroupSse2Impl {
         MoveMask(_mm_cmpgt_epi8_fixed(special, ctrl)));
   }
 
-  // Returns a bitmask representing the positions of full or sentinel slots.
-  // Note: for `is_small()` tables group may contain the "same" slot twice:
-  // original and mirrored.
-  NonIterableBitMaskType MaskFullOrSentinel() const {
-    auto special = _mm_set1_epi8(static_cast<char>(ctrl_t::kSentinel) - 1);
-    return NonIterableBitMaskType(
-        MoveMask(_mm_cmpgt_epi8_fixed(ctrl, special)));
-  }
-
   void ConvertSpecialToEmptyAndFullToDeleted(ctrl_t* dst) const {
     // Take advantage of the fact that kEmpty is already the smallest signed
     // char value, and using a saturated subtraction will not affect it.
@@ -342,14 +340,7 @@ struct GroupSse2Impl {
   }
 
   static MaskInt MoveMask(__m128i xmm) {
-    auto mask = static_cast<MaskInt>(_mm_movemask_epi8(xmm));
-#ifdef __clang__
-    // TODO(b/472522597): Without the inline asm, clang ends up generating an
-    // unnecessary movzx to zero the upper bits of the output, but those bits
-    // are already zero. See https://godbolt.org/z/G6xW1Ecbx.
-    asm("" : "+r"(mask));  // NOLINT
-#endif
-    return mask;
+    return static_cast<MaskInt>(_mm_movemask_epi8(xmm));
   }
 
   __m128i ctrl;
@@ -414,15 +405,6 @@ struct GroupAArch64Impl {
     return NonIterableBitMaskType(mask);
   }
 
-  NonIterableBitMaskType MaskFullOrSentinel() const {
-    uint64_t mask = vget_lane_u64(
-        vreinterpret_u64_u8(
-            vcgt_s8(vreinterpret_s8_u8(ctrl),
-                    vdup_n_s8(static_cast<int8_t>(ctrl_t::kSentinel) - 1))),
-        0);
-    return NonIterableBitMaskType(mask);
-  }
-
   void ConvertSpecialToEmptyAndFullToDeleted(ctrl_t* dst) const {
     uint64_t mask = vget_lane_u64(vreinterpret_u64_u8(ctrl), 0);
     constexpr uint64_t slsbs = 0x0202020202020202ULL;
@@ -483,10 +465,6 @@ struct GroupPortableImpl {
 
   auto MaskEmptyOrDeleted() const {
     return NonIterableBitMaskType((ctrl & ~(ctrl << 7)) & kMsbs8Bytes);
-  }
-
-  auto MaskFullOrSentinel() const {
-    return NonIterableBitMaskType((~ctrl | (ctrl << 7)) & kMsbs8Bytes);
   }
 
   void ConvertSpecialToEmptyAndFullToDeleted(ctrl_t* dst) const {

@@ -27,11 +27,12 @@ cmake_dependent_option(YAML_CPP_BUILD_TESTS
   "Enable yaml-cpp tests" OFF
   "BUILD_TESTING;YAML_CPP_MAIN_PROJECT" OFF)
 cmake_dependent_option(YAML_MSVC_SHARED_RT
-  "MSVC: Build yaml-cpp with shared runtime libs (/MD)" ON
+  "MSVC: Build yaml-cpp with shared runtime libs (/MD). When building a static library, leave OFF for /MT to match statically-linked apps."
+  ${YAML_BUILD_SHARED_LIBS}
   "CMAKE_SYSTEM_NAME MATCHES Windows" OFF)
 set(YAML_CPP_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/yaml-cpp"
   CACHE STRING "Path to install the CMake package to")
- 
+
 if (YAML_CPP_FORMAT_SOURCE)
     find_program(YAML_CPP_CLANG_FORMAT_EXE NAMES clang-format)
 endif()
@@ -55,8 +56,7 @@ if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
     MultiThreaded$<$<CONFIG:Debug>:Debug>$<${msvc-shared_rt}:DLL>)
 endif()
 
-file(GLOB yaml-cpp-contrib-sources CONFIGURE_DEPENDS "src/contrib/*.cpp")
-file(GLOB yaml-cpp-sources CONFIGURE_DEPENDS "src/*.cpp")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/yaml-cpp-sources.cmake")
 
 set(msvc-rt $<TARGET_PROPERTY:MSVC_RUNTIME_LIBRARY>)
 
@@ -142,6 +142,11 @@ write_basic_package_version_file(
   "${PROJECT_BINARY_DIR}/yaml-cpp-config-version.cmake"
   COMPATIBILITY AnyNewerVersion)
 
+if (YAML_BUILD_SHARED_LIBS)
+  set(YAML_CPP_PKG_CONFIG_CFLAGS_PRIVATE "")
+else()
+  set(YAML_CPP_PKG_CONFIG_CFLAGS_PRIVATE "-DYAML_CPP_STATIC_DEFINE")
+endif()
 configure_file(yaml-cpp.pc.in yaml-cpp.pc @ONLY)
 
 if (YAML_CPP_INSTALL)

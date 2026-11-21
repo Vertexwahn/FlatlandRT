@@ -1,6 +1,6 @@
 // Formatting library for C++ - formatting library tests
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -18,10 +18,12 @@
 #include <cfenv>        // fegetexceptflag and FE_ALL_EXCEPT
 #include <climits>      // INT_MAX
 #include <cmath>        // std::signbit
+#include <csignal>      // std::signal, SIGPIPE
 #include <cstring>      // std::strlen
 #include <iterator>     // std::back_inserter
 #include <list>         // std::list
 #include <mutex>        // std::mutex
+#include <new>          // std::bad_alloc
 #include <string>       // std::string
 #include <thread>       // std::thread
 #include <type_traits>  // std::is_default_constructible
@@ -74,11 +76,21 @@ TEST(uint128_test, shift) {
   EXPECT_EQ(static_cast<uint64_t>(n), 42);
   EXPECT_EQ(uint128(1) << 112, uint128(0x1000000000000, 0));
   EXPECT_EQ(uint128(0x1000000000000, 0) >> 112, uint128(1));
+  // FMT_CONSTEXPR turns an undefined shift into a compile error.
+  FMT_CONSTEXPR auto lshift = uint128(1, 2) << 0;
+  FMT_CONSTEXPR auto rshift = uint128(1, 2) >> 0;
+  EXPECT_EQ(lshift, uint128(1, 2));
+  EXPECT_EQ(rshift, uint128(1, 2));
 }
 
 TEST(uint128_test, minus) {
   auto n = uint128(42);
   EXPECT_EQ(n - 2, 40);
+}
+
+TEST(uint128_test, bitwise_not) {
+  auto n = ~uint128(0x123456789abcdef0, 0x0fedcba987654321);
+  EXPECT_EQ(n, uint128(0xedcba9876543210f, 0xf0123456789abcde));
 }
 
 TEST(uint128_test, plus_assign) {
@@ -301,6 +313,19 @@ TEST(memory_buffer_test, ctor) {
   EXPECT_EQ(123u, buffer.capacity());
 }
 
+#if FMT_USE_CONSTEVAL
+TEST(memory_buffer_test, constexpr_grow) {
+  // std::allocator is used because, unlike detail::allocator, it hands out raw
+  // storage in constant expressions, so grow() must construct elements there.
+  constexpr auto result = [] {
+    basic_memory_buffer<char, 2, std::allocator<char>> buf;
+    for (char c : string_view("abcdef")) buf.push_back(c);
+    return string_view(buf.data(), buf.size()) == "abcdef";
+  }();
+  EXPECT_TRUE(result);
+}
+#endif
+
 using std_allocator = allocator_ref<std::allocator<char>>;
 
 TEST(memory_buffer_test, move_ctor_inline_buffer) {
@@ -374,23 +399,66 @@ TEST(memory_buffer_test, move_ctor_inline_buffer_non_propagating) {
   check_move_buffer("testa", buffer);
 }
 
-TEST(memory_buffer_test, move_ctor_dynamic_buffer_non_propagating) {
-  auto alloc = std::allocator<char>();
-  basic_memory_buffer<char, 4, std_allocator_noprop> buffer(
-      (std_allocator_noprop(&alloc)));
-  const char test[] = "test";
-  buffer.append(test, test + 4);
-  const char* inline_buffer_ptr = &buffer[0];
-  buffer.push_back('a');
-  EXPECT_NE(buffer.data(), inline_buffer_ptr);
-  std::allocator<char>* original_alloc_ptr = buffer.get_allocator().get();
-  basic_memory_buffer<char, 4, std_allocator_noprop> buffer2;
+struct stateful_allocator {
+  using value_type = char;
+  int id;
+
+  auto allocate(size_t n) -> char* {
+    return std::allocator<char>().allocate(n);
+  }
+  void deallocate(char* p, size_t n) {
+    std::allocator<char>().deallocate(p, n);
+  }
+  friend auto operator==(stateful_allocator a, stateful_allocator b) -> bool {
+    return a.id == b.id;
+  }
+};
+
+TEST(memory_buffer_test, move_assignment_unequal_allocators) {
+  using buffer_type = basic_memory_buffer<char, 4, stateful_allocator>;
+  buffer_type buffer(stateful_allocator{1});
+  buffer.append(string_view("source"));
+  buffer_type buffer2(stateful_allocator{2});
+  // The source must own dynamic storage to reach the copying path; the
+  // destination is still inline, so nothing is deallocated.
+  ASSERT_GT(buffer.capacity(), 4u);
+  ASSERT_EQ(buffer2.capacity(), 4u);
+  const char* source_data = buffer.data();
+
   buffer2 = std::move(buffer);
-  EXPECT_EQ(std::string(buffer2.data(), buffer2.size()), "testa");
+
+  // The allocators are unequal and don't propagate, so the contents are
+  // copied and the source keeps its storage and allocator.
+  EXPECT_EQ(std::string(buffer2.data(), buffer2.size()), "source");
   EXPECT_GT(buffer2.capacity(), 4u);
-  EXPECT_NE(buffer2.data(), inline_buffer_ptr);
-  EXPECT_EQ(buffer.get_allocator().get(), original_alloc_ptr);
-  EXPECT_NE(buffer2.get_allocator().get(), original_alloc_ptr);
+  EXPECT_EQ(buffer2.get_allocator().id, 2);
+  EXPECT_NE(buffer2.data(), source_data);
+  EXPECT_EQ(std::string(buffer.data(), buffer.size()), "source");
+  EXPECT_EQ(buffer.get_allocator().id, 1);
+  EXPECT_EQ(buffer.data(), source_data);
+}
+
+TEST(memory_buffer_test, move_assignment_unequal_allocators_both_dynamic) {
+  using buffer_type = basic_memory_buffer<char, 4, stateful_allocator>;
+  buffer_type buffer(stateful_allocator{1});
+  buffer.append(string_view("source"));
+  buffer_type buffer2(stateful_allocator{2});
+  buffer2.append(string_view("destination"));
+  // Both buffers must own dynamic storage to reach the copying path.
+  ASSERT_GT(buffer.capacity(), 4u);
+  ASSERT_GT(buffer2.capacity(), 4u);
+  const char* source_data = buffer.data();
+
+  buffer2 = std::move(buffer);
+
+  // The allocators are unequal and don't propagate, so the contents are
+  // copied and the source keeps its storage and allocator.
+  EXPECT_EQ(std::string(buffer2.data(), buffer2.size()), "source");
+  EXPECT_EQ(buffer2.get_allocator().id, 2);
+  EXPECT_NE(buffer2.data(), source_data);
+  EXPECT_EQ(std::string(buffer.data(), buffer.size()), "source");
+  EXPECT_EQ(buffer.get_allocator().id, 1);
+  EXPECT_EQ(buffer.data(), source_data);
 }
 
 void check_move_assign_buffer(const char* str,
@@ -519,6 +587,12 @@ TEST(memory_buffer_test, max_size_allocator_overflow) {
   EXPECT_THROW(buffer.resize(161), std::exception);
 }
 
+TEST(memory_buffer_test, default_allocator_overflow) {
+  // n * sizeof(char32_t) would wrap around to a small nonzero value.
+  size_t n = max_value<size_t>() / sizeof(char32_t) + 2;
+  EXPECT_THROW(fmt::detail::allocator<char32_t>().allocate(n), std::bad_alloc);
+}
+
 TEST(memory_buffer_test, back_insert_iterator) {
   fmt::memory_buffer buf;
   using iterator = decltype(std::back_inserter(buf));
@@ -598,6 +672,71 @@ TEST(format_test, arg_errors) {
 
 TEST(format_test, display_width_precision) {
   EXPECT_EQ(fmt::format("{:.5}", "🐱🐱🐱"), "🐱🐱");
+}
+
+TEST(format_test, display_width_emoji) {
+  // U+2705 and U+274C are Emoji_Presentation code points outside the East
+  // Asian Wide ranges; they should still occupy two columns like other
+  // emoji (https://github.com/fmtlib/fmt/issues/4851).
+  EXPECT_EQ(fmt::format("{:^6}", "✅"), "  ✅  ");
+  EXPECT_EQ(fmt::format("{:^6}", "❌"), "  ❌  ");
+}
+
+// Reproduces the exact example from
+// https://github.com/fmtlib/fmt/issues/4851: emoji should be centered like
+// other double-width (e.g. CJK) text instead of like single-width text.
+TEST(format_test, display_width_issue_4851) {
+  EXPECT_EQ(fmt::format("{:^20}", 12345), "       12345        ");
+  EXPECT_EQ(fmt::format("{:^20}", "normal string"), "   normal string    ");
+  EXPECT_EQ(fmt::format("{:^20}", "❌"), "         ❌         ");
+  EXPECT_EQ(fmt::format("{:^20}", "✅"), "         ✅         ");
+  EXPECT_EQ(fmt::format("{:^20}", "Müller"), "       Müller       ");
+  EXPECT_EQ(fmt::format("{:^20}", "我"), "         我         ");
+}
+
+TEST(format_test, display_width_multiple_emoji) {
+  // Several Emoji_Presentation code points back to back, each contributing
+  // two columns.
+  EXPECT_EQ(fmt::format("{:^10}", "❌✅"), "   ❌✅   ");
+  EXPECT_EQ(fmt::format("{:^12}", "❌✅❌"), "   ❌✅❌   ");
+  // Mixing an already-supported emoji range (🐱, U+1F431) with a newly
+  // covered one (✅, U+2705).
+  EXPECT_EQ(fmt::format("{:^10}", "🐱✅"), "   🐱✅   ");
+}
+
+TEST(format_test, display_width_mixed_content) {
+  // ASCII + new-range emoji + CJK in the same string.
+  EXPECT_EQ(fmt::format("{:^11}", "A✅我"), "   A✅我   ");
+  // Accented Latin (each combined character is one column) + emoji + ASCII.
+  EXPECT_EQ(fmt::format("{:^16}", "Müller❌!"), "   Müller❌!    ");
+}
+
+TEST(format_test, display_width_precision_multiple_emoji) {
+  // Precision truncates by display width, not code point count: a third
+  // two-column emoji would push the total past the limit in both cases.
+  EXPECT_EQ(fmt::format("{:.5}", "❌✅❌"), "❌✅");
+  EXPECT_EQ(fmt::format("{:.4}", "❌✅❌"), "❌✅");
+}
+
+TEST(format_test, display_width_emoji_alignment) {
+  EXPECT_EQ(fmt::format("{:<10}", "✅"), "✅        ");
+  EXPECT_EQ(fmt::format("{:>10}", "✅"), "        ✅");
+  EXPECT_EQ(fmt::format("{:*^10}", "✅"), "****✅****");
+}
+
+TEST(format_test, display_width_new_emoji_ranges) {
+  // Spot-check ranges added outside the two blocks fmt already supported
+  // (Transport and Map Symbols, Symbols and Pictographs Extended-A).
+  EXPECT_EQ(fmt::format("{:^10}", "🚗"), "    🚗    ");  // U+1F697
+  EXPECT_EQ(fmt::format("{:^10}", "🫠"), "    🫠    ");  // U+1FAE0
+}
+
+TEST(format_test, display_width_regional_indicator_pair) {
+  // A flag is two regional indicator code points; each is Neutral under
+  // East_Asian_Width (not Wide), so each is measured as one column, giving
+  // the pair a total of two columns, matching how terminals render the flag
+  // as a single two-column glyph.
+  EXPECT_EQ(fmt::format("{:^10}", "🇺🇸"), "    🇺🇸    ");
 }
 
 template <int N> struct test_format {
@@ -935,6 +1074,7 @@ TEST(format_test, width) {
 
 TEST(format_test, debug_presentation) {
   EXPECT_EQ(fmt::format("{:?}", ""), R"("")");
+  EXPECT_EQ(fmt::format("{:1?}", ""), R"("")");
 
   EXPECT_EQ(fmt::format("{:*<5.0?}", "\n"), R"(*****)");
   EXPECT_EQ(fmt::format("{:*<5.1?}", "\n"), R"("****)");
@@ -1143,6 +1283,15 @@ TEST(format_test, precision) {
     EXPECT_EQ(
         fmt::format("{:0g}", std::numeric_limits<long double>::denorm_min()),
         "3.6452e-4951");
+
+    // 1e-3L and 1e43L are just below the powers of 10 they approximate.
+    EXPECT_EQ(fmt::format("{:.20e}", 1e-3L), "9.99999999999999999958e-04");
+    EXPECT_EQ(fmt::format("{}", 1e-3L), "0.001");
+    EXPECT_EQ(fmt::format("{:.0f}", 1e43L),
+              "9999999999999999999741184793924429452148736");
+    EXPECT_EQ(fmt::format("{:.19e}", 1e43L), "9.9999999999999999997e+42");
+    EXPECT_EQ(fmt::format("{:.21g}", 1e43L), "9.99999999999999999974e+42");
+    EXPECT_EQ(fmt::format("{}", 1e43L), "1e+43");
   }
 
   EXPECT_EQ(fmt::format("{:#.0f}", 123.0), "123.");
@@ -1170,6 +1319,55 @@ TEST(format_test, precision) {
   EXPECT_EQ(fmt::format("{0:.6}", "123456\xad"), "123456");
 }
 
+TEST(format_test, high_precision_trailing_zeros) {
+  auto zeros = [](size_t n) { return std::string(n, '0'); };
+
+  EXPECT_EQ("1." + zeros(767), fmt::format("{:.767f}", 1.0));
+  EXPECT_EQ("1." + zeros(767), fmt::format("{:#.768g}", 1.0));
+
+  EXPECT_EQ("0.5" + zeros(767), fmt::format("{:#.768g}", 0.5));
+  EXPECT_EQ("0.5", fmt::format("{:.768g}", 0.5));
+
+  auto fixed = "0.0625" + zeros(764);
+  auto general = "0.0625" + zeros(765);
+  EXPECT_EQ(fixed, fmt::format("{:.768f}", 0.0625));
+  EXPECT_EQ(general, fmt::format("{:#.768g}", 0.0625));
+  EXPECT_EQ("  " + fixed, fmt::format("{:>772.768f}", 0.0625));
+  EXPECT_EQ(" " + general, fmt::format("{:>#772.768g}", 0.0625));
+}
+
+TEST(format_test, high_precision_bounded_output) {
+  char buffer[9] = {};
+  buffer[8] = 'x';
+  auto result = fmt::format_to_n(buffer, 8, "{:.768f}", 0.0625);
+  EXPECT_EQ(770u, result.size);
+  EXPECT_EQ(buffer + 8, result.out);
+  EXPECT_EQ("0.062500x", fmt::string_view(buffer, 9));
+
+  result = fmt::format_to_n(buffer, 8, "{:#.768g}", 0.0625);
+  EXPECT_EQ(771u, result.size);
+  EXPECT_EQ(buffer + 8, result.out);
+  EXPECT_EQ("0.062500x", fmt::string_view(buffer, 9));
+}
+
+TEST(format_test, high_precision_long_double) {
+  if (std::numeric_limits<long double>::max_exponent <= 3000 ||
+      fmt::detail::is_double_double<long double>::value) {
+    GTEST_SKIP() << "long double is not an extended-precision type";
+  }
+  auto tiny = std::ldexp(1.0L, -3000);
+  auto large = std::ldexp(1.0L, 3000);
+  char buffer[3004];
+  safe_sprintf(buffer, "%.1000Lf", tiny);
+  EXPECT_EQ(buffer, fmt::format("{:.1000f}", tiny));
+  safe_sprintf(buffer, "%.3000Lf", tiny);
+  EXPECT_EQ(buffer, fmt::format("{:.3000f}", tiny));
+  safe_sprintf(buffer, "%#.1000Lg", large);
+  EXPECT_EQ(buffer, fmt::format("{:#.1000g}", large));
+  safe_sprintf(buffer, "%.0Lf", large);
+  EXPECT_EQ(buffer, fmt::format("{:.0f}", large));
+}
+
 TEST(format_test, large_precision) {
   // Iterator used to abort the actual output.
   struct throwing_iterator {
@@ -1184,6 +1382,14 @@ TEST(format_test, large_precision) {
   auto it = throwing_iterator();
 
   EXPECT_THROW_MSG(fmt::format_to(it, fmt::runtime("{:#.{}}"), 1.0,
+                                  fmt::detail::max_value<int>()),
+                   std::runtime_error, "aborted");
+
+  EXPECT_THROW_MSG(fmt::format_to(it, fmt::runtime("{:#.{}g}"), 0.0625,
+                                  fmt::detail::max_value<int>()),
+                   std::runtime_error, "aborted");
+
+  EXPECT_THROW_MSG(fmt::format_to(it, fmt::runtime("{:.{}f}"), 0.0625,
                                   fmt::detail::max_value<int>()),
                    std::runtime_error, "aborted");
 
@@ -1328,6 +1534,16 @@ TEST(format_test, format_int) {
                    "invalid format specifier");
   check_unknown_types(42, "bBdoxXnLc", "integer");
   EXPECT_EQ(fmt::format("{:c}", static_cast<int>('x')), "x");
+  // The 'c' type treats all character types as unsigned for portability, so the
+  // representable range for char is [0, 255] and out-of-range values are
+  // reported as an error.
+  EXPECT_EQ(fmt::format("{:c}", 200), std::string(1, static_cast<char>(200)));
+  EXPECT_EQ(fmt::format("{:c}", 255), std::string(1, static_cast<char>(255)));
+  const char* msg = "character value out of range";
+  EXPECT_THROW_MSG((void)fmt::format("{:c}", -1), format_error, msg);
+  EXPECT_THROW_MSG((void)fmt::format("{:c}", -104), format_error, msg);
+  EXPECT_THROW_MSG((void)fmt::format("{:c}", 256), format_error, msg);
+  EXPECT_THROW_MSG((void)fmt::format("{:c}", 400u), format_error, msg);
 }
 
 TEST(format_test, format_bin) {
@@ -1375,6 +1591,9 @@ TEST(format_test, format_dec) {
             fmt::format("{0}", int128_min));
   EXPECT_EQ("340282366920938463463374607431768211455",
             fmt::format("{0}", uint128_max));
+  constexpr auto pow10_19 = static_cast<__uint128_t>(10000000000000000000ULL);
+  EXPECT_EQ(fmt::format("{0}", pow10_19 << 64),
+            "184467440737095516160000000000000000000");
 #endif
 
   char buffer[buffer_size];
@@ -1478,6 +1697,7 @@ TEST(format_test, format_int_locale) {
 TEST(format_test, format_float) {
   EXPECT_EQ(fmt::format("{}", 0.0f), "0");
   EXPECT_EQ(fmt::format("{0:f}", 392.5f), "392.500000");
+  EXPECT_EQ(fmt::format("{:L}", 1234.5), "1234.5");
 }
 
 TEST(format_test, format_double) {
@@ -1495,6 +1715,8 @@ TEST(format_test, format_double) {
   EXPECT_EQ(fmt::format("{:L}", 42.0), "42");
   EXPECT_EQ(fmt::format("{:24a}", 4.2f), "           0x1.0cccccp+2");
   EXPECT_EQ(fmt::format("{:24a}", 4.2), "    0x1.0cccccccccccdp+2");
+  EXPECT_EQ(fmt::format("{:012a}", 1.0), "0x0000001p+0");
+  EXPECT_EQ(fmt::format("{:*>12a}", 1.0), "******0x1p+0");
   EXPECT_EQ(fmt::format("{:<24a}", 4.2), "0x1.0cccccccccccdp+2    ");
   EXPECT_EQ(fmt::format("{0:e}", 392.65), "3.926500e+02");
   EXPECT_EQ(fmt::format("{0:E}", 392.65), "3.926500E+02");
@@ -1523,6 +1745,13 @@ TEST(format_test, format_double) {
 
     d = std::numeric_limits<double>::denorm_min();
     EXPECT_EQ(fmt::format("{:a}", d), "0x0.0000000000001p-1022");
+
+    // Zero has no subnormal exponent: printf prints it as 0x0p+0.
+    EXPECT_EQ(fmt::format("{:a}", 0.0), "0x0p+0");
+    EXPECT_EQ(fmt::format("{:a}", -0.0), "-0x0p+0");
+    EXPECT_EQ(fmt::format("{:A}", 0.0), "0X0P+0");
+    EXPECT_EQ(fmt::format("{:#a}", 0.0), "0x0.p+0");
+    EXPECT_EQ(fmt::format("{:.3a}", 0.0), "0x0.000p+0");
   }
 
   if (std::numeric_limits<long double>::digits == 64) {
@@ -1537,6 +1766,12 @@ TEST(format_test, format_double) {
   }
 
   EXPECT_EQ(fmt::format("{:.10a}", 4.2), "0x1.0ccccccccdp+2");
+  // Ties round to even like printf.
+  EXPECT_EQ(fmt::format("{:.1a}", 1.03125), "0x1.0p+0");
+  EXPECT_EQ(fmt::format("{:.1a}", 1.09375), "0x1.2p+0");
+  EXPECT_EQ(fmt::format("{:.1a}", 1.0322265625), "0x1.1p+0");
+  if (std::numeric_limits<long double>::digits == 64)
+    EXPECT_EQ(fmt::format("{:.0a}", 1.0625l), "0x8p-3");
 
   EXPECT_EQ(fmt::format("{:a}", -42.0), "-0x1.5p+5");
   EXPECT_EQ(fmt::format("{:A}", -42.0), "-0X1.5P+5");
@@ -1599,6 +1834,7 @@ TEST(format_test, format_nan) {
   EXPECT_EQ(fmt::format("{:<7}", nan), "nan    ");
   EXPECT_EQ(fmt::format("{:^7}", nan), "  nan  ");
   EXPECT_EQ(fmt::format("{:>7}", nan), "    nan");
+  EXPECT_EQ(fmt::format("{:7}", nan), "    nan");
 }
 
 TEST(format_test, format_infinity) {
@@ -1616,6 +1852,7 @@ TEST(format_test, format_infinity) {
   EXPECT_EQ(fmt::format("{:<7}", inf), "inf    ");
   EXPECT_EQ(fmt::format("{:^7}", inf), "  inf  ");
   EXPECT_EQ(fmt::format("{:>7}", inf), "    inf");
+  EXPECT_EQ(fmt::format("{:7}", inf), "    inf");
 }
 
 TEST(format_test, format_long_double) {
@@ -1658,6 +1895,7 @@ TEST(format_test, format_char) {
 
   EXPECT_EQ(fmt::format("{}", '\n'), "\n");
   EXPECT_EQ(fmt::format("{:?}", '\n'), "'\\n'");
+  EXPECT_EQ(fmt::format("{:6?}", 'a'), "'a'   ");
   EXPECT_EQ(fmt::format("{:x}", '\xff'), "ff");
 }
 
@@ -1976,7 +2214,6 @@ TEST(format_test, group_digits_view) {
   EXPECT_EQ(fmt::format("{:8}", fmt::group_digits(-100)), "    -100");
 }
 
-#ifdef __cpp_generic_lambdas
 struct point {
   double x, y;
 };
@@ -1984,18 +2221,20 @@ struct point {
 FMT_BEGIN_NAMESPACE
 template <> struct formatter<point> : nested_formatter<double> {
   auto format(point p, format_context& ctx) const -> decltype(ctx.out()) {
-    return write_padded(ctx, [this, p](auto out) -> decltype(out) {
-      return fmt::format_to(out, "({}, {})", this->nested(p.x),
-                            this->nested(p.y));
-    });
+    return write(ctx, "(", nested(p.x), ", ", nested(p.y), ")");
   }
 };
 FMT_END_NAMESPACE
 
 TEST(format_test, nested_formatter) {
   EXPECT_EQ(fmt::format("{:>16.2f}", point{1, 2}), "    (1.00, 2.00)");
+  EXPECT_EQ(fmt::format("{:.{}f}", point{1.234, 5.678}, 2), "(1.23, 5.68)");
+  EXPECT_EQ(fmt::format("{:>20.{}f}", point{1.234, 5.678}, 2),
+            "        (1.23, 5.68)");
+  EXPECT_EQ(fmt::format("{:>{}.2f}", point{1, 2}, 20), "        (1.00, 2.00)");
+  EXPECT_EQ(fmt::format("{:.{}f}", point{1.2344, 67.8901}, 3),
+            "(1.234, 67.890)");
 }
-#endif  // __cpp_generic_lambdas
 
 enum test_enum { foo, bar };
 auto format_as(test_enum e) -> int { return e; }
@@ -2123,6 +2362,7 @@ FMT_END_NAMESPACE
 TEST(format_test, to_string) {
   EXPECT_EQ(fmt::to_string(42), "42");
   EXPECT_EQ(fmt::to_string(reinterpret_cast<void*>(0x1234)), "0x1234");
+  EXPECT_EQ(fmt::to_string(nullptr), "0x0");
   EXPECT_EQ(fmt::to_string(adl_test::fmt::detail::foo()), "foo");
   EXPECT_EQ(fmt::to_string(foo), "0");
 
@@ -2157,7 +2397,10 @@ TEST(format_test, fill_via_appender) {
 
 TEST(format_test, formatted_size) {
   EXPECT_EQ(2u, fmt::formatted_size("{}", 42));
+#if FMT_USE_LOCALE
   EXPECT_EQ(2u, fmt::formatted_size(std::locale(), "{}", 42));
+#endif
+  EXPECT_EQ(602u, fmt::formatted_size("[{:*>600}]", 42));
 }
 
 TEST(format_test, format_to_no_args) {
@@ -2231,6 +2474,11 @@ TEST(format_test, format_to_n) {
   result = fmt::format_to_n(buffer, 3, "{}", std::string(1000, '*'));
   EXPECT_EQ(1000u, result.size);
   EXPECT_EQ("***x", fmt::string_view(buffer, 4));
+
+  result = fmt::format_to_n(buffer, 0, "{:!>600}", 42);
+  EXPECT_EQ(600u, result.size);
+  EXPECT_EQ(buffer, result.out);
+  EXPECT_EQ("***x", fmt::string_view(buffer, 4));
 }
 
 struct test_output_iterator {
@@ -2258,6 +2506,10 @@ TEST(format_test, format_to_n_output_iterator) {
   char buf[10] = {};
   fmt::format_to_n(test_output_iterator{buf}, 10, "{}", 42);
   EXPECT_STREQ(buf, "42");
+  auto result = fmt::format_to_n(test_output_iterator{buf}, 3, "{:*>600}", 42);
+  EXPECT_EQ(600u, result.size);
+  EXPECT_EQ(buf + 3, result.out.data);
+  EXPECT_STREQ(buf, "***");
 }
 
 TEST(format_test, vformat_to) {
@@ -2390,7 +2642,9 @@ TEST(format_int_test, format_int) {
             std::to_string(max_value<int64_t>()));
 }
 
-#ifndef FMT_STATIC_THOUSANDS_SEPARATOR
+// This file is also compiled with FMT_USE_LOCALE=0 by nolocale-test, so tests
+// that use std::locale must go in this block.
+#if FMT_USE_LOCALE
 
 #  include <locale>
 
@@ -2442,6 +2696,12 @@ TEST(format_test, format_facet_grouping) {
   EXPECT_EQ(fmt::format(loc, "{:L}", 1234567890), "1,234,567,89,0");
 }
 
+TEST(format_test, format_facet_empty_grouping) {
+  // Empty grouping means no grouping as in std::numpunct.
+  auto loc = std::locale({}, new fmt::format_facet<std::locale>(",", ""));
+  EXPECT_EQ(fmt::format(loc, "{:L}", 1234567), "1234567");
+}
+
 TEST(format_test, format_named_arg_with_locale) {
   EXPECT_EQ(fmt::format(std::locale(), "{answer}", fmt::arg("answer", 42)),
             "42");
@@ -2455,7 +2715,17 @@ TEST(format_test, format_locale) {
   EXPECT_EQ(fmt::format(loc, "{:10Lo}", 12345), "    30,071");
 }
 
-#endif  // FMT_STATIC_THOUSANDS_SEPARATOR
+TEST(format_test, format_int_locale_zero_padding) {
+  auto loc = std::locale::classic();
+  EXPECT_EQ(fmt::format(loc, "{:08L}", -12), "-0000012");
+  EXPECT_EQ(fmt::format(loc, "{:02L}", -12), "-12");
+  EXPECT_EQ(fmt::format(loc, "{:0>8L}", -12), "00000-12");
+  loc = std::locale(loc, new fmt::format_facet<std::locale>(","));
+  EXPECT_EQ(fmt::format(loc, "{:08L}", -1234), "-001,234");
+  EXPECT_EQ(fmt::format(loc, "{:#010Lx}", -0x1234), "-0x001,234");
+}
+
+#endif  // FMT_USE_LOCALE
 
 struct convertible_to_nonconst_cstring {
   operator char*() const {
@@ -2592,6 +2862,31 @@ TEST(format_test, invalid_glibc_buffer) {
 
   fmt::print(file, "------\n");
 }
+
+TEST(format_test, print_to_broken_pipe) {
+  // Ignore SIGPIPE so that a failing write reports EPIPE instead of
+  // terminating the test process. It must stay ignored until the file is
+  // closed below because closing also flushes the remaining buffered data.
+  auto old_handler = std::signal(SIGPIPE, SIG_IGN);
+  {
+    auto pipe = fmt::pipe();
+    pipe.read_end.close();
+    auto write_end = pipe.write_end.fdopen("w");
+
+    // The data must exceed the file's buffer to force a flush during
+    // formatting, whose underlying write() then fails with EPIPE.
+    auto data = std::string(1024 * 1024, 'x');
+    EXPECT_THROW(fmt::print(write_end.get(), "{}", data), std::system_error);
+  }
+  std::signal(SIGPIPE, old_handler);
+}
+
+TEST(format_test, print_to_read_only_file) {
+  auto pipe = fmt::pipe();
+  auto read_end = pipe.read_end.fdopen("r");
+  EXPECT_THROW(fmt::print(read_end.get(), "{}", std::string(100, 'x')),
+               std::system_error);
+}
 #endif  // FMT_USE_FCNTL
 
 // Only defined after the test case.
@@ -2608,6 +2903,9 @@ TEST(incomplete_type_test, format) {
   EXPECT_EQ(fmt::format("{}", external_instance), "42");
 }
 
+#if FMT_GCC_VERSION >= 1600
+FMT_PRAGMA_GCC(diagnostic ignored "-Wsfinae-incomplete")
+#endif
 struct incomplete_type {};
 const incomplete_type& external_instance = {};
 

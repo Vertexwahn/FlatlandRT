@@ -1,20 +1,22 @@
 // Formatting library for C++ - the C API
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
 
 #include "fmt/fmt-c.h"
 
-#include <fmt/base.h>
+#include <fmt/core.h>
+#include <limits.h>  // INT_MAX
 
-extern "C" int fmt_vformat(char* buffer, size_t size, const char* fmt,
-                           const fmt_arg* args, size_t num_args) {
-  constexpr size_t max_args = 16;
-  if (num_args > max_args) return fmt_error_invalid_arg;
+constexpr size_t max_c_format_args = 16;
 
-  fmt::basic_format_arg<fmt::format_context> format_args[max_args];
+static int convert_c_format_args(
+    fmt::basic_format_arg<fmt::format_context>* format_args,
+    const fmt_arg* args, size_t num_args) {
+  if (num_args > max_c_format_args) return fmt_error_invalid_arg;
+
   for (size_t i = 0; i < num_args; ++i) {
     switch (args[i].type) {
     case fmt_int:    format_args[i] = args[i].value.int_value; break;
@@ -31,11 +33,36 @@ extern "C" int fmt_vformat(char* buffer, size_t size, const char* fmt,
     default:          return fmt_error_invalid_arg;
     }
   }
+  return 0;
+}
+
+extern "C" int fmt_vformat(char* buffer, size_t size, const char* fmt,
+                           const fmt_arg* args, size_t num_args) {
+  fmt::basic_format_arg<fmt::format_context> format_args[max_c_format_args];
+  int error = convert_c_format_args(format_args, args, num_args);
+  if (error != 0) return error;
+
   FMT_TRY {
     auto result = fmt::vformat_to_n(
         buffer, size, fmt,
         fmt::format_args(format_args, static_cast<int>(num_args)));
+    if (result.size > INT_MAX) return fmt_error;
     return static_cast<int>(result.size);
+  }
+  FMT_CATCH(...) {}
+  return fmt_error;
+}
+
+extern "C" int fmt_vprint(FILE* stream, const char* fmt, const fmt_arg* args,
+                          size_t num_args) {
+  fmt::basic_format_arg<fmt::format_context> format_args[max_c_format_args];
+  int error = convert_c_format_args(format_args, args, num_args);
+  if (error != 0) return error;
+
+  FMT_TRY {
+    fmt::vprint(stream, fmt,
+                fmt::format_args(format_args, static_cast<int>(num_args)));
+    return 0;
   }
   FMT_CATCH(...) {}
   return fmt_error;

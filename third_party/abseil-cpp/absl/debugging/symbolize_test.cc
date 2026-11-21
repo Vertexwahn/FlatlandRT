@@ -13,10 +13,33 @@
 // limitations under the License.
 
 #include "absl/debugging/symbolize.h"
-#include <cstddef>
 
+#include <cerrno>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "absl/base/attributes.h"
+#include "absl/base/casts.h"
+#include "absl/base/config.h"
+#include "absl/base/internal/direct_mmap.h"
+#include "absl/base/internal/low_level_alloc.h"
+#include "absl/base/internal/per_thread_tls.h"
+#include "absl/base/optimization.h"
+#include "absl/cleanup/cleanup.h"
+#include "absl/debugging/internal/stack_consumption.h"
 #include "absl/debugging/internal/symbolize.h"
+#include "absl/log/check.h"
+#include "absl/log/log.h"
+#include "absl/memory/memory.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -25,26 +48,8 @@
 #ifndef _WIN32
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <unistd.h>
 #endif
-
-#include <cstring>
-#include <iostream>
-#include <memory>
-
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "absl/base/attributes.h"
-#include "absl/base/casts.h"
-#include "absl/base/config.h"
-#include "absl/base/internal/low_level_alloc.h"
-#include "absl/base/internal/per_thread_tls.h"
-#include "absl/base/optimization.h"
-#include "absl/cleanup/cleanup.h"
-#include "absl/debugging/internal/stack_consumption.h"
-#include "absl/log/check.h"
-#include "absl/log/log.h"
-#include "absl/memory/memory.h"
-#include "absl/strings/string_view.h"
 
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 #define MAP_ANONYMOUS MAP_ANON
@@ -92,17 +97,17 @@ ABSL_SYMBOLIZE_TEST_NOINLINE void Foo::func(int) {
 
 // Create functions that will remain in different text sections in the
 // final binary when linker option "-z,keep-text-section-prefix" is used.
-int ABSL_ATTRIBUTE_SECTION_VARIABLE(.text.unlikely) unlikely_func() {
+ABSL_ATTRIBUTE_SECTION_VARIABLE(.text.unlikely) int unlikely_func() {
   return 0;
 }
 
-int ABSL_ATTRIBUTE_SECTION_VARIABLE(.text.hot) hot_func() { return 0; }
+ABSL_ATTRIBUTE_SECTION_VARIABLE(.text.hot) int hot_func() { return 0; }
 
-int ABSL_ATTRIBUTE_SECTION_VARIABLE(.text.startup) startup_func() { return 0; }
+ABSL_ATTRIBUTE_SECTION_VARIABLE(.text.startup) int startup_func() { return 0; }
 
-int ABSL_ATTRIBUTE_SECTION_VARIABLE(.text.exit) exit_func() { return 0; }
+ABSL_ATTRIBUTE_SECTION_VARIABLE(.text.exit) int exit_func() { return 0; }
 
-int /*ABSL_ATTRIBUTE_SECTION_VARIABLE(.text)*/ regular_func() { return 0; }
+/*ABSL_ATTRIBUTE_SECTION_VARIABLE(.text)*/ int regular_func() { return 0; }
 
 // Thread-local data may confuse the symbolizer, ensure that it does not.
 // Variable sizes and order are important.
@@ -120,8 +125,8 @@ static volatile bool volatile_bool = false;
 
 // Force the binary to be large enough that a THP .text remap will succeed.
 static constexpr size_t kHpageSize = 1 << 21;
-const char kHpageTextPadding[kHpageSize * 4] ABSL_ATTRIBUTE_SECTION_VARIABLE(
-        .text) = "";
+ABSL_ATTRIBUTE_SECTION_VARIABLE(.text)
+const char kHpageTextPadding[kHpageSize * 4] = "";
 
 #endif  // !defined(__EMSCRIPTEN__)
 
@@ -161,7 +166,7 @@ static const char *TrySymbolize(void *pc) {
     defined(ABSL_INTERNAL_HAVE_EMSCRIPTEN_SYMBOLIZE)
 
 // Test with a return address.
-void ABSL_ATTRIBUTE_NOINLINE TestWithReturnAddress() {
+ABSL_ATTRIBUTE_NOINLINE static void TestWithReturnAddress() {
 #if defined(ABSL_HAVE_ATTRIBUTE_NOINLINE)
   void *return_address = __builtin_return_address(0);
   const char *symbol = TrySymbolize(return_address);
@@ -244,8 +249,8 @@ static const char *SymbolizeStackConsumption(void *pc, int *stack_consumed) {
 }
 
 static int GetStackConsumptionUpperLimit() {
-  // Symbolize stack consumption should be within 2kB.
-  int stack_consumption_upper_limit = 2048;
+  // Symbolize stack consumption should be within 4kB.
+  int stack_consumption_upper_limit = 4096;
 #if defined(ABSL_HAVE_ADDRESS_SANITIZER) || \
     defined(ABSL_HAVE_MEMORY_SANITIZER) || defined(ABSL_HAVE_THREAD_SANITIZER)
   // Account for sanitizer instrumentation requiring additional stack space.
@@ -292,8 +297,8 @@ TEST(Symbolize, SymbolizeWithDemanglingStackConsumption) {
 const size_t kPageSize = 64 << 10;
 // We place a read-only symbols into the .text section and verify that we can
 // symbolize them and other symbols after remapping them.
-const char kPadding0[kPageSize * 4] ABSL_ATTRIBUTE_SECTION_VARIABLE(.text) = "";
-const char kPadding1[kPageSize * 4] ABSL_ATTRIBUTE_SECTION_VARIABLE(.text) = "";
+ABSL_ATTRIBUTE_SECTION_VARIABLE(.text) const char kPadding0[kPageSize * 4] = "";
+ABSL_ATTRIBUTE_SECTION_VARIABLE(.text) const char kPadding1[kPageSize * 4] = "";
 
 static int FilterElfHeader(struct dl_phdr_info *info, size_t size, void *data) {
   for (int i = 0; i < info->dlpi_phnum; i++) {
@@ -416,10 +421,13 @@ TEST(Symbolize, SetSymbolDecorator) {
 // to optimize away the .data section if no variables live in the
 // section. This variable should get placed in the .data section, and
 // the test below checks for the existence of a .data section.
-static int in_data_section = 1;
+static int in_data_section [[maybe_unused]] = 1;
 
 TEST(Symbolize, ForEachSection) {
-  int fd = TEMP_FAILURE_RETRY(open("/proc/self/exe", O_RDONLY));
+  int fd;
+  do {
+    fd = open("/proc/self/exe", O_RDONLY);
+  } while (fd == -1 && errno == EINTR);
   ASSERT_NE(fd, -1);
 
   std::vector<std::string> sections;
@@ -438,6 +446,120 @@ TEST(Symbolize, ForEachSection) {
 
   close(fd);
 }
+
+#if defined(ABSL_INTERNAL_HAVE_ELF_SYMBOLIZE)
+// Builds a minimal ELF image whose SHT_SYMTAB section header carries the given
+// sh_entsize.  Everything else is just enough to reach FindSymbol(): a single
+// executable PT_LOAD segment (so the object is initialized) and a symbol table
+// whose sh_link points at the null section header.
+static std::string MakeElfWithSymtabEntSize(uint64_t sym_entsize) {
+  ElfW(Ehdr) ehdr;
+  memset(&ehdr, 0, sizeof(ehdr));
+  memcpy(ehdr.e_ident, ELFMAG, SELFMAG);
+  ehdr.e_ident[EI_CLASS] = (sizeof(void*) == 8) ? ELFCLASS64 : ELFCLASS32;
+  ehdr.e_ident[EI_DATA] = ELFDATA2LSB;
+  ehdr.e_ident[EI_VERSION] = EV_CURRENT;
+  ehdr.e_type = ET_DYN;
+  ehdr.e_version = EV_CURRENT;
+  ehdr.e_phoff = sizeof(ElfW(Ehdr));
+  ehdr.e_phentsize = sizeof(ElfW(Phdr));
+  ehdr.e_phnum = 1;
+  ehdr.e_shoff = sizeof(ElfW(Ehdr)) + sizeof(ElfW(Phdr));
+  ehdr.e_shentsize = sizeof(ElfW(Shdr));
+  ehdr.e_shnum = 2;
+  ehdr.e_shstrndx = 0;
+
+  ElfW(Phdr) phdr;
+  memset(&phdr, 0, sizeof(phdr));
+  phdr.p_type = PT_LOAD;
+  phdr.p_flags = PF_R | PF_X;
+  phdr.p_filesz = 0x1000;
+  phdr.p_memsz = 0x1000;
+  phdr.p_align = 0x1000;
+
+  // Section 0 is the mandatory null header, which also serves as the string
+  // table referenced by sh_link below (its contents are irrelevant here).
+  ElfW(Shdr) null_shdr;
+  memset(&null_shdr, 0, sizeof(null_shdr));
+
+  ElfW(Shdr) symtab;
+  memset(&symtab, 0, sizeof(symtab));
+  symtab.sh_type = SHT_SYMTAB;
+  symtab.sh_link = 0;
+  symtab.sh_size = sizeof(ElfW(Sym));
+  symtab.sh_entsize = sym_entsize;
+  symtab.sh_offset = ehdr.e_shoff + 2 * sizeof(ElfW(Shdr));
+
+  std::string image;
+  image.append(reinterpret_cast<const char*>(&ehdr), sizeof(ehdr));
+  image.append(reinterpret_cast<const char*>(&phdr), sizeof(phdr));
+  image.append(reinterpret_cast<const char*>(&null_shdr), sizeof(null_shdr));
+  image.append(reinterpret_cast<const char*>(&symtab), sizeof(symtab));
+  // Pad so the symtab sh_offset lands inside the file.
+  image.resize(image.size() + sizeof(ElfW(Sym)), '\0');
+  return image;
+}
+
+// Helper class that creates a temporary file on disk with the given content
+// and unlinks it upon destruction.
+class TempFile {
+ public:
+  explicit TempFile(absl::string_view content) {
+    std::string dir = testing::TempDir();
+    if (dir.empty() || dir.back() != '/') {
+      dir.push_back('/');
+    }
+    path_ = dir + "absl_bad_symtab_XXXXXX";
+    int fd = mkstemp(path_.data());
+    CHECK_NE(fd, -1);
+    CHECK_EQ(write(fd, content.data(), content.size()),
+             static_cast<ssize_t>(content.size()));
+    close(fd);
+  }
+  ~TempFile() { unlink(path_.c_str()); }
+
+  TempFile(const TempFile&) = delete;
+  TempFile& operator=(const TempFile&) = delete;
+
+  const char* path() const { return path_.c_str(); }
+
+ private:
+  std::string path_;
+};
+
+// A crafted object file can set the symbol table's sh_entsize to zero, which is
+// used verbatim as the divisor for the symbol count in FindSymbol().  Before
+// the fix this divided by zero (SIGFPE) while symbolizing; now the malformed
+// table is skipped and the address simply fails to resolve.
+TEST(Symbolize, InvalidSymtabEntSizeDoesNotCrash) {
+  TempFile file(MakeElfWithSymtabEntSize(/*sym_entsize=*/0));
+
+  // Map an executable page to provide a memory address to symbolize.
+  const size_t page_size = static_cast<size_t>(sysconf(_SC_PAGESIZE));
+  void* region =
+      absl::base_internal::DirectMmap(nullptr, page_size, PROT_READ | PROT_EXEC,
+                                      MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+  if (region == MAP_FAILED) {
+    GTEST_SKIP() << "Unable to map an executable page: errno=" << errno;
+  }
+  absl::Cleanup unmap = [&] {
+    absl::base_internal::DirectMunmap(region, page_size);
+  };
+
+  // absl::Symbolize() needs this file mapping hint to associate addresses
+  // within the mapped region with the ELF file on disk and attempt
+  // symbolization.
+  ASSERT_TRUE(absl::debugging_internal::RegisterFileMappingHint(
+      region, static_cast<char*>(region) + page_size, 0, file.path()));
+
+  // Output buffer for absl::Symbolize(). 512 bytes is arbitrarily chosen to
+  // receive any demangled symbol name for the purposes of this test.
+  char symbol_buf[512];
+  // The point of the test is that this returns instead of crashing with SIGFPE.
+  EXPECT_FALSE(absl::Symbolize(static_cast<char*>(region) + 8, symbol_buf,
+                               sizeof(symbol_buf)));
+}
+#endif  // ABSL_INTERNAL_HAVE_ELF_SYMBOLIZE
 #endif  // !ABSL_INTERNAL_HAVE_DARWIN_SYMBOLIZE &&
         // !ABSL_INTERNAL_HAVE_EMSCRIPTEN_SYMBOLIZE
 
@@ -453,7 +575,7 @@ inline void *ABSL_ATTRIBUTE_ALWAYS_INLINE inline_func() {
   return pc;
 }
 
-void *ABSL_ATTRIBUTE_NOINLINE non_inline_func() {
+ABSL_ATTRIBUTE_NOINLINE void* non_inline_func() {
   void *pc = nullptr;
 #if defined(__i386__)
   __asm__ __volatile__("call 1f;\n 1: pop %[PC]" : [PC] "=r"(pc));
@@ -463,7 +585,7 @@ void *ABSL_ATTRIBUTE_NOINLINE non_inline_func() {
   return pc;
 }
 
-void ABSL_ATTRIBUTE_NOINLINE TestWithPCInsideNonInlineFunction() {
+ABSL_ATTRIBUTE_NOINLINE void TestWithPCInsideNonInlineFunction() {
 #if defined(ABSL_HAVE_ATTRIBUTE_NOINLINE) && \
     (defined(__i386__) || defined(__x86_64__))
   void *pc = non_inline_func();
@@ -474,7 +596,7 @@ void ABSL_ATTRIBUTE_NOINLINE TestWithPCInsideNonInlineFunction() {
 #endif
 }
 
-void ABSL_ATTRIBUTE_NOINLINE TestWithPCInsideInlineFunction() {
+ABSL_ATTRIBUTE_NOINLINE void TestWithPCInsideInlineFunction() {
 #if defined(ABSL_HAVE_ATTRIBUTE_ALWAYS_INLINE) && \
     (defined(__i386__) || defined(__x86_64__))
   void *pc = inline_func();  // Must be inlined.
@@ -518,7 +640,7 @@ __attribute__((target("arm"))) int ArmThumbOverlapArm(int x) {
   return x * x * x;
 }
 
-void ABSL_ATTRIBUTE_NOINLINE TestArmThumbOverlap() {
+ABSL_ATTRIBUTE_NOINLINE void TestArmThumbOverlap() {
 #if defined(ABSL_HAVE_ATTRIBUTE_NOINLINE)
   const char *symbol = TrySymbolize((void *)&ArmThumbOverlapArm);
   ASSERT_NE(symbol, nullptr) << "TestArmThumbOverlap failed";

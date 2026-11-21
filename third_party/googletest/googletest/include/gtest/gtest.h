@@ -71,7 +71,7 @@
 #include "gtest/gtest-typed-test.h"  // IWYU pragma: export
 #include "gtest/gtest_pred_impl.h"  // IWYU pragma: export
 #include "gtest/gtest_prod.h"  // IWYU pragma: export
-#include "gtest/internal/gtest-internal.h"
+#include "gtest/internal/gtest-internal.h"  // IWYU pragma: export
 #include "gtest/internal/gtest-string.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
@@ -300,12 +300,12 @@ class GTEST_API_ [[nodiscard]] Test {
   // global context (before or after invocation of RUN_ALL_TESTS and from
   // SetUp/TearDown method of Environment objects registered with Google
   // Test) will be output as attributes of the <testsuites> element.
-  static void RecordProperty(const std::string& key, const std::string& value);
+  static void RecordProperty(std::string_view key, std::string_view value);
   // We do not define a custom serialization except for values that can be
   // converted to int64_t, but other values could be logged in this way.
   template <typename T, std::enable_if_t<std::is_convertible<T, int64_t>::value,
                                          bool> = true>
-  static void RecordProperty(const std::string& key, const T& value) {
+  static void RecordProperty(std::string_view key, const T& value) {
     RecordProperty(key, (Message() << value).GetString());
   }
 
@@ -376,7 +376,7 @@ class [[nodiscard]] TestProperty {
   // C'tor.  TestProperty does NOT have a default constructor.
   // Always use this constructor (with parameters) to create a
   // TestProperty object.
-  TestProperty(const std::string& a_key, const std::string& a_value)
+  TestProperty(std::string_view a_key, std::string_view a_value)
       : key_(a_key), value_(a_value) {}
 
   // Gets the user supplied key.
@@ -386,7 +386,7 @@ class [[nodiscard]] TestProperty {
   const char* value() const { return value_.c_str(); }
 
   // Sets a new value, overriding the one supplied in the constructor.
-  void SetValue(const std::string& new_value) { value_ = new_value; }
+  void SetValue(std::string_view new_value) { value_ = new_value; }
 
  private:
   // The key supplied by the user.
@@ -1261,7 +1261,7 @@ class GTEST_API_ [[nodiscard]] UnitTest {
   // from SetUpTestSuite or TearDownTestSuite, or to the global property set
   // when invoked elsewhere.  If the result already contains a property with
   // the same key, the value will be updated.
-  void RecordProperty(const std::string& key, const std::string& value);
+  void RecordProperty(std::string_view key, std::string_view value);
 
   // Gets the i-th test suite among all the test suites. i can range from 0 to
   // total_test_suite_count() - 1. If i is not in that range, returns NULL.
@@ -1419,14 +1419,14 @@ class [[nodiscard]] EqHelper {
   }
 
   // With this overloaded version, we allow anonymous enums to be used
-  // in {ASSERT|EXPECT}_EQ when compiled with gcc 4, as anonymous
-  // enums can be implicitly cast to BiggestInt.
+  // in {ASSERT|EXPECT}_EQ when compiled with gcc 4, as anonymous enums can be
+  // implicitly cast to intmax_t.
   //
   // Even though its body looks the same as the above version, we
   // cannot merge the two, as it will make anonymous enums unhappy.
   static AssertionResult Compare(const char* lhs_expression,
-                                 const char* rhs_expression, BiggestInt lhs,
-                                 BiggestInt rhs) {
+                                 const char* rhs_expression, intmax_t lhs,
+                                 intmax_t rhs) {
     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
   }
 
@@ -1514,6 +1514,8 @@ GTEST_API_ AssertionResult CmpHelperSTRCASENE(const char* s1_expression,
                                               const char* s2_expression,
                                               const char* s1, const char* s2);
 
+#if GTEST_HAS_STD_WSTRING
+
 // Helper function for *_STREQ on wide strings.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
@@ -1527,6 +1529,8 @@ GTEST_API_ AssertionResult CmpHelperSTREQ(const char* s1_expression,
 GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                           const char* s2_expression,
                                           const wchar_t* s1, const wchar_t* s2);
+
+#endif  // GTEST_HAS_STD_WSTRING
 
 }  // namespace internal
 
@@ -1542,18 +1546,10 @@ GTEST_API_ AssertionResult IsSubstring(const char* needle_expr,
                                        const char* haystack_expr,
                                        const char* needle,
                                        const char* haystack);
-GTEST_API_ AssertionResult IsSubstring(const char* needle_expr,
-                                       const char* haystack_expr,
-                                       const wchar_t* needle,
-                                       const wchar_t* haystack);
 GTEST_API_ AssertionResult IsNotSubstring(const char* needle_expr,
                                           const char* haystack_expr,
                                           const char* needle,
                                           const char* haystack);
-GTEST_API_ AssertionResult IsNotSubstring(const char* needle_expr,
-                                          const char* haystack_expr,
-                                          const wchar_t* needle,
-                                          const wchar_t* haystack);
 GTEST_API_ AssertionResult IsSubstring(const char* needle_expr,
                                        const char* haystack_expr,
                                        const ::std::string& needle,
@@ -1564,6 +1560,14 @@ GTEST_API_ AssertionResult IsNotSubstring(const char* needle_expr,
                                           const ::std::string& haystack);
 
 #if GTEST_HAS_STD_WSTRING
+GTEST_API_ AssertionResult IsSubstring(const char* needle_expr,
+                                       const char* haystack_expr,
+                                       const wchar_t* needle,
+                                       const wchar_t* haystack);
+GTEST_API_ AssertionResult IsNotSubstring(const char* needle_expr,
+                                          const char* haystack_expr,
+                                          const wchar_t* needle,
+                                          const wchar_t* haystack);
 GTEST_API_ AssertionResult IsSubstring(const char* needle_expr,
                                        const char* haystack_expr,
                                        const ::std::wstring& needle,
@@ -1818,14 +1822,13 @@ class [[nodiscard]] TestWithParam : public Test,
 #define GTEST_EXPECT_TRUE(condition)                      \
   GTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
                       GTEST_NONFATAL_FAILURE_)
-#define GTEST_EXPECT_FALSE(condition)                        \
-  GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
+#define GTEST_EXPECT_FALSE(condition)                     \
+  GTEST_TEST_BOOLEAN_(condition, #condition, true, false, \
                       GTEST_NONFATAL_FAILURE_)
 #define GTEST_ASSERT_TRUE(condition) \
   GTEST_TEST_BOOLEAN_(condition, #condition, false, true, GTEST_FATAL_FAILURE_)
-#define GTEST_ASSERT_FALSE(condition)                        \
-  GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
-                      GTEST_FATAL_FAILURE_)
+#define GTEST_ASSERT_FALSE(condition) \
+  GTEST_TEST_BOOLEAN_(condition, #condition, true, false, GTEST_FATAL_FAILURE_)
 
 // Define these macros to 1 to omit the definition of the corresponding
 // EXPECT or ASSERT, which clashes with some users' own code.
@@ -2164,7 +2167,7 @@ class GTEST_API_ [[nodiscard]] ScopedTrace {
 // to cause a compiler error.
 template <typename T1, typename T2>
 constexpr bool StaticAssertTypeEq() noexcept {
-  static_assert(std::is_same<T1, T2>::value, "T1 and T2 are not the same type");
+  static_assert(std::is_same_v<T1, T2>, "T1 and T2 are not the same type");
   return true;
 }
 
@@ -2310,7 +2313,7 @@ template <int&... ExplicitParameterBarrier, typename Factory>
 TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
                        const char* type_param, const char* value_param,
                        const char* file, int line, Factory factory) {
-  using TestT = typename std::remove_pointer<decltype(factory())>::type;
+  using TestT = std::remove_pointer_t<decltype(factory())>;
 
   class FactoryImpl : public internal::TestFactoryBase {
    public:

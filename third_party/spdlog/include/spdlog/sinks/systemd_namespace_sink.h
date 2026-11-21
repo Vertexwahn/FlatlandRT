@@ -7,11 +7,12 @@
 #include <spdlog/details/synchronous_factory.h>
 #include <spdlog/sinks/base_sink.h>
 
-#include <array>
+#include <cstring>
+#include <unistd.h>
 #include <systemd/sd-journal.h>
 #include <systemd/sd-daemon.h>
 
-namespace spdlog {
+SPDLOG_NAMESPACE_BEGIN
 namespace sinks {
 
 /**
@@ -73,15 +74,24 @@ public:
 protected:
     FILE *journal_ = nullptr;
     bool enable_formatting_ = false;
-    using level_prefix_array = std::array<string_view_t, 7>;
-    static constexpr level_prefix_array level_prefixes_ = {
-        {/* spdlog::level::trace      */ SD_DEBUG,
-         /* spdlog::level::debug      */ SD_DEBUG,
-         /* spdlog::level::info       */ SD_INFO,
-         /* spdlog::level::warn       */ SD_WARNING,
-         /* spdlog::level::err        */ SD_ERR,
-         /* spdlog::level::critical   */ SD_CRIT,
-         /* spdlog::level::off        */ SD_INFO}};
+
+    static string_view_t level_prefix_(level::level_enum lvl) {
+        switch (lvl) {
+            case level::trace:
+            case level::debug:
+                return SD_DEBUG;
+            case level::info:
+                return SD_INFO;
+            case level::warn:
+                return SD_WARNING;
+            case level::err:
+                return SD_ERR;
+            case level::critical:
+                return SD_CRIT;
+            default:
+                return SD_INFO;
+        }
+    }
 
     void sink_it_(const details::log_msg &msg) override {
         string_view_t payload;
@@ -95,20 +105,20 @@ protected:
 
         // Journal stream is line-oriented; if there's newlines in the payload, send each
         // newline-delimited piece separately as its own message.
+        const string_view_t prefix = level_prefix_(msg.level);
+        const char *data = payload.data();
+        const size_t size = payload.size();
         size_t pos = 0;
-        while (pos < payload.size()) {
-            size_t nl_pos = payload.find('\n', pos);
-            size_t end = (nl_pos == string_view_t::npos) ? payload.size() : nl_pos + 1;
-            string_view_t one_message = payload.substr(pos, end - pos);
+        while (pos < size) {
+            const auto *nl = static_cast<const char *>(std::memchr(data + pos, '\n', size - pos));
+            const size_t end = (nl == nullptr) ? size : static_cast<size_t>(nl - data) + 1;
 
             // Write log level prefix
-            const auto &prefix =
-                level_prefixes_.at(static_cast<level_prefix_array::size_type>(msg.level));
             write_or_throw_(prefix.data(), prefix.size());
             // Write the message
-            write_or_throw_(one_message.data(), one_message.size());
+            write_or_throw_(data + pos, end - pos);
             // Append newline if the message didn't have one
-            if (nl_pos == string_view_t::npos) {
+            if (nl == nullptr) {
                 write_or_throw_("\n", 1);
             }
 
@@ -138,7 +148,7 @@ using systemd_namespace_sink_mt = systemd_namespace_sink<std::mutex>;
 using systemd_namespace_sink_st = systemd_namespace_sink<details::null_mutex>;
 }  // namespace sinks
 
-template <typename Factory = spdlog::synchronous_factory>
+template <typename Factory = synchronous_factory>
 inline std::shared_ptr<logger> systemd_namespace_logger_mt(const std::string &logger_name,
                                                            const std::string &ident,
                                                            const std::string &name_space,
@@ -147,7 +157,7 @@ inline std::shared_ptr<logger> systemd_namespace_logger_mt(const std::string &lo
         logger_name, ident, name_space, enable_formatting);
 }
 
-template <typename Factory = spdlog::synchronous_factory>
+template <typename Factory = synchronous_factory>
 inline std::shared_ptr<logger> systemd_namespace_logger_st(const std::string &logger_name,
                                                            const std::string &ident,
                                                            const std::string &name_space,
@@ -155,4 +165,4 @@ inline std::shared_ptr<logger> systemd_namespace_logger_st(const std::string &lo
     return Factory::template create<sinks::systemd_namespace_sink_st>(
         logger_name, ident, name_space, enable_formatting);
 }
-}  // namespace spdlog
+SPDLOG_NAMESPACE_END

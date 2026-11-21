@@ -8,10 +8,11 @@ with CMake, while the [Build Systems](#build-systems) section covers the rest.
 
 ## CMake
 
-{fmt} provides three CMake targets: `fmt::fmt` for the standard compiled library,
-`fmt::fmt-module` for the C++ module library and `fmt::fmt-header-only` for the
-header-only library. It is recommended to use the compiled library or the module 
-library for improved build times. 
+{fmt} provides CMake targets: `fmt::fmt` for the standard compiled library,
+`fmt::fmt-header-only` for the header-only library, and optionally
+`fmt::fmt-module` for the C++ module library when the `FMT_MODULE` option is
+enabled. It is recommended to use the compiled library or the module library for
+improved build times. 
 
 There are three primary ways to use {fmt} with CMake:
 
@@ -46,6 +47,38 @@ There are three primary ways to use {fmt} with CMake:
 In order to use the header-only target or the module target, simply substitute the
 `fmt::fmt` in the above steps with `fmt::fmt-header-only` or `fmt::fmt-module` 
 accordingly.
+
+### Using the C++20 Module
+
+The `fmt::fmt-module` target is only available when the `FMT_MODULE` CMake
+option is enabled. Enable it by passing `-DFMT_MODULE=ON` when configuring your
+project before adding {fmt}, or set `CMAKE_CXX_STANDARD` to at least 20 before
+adding {fmt} which will enable module support automatically when supported by
+the toolchain.
+
+Link your target to `fmt::fmt-module` and import `fmt` instead of including a
+{fmt} header:
+
+    target_link_libraries(<your-target> PRIVATE fmt::fmt-module)
+
+    import fmt;
+
+    int main() {
+      fmt::print("Hello, world!\n");
+    }
+
+{fmt} builds the module with CMake's native C++ module support when using
+CMake 3.28 or newer with the Ninja generator (Ninja 1.11 or newer) and GCC 15
+or Clang 16 (with `clang-scan-deps`) or newer, or with Visual Studio 2022 17.4
+or newer. The module is only installed when built this way with Ninja, and
+CMake can only import an installed module in projects that also use Ninja, so
+configure both accordingly, for example:
+
+    cmake -G Ninja -DFMT_MODULE=ON ..
+
+With other toolchains, {fmt} falls back to building the module directly, which
+works with `FetchContent` and `add_subdirectory` but doesn't install
+`fmt::fmt-module`. The fallback is not available with GCC.
 
 ## Installation
 
@@ -95,6 +128,14 @@ You can download and install {fmt} using the [Conan](https://conan.io/) package 
 [ConanCenterIndex](https://github.com/conan-io/conan-center-index) community.
 If the version is out of date or the package does not work,
 please create an issue or pull request on the Conan Center Index repository. -->
+
+## Migrating from `printf`
+
+[clang-tidy](https://clang.llvm.org/extra/clang-tidy/) v18 provides the
+[modernize-use-std-print](https://clang.llvm.org/extra/clang-tidy/checks/modernize/use-std-print.html)
+check that is capable of converting occurrences of `printf` and
+`fprintf` to `fmt::print` if configured to do so. (By default it
+converts to `std::print`.)
 
 ## Building from Source
 
@@ -233,7 +274,7 @@ https://developer.android.com/tools/sdk/ndk/index.html).
 ### Other
 
 To use the {fmt} library with any other build system, add
-`include/fmt/base.h`, `include/fmt/format.h`, `include/fmt/format-inl.h`,
+`include/fmt/core.h`, `include/fmt/format.h`, `include/fmt/format-inl.h`,
 `src/format.cc` and optionally other headers from a [release archive](
 https://github.com/fmtlib/fmt/releases) or the [git repository](
 https://github.com/fmtlib/fmt) to your project, add `include` to include

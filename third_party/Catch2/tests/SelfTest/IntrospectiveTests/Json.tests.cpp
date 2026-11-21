@@ -7,18 +7,43 @@
 // SPDX-License-Identifier: BSL-1.0
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/internal/catch_jsonwriter.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
+#include <limits>
+#include <locale>
 #include <sstream>
+#include <string>
 
 namespace {
     struct Custom {};
     static std::ostream& operator<<( std::ostream& os, Custom const& ) {
         return os << "custom";
     }
+
+    // Obviously wrong numpunct if it is actually used by the JSON writer.
+    class TestNumpunct : public std::numpunct<char> {
+        char do_decimal_point() const override { return '?'; }
+        char do_thousands_sep() const override { return '!'; }
+        std::string do_grouping() const override { return "\1"; }
+        std::string do_truename() const override { return "real"; }
+        std::string do_falsename() const override { return "fake"; }
+    };
+
+    class LocaleGuard {
+        std::locale m_previous_locale;
+
+    public:
+        explicit LocaleGuard( std::locale const& locale ):
+            m_previous_locale{ std::locale() } {
+            std::locale::global( locale );
+        }
+
+        ~LocaleGuard() { std::locale::global( m_previous_locale ); }
+    };
 
 TEST_CASE( "JsonWriter", "[JSON][JsonWriter]" ) {
 
@@ -112,6 +137,40 @@ TEST_CASE( "JsonWriter", "[JSON][JsonWriter]" ) {
     }
 }
 
+TEST_CASE( "JsonWriter escapes all control characters", "[JsonWriter][approvals]" ) {
+    std::stringstream sstream;
+    SECTION( "All JSON control characters are escaped" ) {
+        char const* const escapes[] = {
+            "\\u0000", "\\u0001", "\\u0002", "\\u0003",
+            "\\u0004", "\\u0005", "\\u0006", "\\u0007",
+            "\\b", "\\t", "\\n", "\\u000b",
+            "\\f", "\\r", "\\u000e", "\\u000f",
+            "\\u0010", "\\u0011", "\\u0012", "\\u0013",
+            "\\u0014", "\\u0015", "\\u0016", "\\u0017",
+            "\\u0018", "\\u0019", "\\u001a", "\\u001b",
+            "\\u001c", "\\u001d", "\\u001e", "\\u001f"
+        };
+        for ( unsigned int i = 0; i < 32; ++i ) {
+            std::stringstream output;
+            Catch::JsonValueWriter{ output }.write(
+                std::string( 1, static_cast<char>( i ) ) );
+            CAPTURE( i );
+            REQUIRE( output.str() == std::string( "\"" ) + escapes[i] + "\"" );
+        }
+    }
+    SECTION( "Embedded controls and existing escapes can be mixed with text" ) {
+        char const text[] = "start\0\a\x1b\n\"\\end";
+        Catch::JsonValueWriter{ sstream }.write(
+            Catch::StringRef( text, sizeof( text ) - 1 ) );
+        REQUIRE( sstream.str() ==
+                 "\"start\\u0000\\u0007\\u001b\\n\\\"\\\\end\"" );
+    }
+    SECTION( "Space, DEL, and UTF-8 bytes are preserved" ) {
+        Catch::JsonValueWriter{ sstream }.write( " \x7f\xc3\xa9" );
+        REQUIRE( sstream.str() == "\" \x7f\xc3\xa9\"" );
+    }
+}
+
 TEST_CASE( "JsonWriter escapes characters in strings properly", "[JsonWriter]" ) {
     std::stringstream sstream;
     SECTION( "Quote in a string is escaped" ) {
@@ -149,6 +208,54 @@ TEST_CASE( "JsonWriter escapes characters in strings properly", "[JsonWriter]" )
     SECTION( "combination of characters is escaped" ) {
         Catch::JsonValueWriter{ sstream }.write( "\\/\t\r\n" );
         REQUIRE( sstream.str() == "\"\\\\/\\t\\r\\n\"" );
+    }
+}
+
+TEST_CASE( "JsonWriter serializes numbers independently of the global locale",
+           "[JsonWriter]" ) {
+    using Catch::Matchers::ContainsSubstring;
+
+    LocaleGuard locale_guard{ std::locale{ std::locale(), new TestNumpunct } };
+
+    std::stringstream sstream;
+    {
+        auto writer = Catch::JsonValueWriter{ sstream }.writeObject();
+        writer.write( "double" ).write( 1.5 );
+        writer.write( "int" ).write( 1234567 );
+        writer.write( "bool-1" ).write( true );
+        writer.write( "bool-2" ).write( false );
+        writer.write( "array" ).writeArray().write( 2.5 ).write( 1234567 );
+    }
+
+    REQUIRE_THAT( sstream.str(),
+                  ContainsSubstring( "\"double\": 1.5," ) &&
+                      ContainsSubstring( "\"int\": 1234567," ) &&
+                      ContainsSubstring( "\"bool-1\": true," ) &&
+                      ContainsSubstring( "\"bool-2\": false," ) &&
+                      ContainsSubstring(
+                          "\"array\": [\n    2.5,\n    1234567\n  ]\n}" ) );
+}
+
+TEMPLATE_TEST_CASE( "JsonWriter serializes non-finite FP using Python spelling",
+                    "[JsonWriter][floating-point]",
+                    float,
+                    double ) {
+    std::stringstream sstream;
+
+    SECTION( "NaN" ) {
+        Catch::JsonValueWriter{ sstream }.write(
+            std::numeric_limits<TestType>::quiet_NaN() );
+        REQUIRE( sstream.str() == "NaN" );
+    }
+    SECTION( "Pos nf" ) {
+        Catch::JsonValueWriter{ sstream }.write(
+            std::numeric_limits<TestType>::infinity() );
+        REQUIRE( sstream.str() == "Infinity" );
+    }
+    SECTION( "Neg inf" ) {
+        Catch::JsonValueWriter{ sstream }.write(
+            -std::numeric_limits<TestType>::infinity() );
+        REQUIRE( sstream.str() == "-Infinity" );
     }
 }
 

@@ -2,6 +2,7 @@
 *.so*
 *.xcodeproj
 *~
+*.gradle/
 .vscode/
 .cache/
 .vs/
@@ -16,6 +17,7 @@ CPack*.cmake
 CTestTestfile.cmake
 FMT.build
 Makefile
+__pycache__
 bin/
 build/
 cmake_install.cmake

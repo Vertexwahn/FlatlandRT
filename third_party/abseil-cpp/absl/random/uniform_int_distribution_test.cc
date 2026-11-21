@@ -15,8 +15,10 @@
 #include "absl/random/uniform_int_distribution.h"
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <random>
 #include <sstream>
 #include <string>
@@ -47,8 +49,8 @@ TYPED_TEST(UniformIntDistributionTest, ParamSerializeTest) {
   using Limits = std::numeric_limits<TypeParam>;
   using param_type =
       typename absl::uniform_int_distribution<TypeParam>::param_type;
-  const TypeParam kMin = std::is_unsigned<TypeParam>::value ? 37 : -105;
-  const TypeParam kNegOneOrZero = std::is_unsigned<TypeParam>::value ? 0 : -1;
+  const TypeParam kMin = std::is_unsigned_v<TypeParam> ? 37 : -105;
+  const TypeParam kNegOneOrZero = std::is_unsigned_v<TypeParam> ? 0 : -1;
 
   constexpr int kCount = 1000;
   absl::InsecureBitGen gen;
@@ -180,7 +182,7 @@ TYPED_TEST(UniformIntDistributionTest, ChiSquaredTest50) {
   const int kThreshold =
       absl::random_internal::ChiSquareValue(kBuckets, 0.999999);
 
-  const TypeParam min = std::is_unsigned<TypeParam>::value ? 37 : -37;
+  const TypeParam min = std::is_unsigned_v<TypeParam> ? 37 : -37;
   const TypeParam max = min + kBuckets;
 
   // We use a fixed bit generator for distribution accuracy tests.  This allows
@@ -254,6 +256,58 @@ TEST(UniformIntDistributionTest, StabilityTest) {
   EXPECT_EQ(12, urbg.invocations());
   EXPECT_THAT(output, testing::ElementsAre(9648, 8562, 7439, 4089, 3571, 1602,
                                            3813, 9195, 6641, 2986, 7956, 3765));
+}
+
+MATCHER(FailsLeavingUnchanged,
+        "fails stream extraction and leaves target and stream flags "
+        "unchanged") {
+  return arg.failed && arg.flags_preserved && arg.value == arg.initial;
+}
+
+MATCHER_P(ParsesEqualTo, expected,
+          "succeeds, updates target, and preserves stream flags") {
+  return !arg.failed && arg.flags_preserved && arg.value == expected;
+}
+
+TEST(UniformIntDistributionTest, StreamRejectsInvalidParameters) {
+  using absl::random_internal::ParseFromStream;
+  const absl::uniform_int_distribution<int> kIntInitial(1, 5);
+  const absl::uniform_int_distribution<int8_t> kI8Initial(1, 5);
+  const absl::uniform_int_distribution<uint8_t> kU8Initial(1, 5);
+  const absl::uniform_int_distribution<uint16_t> kU16Initial(1, 5);
+  const absl::uniform_int_distribution<uint32_t> kU32Initial(1, 5);
+  const absl::uniform_int_distribution<uint64_t> kU64Initial(1, 5);
+
+  EXPECT_THAT(ParseFromStream(kIntInitial, "10 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kIntInitial, ""), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kIntInitial, "1"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kIntInitial, "abc 5"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kIntInitial, "1 abc"), FailsLeavingUnchanged());
+
+  EXPECT_THAT(ParseFromStream(kI8Initial, "-254 10"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kI8Initial, "10 200"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kI8Initial, "-129 0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kI8Initial, "0 128"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kI8Initial, "-128 127"),
+              ParsesEqualTo(absl::uniform_int_distribution<int8_t>(-128, 127)));
+
+  EXPECT_THAT(ParseFromStream(kU8Initial, "300 310"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU8Initial, "10 300"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU8Initial, "-1 5"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU8Initial, "-0 5"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU8Initial, "0 255"),
+              ParsesEqualTo(absl::uniform_int_distribution<uint8_t>(0, 255)));
+
+  EXPECT_THAT(ParseFromStream(kU16Initial, "-10 -2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU32Initial, "-10 -2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU32Initial, "-1 5"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU32Initial, "1 -2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU32Initial, "-0 5"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU64Initial, "-10 -2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU64Initial, "0 99999999999999999999999"),
+              FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU32Initial, "10 20"),
+              ParsesEqualTo(absl::uniform_int_distribution<uint32_t>(10, 20)));
 }
 
 }  // namespace

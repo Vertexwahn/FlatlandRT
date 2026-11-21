@@ -24,10 +24,12 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/base/attributes.h"
 #include "absl/base/config.h"
 #include "absl/container/hash_container_defaults.h"
 #include "absl/container/internal/container_memory.h"
 #include "absl/container/internal/hash_generator_testing.h"
+#include "absl/container/internal/hash_policy_testing.h"
 #include "absl/container/internal/test_allocator.h"
 #include "absl/container/internal/unordered_set_constructor_test.h"
 #include "absl/container/internal/unordered_set_lookup_test.h"
@@ -184,39 +186,6 @@ TEST(FlatHashSet, EraseIf) {
     flat_hash_set<int> s = {1, 2, 3, 4, 5};
     EXPECT_EQ(erase_if(s, &IsEven), 2);
     EXPECT_THAT(s, UnorderedElementsAre(1, 3, 5));
-  }
-}
-
-TEST(FlatHashSet, CForEach) {
-  using ValueType = std::pair<int, int>;
-  flat_hash_set<ValueType> s;
-  std::vector<ValueType> expected;
-  for (int i = 0; i < 100; ++i) {
-    {
-      SCOPED_TRACE("mutable object iteration");
-      std::vector<ValueType> v;
-      absl::container_internal::c_for_each_fast(
-          s, [&v](const ValueType& p) { v.push_back(p); });
-      ASSERT_THAT(v, UnorderedElementsAreArray(expected));
-    }
-    {
-      SCOPED_TRACE("const object iteration");
-      std::vector<ValueType> v;
-      const flat_hash_set<ValueType>& cs = s;
-      absl::container_internal::c_for_each_fast(
-          cs, [&v](const ValueType& p) { v.push_back(p); });
-      ASSERT_THAT(v, UnorderedElementsAreArray(expected));
-    }
-    {
-      SCOPED_TRACE("temporary object iteration");
-      std::vector<ValueType> v;
-      absl::container_internal::c_for_each_fast(
-          flat_hash_set<ValueType>(s),
-          [&v](const ValueType& p) { v.push_back(p); });
-      ASSERT_THAT(v, UnorderedElementsAreArray(expected));
-    }
-    s.emplace(i, i);
-    expected.emplace_back(i, i);
   }
 }
 
@@ -388,15 +357,84 @@ TEST(FlatHashSet, MoveOnlyKey) {
 TEST(FlatHashSet, IsDefaultHash) {
   using absl::container_internal::hashtable_debug_internal::
       HashtableDebugAccess;
-  EXPECT_EQ(HashtableDebugAccess<flat_hash_set<int>>::kIsDefaultHash, true);
-  EXPECT_EQ(HashtableDebugAccess<flat_hash_set<std::string>>::kIsDefaultHash,
+  EXPECT_EQ(HashtableDebugAccess<flat_hash_set<int>>::kIsAbslHash, true);
+  EXPECT_EQ(HashtableDebugAccess<flat_hash_set<std::string>>::kIsAbslHash,
             true);
+  EXPECT_EQ(HashtableDebugAccess<flat_hash_set<std::wstring>>::kIsAbslHash,
+            true);
+  EXPECT_EQ(HashtableDebugAccess<flat_hash_set<int*>>::kIsAbslHash, true);
+  EXPECT_EQ(
+      HashtableDebugAccess<flat_hash_set<std::unique_ptr<int>>>::kIsAbslHash,
+      true);
+  using TransparentStringHashSet =
+      flat_hash_set<std::string,
+                    absl::TransparentHash<std::string, std::string_view>>;
+  EXPECT_EQ(HashtableDebugAccess<TransparentStringHashSet>::kIsAbslHash, true);
 
   struct Hash {
     size_t operator()(size_t i) const { return i; }
   };
-  EXPECT_EQ((HashtableDebugAccess<flat_hash_set<size_t, Hash>>::kIsDefaultHash),
+  EXPECT_EQ((HashtableDebugAccess<flat_hash_set<size_t, Hash>>::kIsAbslHash),
             false);
+
+  EXPECT_EQ((GetTypeErasedApplyToSlotFn<StringHash, std::string, true, 0>()),
+            (GetTypeErasedApplyToSlotFn<absl::Hash<std::string>, std::string,
+                                        true, 0>()));
+  EXPECT_EQ((GetTypeErasedApplyToSlotFn<StringHash, std::string, true, 0>()),
+            (GetTypeErasedApplyToSlotFn<
+                absl::TransparentHash<std::string, absl::string_view>,
+                std::string, true, 0>()));
+  EXPECT_EQ(
+      (GetTypeErasedApplyToSlotFn<StringHash, absl::string_view, true, 0>()),
+      (GetTypeErasedApplyToSlotFn<absl::Hash<absl::string_view>,
+                                  absl::string_view, true, 0>()));
+  EXPECT_EQ((GetTypeErasedApplyToSlotFn<BasicStringHash<wchar_t>, std::wstring,
+                                        true, 0>()),
+            (GetTypeErasedApplyToSlotFn<absl::Hash<std::wstring>, std::wstring,
+                                        true, 0>()));
+  EXPECT_EQ((GetTypeErasedApplyToSlotFn<HashEq<int*>::Hash, int*, true, 0>()),
+            (GetTypeErasedApplyToSlotFn<absl::Hash<int*>, int*, true, 0>()));
+}
+
+// Small trivially copyable key with padding bytes between `a` and `b`.
+struct KeyWithPadding {
+  uint8_t a;
+  uint32_t b;
+
+  friend bool operator==(const KeyWithPadding& x, const KeyWithPadding& y) {
+    return x.a == y.a && x.b == y.b;
+  }
+  template <typename H>
+  friend H AbslHashValue(H h, const KeyWithPadding& k) {
+    return H::combine(std::move(h), k.a, k.b);
+  }
+};
+
+// Initializes the fields of `*k` without touching its padding bytes. Not
+// inlined so that the compiler keeps the padding uninitialized.
+ABSL_ATTRIBUTE_NOINLINE void InitKey(KeyWithPadding* k, uint8_t a, uint32_t b) {
+  k->a = a;
+  k->b = b;
+}
+
+// Regression test: keys that are small and trivially copyable but not
+// uniquely represented must not be passed by value through the type erased
+// hashing path, otherwise MemorySanitizer reports a use of uninitialized value
+// for the padding bytes.
+TEST(FlatHashSet, SmallKeyWithUninitializedPadding) {
+  // Keys live in default initialized heap memory so that the padding bytes
+  // stay uninitialized (stack objects may be split into their fields by the
+  // optimizer, and `make_unique` would value initialize the array).
+  std::unique_ptr<KeyWithPadding[]> keys(new KeyWithPadding[100]);
+  for (uint32_t i = 0; i < 100; ++i) {
+    InitKey(&keys[i], static_cast<uint8_t>(i), i);
+  }
+  absl::flat_hash_set<KeyWithPadding> set;
+  for (uint32_t i = 0; i < 100; ++i) {
+    set.insert(keys[i]);
+  }
+  EXPECT_EQ(set.size(), 100);
+  EXPECT_TRUE(set.contains(keys[42]));
 }
 
 #if defined(__cpp_lib_containers_ranges) && \

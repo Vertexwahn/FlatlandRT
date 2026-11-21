@@ -20,14 +20,14 @@
 #include <sstream>
 #include <string>
 
-namespace spdlog {
+SPDLOG_NAMESPACE_BEGIN
 namespace sinks {
 
 /*
- * Generator of daily log file names in format basename.YYYY-MM-DD.ext
+ * Generator of daily log file names in format basename_YYYY-MM-DD.ext
  */
 struct daily_filename_calculator {
-    // Create filename for the form basename.YYYY-MM-DD
+    // Create filename of the form basename_YYYY-MM-DD.ext
     static filename_t calc_filename(const filename_t &filename, const tm &now_tm) {
         filename_t basename, ext;
         std::tie(basename, ext) = details::file_helper::split_by_extension(filename);
@@ -74,7 +74,8 @@ public:
                     int rotation_minute,
                     bool truncate = false,
                     uint16_t max_files = 0,
-                    const file_event_handlers &event_handlers = {})
+                    const file_event_handlers &event_handlers = {},
+                    size_t buffer_size = 0)
         : base_filename_(std::move(base_filename)),
           rotation_h_(rotation_hour),
           rotation_m_(rotation_minute),
@@ -87,6 +88,7 @@ public:
             throw_spdlog_ex("daily_file_sink: Invalid rotation time in ctor");
         }
 
+        file_helper_.set_buffer_size(buffer_size);
         auto now = log_clock::now();
         const auto new_filename = FileNameCalc::calc_filename(base_filename_, now_tm(now));
         file_helper_.open(new_filename, truncate_);
@@ -100,6 +102,16 @@ public:
     filename_t filename() {
         std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
         return file_helper_.filename();
+    }
+
+    void set_buffer_size(size_t buffer_size) {
+        std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+        file_helper_.set_buffer_size(buffer_size);
+    }
+
+    size_t buffer_size() {
+        std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+        return file_helper_.buffer_size();
     }
 
 protected:
@@ -145,7 +157,7 @@ private:
 
     tm now_tm(log_clock::time_point tp) {
         time_t tnow = log_clock::to_time_t(tp);
-        return spdlog::details::os::localtime(tnow);
+        return details::os::localtime(tnow);
     }
 
     log_clock::time_point next_rotation_tp_() {
@@ -202,19 +214,21 @@ using daily_file_format_sink_st =
 //
 // factory functions
 //
-template <typename Factory = spdlog::synchronous_factory>
+template <typename Factory = synchronous_factory>
 inline std::shared_ptr<logger> daily_logger_mt(const std::string &logger_name,
                                                const filename_t &filename,
                                                int hour = 0,
                                                int minute = 0,
                                                bool truncate = false,
                                                uint16_t max_files = 0,
-                                               const file_event_handlers &event_handlers = {}) {
+                                               const file_event_handlers &event_handlers = {},
+                                               size_t buffer_size = 0) {
     return Factory::template create<sinks::daily_file_sink_mt>(logger_name, filename, hour, minute,
-                                                               truncate, max_files, event_handlers);
+                                                               truncate, max_files, event_handlers,
+                                                               buffer_size);
 }
 
-template <typename Factory = spdlog::synchronous_factory>
+template <typename Factory = synchronous_factory>
 inline std::shared_ptr<logger> daily_logger_format_mt(
     const std::string &logger_name,
     const filename_t &filename,
@@ -222,24 +236,27 @@ inline std::shared_ptr<logger> daily_logger_format_mt(
     int minute = 0,
     bool truncate = false,
     uint16_t max_files = 0,
-    const file_event_handlers &event_handlers = {}) {
+    const file_event_handlers &event_handlers = {},
+    size_t buffer_size = 0) {
     return Factory::template create<sinks::daily_file_format_sink_mt>(
-        logger_name, filename, hour, minute, truncate, max_files, event_handlers);
+        logger_name, filename, hour, minute, truncate, max_files, event_handlers, buffer_size);
 }
 
-template <typename Factory = spdlog::synchronous_factory>
+template <typename Factory = synchronous_factory>
 inline std::shared_ptr<logger> daily_logger_st(const std::string &logger_name,
                                                const filename_t &filename,
                                                int hour = 0,
                                                int minute = 0,
                                                bool truncate = false,
                                                uint16_t max_files = 0,
-                                               const file_event_handlers &event_handlers = {}) {
+                                               const file_event_handlers &event_handlers = {},
+                                               size_t buffer_size = 0) {
     return Factory::template create<sinks::daily_file_sink_st>(logger_name, filename, hour, minute,
-                                                               truncate, max_files, event_handlers);
+                                                               truncate, max_files, event_handlers,
+                                                               buffer_size);
 }
 
-template <typename Factory = spdlog::synchronous_factory>
+template <typename Factory = synchronous_factory>
 inline std::shared_ptr<logger> daily_logger_format_st(
     const std::string &logger_name,
     const filename_t &filename,
@@ -247,8 +264,9 @@ inline std::shared_ptr<logger> daily_logger_format_st(
     int minute = 0,
     bool truncate = false,
     uint16_t max_files = 0,
-    const file_event_handlers &event_handlers = {}) {
+    const file_event_handlers &event_handlers = {},
+    size_t buffer_size = 0) {
     return Factory::template create<sinks::daily_file_format_sink_st>(
-        logger_name, filename, hour, minute, truncate, max_files, event_handlers);
+        logger_name, filename, hour, minute, truncate, max_files, event_handlers, buffer_size);
 }
-}  // namespace spdlog
+SPDLOG_NAMESPACE_END

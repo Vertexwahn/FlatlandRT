@@ -11,8 +11,14 @@ jobs:
       ${{matrix.cxx}} c++${{matrix.std}} ${{matrix.build_type}}
       ${{matrix.gen}} ${{matrix.fuzz && 'Fuzz' || ''}}
       ${{matrix.shared && 'Shared' || ''}}
-      ${{matrix.cxxflags_extra && 'Sanitize' || ''}}
+      ${{matrix.cxxflags}}
+      ${{matrix.sanitizers && 'ASan UBSan' || ''}}
     runs-on: ${{ matrix.os || 'ubuntu-22.04' }}
+    env:
+      # Run tests in a non-UTC timezone. glibc localtime/strftime honor TZ, so
+      # there is no need for timedatectl, which fails without systemd-timedated.
+      TZ: Europe/Kyiv
+      GTEST_DEATH_TEST_USE_FORK: ${{ matrix.sanitizers && startsWith(matrix.cxx, 'g++') && '1' || '0' }}
     strategy:
       matrix:
         cxx: [g++-4.9, g++-11, clang++-3.6, clang++-11]
@@ -20,7 +26,6 @@ jobs:
         std: [11]
         shared: [""]
         include:
-          - cxx: g++-4.9
           - cxx: g++-11
             build_type: Debug
             std: 14
@@ -38,10 +43,17 @@ jobs:
             os: ubuntu-24.04
             shared: -DBUILD_SHARED_LIBS=ON
           - cxx: g++-14
+            sanitizers: true
             build_type: Release
             std: 23
             os: ubuntu-24.04
             gen: Ninja
+          - cxx: g++-16
+            build_type: Debug
+            std: 26
+            os: ubuntu-24.04
+            cxxflags: -freflection
+            install: sudo apt install g++-16
           - cxx: clang++-3.6
           - cxx: clang++-11
             build_type: Debug
@@ -58,14 +70,13 @@ jobs:
           - cxx: clang++-14
             build_type: Debug
             std: 20
-            cxxflags: -fsanitize=address
-            cxxflags_extra: -fno-sanitize-recover=all -fno-omit-frame-pointer
           - cxx: clang++-14
             build_type: Debug
             std: 20
             cxxflags: -stdlib=libc++
             install: sudo apt install libc++-14-dev libc++abi-14-dev
           - cxx: clang++-20
+            sanitizers: true
             build_type: Debug
             std: 20
             cxxflags: -stdlib=libc++
@@ -73,17 +84,30 @@ jobs:
             gen: Ninja
 
     steps:
-    - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-    - name: Set timezone
-      run: sudo timedatectl set-timezone 'Europe/Kyiv'
+    # Packages are installed from third-party archives that periodically
+    # return 50x or throttle, which otherwise fails the build. The key covers
+    # everything that determines the package set; bump the -v1 suffix to
+    # discard the cached packages.
+    - name: Cache packages
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/apt-cache
+        key: pkg-${{matrix.os || 'ubuntu-22.04'}}-${{matrix.cxx}}-${{matrix.install}}-v1
+
+    - name: Create package cache directory
+      run: mkdir -p ~/apt-cache
 
     - name: Install GCC 4.9
       run: |
         sudo apt update
         sudo apt install libatomic1 libc6-dev libgomp1 libitm1 libmpc3
+        cd ~/apt-cache
         # https://launchpad.net/ubuntu/xenial/amd64/g++-4.9/4.9.3-13ubuntu2
-        wget --no-verbose \
+        # launchpad periodically returns 50x errors, so retry to avoid flaky CI.
+        wget --no-verbose --no-clobber --tries=5 --waitretry=10 \
+          --retry-connrefused --retry-on-http-error=502,503,504 \
           http://launchpadlibrarian.net/230069137/libmpfr4_3.1.3-2_amd64.deb \
           http://launchpadlibrarian.net/253728424/libasan1_4.9.3-13ubuntu2_amd64.deb \
           http://launchpadlibrarian.net/445346135/libubsan0_5.4.0-6ubuntu1~16.04.12_amd64.deb \
@@ -113,8 +137,11 @@ jobs:
       run: |
         sudo apt update
         sudo apt install libtinfo5
+        cd ~/apt-cache
         # https://code.launchpad.net/ubuntu/xenial/amd64/clang-3.6/1:3.6.2-3ubuntu2
-        wget --no-verbose \
+        # launchpad periodically returns 50x errors, so retry to avoid flaky CI.
+        wget --no-verbose --no-clobber --tries=5 --waitretry=10 \
+          --retry-connrefused --retry-on-http-error=502,503,504 \
           http://launchpadlibrarian.net/230019046/libffi6_3.2.1-4_amd64.deb \
           http://launchpadlibrarian.net/445346109/libasan2_5.4.0-6ubuntu1~16.04.12_amd64.deb \
           http://launchpadlibrarian.net/445346135/libubsan0_5.4.0-6ubuntu1~16.04.12_amd64.deb \
@@ -146,10 +173,19 @@ jobs:
 
     - name: Install LLVM-20
       run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 20
+        sudo install -D -m 0644 support/llvm-snapshot.gpg.key \
+          /etc/apt/keyrings/apt.llvm.org.asc
+        codename=$(lsb_release -cs)
+        echo "deb [signed-by=/etc/apt/keyrings/apt.llvm.org.asc]" \
+             "https://apt.llvm.org/$codename/" \
+             "llvm-toolchain-$codename-20 main" \
+          | sudo tee /etc/apt/sources.list.d/llvm.list
       if: ${{ matrix.cxx == 'clang++-20' }}
+
+    - name: Install GCC 16
+      run: |
+        sudo add-apt-repository --no-update --yes ppa:ubuntu-toolchain-r/test
+      if: ${{ matrix.cxx == 'g++-16' }}
 
     - name: Add Ubuntu mirrors
       run: |
@@ -165,16 +201,31 @@ jobs:
 
     - name: Create build environment
       run: |
+        # apt (unlike apt-get) defaults to discarding downloaded packages, so
+        # the binary-specific setting is required to populate the cache.
+        printf 'Binary::apt::APT::Keep-Downloaded-Packages "true";\n' | \
+          sudo tee /etc/apt/apt.conf.d/99keep-packages
+        sudo cp -n ~/apt-cache/*.deb /var/cache/apt/archives || true
         sudo apt update
         ${{matrix.install}}
         sudo apt install locales-all
+        cp -n /var/cache/apt/archives/*.deb ~/apt-cache || true
         cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Select matching C compiler
+      run: |
+        cc=${{matrix.cxx}}
+        cc=${cc/clang++/clang}
+        cc=${cc/g++/gcc}
+        echo "CC=$cc" >> "$GITHUB_ENV"
 
     - name: Configure
       working-directory: ${{runner.workspace}}/build
       env:
         CXX: ${{matrix.cxx}}
-        CXXFLAGS: ${{matrix.cxxflags}} ${{matrix.cxxflags_extra}}
+        CXXFLAGS: >-
+          ${{matrix.cxxflags}}
+          ${{ matrix.sanitizers && '-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all' || '' }}
       run: |
         cmake ${{matrix.gen && '-G' || ''}} ${{matrix.gen}} \
               -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \

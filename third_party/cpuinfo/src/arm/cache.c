@@ -1310,7 +1310,8 @@ void cpuinfo_arm_decode_cache(
 		case cpuinfo_uarch_neoverse_n1:
 		case cpuinfo_uarch_neoverse_v1:
 		case cpuinfo_uarch_neoverse_n2:
-		case cpuinfo_uarch_neoverse_v2: {
+		case cpuinfo_uarch_neoverse_v2:
+		case cpuinfo_uarch_neoverse_v3: {
 			/*
 			 * The specifications here below are taken from the
 			 * Arm Core Technical Reference Manuals for
@@ -1322,27 +1323,36 @@ void cpuinfo_arm_decode_cache(
 			 * https://developer.arm.com/documentation/101427/0102/?lang=en
 			 *  - Neoverse V2:
 			 * https://developer.arm.com/documentation/102375/0002/?lang=en
+			 *  - Neoverse V3/V3AE:
+			 * https://support.arm.com/documentation/107734/0002/?lang=en
 			 *
-			 * All four Arm architectures have L1 memory system with
+			 * All five Arm architectures have L1 memory system with
 			 * instruction and data caches, both of fixed size of
 			 * 64KB. The instruction side memory system is 4-way set
 			 * associative with a cache line length of 64 bytes. The
 			 * data cache is also 4-way set associative with a cache
 			 * line length of 64 bytes.
 			 *
-			 * The L2 memory system differs across the four
+			 * The L2 memory system differs across the five
 			 * Architectures in the minimum length of the L2 cache.
 			 * Namely:
 			 *  - Arm Neoverse N1/N2/V1 have a L2 cache of
 			 * configurable size of 256KB, 512KB, or 1024KB
 			 *  - Arm Neoverse V2 has a L2 cache of configurable
-			 * size of 1MB or 2MB For all four architectures, the L2
-			 * cache is 8-way set associative For all other
+			 * size of 1MB or 2MB
+			 *  - Arm Neoverse V3/V3AE has a L2 cache of configurable
+			 * size of 1MB, 2MB, or 3MB
+			 * For all five architectures, the L2 cache is 8-way set
+			 * associative.
+			 * For all other
 			 * information, please refer to the technical manuals
 			 * linked above
 			 */
 			const uint32_t min_l2_size_KB =
-				(uarch == cpuinfo_uarch_neoverse_v2 || midr_is_ampere_altra(midr)) ? 1024 : 256;
+				(uarch == cpuinfo_uarch_neoverse_v2 || uarch == cpuinfo_uarch_neoverse_v3 ||
+				 midr_is_ampere_altra(midr))
+				? 1024
+				: 256;
 			const uint32_t min_l3_size_KB = 0;
 
 			*l1i = (struct cpuinfo_cache){
@@ -1364,6 +1374,32 @@ void cpuinfo_arm_decode_cache(
 			*l3 = (struct cpuinfo_cache){
 				.size = min_l3_size_KB * 1024,
 				.associativity = 16,
+				.line_size = 64,
+			};
+			break;
+		}
+		case cpuinfo_uarch_lumex_c2_ultra: {
+			/*
+			 * Arm C2-Ultra Core Technical Reference Manual
+			 * (https://developer.arm.com/documentation/109736/latest):
+			 * - L1 instruction cache: 64 KB, 4-way set associative, 64-byte line.
+			 * - L1 data cache: 128 KB, 4-way set associative, 64-byte line.
+			 * - Private unified L2 cache: configurable 2 MB (8-way) or 3 MB
+			 *   (12-way), 64-byte line. Default to the 2 MB minimum configuration.
+			 */
+			*l1i = (struct cpuinfo_cache){
+				.size = 64 * 1024,
+				.associativity = 4,
+				.line_size = 64,
+			};
+			*l1d = (struct cpuinfo_cache){
+				.size = 128 * 1024,
+				.associativity = 4,
+				.line_size = 64,
+			};
+			*l2 = (struct cpuinfo_cache){
+				.size = 2 * 1024 * 1024,
+				.associativity = 8,
 				.line_size = 64,
 			};
 			break;
@@ -1444,6 +1480,34 @@ void cpuinfo_arm_decode_cache(
 				*l2 = (struct cpuinfo_cache){.size = 1024 * 1024, .associativity = 8, .line_size = 128};
 			}
 			break;
+		case cpuinfo_uarch_oryon:
+		case cpuinfo_uarch_oryon_v3: {
+			/*
+			 *  +--------------------------+-------+-----------+-----------+-----------+
+			 *  | Processor model          | Cores | L1D cache | L1I cache | L2 cache  |
+			 *  +--------------------------+-------+-----------+-----------+-----------+
+			 *  | Snapdragon X Elite       | 4+4+4 |    96K    |   192K    | 12M/clust |
+			 *  | Snapdragon 8 Elite       |  2+6  |  96K/64K  | 192K/128K |  12M+12M  |
+			 *  | Snapdragon 8 Elite Gen 5 |  2+6  |  96K/64K  | 192K/128K |  12M+12M  |
+			 *  +--------------------------+-------+-----------+-----------+-----------+
+			 *
+			 * - Prime cores: 192 KB 6-way L1I, 96 KB 6-way L1D.
+			 * - Performance cores (Oryon variant 0x4, Oryon V3 variant 0x2): 128 KB L1I, 64 KB L1D.
+			 * - Shared L2 cache: 12 MB 12-way per cluster.
+			 */
+			const uint32_t variant = midr_get_variant(midr);
+			const bool is_oryon_perf = uarch == cpuinfo_uarch_oryon && variant == 4;
+			const bool is_oryon_v3_perf = uarch == cpuinfo_uarch_oryon_v3 && variant == 2;
+			if (is_oryon_perf || is_oryon_v3_perf) {
+				*l1i = (struct cpuinfo_cache){.size = 128 * 1024, .associativity = 4, .line_size = 64};
+				*l1d = (struct cpuinfo_cache){.size = 64 * 1024, .associativity = 4, .line_size = 64};
+			} else {
+				*l1i = (struct cpuinfo_cache){.size = 192 * 1024, .associativity = 6, .line_size = 64};
+				*l1d = (struct cpuinfo_cache){.size = 96 * 1024, .associativity = 6, .line_size = 64};
+			}
+			*l2 = (struct cpuinfo_cache){.size = 12 * 1024 * 1024, .associativity = 12, .line_size = 64};
+			break;
+		}
 		case cpuinfo_uarch_denver:
 		case cpuinfo_uarch_denver2:
 			/*
@@ -1662,6 +1726,8 @@ uint32_t cpuinfo_arm_compute_max_cache_size(const struct cpuinfo_processor* proc
 		case cpuinfo_uarch_scorpion:
 		case cpuinfo_uarch_krait:
 		case cpuinfo_uarch_kryo:
+		case cpuinfo_uarch_oryon:
+		case cpuinfo_uarch_oryon_v3:
 		case cpuinfo_uarch_exynos_m1:
 		case cpuinfo_uarch_exynos_m2:
 		case cpuinfo_uarch_exynos_m3:
@@ -1765,6 +1831,7 @@ uint32_t cpuinfo_arm_compute_max_cache_size(const struct cpuinfo_processor* proc
 		case cpuinfo_uarch_neoverse_v1:
 		case cpuinfo_uarch_neoverse_n2:
 		case cpuinfo_uarch_neoverse_v2:
+		case cpuinfo_uarch_neoverse_v3:
 		case cpuinfo_uarch_cortex_a75:
 		case cpuinfo_uarch_cortex_a76:
 		case cpuinfo_uarch_exynos_m4:

@@ -12,9 +12,9 @@ function Invoke-CmdScript($scriptName)
 $sources = @("src/pugixml.cpp") + (Get-ChildItem -Path "tests/*.cpp" -Exclude "fuzz_*.cpp")
 $failed = $FALSE
 
-foreach ($vs in $args)
+foreach ($vs in @($args[0]))
 {
-	foreach ($arch in "x86","x64")
+	foreach ($arch in @($args[1]))
 	{
 		Write-Output "# Setting up VS$vs $arch"
 
@@ -30,6 +30,10 @@ foreach ($vs in $args)
 			$vsdevcmdarch = if ($arch -eq "x64") { "amd64" } else { "x86" }
 			Invoke-CmdScript "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat" "-arch=$vsdevcmdarch"
 		}
+		elseif ($vs -eq 26) {
+			$vsdevcmdarch = if ($arch -eq "x64") { "amd64" } else { "x86" }
+			Invoke-CmdScript "C:\Program Files\Microsoft Visual Studio\18\Community\Common7\Tools\VsDevCmd.bat" "-arch=$vsdevcmdarch"
+		}
 		else
 		{
 			Invoke-CmdScript "C:\Program Files (x86)\Microsoft Visual Studio $vs.0\VC\vcvarsall.bat" $arch
@@ -39,7 +43,7 @@ foreach ($vs in $args)
 
 		$cxx = if ($vs -ge 19) { "/std:c++17" } else { "" }
 
-		foreach ($defines in "standard", "PUGIXML_WCHAR_MODE", "PUGIXML_COMPACT")
+		foreach ($defines in @($args[2]))
 		{
 			$target = "tests_vs${vs}_${arch}_${defines}"
 			$deflist = if ($defines -eq "standard") { "" } else { "/D$defines" }

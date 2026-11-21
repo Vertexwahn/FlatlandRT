@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set Up Directories & Environment
         run: |
@@ -106,7 +106,7 @@ jobs:
 
       - name: Install MSYS2 ${{ inputs.msystem }}
         if: inputs.msystem != ''
-        uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
+        uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
           msystem: ${{ inputs.msystem }}
           update: true
@@ -116,7 +116,7 @@ jobs:
       - name: Install python for MINGW32
         if: inputs.pybind11 == 'ON' && inputs.msystem == 'MINGW32'
         # Note that MINGW32 requires the x86 architecture
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.9'
           architecture: 'x86'

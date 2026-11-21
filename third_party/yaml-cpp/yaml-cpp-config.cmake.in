@@ -21,10 +21,10 @@ set(YAML_CPP_LIBRARIES "@EXPORT_TARGETS@")
 
 # Protect against multiple inclusion, which would fail when already imported targets are added once more.
 if(NOT TARGET yaml-cpp)
-  add_library(yaml-cpp INTERFACE IMPORTED) 
-  target_link_libraries(yaml-cpp INTERFACE yaml-cpp::yaml-cpp) 
+  add_library(yaml-cpp INTERFACE IMPORTED)
+  target_link_libraries(yaml-cpp INTERFACE yaml-cpp::yaml-cpp)
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
-    set_target_properties(yaml-cpp PROPERTIES 
+    set_target_properties(yaml-cpp PROPERTIES
       DEPRECATION "The target yaml-cpp is deprecated and will be removed in version 0.10.0. Use the yaml-cpp::yaml-cpp target instead."
     )
   endif()

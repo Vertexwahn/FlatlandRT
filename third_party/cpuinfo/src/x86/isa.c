@@ -48,13 +48,15 @@ struct cpuinfo_x86_isa cpuinfo_x86_detect_isa(
 		(max_base_index >= 7) ? cpuidex(7, 1) : (struct cpuid_regs){0, 0, 0, 0};
 	const struct cpuid_regs structured_feature_info2 =
 		(max_base_index >= 7) ? cpuidex(0x24, 0) : (struct cpuid_regs){0, 0, 0, 0};
+	const struct cpuid_regs tmm_info1 =
+		(max_base_index >= 0x1E) ? cpuidex(0x1E, 1) : (struct cpuid_regs){0, 0, 0, 0};
 
 	const uint32_t processor_capacity_info_index = UINT32_C(0x80000008);
 	const struct cpuid_regs processor_capacity_info = (max_extended_index >= processor_capacity_info_index)
 		? cpuid(processor_capacity_info_index)
 		: (struct cpuid_regs){0, 0, 0, 0};
 
-	bool avx_regs = false, avx512_regs = false, mpx_regs = false;
+	bool avx_regs = false, avx512_regs = false, mpx_regs = false, amx_regs = false;
 	/*
 	 * OSXSAVE: Operating system enabled XSAVE instructions for application
 	 * use:
@@ -111,6 +113,18 @@ struct cpuinfo_x86_isa cpuinfo_x86_detect_isa(
 		const uint64_t mpx_regs_mask = UINT64_C(0x0000000000000018);
 		if ((xcr0_valid_bits & mpx_regs_mask) == mpx_regs_mask) {
 			mpx_regs = (xfeature_enabled_mask & mpx_regs_mask) == mpx_regs_mask;
+		}
+
+		/*
+		 * AMX registers:
+		 * - Intel: XFEATURE_ENABLED_MASK[bit 17] (0x00020000) for
+		 * 64-byte TILECFG register
+		 * - Intel: XFEATURE_ENABLED_MASK[bit 18] (0x00040000) for
+		 * 8192-byte TILEDATA registers (tmm0-tmm7)
+		 */
+		const uint64_t amx_regs_mask = UINT64_C(0x0000000000060000);
+		if ((xcr0_valid_bits & amx_regs_mask) == amx_regs_mask) {
+			amx_regs = (xfeature_enabled_mask & amx_regs_mask) == amx_regs_mask;
 		}
 	}
 
@@ -574,6 +588,18 @@ struct cpuinfo_x86_isa cpuinfo_x86_detect_isa(
 	 * - Intel: eax[bit 21] in structured feature info (ecx = 1).
 	 */
 	isa.amx_fp16 = avx512_regs && !!(structured_feature_info1.eax & UINT32_C(0x00200000));
+
+	/*
+	 * AMX_FP8 instructions:
+	 * - Intel: eax[bit 4] in TMM feature info (leaf 0x1E, ecx = 1).
+	 */
+	isa.amx_fp8 = avx512_regs && !!(tmm_info1.eax & UINT32_C(0x00000010));
+
+	/*
+	 * AMX_AVX512 instructions:
+	 * - Intel: eax[bit 7] in TMM feature info (leaf 0x1E, ecx = 1).
+	 */
+	isa.amx_avx512 = avx512_regs && amx_regs && !!(tmm_info1.eax & UINT32_C(0x00000080));
 
 	/*
 	 * AVX_VNNI_INT8 instructions:

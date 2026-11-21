@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <vector>
@@ -75,8 +76,8 @@ std::string AbslUnparseFlag(const OptionalString& flag) {
 
 struct UDT {
   UDT() = default;
-  UDT(const UDT&) {}
-  UDT& operator=(const UDT&) { return *this; }
+  UDT(const UDT&) = default;
+  UDT& operator=(const UDT&) = default;
 };
 // Next two functions represent Abseil Flags marshalling for UDT.
 bool AbslParseFlag(absl::string_view, UDT*, std::string*) { return true; }

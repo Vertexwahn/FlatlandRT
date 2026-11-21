@@ -16,7 +16,7 @@
 
 #include <cmath>
 #include <cstdint>
-#include <random>
+#include <limits>
 #include <type_traits>
 
 #include "gtest/gtest.h"
@@ -215,11 +215,9 @@ Invalid InferredUniformReturnT(...);
 template <typename A, typename B, typename Expect>
 void CheckArgsInferType() {
   static_assert(
-      std::conjunction<
+      std::conjunction_v<
           std::is_same<Expect, decltype(InferredUniformReturnT<A, B>(0))>,
-          std::is_same<Expect,
-                       decltype(InferredUniformReturnT<B, A>(0))>>::value,
-      "");
+          std::is_same<Expect, decltype(InferredUniformReturnT<B, A>(0))>>);
 }
 
 TEST_F(UniformHelperTest, UniformTypeInference) {

@@ -111,16 +111,6 @@ inline Element* GetRawPointer(Element* p) {
 #define GMOCK_INTERNAL_WARNING_POP() _Pragma("clang diagnostic pop")
 #endif
 
-// MSVC treats wchar_t as a native type usually, but treats it as the
-// same as unsigned short when the compiler option /Zc:wchar_t- is
-// specified.  It defines _NATIVE_WCHAR_T_DEFINED symbol when wchar_t
-// is a native type.
-#if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
-// wchar_t is a typedef.
-#else
-#define GMOCK_WCHAR_T_IS_NATIVE_ 1
-#endif
-
 // In what follows, we use the term "kind" to indicate whether a type
 // is bool, an integer type (excluding bool), a floating-point type,
 // or none of them.  This categorization is useful for determining
@@ -156,7 +146,7 @@ GMOCK_DECLARE_KIND_(unsigned long, kInteger);       // NOLINT
 GMOCK_DECLARE_KIND_(long long, kInteger);           // NOLINT
 GMOCK_DECLARE_KIND_(unsigned long long, kInteger);  // NOLINT
 
-#if GMOCK_WCHAR_T_IS_NATIVE_
+#if GTEST_HAS_NATIVE_WCHAR
 GMOCK_DECLARE_KIND_(wchar_t, kInteger);
 #endif
 
@@ -194,11 +184,11 @@ using LosslessArithmeticConvertibleImpl = std::integral_constant<
        // Converting between integers of different widths is allowed so long
        // as the conversion does not go from signed to unsigned.
       (((sizeof(From) < sizeof(To)) &&
-        !(std::is_signed<From>::value && !std::is_signed<To>::value)) ||
+        !(std::is_signed_v<From> && !std::is_signed_v<To>)) ||
        // Converting between integers of the same width only requires the
        // two types to have the same signedness.
        ((sizeof(From) == sizeof(To)) &&
-        (std::is_signed<From>::value == std::is_signed<To>::value)))
+        (std::is_signed_v<From> == std::is_signed_v<To>)))
        ) ? true
       // Floating point conversions are lossless if and only if `To` is at least
       // as wide as `From`.
@@ -364,7 +354,7 @@ class [[nodiscard]] StlContainerView {
   typedef const type& const_reference;
 
   static const_reference ConstReference(const RawContainer& container) {
-    static_assert(!std::is_const<RawContainer>::value,
+    static_assert(!std::is_const_v<RawContainer>,
                   "RawContainer type must not be const");
     return container;
   }
@@ -385,7 +375,7 @@ class [[nodiscard]] StlContainerView<Element[N]> {
   typedef const type const_reference;
 
   static const_reference ConstReference(const Element (&array)[N]) {
-    static_assert(std::is_same<Element, RawElement>::value,
+    static_assert(std::is_same_v<Element, RawElement>,
                   "Element type must not be const");
     return type(array, N, RelationToSourceReference());
   }
@@ -447,14 +437,13 @@ auto ApplyImpl(F&& f, Tuple&& args, std::index_sequence<Idx...>)
 
 // Apply the function to a tuple of arguments.
 template <typename F, typename Tuple>
-auto Apply(F&& f, Tuple&& args)
-    -> decltype(ApplyImpl(
-        std::forward<F>(f), std::forward<Tuple>(args),
-        std::make_index_sequence<std::tuple_size<
-            typename std::remove_reference<Tuple>::type>::value>())) {
+auto Apply(F&& f, Tuple&& args) -> decltype(ApplyImpl(
+    std::forward<F>(f), std::forward<Tuple>(args),
+    std::make_index_sequence<
+        std::tuple_size_v<std::remove_reference_t<Tuple>>>())) {
   return ApplyImpl(std::forward<F>(f), std::forward<Tuple>(args),
-                   std::make_index_sequence<std::tuple_size<
-                       typename std::remove_reference<Tuple>::type>::value>());
+                   std::make_index_sequence<
+                       std::tuple_size_v<std::remove_reference_t<Tuple>>>());
 }
 
 // Template struct Function<F>, where F must be a function type, contains
@@ -490,7 +479,7 @@ struct Function<R(Args...)> {
 // See: https://github.com/google/googletest/issues/3931
 // Can be replaced with std::tuple_element_t in C++14.
 template <size_t I, typename T>
-using TupleElement = typename std::tuple_element<I, T>::type;
+using TupleElement = std::tuple_element_t<I, T>;
 
 bool Base64Unescape(const std::string& encoded, std::string* decoded);
 

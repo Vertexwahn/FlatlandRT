@@ -25,6 +25,7 @@
 #include <initializer_list>
 #include <ios>
 #include <limits>
+#include <map>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -34,6 +35,7 @@
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -46,10 +48,10 @@
 #include "absl/hash/hash_testing.h"
 #include "absl/hash/internal/hash_test.h"
 #include "absl/hash/internal/spy_hash_state.h"
-#include "absl/memory/memory.h"
-#include "absl/meta/type_traits.h"
 #include "absl/numeric/bits.h"
+#include "absl/strings/cord.h"
 #include "absl/strings/cord_test_helpers.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/string_view.h"
 
 #ifdef ABSL_INTERNAL_STD_FILESYSTEM_PATH_HASH_AVAILABLE
@@ -192,7 +194,7 @@ TEST(HashValueTest, PointerAlignment) {
     constexpr size_t kMask = (1 << (kLog2NumValues + 7)) - 1;
     size_t stuck_bits = (~bits_or | bits_and) & kMask;
     int stuck_bit_count = absl::popcount(stuck_bits);
-    size_t max_stuck_bits = 5;
+    size_t max_stuck_bits = 8;
     EXPECT_LE(stuck_bit_count, max_stuck_bits)
         << "0x" << std::hex << stuck_bits;
 
@@ -484,6 +486,17 @@ TEST(HashValueTest, WString) {
       std::wstring(L"Iñtërnâtiônàlizætiøn"))));
 }
 
+#ifdef __cpp_char8_t
+TEST(HashValueTest, U8String) {
+  EXPECT_TRUE((is_hashable<std::u8string>::value));
+
+  EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly(std::make_tuple(
+      std::u8string(), std::u8string(u8"ABC"), std::u8string(u8"ABC"),
+      std::u8string(u8"Some other different string"),
+      std::u8string(u8"Iñtërnâtiônàlizætiøn"))));
+}
+#endif
+
 TEST(HashValueTest, U16String) {
   EXPECT_TRUE((is_hashable<std::u16string>::value));
 
@@ -510,6 +523,18 @@ TEST(HashValueTest, WStringView) {
       std::wstring_view(L"Some other different string_view"),
       std::wstring_view(L"Iñtërnâtiônàlizætiøn"))));
 }
+
+#ifdef __cpp_char8_t
+TEST(HashValueTest, U8StringView) {
+  EXPECT_TRUE((is_hashable<std::u8string_view>::value));
+
+  EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly(
+      std::make_tuple(std::u8string_view(), std::u8string_view(u8"ABC"),
+                      std::u8string_view(u8"ABC"),
+                      std::u8string_view(u8"Some other different string_view"),
+                      std::u8string_view(u8"Iñtërnâtiônàlizætiøn"))));
+}
+#endif
 
 TEST(HashValueTest, U16StringView) {
   EXPECT_TRUE((is_hashable<std::u16string_view>::value));
@@ -558,6 +583,8 @@ TEST(HashValueTest, StdFilesystemPath) {
       std::filesystem::path("c:\\//"),
       std::filesystem::path("c://"),
       std::filesystem::path("c://\\"),
+      std::filesystem::path("c:/a"),
+      std::filesystem::path("c:\\a"),
       std::filesystem::path("/e/p"),
       std::filesystem::path("/s/../e/p"),
       std::filesystem::path("e/p"),
@@ -800,11 +827,11 @@ struct IsAggregateInitializable<T, std::void_t<decltype(T{})>>
 
 TEST(IsHashableTest, ValidHash) {
   EXPECT_TRUE((is_hashable<int>::value));
-  EXPECT_TRUE(std::is_default_constructible<absl::Hash<int>>::value);
-  EXPECT_TRUE(std::is_copy_constructible<absl::Hash<int>>::value);
-  EXPECT_TRUE(std::is_move_constructible<absl::Hash<int>>::value);
-  EXPECT_TRUE(std::is_copy_assignable<absl::Hash<int>>::value);
-  EXPECT_TRUE(std::is_move_assignable<absl::Hash<int>>::value);
+  EXPECT_TRUE(std::is_default_constructible_v<absl::Hash<int>>);
+  EXPECT_TRUE(std::is_copy_constructible_v<absl::Hash<int>>);
+  EXPECT_TRUE(std::is_move_constructible_v<absl::Hash<int>>);
+  EXPECT_TRUE(std::is_copy_assignable_v<absl::Hash<int>>);
+  EXPECT_TRUE(std::is_move_assignable_v<absl::Hash<int>>);
   EXPECT_TRUE(IsHashCallable<int>::value);
   EXPECT_TRUE(IsAggregateInitializable<absl::Hash<int>>::value);
 }
@@ -812,11 +839,11 @@ TEST(IsHashableTest, ValidHash) {
 TEST(IsHashableTest, PoisonHash) {
   struct X {};
   EXPECT_FALSE((is_hashable<X>::value));
-  EXPECT_FALSE(std::is_default_constructible<absl::Hash<X>>::value);
-  EXPECT_FALSE(std::is_copy_constructible<absl::Hash<X>>::value);
-  EXPECT_FALSE(std::is_move_constructible<absl::Hash<X>>::value);
-  EXPECT_FALSE(std::is_copy_assignable<absl::Hash<X>>::value);
-  EXPECT_FALSE(std::is_move_assignable<absl::Hash<X>>::value);
+  EXPECT_FALSE(std::is_default_constructible_v<absl::Hash<X>>);
+  EXPECT_FALSE(std::is_copy_constructible_v<absl::Hash<X>>);
+  EXPECT_FALSE(std::is_move_constructible_v<absl::Hash<X>>);
+  EXPECT_FALSE(std::is_copy_assignable_v<absl::Hash<X>>);
+  EXPECT_FALSE(std::is_move_assignable_v<absl::Hash<X>>);
   EXPECT_FALSE(IsHashCallable<X>::value);
 #if !defined(__GNUC__) || defined(__clang__)
   // TODO(b/144368551): As of GCC 8.4 this does not compile.
@@ -891,17 +918,30 @@ struct CustomHashType {
 
 template <InvokeTag allowed, InvokeTag... tags>
 struct EnableIfContained
-    : std::enable_if<std::disjunction<
-          std::integral_constant<bool, allowed == tags>...>::value> {};
+    : std::enable_if<
+          std::disjunction_v<std::bool_constant<allowed == tags>...>> {};
 
 template <
     typename H, InvokeTag... Tags,
     typename = typename EnableIfContained<InvokeTag::kHashValue, Tags...>::type>
 H AbslHashValue(H state, CustomHashType<Tags...> t) {
-  static_assert(MinTag<Tags...>::value == InvokeTag::kHashValue, "");
+  static_assert(MinTag<Tags...>::value == InvokeTag::kHashValue);
   return H::combine(std::move(state),
                     t.value + static_cast<int>(InvokeTag::kHashValue));
 }
+
+struct NonTriviallyCopyableUniquelyRepresented {
+  uintptr_t v;
+  explicit NonTriviallyCopyableUniquelyRepresented(uintptr_t v) : v(v) {}
+  // NOLINTNEXTLINE(modernize-use-equals-default)
+  NonTriviallyCopyableUniquelyRepresented(
+      const NonTriviallyCopyableUniquelyRepresented& other)
+      : v(other.v) {}
+  friend bool operator==(const NonTriviallyCopyableUniquelyRepresented& a,
+                         const NonTriviallyCopyableUniquelyRepresented& b) {
+    return a.v == b.v;
+  }
+};
 
 }  // namespace
 
@@ -912,6 +952,10 @@ template <InvokeTag... Tags>
 struct is_uniquely_represented<
     CustomHashType<Tags...>,
     typename EnableIfContained<InvokeTag::kUniquelyRepresented, Tags...>::type>
+    : std::true_type {};
+
+template <>
+struct is_uniquely_represented<NonTriviallyCopyableUniquelyRepresented>
     : std::true_type {};
 }  // namespace hash_internal
 ABSL_NAMESPACE_END
@@ -924,7 +968,7 @@ struct hash<CustomHashType<Tags...>> {
   template <InvokeTag... TagsIn, typename = typename EnableIfContained<
                                      InvokeTag::kLegacyHash, TagsIn...>::type>
   size_t operator()(CustomHashType<TagsIn...> t) const {
-    static_assert(MinTag<Tags...>::value == InvokeTag::kLegacyHash, "");
+    static_assert(MinTag<Tags...>::value == InvokeTag::kLegacyHash);
     return t.value + static_cast<int>(InvokeTag::kLegacyHash);
   }
 };
@@ -937,7 +981,7 @@ struct hash<CustomHashType<Tags...>> {
   template <InvokeTag... TagsIn, typename = typename EnableIfContained<
                                      InvokeTag::kStdHash, TagsIn...>::type>
   size_t operator()(CustomHashType<TagsIn...> t) const {
-    static_assert(MinTag<Tags...>::value == InvokeTag::kStdHash, "");
+    static_assert(MinTag<Tags...>::value == InvokeTag::kStdHash);
     return t.value + static_cast<int>(InvokeTag::kStdHash);
   }
 };
@@ -1016,10 +1060,10 @@ struct StructWithPadding {
 
 static_assert(sizeof(StructWithPadding) > sizeof(char) + sizeof(int),
               "StructWithPadding doesn't have padding");
-static_assert(std::is_standard_layout<StructWithPadding>::value, "");
+static_assert(std::is_standard_layout_v<StructWithPadding>);
 
 // This check has to be disabled because libstdc++ doesn't support it.
-// static_assert(std::is_trivially_constructible<StructWithPadding>::value, "");
+// static_assert(std::is_trivially_constructible_v<StructWithPadding>);
 
 template <typename T>
 struct ArraySlice {
@@ -1091,7 +1135,15 @@ TEST(IsUniquelyRepresentedTest, SanityTest) {
   EXPECT_TRUE(is_uniquely_represented<unsigned char>::value);
   EXPECT_TRUE(is_uniquely_represented<int>::value);
   EXPECT_FALSE(is_uniquely_represented<bool>::value);
-  EXPECT_FALSE(is_uniquely_represented<int*>::value);
+  EXPECT_TRUE(is_uniquely_represented<int*>::value);
+}
+
+TEST(IsUniquelyRepresentedTest, NonTriviallyCopyableInFlatHashMap) {
+  absl::flat_hash_map<NonTriviallyCopyableUniquelyRepresented, int> m;
+  m[NonTriviallyCopyableUniquelyRepresented{1}] = 10;
+  m.emplace(NonTriviallyCopyableUniquelyRepresented{2}, 20);
+  EXPECT_EQ(m.find(NonTriviallyCopyableUniquelyRepresented{1})->second, 10);
+  EXPECT_EQ(m[NonTriviallyCopyableUniquelyRepresented{2}], 20);
 }
 
 struct IntAndString {
@@ -1239,23 +1291,30 @@ TEST(PrecombineLengthMix, ShortStringCollision) {
 #if defined(__wasm__)
   GTEST_SKIP() << "Fails flakily on wasm due to no ASLR and 32-bit size_t.";
 #endif
-  std::string s1 = "00";
-  std::string s2 = "000";
+#if defined(__ANDROID__) && defined(__arm__)
+  GTEST_SKIP() << "Fails on 32-bit Android due to layout changes.";
+#endif
   constexpr char kMinChar = 0;
-  constexpr char kMaxChar = 32;
-  for (s1[0] = kMinChar; s1[0] < kMaxChar; ++s1[0]) {
-    for (s1[1] = kMinChar; s1[1] < kMaxChar; ++s1[1]) {
-      for (s2[0] = kMinChar; s2[0] < kMaxChar; ++s2[0]) {
-        for (s2[1] = kMinChar; s2[1] < kMaxChar; ++s2[1]) {
-          for (s2[2] = kMinChar; s2[2] < kMaxChar; ++s2[2]) {
-            ASSERT_NE(absl::HashOf(s1), absl::HashOf(s2))
-                << "s1[0]: " << static_cast<int>(s1[0])
-                << "; s1[1]: " << static_cast<int>(s1[1])
-                << "; s2[0]: " << static_cast<int>(s2[0])
-                << "; s2[1]: " << static_cast<int>(s2[1])
-                << "; s2[2]: " << static_cast<int>(s2[2]);
-          }
-        }
+  constexpr char kMaxChar = sizeof(size_t) * 4;
+  // We use standard map to avoid the second dependency on the same hash.
+  std::map<size_t, std::string> hashes;
+  {
+    std::string s1 = "00";
+    for (s1[0] = kMinChar; s1[0] < kMaxChar; ++s1[0]) {
+      for (s1[1] = kMinChar; s1[1] < kMaxChar; ++s1[1]) {
+        auto [it, inserted] = hashes.insert({absl::HashOf(s1), s1});
+        ASSERT_TRUE(inserted) << "Collision found for " << absl::CEscape(s1)
+                              << " and " << absl::CEscape(it->second);
+      }
+    }
+  }
+  std::string s2 = "000";
+  for (s2[0] = kMinChar; s2[0] < kMaxChar; ++s2[0]) {
+    for (s2[1] = kMinChar; s2[1] < kMaxChar; ++s2[1]) {
+      for (s2[2] = kMinChar; s2[2] < kMaxChar; ++s2[2]) {
+        auto [it, inserted] = hashes.insert({absl::HashOf(s2), s2});
+        ASSERT_TRUE(inserted) << "Collision found for " << absl::CEscape(s2)
+                              << " and " << absl::CEscape(it->second);
       }
     }
   }
@@ -1277,10 +1336,18 @@ TEST(SwisstableCollisions, DoubleRange) {
 TEST(SwisstableCollisions, LowEntropyStrings) {
   constexpr char kMinChar = 0;
   constexpr char kMaxChar = 64;
+  // Scale the probe limit inversely with Group::kWidth so the test asserts a
+  // consistent bound on the number of probed slots across architectures.
+  constexpr size_t kMaxProbes =
+      64 * 16 / absl::container_internal::Group::kWidth;
   // These sizes cover the different hashing cases.
   for (size_t size : {8u, 16u, 32u, 64u, 128u}) {
     for (size_t b = 0; b < size - 1; ++b) {
-      absl::flat_hash_set<std::string> set;
+      // Pre-reserve table capacity so the test measures hash distribution
+      // quality under standard load factors, avoiding probe length spikes
+      // caused by near-maximum load factors right before incremental resizing.
+      absl::flat_hash_set<std::string> set(
+          size_t{kMaxChar - kMinChar} * size_t{kMaxChar - kMinChar});
       std::string s(size, '\0');
       for (char c1 = kMinChar; c1 < kMaxChar; ++c1) {
         for (char c2 = kMinChar; c2 < kMaxChar; ++c2) {
@@ -1288,7 +1355,7 @@ TEST(SwisstableCollisions, LowEntropyStrings) {
           s[b + 1] = c2;
           set.insert(s);
           ASSERT_LT(HashtableDebugAccess<decltype(set)>::GetNumProbes(set, s),
-                    64)
+                    kMaxProbes)
               << "size: " << size << "; bit: " << b;
         }
       }
@@ -1301,14 +1368,181 @@ TEST(SwisstableCollisions, LowEntropyStrings) {
 TEST(SwisstableCollisions, LowEntropyInts) {
   constexpr int kSizeTBits = sizeof(size_t) * 8;
   for (int bit = 0; bit < kSizeTBits; ++bit) {
-    absl::flat_hash_set<size_t> set;
-    for (size_t i = 0; i < 128 * 1024; ++i) {
+    // Pre-reserve table capacity so the test measures hash distribution
+    // quality under standard load factors, avoiding probe length spikes
+    // caused by near-maximum load factors right before incremental resizing.
+    const size_t kNumElements = 128 * 1024;
+    absl::flat_hash_set<size_t> set(kNumElements);
+    for (size_t i = 0; i < kNumElements; ++i) {
       size_t v = absl::rotl(i, bit);
       set.insert(v);
       ASSERT_LT(HashtableDebugAccess<decltype(set)>::GetNumProbes(set, v), 48)
           << bit << " " << i;
     }
   }
+}
+
+struct NameView {
+  absl::string_view first;
+  absl::string_view last;
+
+  friend bool operator==(const NameView& lhs, const NameView& rhs) {
+    return lhs.first == rhs.first && lhs.last == rhs.last;
+  }
+
+  template <typename H>
+  friend H AbslHashValue(H h, const NameView& name) {
+    return H::combine(std::move(h), name.first, name.last);
+  }
+};
+
+struct Name {
+  std::string first;
+  std::string last;
+
+  friend bool operator==(const Name& lhs, const Name& rhs) {
+    return lhs.first == rhs.first && lhs.last == rhs.last;
+  }
+
+  operator NameView() const { return NameView{first, last}; }  // NOLINT
+
+  template <typename H>
+  friend H AbslHashValue(H h, const Name& name) {
+    return H::combine(std::move(h), name.first, name.last);
+  }
+
+  using absl_container_hash = absl::TransparentHash<NameView, Name>;
+};
+
+template <typename NameHash>
+class TransparentHashTest : public testing::Test {};
+
+using NameHashTypes =
+    testing::Types<absl::TransparentHash<Name, NameView>,
+                   absl::TransparentHash<Name, Name, NameView>,
+                   absl::TransparentHash<Name, NameView, Name>,
+                   absl::TransparentHash<Name, NameView, Name, NameView>,
+                   absl::TransparentHash<Name, NameView, Name, NameView, Name,
+                                         NameView, Name>>;
+TYPED_TEST_SUITE(TransparentHashTest, NameHashTypes);
+
+TYPED_TEST(TransparentHashTest, BasicUsage) {
+  using NameHash = TypeParam;
+  static_assert(std::is_same_v<typename NameHash::is_transparent, void>);
+
+  EXPECT_FALSE((std::is_convertible_v<NameHash, absl::Hash<Name>>));
+  EXPECT_FALSE((std::is_convertible_v<NameHash, absl::Hash<NameView>>));
+
+  EXPECT_EQ(NameHash{}(Name{"John", "Doe"}),
+            NameHash{}(NameView{"John", "Doe"}));
+
+  EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly(std::make_tuple(
+      Name{"John", "Doe"}, NameView{"John", "Doe"}, Name{"Jack", "Doe"},
+      NameView{"Jack", "Doe"}, Name{"John", "Smith"}, NameView{"John", "Smith"},
+      Name{"Jack", "Smith"}, NameView{"Jack", "Smith"})));
+
+  absl::flat_hash_set<Name, NameHash, std::equal_to<>> set;
+  set.insert(Name{"John", "Doe"});
+  EXPECT_TRUE(set.contains(NameView{"John", "Doe"}));
+  EXPECT_TRUE(set.contains(Name{"John", "Doe"}));
+
+  std::unordered_set<Name, NameHash, std::equal_to<>> std_set;
+  std_set.insert(Name{"John", "Doe"});
+  EXPECT_TRUE(std_set.find(Name{"John", "Doe"}) != std_set.end());
+}
+
+TEST(HashTest, TransparentHashDefaultLookUp) {
+  absl::flat_hash_set<Name> set;
+  set.insert(Name{"John", "Doe"});
+  EXPECT_TRUE(set.contains(NameView{"John", "Doe"}));
+  EXPECT_TRUE(set.contains(Name{"John", "Doe"}));
+}
+
+struct MyString {
+  std::string s;
+
+  MyString() = default;
+  explicit MyString(absl::string_view s) : s(s) {}
+  explicit MyString(const char* s) : s(s) {}
+
+  template <typename H>
+  friend H AbslHashValue(H h, const MyString& s) {
+    return H::combine(std::move(h), s.s);
+  }
+
+  friend bool operator==(const MyString& lhs, const MyString& rhs) {
+    return lhs.s == rhs.s;
+  }
+  friend bool operator==(const MyString& lhs, absl::string_view rhs) {
+    return lhs.s == rhs;
+  }
+  friend bool operator==(absl::string_view lhs, const MyString& rhs) {
+    return lhs == rhs.s;
+  }
+};
+
+TEST(HashTest, TransparentHashDefaultLookUpAllowsImplicitCasting) {
+  EXPECT_EQ(
+      absl::Hash<absl::string_view>()("a"),
+      absl::TransparentHash<absl::string_view>()("a")
+  );
+  absl::flat_hash_set<std::string, absl::TransparentHash<absl::string_view>>
+      set;
+  set.insert("a");
+  EXPECT_TRUE(set.contains("a"));
+}
+
+TEST(HashTest, TransparentHashDefaultLookUpAllowsImplicitCastingMultiArg) {
+  using TestHash =
+      absl::TransparentHash<absl::string_view, MyString>;
+  EXPECT_EQ(absl::Hash<absl::string_view>()("a"), TestHash()("a"));
+  absl::flat_hash_set<MyString, TestHash, std::equal_to<>> set;
+  set.emplace("a");
+  EXPECT_TRUE(set.contains("a"));
+}
+
+struct Unhashable {};
+
+template <typename Hasher>
+class TransparentPoisonedHashTest : public testing::Test {};
+
+using TransparentPoisonedHashTypes =
+    testing::Types<absl::TransparentHash<Unhashable>,
+                   absl::TransparentHash<Unhashable, Unhashable>,
+                   absl::TransparentHash<int, Unhashable>,
+                   absl::TransparentHash<int, Unhashable, int>,
+                   absl::TransparentHash<int, Unhashable, int, Unhashable>>;
+TYPED_TEST_SUITE(TransparentPoisonedHashTest, TransparentPoisonedHashTypes);
+
+TYPED_TEST(TransparentPoisonedHashTest, PoisonHash) {
+  using Hasher = TypeParam;
+  EXPECT_FALSE(std::is_default_constructible_v<Hasher>);
+  EXPECT_FALSE(std::is_copy_constructible_v<Hasher>);
+  EXPECT_FALSE(std::is_move_constructible_v<Hasher>);
+  EXPECT_FALSE(std::is_copy_assignable_v<Hasher>);
+  EXPECT_FALSE(std::is_move_assignable_v<Hasher>);
+#if !defined(__GNUC__) || defined(__clang__)
+  // TODO(b/144368551): As of GCC 8.4 this does not compile.
+  EXPECT_FALSE(IsAggregateInitializable<Hasher>::value);
+#endif
+}
+
+struct RecursiveHashableType {
+  template <typename H>
+  friend H AbslHashValue(H h, const RecursiveHashableType& v) {
+    return H::combine(std::move(h), v.children);
+  }
+  friend bool operator==(const RecursiveHashableType& a,
+                         const RecursiveHashableType& b) {
+    return a.children == b.children;
+  }
+  absl::flat_hash_set<RecursiveHashableType> children;
+};
+
+TEST(HashTest, IncompleteRecursiveTypeInFlatHashSet) {
+  RecursiveHashableType root;
+  root.children.emplace();
+  EXPECT_EQ(absl::HashOf(root), absl::HashOf(root));
 }
 
 }  // namespace

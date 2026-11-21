@@ -25,9 +25,7 @@ std::size_t Emitter::size() const { return m_stream.pos(); }
 // state checking
 bool Emitter::good() const { return m_pState->good(); }
 
-const std::string Emitter::GetLastError() const {
-  return m_pState->GetLastError();
-}
+std::string Emitter::GetLastError() const { return m_pState->GetLastError(); }
 
 // global setters
 bool Emitter::SetOutputCharset(EMITTER_MANIP value) {
@@ -142,6 +140,11 @@ Emitter& Emitter::SetLocalValue(EMITTER_MANIP value) {
 
 Emitter& Emitter::SetLocalIndent(const _Indent& indent) {
   m_pState->SetIndent(indent.value, FmtScope::Local);
+  return *this;
+}
+
+Emitter& Emitter::SetLocalWrap(const _Wrap& wrap) {
+  m_pState->SetWrap(wrap.value, FmtScope::Local);
   return *this;
 }
 
@@ -276,8 +279,6 @@ void Emitter::EmitNewline() {
   m_pState->SetNonContent();
 }
 
-bool Emitter::CanEmitNewline() const { return true; }
-
 // Put the stream in a state so we can simply write the next node
 // E.g., if we're in a sequence, write the "- "
 void Emitter::PrepareNode(EmitterNodeType::value child) {
@@ -308,8 +309,10 @@ void Emitter::PrepareTopNode(EmitterNodeType::value child) {
   if (child == EmitterNodeType::NoType)
     return;
 
-  if (m_pState->CurGroupChildCount() > 0 && m_stream.col() > 0)
+  if (m_pState->CurGroupChildCount() > 0 && m_stream.col() > 0
+    && !m_pState->HasBegunContent()) {
     EmitBeginDoc();
+  }
 
   switch (child) {
     case EmitterNodeType::NoType:
@@ -947,8 +950,12 @@ Emitter& Emitter::Write(const _Comment& comment) {
 
   PrepareNode(EmitterNodeType::NoType);
 
-  if (m_stream.col() > 0)
+  if (m_stream.col() == 0 &&
+      m_pState->CurGroupNodeType() == EmitterNodeType::BlockMap) {
+    m_stream << IndentTo(m_pState->CurIndent());
+  } else if (m_stream.col() > 0) {
     m_stream << Indentation(m_pState->GetPreCommentIndent());
+  }
   Utils::WriteComment(m_stream, comment.content.data(), comment.content.size(),
                       m_pState->GetPostCommentIndent());
 
@@ -976,8 +983,33 @@ Emitter& Emitter::Write(const Binary& binary) {
   if (!good())
     return *this;
 
+  const StringFormat::value strFormat =
+      Utils::ComputeBinaryFormat(binary, m_pState->GetStringFormat(),
+                                 m_pState->CurGroupFlowType());
+
+  if (strFormat == StringFormat::Literal)
+    m_pState->SetMapKeyFormat(YAML::LongKey, FmtScope::Local);
+
   PrepareNode(EmitterNodeType::Scalar);
-  Utils::WriteBinary(m_stream, binary);
+
+  switch (strFormat) {
+    case StringFormat::SingleQuoted:
+      Utils::WriteSingleQuotedBinary(m_stream, binary);
+      break;
+    // For a long period of time, this function outputed the DoubleQuoted form
+    // regardless of the options. In order not to change the default behavior,
+    // when strFormat is Plain, it is still treated as DoubleQuoted.
+    case StringFormat::Plain:
+    case StringFormat::DoubleQuoted:
+      Utils::WriteBinary(m_stream, binary);
+      break;
+    case StringFormat::Literal:
+      Utils::WriteLiteralBinary(m_stream, binary,
+                                m_pState->CurIndent() + m_pState->GetIndent(),
+                                m_pState->GetWrap());
+      break;
+  }
+
   StartedScalar();
 
   return *this;

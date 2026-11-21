@@ -39,7 +39,7 @@ class null_state_saver {
   using flags_type = std::ios_base::fmtflags;
 
   null_state_saver(T&, flags_type) {}
-  ~null_state_saver() {}
+  ~null_state_saver() = default;
 };
 
 // ostream_state_saver is a RAII object to save and restore the common
@@ -95,8 +95,8 @@ ostream_state_saver<std::basic_ostream<CharT, Traits>> make_ostream_state_saver(
 }
 
 template <typename T>
-typename std::enable_if_t<!std::is_base_of<std::ios_base, T>::value,
-                           null_state_saver<T>>
+typename std::enable_if_t<!std::is_base_of_v<std::ios_base, T>,
+                          null_state_saver<T>>
 make_ostream_state_saver(T& is,  // NOLINT(runtime/references)
                          std::ios_base::fmtflags flags = std::ios_base::dec) {
   using result_type = null_state_saver<T>;
@@ -159,8 +159,8 @@ istream_state_saver<std::basic_istream<CharT, Traits>> make_istream_state_saver(
 }
 
 template <typename T>
-typename std::enable_if_t<!std::is_base_of<std::ios_base, T>::value,
-                           null_state_saver<T>>
+typename std::enable_if_t<!std::is_base_of_v<std::ios_base, T>,
+                          null_state_saver<T>>
 make_istream_state_saver(T& is,  // NOLINT(runtime/references)
                          std::ios_base::fmtflags flags = std::ios_base::dec) {
   using result_type = null_state_saver<T>;
@@ -177,6 +177,55 @@ template <typename T>
 struct stream_format_type
     : public std::conditional<(sizeof(T) == sizeof(char)), int, T> {};
 
+// Extracts an integral value of type `IntType` from `is`, storing it in `out`
+// on success and returning `true`. On failure, sets `std::ios_base::failbit`
+// (if not already failed) and returns `false` without modifying `out`.
+//
+// Rejects leading '-' for unsigned `IntType` (preventing standard `num_get`
+// modular wraparound) and validates range bounds for 1-byte types widened to
+// `int` via `stream_format_type`.
+template <typename IntType, typename CharT, typename Traits>
+inline bool read_integral(
+    std::basic_istream<CharT, Traits>& is,  // NOLINT(runtime/references)
+    IntType& out) {                         // NOLINT(runtime/references)
+  static_assert(std::numeric_limits<IntType>::is_integer);
+  using stream_type = typename stream_format_type<IntType>::type;
+  if constexpr (!std::numeric_limits<IntType>::is_signed) {
+    {
+      typename std::basic_istream<CharT, Traits>::sentry ok(is);
+      if (!ok) {
+        return false;
+      }
+    }
+    const typename Traits::int_type ch = is.peek();
+    if (is.fail()) {
+      return false;
+    }
+    if (!Traits::eq_int_type(ch, Traits::eof()) &&
+        Traits::eq(Traits::to_char_type(ch), is.widen('-'))) {
+      is.setstate(std::ios_base::failbit);
+      return false;
+    }
+  }
+  stream_type val = 0;
+  is >> val;
+  if (is.fail()) {
+    return false;
+  }
+  if constexpr (!std::is_same_v<stream_type, IntType>) {
+    constexpr stream_type kMin =
+        static_cast<stream_type>((std::numeric_limits<IntType>::min)());
+    constexpr stream_type kMax =
+        static_cast<stream_type>((std::numeric_limits<IntType>::max)());
+    if (val < kMin || val > kMax) {
+      is.setstate(std::ios_base::failbit);
+      return false;
+    }
+  }
+  out = static_cast<IntType>(val);
+  return true;
+}
+
 // stream_u128_helper allows us to write out either absl::uint128 or
 // __uint128_t types in the same way, which enables their use as internal
 // state of PRNG engines.
@@ -186,15 +235,17 @@ struct stream_u128_helper;
 template <>
 struct stream_u128_helper<absl::uint128> {
   template <typename IStream>
-  inline absl::uint128 read(IStream& in) {
+  absl::uint128 read(IStream& in) {
     uint64_t h = 0;
     uint64_t l = 0;
-    in >> h >> l;
+    if (!read_integral(in, h) || !read_integral(in, l)) {
+      return absl::uint128{0};
+    }
     return absl::MakeUint128(h, l);
   }
 
   template <typename OStream>
-  inline void write(absl::uint128 val, OStream& out) {
+  void write(absl::uint128 val, OStream& out) {
     uint64_t h = absl::Uint128High64(val);
     uint64_t l = absl::Uint128Low64(val);
     out << h << out.fill() << l;
@@ -205,15 +256,17 @@ struct stream_u128_helper<absl::uint128> {
 template <>
 struct stream_u128_helper<__uint128_t> {
   template <typename IStream>
-  inline __uint128_t read(IStream& in) {
+  __uint128_t read(IStream& in) {
     uint64_t h = 0;
     uint64_t l = 0;
-    in >> h >> l;
+    if (!read_integral(in, h) || !read_integral(in, l)) {
+      return 0;
+    }
     return (static_cast<__uint128_t>(h) << 64) | l;
   }
 
   template <typename OStream>
-  inline void write(__uint128_t val, OStream& out) {
+  void write(__uint128_t val, OStream& out) {
     uint64_t h = static_cast<uint64_t>(val >> 64u);
     uint64_t l = static_cast<uint64_t>(val);
     out << h << out.fill() << l;
@@ -223,8 +276,11 @@ struct stream_u128_helper<__uint128_t> {
 
 template <typename FloatType, typename IStream>
 inline FloatType read_floating_point(IStream& is) {
-  static_assert(std::is_floating_point<FloatType>::value, "");
-  FloatType dest;
+  static_assert(std::is_floating_point_v<FloatType>);
+  if (is.fail()) {
+    return FloatType{0};
+  }
+  FloatType dest = 0;
   is >> dest;
   // Parsing a double value may report a subnormal value as an error
   // despite being able to represent it.
@@ -233,7 +289,7 @@ inline FloatType read_floating_point(IStream& is) {
   // ERANGE error, as the parsed value may be smaller than DOUBLE_MIN
   // and rounded up.
   // See: https://stackoverflow.com/q/42005462
-  if (is.fail() &&
+  if (is.fail() && !is.bad() &&
       (std::fabs(dest) == (std::numeric_limits<FloatType>::min)() ||
        std::fpclassify(dest) == FP_SUBNORMAL)) {
     is.clear(is.rdstate() & (~std::ios_base::failbit));

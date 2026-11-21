@@ -33,6 +33,9 @@
 
 #include "gtest/gtest.h"
 
+#include <iterator>
+#include <limits>
+
 // Verifies that the command line flag variables can be accessed in
 // code once "gtest.h" has been #included.
 // Do not move it after other gtest #includes.
@@ -65,6 +68,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_set>
 #include <utility>
@@ -87,6 +91,20 @@ void operator<<(ConvertibleGlobalType&, int);
 static_assert(sizeof(decltype(std::declval<ConvertibleGlobalType&>()
                               << 1)(*)()) > 0,
               "error in operator<< overload resolution");
+
+namespace {
+
+template <bool MutableResult, bool ConstResult>
+struct ConvertibleToBool {
+  explicit operator bool() { return MutableResult; }
+  explicit operator bool() const { return ConstResult; }
+};
+
+struct Bitfield {
+  bool bit : 1;
+};
+
+}  // namespace
 
 namespace testing {
 namespace internal {
@@ -198,7 +216,7 @@ class UnitTestRecordPropertyTestHelper : public Test {
   UnitTestRecordPropertyTestHelper() = default;
 
   // Forwards to UnitTest::RecordProperty() to bypass access controls.
-  void UnitTestRecordProperty(const char* key, const std::string& value) {
+  void UnitTestRecordProperty(std::string_view key, std::string_view value) {
     unit_test_.RecordProperty(key, value);
   }
 
@@ -442,11 +460,11 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
   void SetUp() override {
     saved_tz_.reset();
 
-    GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv: deprecated */)
+    GTEST_DISABLE_DEPRECATED_PUSH_(/* getenv: deprecated */)
     if (const char* tz = getenv("TZ")) {
       saved_tz_ = std::make_unique<std::string>(tz);
     }
-    GTEST_DISABLE_MSC_DEPRECATED_POP_()
+    GTEST_DISABLE_DEPRECATED_POP_()
 
     // Set the local time zone for FormatEpochTimeInMillisAsIso8601 to be
     // a fixed time zone for reproducibility purposes.
@@ -468,9 +486,11 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     const std::string env_var =
         std::string("TZ=") + (time_zone ? time_zone : "");
     _putenv(env_var.c_str());
-    GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996 /* deprecated function */)
+#if defined(GTEST_OS_WINDOWS)
+    _tzset();
+#else
     tzset();
-    GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 #else
 #if defined(GTEST_OS_LINUX_ANDROID) && __ANDROID_API__ < 21
     // Work around KitKat bug in tzset by setting "UTC" before setting "UTC+00".
@@ -517,11 +537,6 @@ TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsEpochStart) {
 }
 
 #endif  // __EMSCRIPTEN__
-
-#ifdef __BORLANDC__
-// Silences warnings: "Condition is always true", "Unreachable code"
-#pragma option push -w-ccc -w-rch
-#endif
 
 // Tests that the LHS of EXPECT_EQ or ASSERT_EQ can be used as a null literal
 // when the RHS is a pointer type.
@@ -579,9 +594,7 @@ TEST(NullLiteralTest, ImplicitConversion) {
 
 #ifdef __clang__
 #pragma clang diagnostic push
-#if __has_warning("-Wzero-as-null-pointer-constant")
 #pragma clang diagnostic error "-Wzero-as-null-pointer-constant"
-#endif
 #endif
 
 TEST(NullLiteralTest, NoConversionNoWarning) {
@@ -593,11 +606,6 @@ TEST(NullLiteralTest, NoConversionNoWarning) {
 
 #ifdef __clang__
 #pragma clang diagnostic pop
-#endif
-
-#ifdef __BORLANDC__
-// Restores warnings after previous "#pragma option push" suppressed them.
-#pragma option pop
 #endif
 
 //
@@ -1259,11 +1267,6 @@ TEST_F(ExpectFatalFailureTest, CatchesFatalFailureOnAllThreads) {
                                       "Expected fatal failure.");
 }
 
-#ifdef __BORLANDC__
-// Silences warnings: "Condition is always true"
-#pragma option push -w-ccc
-#endif
-
 // Tests that EXPECT_FATAL_FAILURE() can be used in a non-void
 // function even when the statement in it contains ASSERT_*.
 
@@ -1287,11 +1290,6 @@ void DoesNotAbortHelper(bool* aborted) {
   *aborted = false;
 }
 
-#ifdef __BORLANDC__
-// Restores warnings after previous "#pragma option push" suppressed them.
-#pragma option pop
-#endif
-
 TEST_F(ExpectFatalFailureTest, DoesNotAbort) {
   bool aborted = true;
   DoesNotAbortHelper(&aborted);
@@ -1306,15 +1304,12 @@ static int global_var = 0;
 #define GTEST_USE_UNPROTECTED_COMMA_ global_var++, global_var++
 
 TEST_F(ExpectFatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
-#ifndef __BORLANDC__
-  // ICE's in C++Builder.
   EXPECT_FATAL_FAILURE(
       {
         GTEST_USE_UNPROTECTED_COMMA_;
         AddFatalFailure();
       },
       "");
-#endif
 
   EXPECT_FATAL_FAILURE_ON_ALL_THREADS(
       {
@@ -1392,6 +1387,20 @@ TEST(TestPropertyTest, SetValue) {
   TestProperty property("key", "value_1");
   EXPECT_STREQ("key", property.key());
   property.SetValue("value_2");
+  EXPECT_STREQ("key", property.key());
+  EXPECT_STREQ("value_2", property.value());
+}
+
+TEST(TestPropertyTest, StringViewValue) {
+  std::string_view key = std::string_view("key_extra").substr(0, 3);
+  std::string_view value_1 = std::string_view("value_1_extra").substr(0, 7);
+  std::string_view value_2 = std::string_view("value_2_extra").substr(0, 7);
+
+  TestProperty property(key, value_1);
+  EXPECT_STREQ("key", property.key());
+  EXPECT_STREQ("value_1", property.value());
+
+  property.SetValue(value_2);
   EXPECT_STREQ("key", property.key());
   EXPECT_STREQ("value_2", property.value());
 }
@@ -1695,26 +1704,6 @@ static void SetEnv(const char* name, const char* value) {
 #ifdef GTEST_OS_WINDOWS_MOBILE
   // Environment variables are not supported on Windows CE.
   return;
-#elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
-  // C++Builder's putenv only stores a pointer to its parameter; we have to
-  // ensure that the string remains valid as long as it might be needed.
-  // We use an std::map to do so.
-  static std::map<std::string, std::string*> added_env;
-
-  // Because putenv stores a pointer to the string buffer, we can't delete the
-  // previous string (if present) until after it's replaced.
-  std::string* prev_env = NULL;
-  if (added_env.find(name) != added_env.end()) {
-    prev_env = added_env[name];
-  }
-  added_env[name] =
-      new std::string((Message() << name << "=" << value).GetString());
-
-  // The standard signature of putenv accepts a 'char*' argument. Other
-  // implementations, like C++Builder's, accept a 'const char*'.
-  // We cast away the 'const' since that would work for both variants.
-  putenv(const_cast<char*>(added_env[name]->c_str()));
-  delete prev_env;
 #elif defined(GTEST_OS_WINDOWS)  // If we are on Windows proper.
   _putenv((Message() << name << "=" << value).GetString().c_str());
 #else
@@ -2135,6 +2124,16 @@ TEST_F(UnitTestRecordPropertyTest,
       " 'file', and 'line' are reserved");
 }
 
+TEST_F(UnitTestRecordPropertyTest, AcceptsStringView) {
+  UnitTestRecordProperty(std::string_view("key_extra", 3),
+                         std::string_view("value_extra", 5));
+
+  ASSERT_EQ(1, unit_test_.ad_hoc_test_result().test_property_count());
+  EXPECT_STREQ("key", unit_test_.ad_hoc_test_result().GetTestProperty(0).key());
+  EXPECT_STREQ("value",
+               unit_test_.ad_hoc_test_result().GetTestProperty(0).value());
+}
+
 class UnitTestRecordPropertyTestEnvironment : public Environment {
  public:
   void TearDown() override {
@@ -2548,6 +2547,7 @@ TEST(StringAssertionTest, ASSERT_STRCASENE) {
   EXPECT_FATAL_FAILURE(ASSERT_STRCASENE("Hi", "hi"), "(ignoring case)");
 }
 
+#if GTEST_HAS_STD_WSTRING
 // Tests *_STREQ on wide strings.
 TEST(StringAssertionTest, STREQ_Wide) {
   // NULL strings.
@@ -2603,6 +2603,7 @@ TEST(StringAssertionTest, STRNE_Wide) {
   // The streaming variation.
   ASSERT_STRNE(L"abc\x8119", L"abc\x8120") << "This shouldn't happen";
 }
+#endif  // GTEST_HAS_STD_WSTRING
 
 // Tests for ::testing::IsSubstring().
 
@@ -2615,18 +2616,6 @@ TEST(IsSubstringTest, ReturnsCorrectResultForCString) {
 
   EXPECT_TRUE(IsSubstring("", "", static_cast<const char*>(nullptr), nullptr));
   EXPECT_TRUE(IsSubstring("", "", "needle", "two needles"));
-}
-
-// Tests that IsSubstring() returns the correct result when the input
-// argument type is const wchar_t*.
-TEST(IsSubstringTest, ReturnsCorrectResultForWideCString) {
-  EXPECT_FALSE(IsSubstring("", "", kNull, L"a"));
-  EXPECT_FALSE(IsSubstring("", "", L"b", kNull));
-  EXPECT_FALSE(IsSubstring("", "", L"needle", L"haystack"));
-
-  EXPECT_TRUE(
-      IsSubstring("", "", static_cast<const wchar_t*>(nullptr), nullptr));
-  EXPECT_TRUE(IsSubstring("", "", L"needle", L"two needles"));
 }
 
 // Tests that IsSubstring() generates the correct message when the input
@@ -2649,6 +2638,18 @@ TEST(IsSubstringTest, ReturnsCorrectResultsForStdString) {
 }
 
 #if GTEST_HAS_STD_WSTRING
+// Tests that IsSubstring() returns the correct result when the input
+// argument type is const wchar_t*.
+TEST(IsSubstringTest, ReturnsCorrectResultForWideCString) {
+  EXPECT_FALSE(IsSubstring("", "", kNull, L"a"));
+  EXPECT_FALSE(IsSubstring("", "", L"b", kNull));
+  EXPECT_FALSE(IsSubstring("", "", L"needle", L"haystack"));
+
+  EXPECT_TRUE(
+      IsSubstring("", "", static_cast<const wchar_t*>(nullptr), nullptr));
+  EXPECT_TRUE(IsSubstring("", "", L"needle", L"two needles"));
+}
+
 // Tests that IsSubstring returns the correct result when the input
 // argument type is ::std::wstring.
 TEST(IsSubstringTest, ReturnsCorrectResultForStdWstring) {
@@ -2680,25 +2681,6 @@ TEST(IsNotSubstringTest, ReturnsCorrectResultForCString) {
   EXPECT_FALSE(IsNotSubstring("", "", "needle", "two needles"));
 }
 
-// Tests that IsNotSubstring() returns the correct result when the input
-// argument type is const wchar_t*.
-TEST(IsNotSubstringTest, ReturnsCorrectResultForWideCString) {
-  EXPECT_TRUE(IsNotSubstring("", "", L"needle", L"haystack"));
-  EXPECT_FALSE(IsNotSubstring("", "", L"needle", L"two needles"));
-}
-
-// Tests that IsNotSubstring() generates the correct message when the input
-// argument type is const wchar_t*.
-TEST(IsNotSubstringTest, GeneratesCorrectMessageForWideCString) {
-  EXPECT_STREQ(
-      "Value of: needle_expr\n"
-      "  Actual: L\"needle\"\n"
-      "Expected: not a substring of haystack_expr\n"
-      "Which is: L\"two needles\"",
-      IsNotSubstring("needle_expr", "haystack_expr", L"needle", L"two needles")
-          .failure_message());
-}
-
 // Tests that IsNotSubstring returns the correct result when the input
 // argument type is ::std::string.
 TEST(IsNotSubstringTest, ReturnsCorrectResultsForStdString) {
@@ -2719,6 +2701,25 @@ TEST(IsNotSubstringTest, GeneratesCorrectMessageForStdString) {
 }
 
 #if GTEST_HAS_STD_WSTRING
+
+// Tests that IsNotSubstring() returns the correct result when the input
+// argument type is const wchar_t*.
+TEST(IsNotSubstringTest, ReturnsCorrectResultForWideCString) {
+  EXPECT_TRUE(IsNotSubstring("", "", L"needle", L"haystack"));
+  EXPECT_FALSE(IsNotSubstring("", "", L"needle", L"two needles"));
+}
+
+// Tests that IsNotSubstring() generates the correct message when the input
+// argument type is const wchar_t*.
+TEST(IsNotSubstringTest, GeneratesCorrectMessageForWideCString) {
+  EXPECT_STREQ(
+      "Value of: needle_expr\n"
+      "  Actual: L\"needle\"\n"
+      "Expected: not a substring of haystack_expr\n"
+      "Which is: L\"two needles\"",
+      IsNotSubstring("needle_expr", "haystack_expr", L"needle", L"two needles")
+          .failure_message());
+}
 
 // Tests that IsNotSubstring returns the correct result when the input
 // argument type is ::std::wstring.
@@ -3690,27 +3691,28 @@ TEST(AssertionTest, AppendUserMessage) {
   EXPECT_STREQ("foo\nbar", AppendUserMessage(foo, msg).c_str());
 }
 
-#ifdef __BORLANDC__
-// Silences warnings: "Condition is always true", "Unreachable code"
-#pragma option push -w-ccc -w-rch
-#endif
-
 // Tests ASSERT_TRUE.
 TEST(AssertionTest, ASSERT_TRUE) {
   ASSERT_TRUE(2 > 1);  // NOLINT
   EXPECT_FATAL_FAILURE(ASSERT_TRUE(2 < 1), "2 < 1");
+
+  ASSERT_TRUE((ConvertibleToBool<true, false>()));
+  ASSERT_TRUE((std::add_const_t<ConvertibleToBool<false, true>>()));
+
+  Bitfield bf = {true};
+  ASSERT_TRUE(bf.bit);                                             // &
+  ASSERT_TRUE(Bitfield{true}.bit);                                 // &&
+  ASSERT_TRUE(static_cast<const Bitfield&>(Bitfield{true}).bit);   // const&
+  ASSERT_TRUE(static_cast<const Bitfield&&>(Bitfield{true}).bit);  // const&&
 }
 
 // Tests ASSERT_TRUE(predicate) for predicates returning AssertionResult.
 TEST(AssertionTest, AssertTrueWithAssertionResult) {
   ASSERT_TRUE(ResultIsEven(2));
-#ifndef __BORLANDC__
-  // ICE's in C++Builder.
   EXPECT_FATAL_FAILURE(ASSERT_TRUE(ResultIsEven(3)),
                        "Value of: ResultIsEven(3)\n"
                        "  Actual: false (3 is odd)\n"
                        "Expected: true");
-#endif
   ASSERT_TRUE(ResultIsEvenNoExplanation(2));
   EXPECT_FATAL_FAILURE(ASSERT_TRUE(ResultIsEvenNoExplanation(3)),
                        "Value of: ResultIsEvenNoExplanation(3)\n"
@@ -3725,29 +3727,30 @@ TEST(AssertionTest, ASSERT_FALSE) {
                        "Value of: 2 > 1\n"
                        "  Actual: true\n"
                        "Expected: false");
+
+  ASSERT_FALSE((ConvertibleToBool<false, true>()));
+  ASSERT_FALSE((std::add_const_t<ConvertibleToBool<true, false>>()));
+
+  Bitfield bf = {false};
+  ASSERT_FALSE(bf.bit);                                              // &
+  ASSERT_FALSE(Bitfield{false}.bit);                                 // &&
+  ASSERT_FALSE(static_cast<const Bitfield&>(Bitfield{false}).bit);   // const&
+  ASSERT_FALSE(static_cast<const Bitfield&&>(Bitfield{false}).bit);  // const&&
 }
 
 // Tests ASSERT_FALSE(predicate) for predicates returning AssertionResult.
 TEST(AssertionTest, AssertFalseWithAssertionResult) {
   ASSERT_FALSE(ResultIsEven(3));
-#ifndef __BORLANDC__
-  // ICE's in C++Builder.
   EXPECT_FATAL_FAILURE(ASSERT_FALSE(ResultIsEven(2)),
                        "Value of: ResultIsEven(2)\n"
                        "  Actual: true (2 is even)\n"
                        "Expected: false");
-#endif
   ASSERT_FALSE(ResultIsEvenNoExplanation(3));
   EXPECT_FATAL_FAILURE(ASSERT_FALSE(ResultIsEvenNoExplanation(2)),
                        "Value of: ResultIsEvenNoExplanation(2)\n"
                        "  Actual: true\n"
                        "Expected: false");
 }
-
-#ifdef __BORLANDC__
-// Restores warnings after previous "#pragma option push" suppressed them
-#pragma option pop
-#endif
 
 // Tests using ASSERT_EQ on double values.  The purpose is to make
 // sure that the specialization we did for integer and anonymous enums
@@ -3839,9 +3842,6 @@ void ThrowNothing() {}
 TEST(AssertionTest, ASSERT_THROW) {
   ASSERT_THROW(ThrowAnInteger(), int);
 
-#ifndef __BORLANDC__
-
-  // ICE's in C++Builder 2007 and 2009.
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW(ThrowAnInteger(), bool),
       "Expected: ThrowAnInteger() throws an exception of type bool.\n"
@@ -3853,7 +3853,6 @@ TEST(AssertionTest, ASSERT_THROW) {
       "Actual: it throws " ERROR_DESC
       " "
       "with description \"A description\".");
-#endif
 
   EXPECT_FATAL_FAILURE(
       ASSERT_THROW(ThrowNothing(), bool),
@@ -3973,9 +3972,6 @@ TEST(AssertionTest, NamedEnum) {
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(kE1, kE2), "Which is: 1");
 }
 
-// Sun Studio and HP aCC2reject this code.
-#if !defined(__SUNPRO_CC) && !defined(__HP_aCC)
-
 // Tests using assertions with anonymous enums.
 enum {
   kCaseA = -1,
@@ -3991,7 +3987,7 @@ enum {
   // On Linux, kCaseB and kCaseA have the same value when truncated to
   // int size.  We want to test whether this will confuse the
   // assertions.
-  kCaseB = testing::internal::kMaxBiggestInt,
+  kCaseB = (std::numeric_limits<intmax_t>::max)(),
 
 #else
 
@@ -4025,17 +4021,11 @@ TEST(AssertionTest, AnonymousEnum) {
   ASSERT_GT(kCaseB, kCaseA);
   ASSERT_GE(kCaseA, kCaseA);
 
-#ifndef __BORLANDC__
-
-  // ICE's in C++Builder.
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseB), "  kCaseB\n    Which is: ");
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseC), "\n    Which is: 42");
-#endif
 
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseC), "\n    Which is: -1");
 }
-
-#endif  // !GTEST_OS_MAC && !defined(__SUNPRO_CC)
 
 #ifdef GTEST_OS_WINDOWS
 
@@ -4081,13 +4071,9 @@ TEST(HRESULTAssertionTest, EXPECT_HRESULT_FAILED) {
 TEST(HRESULTAssertionTest, ASSERT_HRESULT_FAILED) {
   ASSERT_HRESULT_FAILED(E_UNEXPECTED);
 
-#ifndef __BORLANDC__
-
-  // ICE's in C++Builder 2007 and 2009.
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_FAILED(OkHRESULTSuccess()),
                        "Expected: (OkHRESULTSuccess()) fails.\n"
                        "  Actual: 0x0");
-#endif
 
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_FAILED(FalseHRESULTSuccess()),
                        "Expected: (FalseHRESULTSuccess()) fails.\n"
@@ -4105,13 +4091,9 @@ TEST(HRESULTAssertionTest, Streaming) {
                               << "expected failure",
                           "expected failure");
 
-#ifndef __BORLANDC__
-
-  // ICE's in C++Builder 2007 and 2009.
   EXPECT_FATAL_FAILURE(ASSERT_HRESULT_SUCCEEDED(E_UNEXPECTED)
                            << "expected failure",
                        "expected failure");
-#endif
 
   EXPECT_NONFATAL_FAILURE(EXPECT_HRESULT_FAILED(S_OK) << "expected failure",
                           "expected failure");
@@ -4426,6 +4408,15 @@ TEST(ExpectTest, EXPECT_TRUE) {
                           "  Actual: false\n"
                           "Expected: true");
   EXPECT_NONFATAL_FAILURE(EXPECT_TRUE(2 > 3), "2 > 3");
+
+  EXPECT_TRUE((ConvertibleToBool<true, false>()));
+  EXPECT_TRUE((std::add_const_t<ConvertibleToBool<false, true>>()));
+
+  Bitfield bf = {true};
+  EXPECT_TRUE(bf.bit);                                             // &
+  EXPECT_TRUE(Bitfield{true}.bit);                                 // &&
+  EXPECT_TRUE(static_cast<const Bitfield&>(Bitfield{true}).bit);   // const&
+  EXPECT_TRUE(static_cast<const Bitfield&&>(Bitfield{true}).bit);  // const&&
 }
 
 // Tests EXPECT_TRUE(predicate) for predicates returning AssertionResult.
@@ -4455,6 +4446,15 @@ TEST(ExpectTest, EXPECT_FALSE) {
                           "  Actual: true\n"
                           "Expected: false");
   EXPECT_NONFATAL_FAILURE(EXPECT_FALSE(2 < 3), "2 < 3");
+
+  EXPECT_FALSE((ConvertibleToBool<false, true>()));
+  EXPECT_FALSE((std::add_const_t<ConvertibleToBool<true, false>>()));
+
+  Bitfield bf = {false};
+  EXPECT_FALSE(bf.bit);                                              // &
+  EXPECT_FALSE(Bitfield{false}.bit);                                 // &&
+  EXPECT_FALSE(static_cast<const Bitfield&>(Bitfield{false}).bit);   // const&
+  EXPECT_FALSE(static_cast<const Bitfield&&>(Bitfield{false}).bit);  // const&&
 }
 
 // Tests EXPECT_FALSE(predicate) for predicates returning AssertionResult.
@@ -4470,11 +4470,6 @@ TEST(ExpectTest, ExpectFalseWithAssertionResult) {
                           "  Actual: true\n"
                           "Expected: false");
 }
-
-#ifdef __BORLANDC__
-// Restores warnings after previous "#pragma option push" suppressed them
-#pragma option pop
-#endif
 
 // Tests EXPECT_EQ.
 TEST(ExpectTest, EXPECT_EQ) {
@@ -4988,13 +4983,10 @@ TEST(ComparisonAssertionTest, AcceptsUnprintableArgs) {
 
   // Code tested by EXPECT_FATAL_FAILURE cannot reference local
   // variables, so we have to write UnprintableChar('x') instead of x.
-#ifndef __BORLANDC__
-  // ICE's in C++Builder.
   EXPECT_FATAL_FAILURE(ASSERT_NE(UnprintableChar('x'), UnprintableChar('x')),
                        "1-byte object <78>");
   EXPECT_FATAL_FAILURE(ASSERT_LE(UnprintableChar('y'), UnprintableChar('x')),
                        "1-byte object <78>");
-#endif
   EXPECT_FATAL_FAILURE(ASSERT_LE(UnprintableChar('y'), UnprintableChar('x')),
                        "1-byte object <79>");
   EXPECT_FATAL_FAILURE(ASSERT_GE(UnprintableChar('x'), UnprintableChar('y')),
@@ -5803,9 +5795,8 @@ class ParseFlagsTest : public Test {
   // to specify the array sizes.
 
 #define GTEST_TEST_PARSING_FLAGS_(argv1, argv2, expected, should_print_help) \
-  TestParsingFlags(sizeof(argv1) / sizeof(*argv1) - 1, argv1,                \
-                   sizeof(argv2) / sizeof(*argv2) - 1, argv2, expected,      \
-                   should_print_help)
+  TestParsingFlags(std::size(argv1) - 1, argv1, std::size(argv2) - 1, argv2, \
+                   expected, should_print_help)
 };
 
 // Tests parsing an empty command line.
@@ -6488,11 +6479,6 @@ TEST(StreamingAssertionsTest, Unconditional) {
   EXPECT_FATAL_FAILURE(FAIL() << "expected failure", "expected failure");
 }
 
-#ifdef __BORLANDC__
-// Silences warnings: "Condition is always true", "Unreachable code"
-#pragma option push -w-ccc -w-rch
-#endif
-
 TEST(StreamingAssertionsTest, Truth) {
   EXPECT_TRUE(true) << "unexpected failure";
   ASSERT_TRUE(true) << "unexpected failure";
@@ -6510,11 +6496,6 @@ TEST(StreamingAssertionsTest, Truth2) {
   EXPECT_FATAL_FAILURE(ASSERT_FALSE(true) << "expected failure",
                        "expected failure");
 }
-
-#ifdef __BORLANDC__
-// Restores warnings after previous "#pragma option push" suppressed them
-#pragma option pop
-#endif
 
 TEST(StreamingAssertionsTest, IntegerEquals) {
   EXPECT_EQ(1, 1) << "unexpected failure";
@@ -7439,10 +7420,8 @@ TEST(CopyArrayTest, WorksForDegeneratedArrays) {
 TEST(CopyArrayTest, WorksForOneDimensionalArrays) {
   const char a[3] = "hi";
   int b[3];
-#ifndef __BORLANDC__  // C++Builder cannot compile some array size deductions.
   CopyArray(a, &b);
   EXPECT_TRUE(ArrayEq(a, b));
-#endif
 
   int c[3];
   CopyArray(a, 3, c);
@@ -7452,10 +7431,8 @@ TEST(CopyArrayTest, WorksForOneDimensionalArrays) {
 TEST(CopyArrayTest, WorksForTwoDimensionalArrays) {
   const int a[2][3] = {{0, 1, 2}, {3, 4, 5}};
   int b[2][3];
-#ifndef __BORLANDC__  // C++Builder cannot compile some array size deductions.
   CopyArray(a, &b);
   EXPECT_TRUE(ArrayEq(a, b));
-#endif
 
   int c[2][3];
   CopyArray(a, 2, c);

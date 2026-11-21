@@ -1,6 +1,6 @@
 // Formatting library for C++ - tests of the OS-specific functionality
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -295,6 +295,16 @@ TEST(ostream_test, buffer_size) {
   EXPECT_READ(in, "foo");
 }
 
+TEST(ostream_test, zero_buffer_size) {
+  auto test_file = uniq_file_name(__LINE__);
+  fmt::ostream out = fmt::output_file(test_file, fmt::buffer_size = 0);
+  out.print("{}{}", 'A', " byte late!");
+  file in(test_file, file::RDONLY);
+  EXPECT_READ(in, "A byte late");
+  out.close();
+  EXPECT_READ(in, "!");
+}
+
 TEST(ostream_test, truncate) {
   auto test_file = uniq_file_name(__LINE__);
   {
@@ -316,6 +326,23 @@ TEST(ostream_test, flush) {
   out.flush();
   auto in = fmt::file(test_file, file::RDONLY);
   EXPECT_READ(in, "x");
+}
+
+TEST(ostream_test, write_error_in_dtor) {
+  auto test_file = uniq_file_name(__LINE__);
+  EXPECT_WRITE(
+      stderr,
+      fmt::output_file(test_file, file::RDONLY | file::CREATE).print("x"),
+      system_error_message(EBADF, "cannot write to file") + "\n");
+}
+
+TEST(ostream_test, close_error) {
+  auto out =
+      fmt::output_file(uniq_file_name(__LINE__), file::RDONLY | file::CREATE);
+  out.print("x");
+  EXPECT_THROW(out.close(), std::system_error);
+  // Check that the destructor doesn't try to write the data again.
+  EXPECT_WRITE(stderr, { auto moved = std::move(out); }, "");
 }
 
 TEST(file_test, default_ctor) {

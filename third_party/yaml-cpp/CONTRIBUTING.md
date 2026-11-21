@@ -21,6 +21,25 @@ Please verify the tests pass by configuring CMake with `-D YAML_CPP_BUILD_TESTS=
 
 If you are adding functionality, add tests accordingly. Note that the "spec tests" are reserved for examples directly from the YAML spec, so if you have new examples, put them in other test files.
 
+# Whitespace
+
+Maintained text files must not contain trailing spaces or tabs. Each line
+must end with an LF character, and non-empty files must have exactly one final
+LF. The vendored GoogleTest sources are excluded from this check.
+
+You may run `python3 util/check-whitespace.py` to check whitespace before
+submitting a pull request.
+
 # Pull request process
 
 Every pull request undergoes a code review. Unfortunately, github's code review process isn't great, but we'll manage. During the code review, if you make changes, add new commits to the pull request for each change. Once the code review is complete, rebase against the master branch and squash into a single commit.
+
+# AI Usage
+
+The following rules are in service of producing correct, maintainable code while not inundating the maintainers.
+
+1. You (the author of the PR) are responsible for the PR, regardless of the tools you use to create it. Make sure you understand it thoroughly and agree with its contents before you submit a PR.
+2. Corollary: AI is not a co-author, AI is a tool. If you wouldn't list Emacs as a co-author, don't list Claude either. (Maybe it will be someday, but not yet.)
+3. Do not use AI to generate documentation. It's fine for code, but it's [painful](https://samkriss.substack.com/p/if-you-let-ai-do-your-writing-i-will) to read AI text.
+4. Corollary: Write your own PR and commit messages; do NOT use AI to generate them. These descriptions are key to understand the point of a change, and AIs are very bad at them. They litter the message with garbage like "4931/4931 tests pass" and rarely explain the purpose well. (Maybe it will someday, but not yet.) It's OK for the entire code change to be AI-generated (pending you stand behind it, per the other rules), but NOT the commit message.
+5. No "low effort" AI PRs. Don't just paste an issue into Claude and ask it to fix it; don't just ask it for a vulnerability report. That's fine as a starting point, but if that's *all* you do, then you haven't provided any value; you've just added work for the maintainers, who could have easily pasted the issue into Claude themselves.

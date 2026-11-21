@@ -14,9 +14,12 @@
 
 #include "absl/random/log_uniform_int_distribution.h"
 
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <random>
 #include <sstream>
 #include <string>
@@ -24,6 +27,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/base/macros.h"
 #include "absl/log/log.h"
 #include "absl/random/internal/chi_square.h"
 #include "absl/random/internal/distribution_test_util.h"
@@ -109,6 +113,26 @@ TYPED_TEST(LogUniformIntDistributionTypeTest, SerializeTest) {
       if (sample < sample_min) sample_min = sample;
     }
     LOG(INFO) << "Range: " << sample_min << ", " << sample_max;
+  }
+}
+
+// operator>> must reject input that violates the param_type preconditions
+// (max >= min and base > 1) by setting failbit and leaving the distribution
+// unchanged, rather than constructing an out-of-contract param_type.
+TYPED_TEST(LogUniformIntDistributionTypeTest, DeserializeRejectsInvalidParams) {
+  for (const char* input : {
+           "0 100 1",  // base == 1
+           "0 100 0",  // base == 0
+           "100 0 2",  // max < min
+       }) {
+    absl::log_uniform_int_distribution<TypeParam> dist(3, 6, 17);
+    const auto before = dist.param();
+
+    std::istringstream is(input);
+    is >> dist;
+
+    EXPECT_TRUE(is.fail()) << input;
+    EXPECT_EQ(dist.param(), before) << input;
   }
 }
 
@@ -272,6 +296,125 @@ TEST(LogUniformIntDistributionTest, StabilityTest) {
                   [&] { return dist(urbg); });
     EXPECT_THAT(output, ElementsAre(8, 4, 0, 0, 0, 69));
   }
+}
+
+MATCHER(FailsLeavingUnchanged,
+        "fails stream extraction and leaves target and stream flags "
+        "unchanged") {
+  return arg.failed && arg.flags_preserved && arg.value == arg.initial;
+}
+
+MATCHER_P(ParsesEqualTo, expected,
+          "succeeds, updates target, and preserves stream flags") {
+  return !arg.failed && arg.flags_preserved && arg.value == expected;
+}
+
+TEST(LogUniformIntDistributionTest, StreamRejectsInvalidParameters) {
+  using absl::random_internal::ParseFromStream;
+  const absl::log_uniform_int_distribution<int8_t> kI8Initial(3, 6, 17);
+  const absl::log_uniform_int_distribution<uint8_t> kU8Initial(3, 6, 17);
+
+  EXPECT_THAT(
+      ParseFromStream(kI8Initial, "-128 127 2"),
+      ParsesEqualTo(absl::log_uniform_int_distribution<int8_t>(-128, 127, 2)));
+  EXPECT_THAT(
+      ParseFromStream(kU8Initial, "0 255 2"),
+      ParsesEqualTo(absl::log_uniform_int_distribution<uint8_t>(0, 255, 2)));
+
+  EXPECT_THAT(ParseFromStream(kI8Initial, "-254 10 2"),
+              FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kI8Initial, "-129 10 2"),
+              FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kI8Initial, "0 128 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kI8Initial, "0 10 128"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kI8Initial, "0 10 258"), FailsLeavingUnchanged());
+
+  EXPECT_THAT(ParseFromStream(kU8Initial, "0 256 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU8Initial, "0 300 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU8Initial, "0 10 256"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU8Initial, "0 10 258"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kU8Initial, "-5 10 2"), FailsLeavingUnchanged());
+}
+
+template <typename IntType>
+class LogUniformIntDistributionUnsignedTypeTest : public ::testing::Test {};
+
+using UnsignedIntTypes =
+    ::testing::Types<uint8_t, uint16_t, uint32_t, uint64_t>;
+TYPED_TEST_SUITE(LogUniformIntDistributionUnsignedTypeTest, UnsignedIntTypes);
+
+TYPED_TEST(LogUniformIntDistributionUnsignedTypeTest,
+           StreamDeserializationValidation) {
+  using absl::random_internal::ParseFromStream;
+  using Dist = absl::log_uniform_int_distribution<TypeParam>;
+  const Dist kInitial(3, 6, 17);
+
+  EXPECT_THAT(ParseFromStream(kInitial, "0 10 2"),
+              ParsesEqualTo(Dist(0, 10, 2)));
+  EXPECT_THAT(ParseFromStream(kInitial, "  0  10  2"),
+              ParsesEqualTo(Dist(0, 10, 2)));
+  EXPECT_THAT(ParseFromStream(kInitial, "+0 +10 +2"),
+              ParsesEqualTo(Dist(0, 10, 2)));
+  EXPECT_THAT(ParseFromStream(kInitial, "  +5  +20  +3"),
+              ParsesEqualTo(Dist(5, 20, 3)));
+  EXPECT_THAT(ParseFromStream(kInitial, L"  0 10 2"),
+              ParsesEqualTo(Dist(0, 10, 2)));
+
+  EXPECT_THAT(ParseFromStream(kInitial, "0 100 1"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 100 0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "100 0 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-5 10 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-5 -1 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 -5 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 -1 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 10 -2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-0 10 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 -0 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "  -5 10 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "\t\n-5 10 2"),
+              FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0   -5 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 10   -2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, L"-5 10 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, L"  0 -5 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, L"0 10 -2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, ""), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "   "), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 10"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 10   "), FailsLeavingUnchanged());
+}
+
+template <typename IntType>
+class LogUniformIntDistributionSignedTypeTest : public ::testing::Test {};
+
+using SignedIntTypes = ::testing::Types<int8_t, int16_t, int32_t, int64_t>;
+TYPED_TEST_SUITE(LogUniformIntDistributionSignedTypeTest, SignedIntTypes);
+
+TYPED_TEST(LogUniformIntDistributionSignedTypeTest,
+           StreamDeserializationValidation) {
+  using absl::random_internal::ParseFromStream;
+  using Dist = absl::log_uniform_int_distribution<TypeParam>;
+  const Dist kInitial(3, 6, 17);
+
+  EXPECT_THAT(ParseFromStream(kInitial, "-10 -2 2"),
+              ParsesEqualTo(Dist(-10, -2, 2)));
+  EXPECT_THAT(ParseFromStream(kInitial, "  -10  -2  2"),
+              ParsesEqualTo(Dist(-10, -2, 2)));
+  EXPECT_THAT(ParseFromStream(kInitial, "-10 10 3"),
+              ParsesEqualTo(Dist(-10, 10, 3)));
+  EXPECT_THAT(ParseFromStream(kInitial, L"-10 -2 2"),
+              ParsesEqualTo(Dist(-10, -2, 2)));
+
+  EXPECT_THAT(ParseFromStream(kInitial, "0 100 1"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 100 0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "100 0 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-2 -10 2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-10 -2 -2"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-10 -2 1"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, ""), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0 10"), FailsLeavingUnchanged());
 }
 
 }  // namespace

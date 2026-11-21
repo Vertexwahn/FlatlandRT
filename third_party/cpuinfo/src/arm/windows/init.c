@@ -216,6 +216,7 @@ static void set_cpuinfo_isa_fields(void) {
 
 	cpuinfo_isa.sve = IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE) != 0;
 	cpuinfo_isa.sve2 = IsProcessorFeaturePresent(PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE) != 0;
+	cpuinfo_isa.sve2p1 = IsProcessorFeaturePresent(PF_ARM_SVE2_1_INSTRUCTIONS_AVAILABLE) != 0;
 	cpuinfo_isa.i8mm = IsProcessorFeaturePresent(PF_ARM_V82_I8MM_INSTRUCTIONS_AVAILABLE) != 0;
 	cpuinfo_isa.jscvt = IsProcessorFeaturePresent(PF_ARM_V83_JSCVT_INSTRUCTIONS_AVAILABLE) != 0;
 	cpuinfo_isa.fcma = IsProcessorFeaturePresent(PF_ARM_FMAC_INSTRUCTIONS_AVAILABLE) != 0;
@@ -235,6 +236,15 @@ static void set_cpuinfo_isa_fields(void) {
 	// - sme_bi32i32
 
 	cpuinfo_isa.bf16 = IsProcessorFeaturePresent(PF_ARM_V86_BF16_INSTRUCTIONS_AVAILABLE) != 0;
+#if defined(PF_ARM_V87_FP8_INSTRUCTIONS_AVAILABLE)
+	cpuinfo_isa.fp8 = IsProcessorFeaturePresent(PF_ARM_V87_FP8_INSTRUCTIONS_AVAILABLE) != 0;
+#endif
+#if defined(PF_ARM_V87_FP8_DOT4_INSTRUCTIONS_AVAILABLE)
+	cpuinfo_isa.f8dot = IsProcessorFeaturePresent(PF_ARM_V87_FP8_DOT4_INSTRUCTIONS_AVAILABLE) != 0;
+#endif
+#if defined(PF_ARM_V87_FP8_F32MM_INSTRUCTIONS_AVAILABLE)
+	cpuinfo_isa.f8mm = IsProcessorFeaturePresent(PF_ARM_V87_FP8_F32MM_INSTRUCTIONS_AVAILABLE) != 0;
+#endif
 
 	// TODO: This is not available in the Windows SDK yet , so conservatively go with the lowest value (128 bits)
 	// https://developer.arm.com/documentation/101427/0102/Register-descriptions/Scalable-vector-extensions--SVE--registers/ZCR-EL1--SVE-Control-Register--EL1

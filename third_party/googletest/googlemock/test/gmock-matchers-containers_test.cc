@@ -78,6 +78,52 @@ TEST(ContainsTest, WorksWithMoveOnly) {
 
 INSTANTIATE_GTEST_MATCHER_TEST_P(ElementsAreTest);
 
+// A range of decreasing, positive integers.
+class DecreasingIntRange {
+ public:
+  explicit DecreasingIntRange(int start) : v_(start) {}
+
+  struct Sentinel {};
+
+  class Iterator {
+   public:
+    using difference_type = std::ptrdiff_t;
+    using value_type = int;
+    using iterator_category = std::input_iterator_tag;
+    using pointer = void;
+    using reference = int;
+
+    explicit Iterator(int v) : v_(v) {}
+
+    int operator*() const { return v_; }
+
+    Iterator& operator++() {
+      --v_;
+      return *this;
+    }
+    Iterator operator++(int) {
+      auto tmp = *this;
+      ++*this;
+      return tmp;
+    }
+
+    bool operator==(const Iterator& other) const { return v_ == other.v_; }
+    bool operator!=(const Iterator& other) const { return v_ != other.v_; }
+
+    bool operator==(const Sentinel&) const { return v_ < 0; }
+    bool operator!=(const Sentinel&) const { return v_ >= 0; }
+
+   private:
+    int v_;
+  };
+
+  Iterator begin() const { return Iterator(v_); }
+  Sentinel end() const { return Sentinel{}; }
+
+ private:
+  int v_;
+};
+
 // Tests the variadic version of the ElementsAreMatcher
 TEST(ElementsAreTest, HugeMatcher) {
   vector<int> test_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
@@ -85,6 +131,13 @@ TEST(ElementsAreTest, HugeMatcher) {
   EXPECT_THAT(test_vector,
               ElementsAre(Eq(1), Eq(2), Lt(13), Eq(4), Eq(5), Eq(6), Eq(7),
                           Eq(8), Eq(9), Eq(10), Gt(1), Eq(12)));
+}
+
+// Tests ElementsAreMatcher with a range that uses a sentinel.
+TEST(ElementsAreTest, HugeMatcherSentinel) {
+  DecreasingIntRange range(3);
+
+  EXPECT_THAT(range, ElementsAre(Eq(3), Eq(2), Eq(1), Eq(0)));
 }
 
 // Tests the variadic version of the UnorderedElementsAreMatcher
@@ -103,6 +156,13 @@ TEST(ElementsAreTest, HugeMatcherUnordered) {
   EXPECT_THAT(test_vector, UnorderedElementsAre(
                                Eq(2), Eq(1), Gt(7), Eq(5), Eq(4), Eq(6), Eq(7),
                                Eq(3), Eq(9), Eq(12), Eq(11), Ne(122)));
+}
+
+// Tests the UnorderedElementsAreMatcher with a range that uses a sentinel.
+TEST(ElementsAreTest, HugeMatcherUnorderedSentinel) {
+  DecreasingIntRange range(3);
+
+  EXPECT_THAT(range, UnorderedElementsAre(Eq(2), Eq(1), Eq(3), Eq(0)));
 }
 
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the value
@@ -2228,6 +2288,13 @@ TEST_F(UnorderedElementsAreTest, WorksWithUncopyable) {
               UnorderedElementsAre(Truly(ValueIsPositive), UncopyableIs(-3)));
 }
 
+TEST_F(UnorderedElementsAreTest, WorksWithNativeArrayPassedAsPointerAndSize) {
+  int array[] = {0, 1};
+  ::std::tuple<int*, size_t> array_as_tuple(array, 2);
+  EXPECT_THAT(array_as_tuple, UnorderedElementsAre(1, 0));
+  EXPECT_THAT(array_as_tuple, Not(UnorderedElementsAre(0)));
+}
+
 TEST_F(UnorderedElementsAreTest, SucceedsWhenExpected) {
   const int a[] = {1, 2, 3};
   std::vector<int> s(std::begin(a), std::end(a));
@@ -3437,6 +3504,78 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Contains(Contains(5)));
   EXPECT_THAT(a, Not(Contains(ElementsAre(3, 4, 5))));
   EXPECT_THAT(a, Contains(Not(Contains(5))));
+}
+
+// Tests ContainsSubsequence().
+
+TEST(ContainsSubsequenceTest, WorksForNativeArray) {
+  const int a[] = {1, 2, 3, 4, 5};
+  EXPECT_THAT(a, ContainsSubsequence(1, 3, 4));
+  EXPECT_THAT(a, Not(ContainsSubsequence(1, 3, 2)));
+}
+
+TEST(ContainsSubsequenceTest, AcceptsMatcher) {
+  const int a[] = {1, 2, 3, 4, 5};
+  EXPECT_THAT(a, ContainsSubsequence(Eq(1), Gt(3), Gt(4)));
+  EXPECT_THAT(a, Not(ContainsSubsequence(1, Gt(3), Lt(3))));
+}
+
+TEST(ContainsSubsequenceTest, WorksForTwoDimensionalNativeArray) {
+  int a[][3] = {{1, 2, 3}, {7, 8, 9}, {4, 5, 6}};
+  EXPECT_THAT(a, ContainsSubsequence(ElementsAre(1, 2, 3), Contains(4)));
+  EXPECT_THAT(a,
+              Not(ContainsSubsequence(Contains(1), Contains(8), Contains(9))));
+}
+
+TEST(ContainsSubsequenceTest, WorksForVector) {
+  const vector<int> a = {1, 2, 3, 4, 5};
+  EXPECT_THAT(a, ContainsSubsequence(1, 3, 4));
+  EXPECT_THAT(a, Not(ContainsSubsequence(1, 3, 2)));
+}
+
+TEST(ContainsSubsequenceTest, WorksForEmptySmallSizedSubsequences) {
+  const int a[] = {1, 2, 3, 4, 5};
+  EXPECT_THAT(a, ContainsSubsequence());
+  EXPECT_THAT(a, ContainsSubsequence(Gt(4)));
+  EXPECT_THAT(a, Not(ContainsSubsequence(Gt(6))));
+  EXPECT_THAT(a, ContainsSubsequence(Lt(2), Gt(3)));
+  EXPECT_THAT(a, Not(ContainsSubsequence(Lt(2), Lt(2))));
+}
+
+TEST(ContainsSubsequenceTest, DescribesItselfCorrectly) {
+  Matcher<const int (&)[5]> m = ContainsSubsequence(1, 3, 4);
+  EXPECT_EQ(
+      "contains in order a subsequence of elements that matches: is equal to "
+      "1, then is equal to 3, then is equal to 4",
+      Describe(m));
+  m = ContainsSubsequence(Eq(1), Gt(3), Gt(4));
+  EXPECT_EQ(
+      "contains in order a subsequence of elements that matches: is equal to "
+      "1, then is > 3, then is > 4",
+      Describe(m));
+
+  m = Not(ContainsSubsequence(1, 3, 4));
+  EXPECT_EQ(
+      "does not contain in order a subsequence of elements that matches is "
+      "equal to 1, then is equal to 3, then is equal to 4",
+      Describe(m));
+}
+
+TEST(ContainsSubsequenceTest, ExplainsMismatchCorrectlyForSingleMatcher) {
+  const int a[] = {1, 2, 3, 4, 5};
+  Matcher<const int (&)[5]> m = ContainsSubsequence(Eq(6));
+  EXPECT_EQ(Explain(m, a),
+            "could not find a match for matcher #0 (is equal to 6)");
+}
+
+TEST(ContainsSubsequenceTest, ExplainsMismatchCorrectlyForMultipleMatchers) {
+  const int a[] = {1, 2, 3, 4, 5};
+  Matcher<const int (&)[5]> m = ContainsSubsequence(Eq(2), Gt(4), Gt(4));
+  EXPECT_EQ(
+      Explain(m, a),
+      "found match for matcher #0 with element at position #1, found match for "
+      "matcher #1 with element at position #4, but could not find a match for "
+      "matcher #2 (is > 4) after the last match at position #4");
 }
 
 }  // namespace

@@ -1,12 +1,17 @@
-# Release 1.9.1
+# Release 1.9.2
 
 **What's Changed**
 * Revert allow_symlink = True by default for non-executables
 * Change from stamp to some other boolean flag 
 * Update Bazel versions in CI: drop Bazel 6, add Bazel 9 
+* Change Starlark flag default propagation from "universal" to "target"
 
 **Contributors**:
 @gzm0, @kotlaja, @susinmotion, @justinhorvitz
+
+# Release 1.9.1
+
+Skipped due to [CI failure](https://github.com/bazelbuild/bazel-skylib/actions/runs/25128976486)
 
 # Release 1.9.0
 

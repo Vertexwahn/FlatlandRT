@@ -31,19 +31,28 @@
 
 set -euox pipefail
 
-readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20260131"
+readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest@sha256:baa99e65a3cc837bab8e5246f1870d25c76d0adf2b1d598ee5a3ec77fd2e19bd"
 
 if [[ -z ${GTEST_ROOT:-} ]]; then
   GTEST_ROOT="$(realpath $(dirname ${0})/..)"
+  if [[ -n ${KOKORO_ROOT_DIR:-} ]] && [[ -n ${KOKORO_HOST_ROOT_DIR:-} ]]; then
+    GTEST_ROOT="${GTEST_ROOT/#${KOKORO_ROOT_DIR%/}/${KOKORO_HOST_ROOT_DIR%/}}"
+  fi
 fi
 
 # Use Bazel Vendor mode to reduce reliance on external dependencies.
 # See https://bazel.build/external/vendor and the Dockerfile for
 # an explaination of how this works.
 if [[ ${KOKORO_GFILE_DIR:-} ]] && [[ -f "${KOKORO_GFILE_DIR}/distdir/googletest_vendor.tar.gz" ]]; then
-  DOCKER_EXTRA_ARGS="--mount type=bind,source=${KOKORO_GFILE_DIR}/distdir,target=/distdir,readonly --env=BAZEL_VENDOR_ARCHIVE=/distdir/googletest_vendor.tar.gz ${DOCKER_EXTRA_ARGS:-}"
+  KOKORO_HOST_GFILE_DIR="${KOKORO_GFILE_DIR}"
+  if [[ -n ${KOKORO_ROOT_DIR:-} ]] && [[ -n ${KOKORO_HOST_ROOT_DIR:-} ]]; then
+    KOKORO_HOST_GFILE_DIR="${KOKORO_HOST_GFILE_DIR/#${KOKORO_ROOT_DIR%/}/${KOKORO_HOST_ROOT_DIR%/}}"
+  fi
+  DOCKER_EXTRA_ARGS="--mount type=bind,source=${KOKORO_HOST_GFILE_DIR}/distdir,target=/distdir,readonly --env=BAZEL_VENDOR_ARCHIVE=/distdir/googletest_vendor.tar.gz ${DOCKER_EXTRA_ARGS:-}"
   BAZEL_EXTRA_ARGS="--vendor_dir=/googletest_vendor ${BAZEL_EXTRA_ARGS:-}"
 fi
+
+BAZEL_EXTRA_ARGS="--jobs=8 ${BAZEL_EXTRA_ARGS:-}"
 
 if [[ -z ${STD:-} ]]; then
   STD="c++17 c++20 c++23"
@@ -67,7 +76,7 @@ for cmake_off_on in OFF ON; do
         -Dgmock_build_tests=ON \
         -Dcxx_no_exception=${cmake_off_on} \
         -Dcxx_no_rtti=${cmake_off_on} && \
-      make -j$(nproc) && \
+      make -j8 && \
       ctest -j$(nproc) --output-on-failure"
 done
 
@@ -89,7 +98,7 @@ for cmake_off_on in OFF ON; do
         -Dgmock_build_tests=ON \
         -Dcxx_no_exception=${cmake_off_on} \
         -Dcxx_no_rtti=${cmake_off_on} && \
-      make -j$(nproc) && \
+      make -j8 && \
       ctest -j$(nproc) --output-on-failure"
 done
 
@@ -98,9 +107,9 @@ time docker run \
   --volume="${GTEST_ROOT}:/src:ro" \
   --workdir="/src" \
   --rm \
-  --env="CC=/opt/gcc-9/bin/gcc" \
+  --env="CC=/opt/gcc-10/bin/gcc" \
   --env="BAZEL_CXXOPTS=-std=c++17" \
-  --env="BAZEL_LINKOPTS=-L/opt/gcc-9/lib64:-Wl,-rpath=/opt/gcc-9/lib64" \
+  --env="BAZEL_LINKOPTS=-L/opt/gcc-10/lib64:-Wl,-rpath=/opt/gcc-10/lib64" \
   --env="USE_BAZEL_VERSION=8.5.1" \
   ${DOCKER_EXTRA_ARGS:-} \
   ${LINUX_LATEST_CONTAINER} \
@@ -129,7 +138,7 @@ for std in ${STD}; do
       --rm \
       --env="CC=/usr/local/bin/gcc" \
       --env="BAZEL_CXXOPTS=-std=${std}" \
-      --env="USE_BAZEL_VERSION=9.0.0" \
+      --env="USE_BAZEL_VERSION=9.1.0" \
       ${DOCKER_EXTRA_ARGS:-} \
       ${LINUX_LATEST_CONTAINER} \
       /bin/bash --login -c "
@@ -158,7 +167,7 @@ for std in ${STD}; do
       --rm \
       --env="CC=/opt/llvm/bin/clang" \
       --env="BAZEL_CXXOPTS=-std=${std}" \
-      --env="USE_BAZEL_VERSION=9.0.0" \
+      --env="USE_BAZEL_VERSION=9.1.0" \
       ${DOCKER_EXTRA_ARGS:-} \
       ${LINUX_LATEST_CONTAINER} \
       /bin/bash --login -c "

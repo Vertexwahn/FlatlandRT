@@ -1,9 +1,18 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
+exports_files(["LICENSE"])
+
 yaml_cpp_defines = select({
     # On Windows, ensure static linking is used.
     "@platforms//os:windows": ["YAML_CPP_STATIC_DEFINE", "YAML_CPP_NO_CONTRIB"],
     "//conditions:default": [],
+})
+
+yaml_copts = select({
+    "@platforms//os:windows": [],
+    "//conditions:default": [
+        "-fexceptions",
+    ],
 })
 
 cc_library(
@@ -11,6 +20,7 @@ cc_library(
     visibility = ["//:__subpackages__"],
     strip_include_prefix = "src",
     hdrs = glob(["src/**/*.h"]),
+    copts = yaml_copts,
 )
 
 cc_library(
@@ -20,4 +30,5 @@ cc_library(
     hdrs = glob(["include/**/*.h"]),
     srcs = glob(["src/**/*.cpp", "src/**/*.h"]),
     defines = yaml_cpp_defines,
+    copts = yaml_copts,
 )

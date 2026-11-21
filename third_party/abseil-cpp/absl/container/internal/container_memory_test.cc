@@ -16,11 +16,14 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
+#include <functional>
+#include <map>
 #include <memory>
+#include <string>
 #include <tuple>
 #include <type_traits>
 #include <typeindex>
-#include <typeinfo>
 #include <utility>
 
 #include "gmock/gmock.h"
@@ -28,6 +31,8 @@
 #include "absl/base/config.h"
 #include "absl/base/no_destructor.h"
 #include "absl/container/internal/test_instance_tracker.h"
+#include "absl/functional/overload.h"
+#include "absl/hash/hash.h"
 #include "absl/meta/type_traits.h"
 #include "absl/strings/string_view.h"
 
@@ -171,7 +176,7 @@ DecomposeValueImpl(int, F&& f, Arg&& arg) {
 }
 
 template <class F, class Arg>
-const char* DecomposeValueImpl(char, F&& f, Arg&& arg) {
+const char* DecomposeValueImpl(char, F&&, Arg&&) {
   return "not decomposable";
 }
 
@@ -205,7 +210,7 @@ DecomposePairImpl(int, F&& f, Args&&... args) {
 }
 
 template <class F, class... Args>
-const char* DecomposePairImpl(char, F&& f, Args&&... args) {
+const char* DecomposePairImpl(char, F&&, Args&&...) {
   return "not decomposable";
 }
 
@@ -216,14 +221,21 @@ TryDecomposePair(F&& f, Args&&... args) {
 }
 
 TEST(DecomposePair, Decomposable) {
-  auto f = [](const int& x,  // NOLINT
-              std::piecewise_construct_t, std::tuple<int&&> k,
-              std::tuple<double>&& v) {
-    EXPECT_EQ(&x, &std::get<0>(k));
+  static constexpr auto f0 = [](const int& x,  // NOLINT
+                                int&& k, double&& v) {
+    EXPECT_EQ(&x, &k);
     EXPECT_EQ(42, x);
-    EXPECT_EQ(0.5, std::get<0>(v));
+    EXPECT_EQ(0.5, v);
     return 'A';
   };
+  static constexpr auto f = absl::Overload(
+      [](const int& x,  // NOLINT
+         std::piecewise_construct_t, std::tuple<int&&> k,
+         std::tuple<double>&& v) {
+        return f0(x, std::get<0>(std::move(k)), std::get<0>(std::move(v)));
+      },
+      f0);
+  EXPECT_EQ('A', TryDecomposePair(f, std::pair<int&&, double&&>(42, 0.5)));
   EXPECT_EQ('A', TryDecomposePair(f, 42, 0.5));
   EXPECT_EQ('A', TryDecomposePair(f, std::make_pair(42, 0.5)));
   EXPECT_EQ('A', TryDecomposePair(f, std::piecewise_construct,
@@ -270,9 +282,9 @@ TEST(MapSlotPolicy, TransferReturnsTrue) {
   {
     using slot_policy = map_slot_policy<int, float>;
     EXPECT_TRUE(
-        (std::is_same<decltype(slot_policy::transfer<std::allocator<char>>(
-                          nullptr, nullptr, nullptr)),
-                      std::true_type>::value));
+        (std::is_same_v<decltype(slot_policy::transfer<std::allocator<char>>(
+                            nullptr, nullptr, nullptr)),
+                        std::true_type>));
   }
   {
     struct NonRelocatable {
@@ -285,9 +297,9 @@ TEST(MapSlotPolicy, TransferReturnsTrue) {
     EXPECT_FALSE(absl::is_trivially_relocatable<NonRelocatable>::value);
     using slot_policy = map_slot_policy<int, NonRelocatable>;
     EXPECT_TRUE(
-        (std::is_same<decltype(slot_policy::transfer<std::allocator<char>>(
-                          nullptr, nullptr, nullptr)),
-                      std::false_type>::value));
+        (std::is_same_v<decltype(slot_policy::transfer<std::allocator<char>>(
+                            nullptr, nullptr, nullptr)),
+                        std::false_type>));
   }
 }
 
@@ -295,39 +307,117 @@ TEST(MapSlotPolicy, DestroyReturnsTrue) {
   {
     using slot_policy = map_slot_policy<int, float>;
     EXPECT_TRUE(
-        (std::is_same<decltype(slot_policy::destroy<std::allocator<char>>(
-                          nullptr, nullptr)),
-                      std::true_type>::value));
+        (std::is_same_v<decltype(slot_policy::destroy<std::allocator<char>>(
+                            nullptr, nullptr)),
+                        std::true_type>));
   }
   {
-    EXPECT_FALSE(std::is_trivially_destructible<std::unique_ptr<int>>::value);
+    EXPECT_FALSE(std::is_trivially_destructible_v<std::unique_ptr<int>>);
     using slot_policy = map_slot_policy<int, std::unique_ptr<int>>;
     EXPECT_TRUE(
-        (std::is_same<decltype(slot_policy::destroy<std::allocator<char>>(
-                          nullptr, nullptr)),
-                      std::false_type>::value));
+        (std::is_same_v<decltype(slot_policy::destroy<std::allocator<char>>(
+                            nullptr, nullptr)),
+                        std::false_type>));
   }
 }
 
 TEST(ApplyTest, TypeErasedApplyToSlotFn) {
   size_t x = 7;
+  size_t* x_ptr = &x;
   size_t seed = 100;
   auto fn = [](size_t v) { return v * 2; };
-  EXPECT_EQ(
-      (TypeErasedApplyToSlotFn<decltype(fn), size_t, /*kIsDefault=*/false>(
-          &fn, &x, seed)),
-      (HashElement<decltype(fn), /*kIsDefault=*/false>(fn, seed)(x)));
+  const size_t expected =
+      HashElement<decltype(fn), /*kIsAbsl=*/false, /*kSeedShift=*/0>(fn,
+                                                                     seed)(x);
+  EXPECT_EQ((TypeErasedApplyToSlotFn<decltype(fn), size_t, /*kIsAbsl=*/false,
+                                     /*kSeedShift=*/0>(&fn, &x, seed)),
+            expected);
+  EXPECT_EQ((TypeErasedApplyToSlotFn<decltype(fn), size_t, /*kIsAbsl=*/false,
+                                     /*kSeedShift=*/0, /*kDerefSlot=*/true>(
+                &fn, &x_ptr, seed)),
+            expected);
 }
 
-TEST(ApplyTest, TypeErasedDerefAndApplyToSlotFn) {
-  size_t x = 7;
+template <bool kDerefSlot>
+void ExpectGetTypeErasedApplyToSlotFnCanonicalizesTypes() {
+  enum class MyEnum : uint32_t { kOne = 1, kTwo = 2 };
+  HashSlotFn fn = GetTypeErasedApplyToSlotFn<absl::Hash<int32_t>, int32_t,
+                                             /*kIsAbsl=*/true, 0, kDerefSlot>();
+  EXPECT_EQ(
+      fn, (GetTypeErasedApplyToSlotFn<absl::Hash<uint32_t>, uint32_t,
+                                      /*kIsAbsl=*/true, 0, kDerefSlot>()));
+  EXPECT_EQ(
+      fn, (GetTypeErasedApplyToSlotFn<absl::Hash<MyEnum>, MyEnum,
+                                      /*kIsAbsl=*/true, 0, kDerefSlot>()));
+  EXPECT_EQ(fn,
+            (GetTypeErasedApplyToSlotFn<absl::TransparentHash<int32_t, int64_t>,
+                                        int32_t, /*kIsAbsl=*/true, 0,
+                                        kDerefSlot>()));
+  EXPECT_NE(
+      fn, (GetTypeErasedApplyToSlotFn<absl::Hash<int32_t>, int32_t,
+                                      /*kIsAbsl=*/false, 0, kDerefSlot>()));
+  EXPECT_NE(
+      fn, (GetTypeErasedApplyToSlotFn<absl::Hash<int32_t>, int32_t,
+                                      /*kIsAbsl=*/true, 0, !kDerefSlot>()));
+  MyEnum c = MyEnum::kTwo;
+  MyEnum* c_ptr = &c;
   size_t seed = 100;
-  auto fn = [](size_t v) { return v * 2; };
-  size_t* x_ptr = &x;
-  EXPECT_EQ((TypeErasedDerefAndApplyToSlotFn<decltype(fn), size_t,
-                                             /*kIsDefault=*/false>(&fn, &x_ptr,
-                                                                   seed)),
-            (HashElement<decltype(fn), /*kIsDefault=*/false>(fn, seed)(x)));
+  void* slot = kDerefSlot ? static_cast<void*>(&c_ptr) : static_cast<void*>(&c);
+  EXPECT_EQ(fn(nullptr, slot, seed),
+            (HashElement<absl::Hash<MyEnum>, /*kIsAbsl=*/true, 0>(
+                absl::Hash<MyEnum>{}, seed)(c)));
+}
+
+TEST(ApplyTest, GetTypeErasedApplyToSlotFnCanonicalizesTypes) {
+  ExpectGetTypeErasedApplyToSlotFnCanonicalizesTypes<false>();
+  ExpectGetTypeErasedApplyToSlotFnCanonicalizesTypes<true>();
+}
+
+TEST(HashKeyTest, NonCanonicalUsesHasher) {
+  auto hash = [](int32_t v) { return static_cast<size_t>(v + 42); };
+  using HashKeyCustom = HashKey<decltype(hash), int32_t, /*kIsAbsl=*/false,
+                                /*kSeedShift=*/0, /*kUseCanonical=*/false>;
+  int32_t a = 1;
+  size_t seed = 100;
+  HashKeyCustom hk{hash, a};
+  EXPECT_EQ(hk.data().ToPtr<HashKeyCustom>(), &hk);
+  EXPECT_EQ(HashKeyCustom::get_hash_fn()(hk.data(), seed),
+            (HashElement<decltype(hash), /*kIsAbsl=*/false, 0>(hash, seed)(a)));
+}
+
+TEST(EqSlotFnTest, SlotEqFnWorks) {
+  auto test_eq = [](auto eq) {
+    std::string key = "a";
+    SlotEqFn<std::string, /*kDerefSlot=*/false> eq_slot;
+    static_assert(std::is_empty_v<decltype(eq_slot)>);
+    static_assert(
+        std::is_same_v<typename decltype(eq_slot)::SlotKeyType,
+                       const std::string>);
+    std::string slot_match = "a";
+    std::string slot_mismatch = "b";
+    EXPECT_TRUE(eq_slot(eq, &slot_match, key));
+    EXPECT_FALSE(eq_slot(eq, &slot_mismatch, key));
+
+    SlotEqFn<std::string, /*kDerefSlot=*/true> eq_deref;
+    static_assert(std::is_empty_v<decltype(eq_deref)>);
+    static_assert(
+        std::is_same_v<typename decltype(eq_deref)::SlotKeyType,
+                       const std::string>);
+    std::string* slot_match_ptr = &slot_match;
+    std::string* slot_mismatch_ptr = &slot_mismatch;
+    EXPECT_TRUE(eq_deref(eq, &slot_match_ptr, key));
+    EXPECT_FALSE(eq_deref(eq, &slot_mismatch_ptr, key));
+  };
+
+  test_eq(std::equal_to<std::string>{});
+
+  struct StatefulEq {
+    int dummy = 0;
+    bool operator()(const std::string& lhs, const std::string& rhs) const {
+      return lhs == rhs;
+    }
+  };
+  test_eq(StatefulEq{1});
 }
 
 TEST(HashElement, DefaultHash) {
@@ -339,7 +429,8 @@ TEST(HashElement, DefaultHash) {
       return v * 2 + seed * 3;
     }
   } hash;
-  EXPECT_EQ((HashElement<HashWithSeed, /*kIsDefault=*/true>(hash, seed)(x)),
+  EXPECT_EQ((HashElement<HashWithSeed, /*kIsAbsl=*/true,
+                         /*kSeedShift=*/0>(hash, seed)(x)),
             hash.hash_with_seed(x, seed));
 }
 
@@ -348,9 +439,19 @@ TEST(HashElement, NonDefaultHash) {
   size_t seed = 100;
   auto fn = [](size_t v) { return v * 2; };
   EXPECT_EQ(
-      (HashElement<decltype(fn), /*kIsDefault=*/false>(
+      (HashElement<decltype(fn), /*kIsAbsl=*/false, /*kSeedShift=*/0>(
           fn, seed)(x)),
       fn(x) ^ seed);
+}
+
+TEST(HashElement, NonDefaultHashWithSeedShift) {
+  size_t x = 7;
+  size_t seed = 100;
+  auto fn = [](size_t v) { return v * 2; };
+  EXPECT_EQ(
+      (HashElement<decltype(fn), /*kIsAbsl=*/false, /*kSeedShift=*/1>(
+          fn, seed)(x)),
+      fn(x) ^ (seed >> 1));
 }
 
 }  // namespace

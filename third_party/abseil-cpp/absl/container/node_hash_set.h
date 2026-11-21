@@ -43,6 +43,7 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
+#include "absl/base/config.h"
 #include "absl/container/hash_container_defaults.h"
 #include "absl/container/internal/container_memory.h"
 #include "absl/container/internal/node_slot_policy.h"
@@ -161,11 +162,18 @@ class ABSL_ATTRIBUTE_OWNER node_hash_set
   //   // Move is guaranteed efficient
   //   absl::node_hash_set<std::string> set5(std::move(set4));
   //
+  //   // After the move, set4 is in a valid but unspecified state. The only
+  //   // operations guaranteed to be safe on a moved-from set are destruction,
+  //   // assignment, and clear(). Any other operation (e.g. size(), empty(),
+  //   // iteration) results in undefined behavior.
+  //
   // * Move assignment operator
   //
   //   // May be efficient if allocators are compatible
   //   absl::node_hash_set<std::string> set6;
   //   set6 = std::move(set5);
+  //
+  //   // Same moved-from guarantees apply to set5 after this operation.
   //
   // * Range constructor
   //
@@ -505,35 +513,6 @@ void swap(node_hash_set<T, H, E, A>& x,
 
 namespace container_internal {
 
-// c_for_each_fast(node_hash_set<>, Function)
-//
-// Container-based version of the <algorithm> `std::for_each()` function to
-// apply a function to a container's elements.
-// There is no guarantees on the order of the function calls.
-// Erasure and/or insertion of elements in the function is not allowed.
-template <typename T, typename H, typename E, typename A, typename Function>
-std::decay_t<Function> c_for_each_fast(const node_hash_set<T, H, E, A>& c,
-                                       Function&& f) {
-  container_internal::ForEach(f, &c);
-  return f;
-}
-template <typename T, typename H, typename E, typename A, typename Function>
-std::decay_t<Function> c_for_each_fast(node_hash_set<T, H, E, A>& c,
-                                       Function&& f) {
-  container_internal::ForEach(f, &c);
-  return f;
-}
-template <typename T, typename H, typename E, typename A, typename Function>
-std::decay_t<Function> c_for_each_fast(node_hash_set<T, H, E, A>&& c,
-                                       Function&& f) {
-  container_internal::ForEach(f, &c);
-  return f;
-}
-
-}  // namespace container_internal
-
-namespace container_internal {
-
 template <class T>
 struct NodeHashSetPolicy
     : absl::container_internal::node_slot_policy<T&, NodeHashSetPolicy<T>> {
@@ -544,26 +523,7 @@ struct NodeHashSetPolicy
   using DefaultHash = DefaultHashContainerHash<T>;
   using DefaultEq = DefaultHashContainerEq<T>;
   using DefaultAlloc = std::allocator<T>;
-
-  template <class Allocator, class... Args>
-  static T* new_element(Allocator* alloc, Args&&... args) {
-    using ValueAlloc =
-        typename std::allocator_traits<Allocator>::template rebind_alloc<T>;
-    ValueAlloc value_alloc(*alloc);
-    T* res = std::allocator_traits<ValueAlloc>::allocate(value_alloc, 1);
-    std::allocator_traits<ValueAlloc>::construct(value_alloc, res,
-                                                 std::forward<Args>(args)...);
-    return res;
-  }
-
-  template <class Allocator>
-  static void delete_element(Allocator* alloc, T* elem) {
-    using ValueAlloc =
-        typename std::allocator_traits<Allocator>::template rebind_alloc<T>;
-    ValueAlloc value_alloc(*alloc);
-    std::allocator_traits<ValueAlloc>::destroy(value_alloc, elem);
-    std::allocator_traits<ValueAlloc>::deallocate(value_alloc, elem, 1);
-  }
+  using SlotEq = SlotEqFn<T, /*kDerefSlot=*/true>;
 
   template <class F, class... Args>
   static decltype(absl::container_internal::DecomposeValue(
@@ -573,11 +533,10 @@ struct NodeHashSetPolicy
         std::forward<F>(f), std::forward<Args>(args)...);
   }
 
-  static size_t element_space_used(const T*) { return sizeof(T); }
-
-  template <class Hash, bool kIsDefault>
+  template <class Hash, bool kIsAbsl, size_t kSeedShift>
   static constexpr HashSlotFn get_hash_slot_fn() {
-    return &TypeErasedDerefAndApplyToSlotFn<Hash, T, kIsDefault>;
+    return GetTypeErasedApplyToSlotFn<Hash, T, kIsAbsl, kSeedShift,
+                                      /*kDerefSlot=*/true>();
   }
 };
 }  // namespace container_internal

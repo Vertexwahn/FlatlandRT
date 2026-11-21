@@ -76,6 +76,8 @@ int main(int argc, char** argv) {
 	printf("\tAMX_TILE: %s\n", cpuinfo_has_x86_amx_tile() ? "yes" : "no");
 	printf("\tAMX_INT8: %s\n", cpuinfo_has_x86_amx_int8() ? "yes" : "no");
 	printf("\tAMX_FP16: %s\n", cpuinfo_has_x86_amx_fp16() ? "yes" : "no");
+	printf("\tAMX_FP8: %s\n", cpuinfo_has_x86_amx_fp8() ? "yes" : "no");
+	printf("\tAMX_AVX512: %s\n", cpuinfo_has_x86_amx_avx512() ? "yes" : "no");
 	printf("\tAVXVNNI: %s\n", cpuinfo_has_x86_avxvnni() ? "yes" : "no");
 	printf("\tAVX_VNNI_INT8: %s\n", cpuinfo_has_x86_avx_vnni_int8() ? "yes" : "no");
 	printf("\tAVX_VNNI_INT16: %s\n", cpuinfo_has_x86_avx_vnni_int16() ? "yes" : "no");
@@ -169,13 +171,18 @@ int main(int argc, char** argv) {
 	printf("\tARM v8.2 Int8 matrix multiplication: %s\n", cpuinfo_has_arm_i8mm() ? "yes" : "no");
 	printf("\tARM v8.3 JS conversion: %s\n", cpuinfo_has_arm_jscvt() ? "yes" : "no");
 	printf("\tARM v8.3 complex: %s\n", cpuinfo_has_arm_fcma() ? "yes" : "no");
+	printf("\tARM v8.7 FP8: %s\n", cpuinfo_has_arm_fp8() ? "yes" : "no");
+	printf("\tARM v8.7 FP8 dot product: %s\n", cpuinfo_has_arm_neon_f8dot4() ? "yes" : "no");
+	printf("\tARM v8.7 FP8 matrix multiplication: %s\n", cpuinfo_has_arm_neon_f8mm() ? "yes" : "no");
 
 	printf("SIMD extensions:\n");
 	printf("\tARM SVE: %s\n", cpuinfo_has_arm_sve() ? "yes" : "no");
 	printf("\tARM SVE 2: %s\n", cpuinfo_has_arm_sve2() ? "yes" : "no");
+	printf("\tARM SVE 2.1: %s\n", cpuinfo_has_arm_sve2p1() ? "yes" : "no");
 	printf("\tARM SME: %s\n", cpuinfo_has_arm_sme() ? "yes" : "no");
 	printf("\tARM SME 2: %s\n", cpuinfo_has_arm_sme2() ? "yes" : "no");
 	printf("\tARM SME 2P1: %s\n", cpuinfo_has_arm_sme2p1() ? "yes" : "no");
+	printf("\tARM SME MOP4: %s\n", cpuinfo_has_arm_sme_mop4() ? "yes" : "no");
 	printf("\tARM SME I16I32: %s\n", cpuinfo_has_arm_sme_i16i32() ? "yes" : "no");
 	printf("\tARM SME BI32I32: %s\n", cpuinfo_has_arm_sme_bi32i32() ? "yes" : "no");
 	printf("\tARM SME B16B16: %s\n", cpuinfo_has_arm_sme_b16b16() ? "yes" : "no");

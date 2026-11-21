@@ -1,6 +1,6 @@
 // Formatting library for C++ - optional wchar_t and exotic character support
 //
-// Copyright (c) 2012 - present, Victor Zverovich
+// Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
 // All rights reserved.
 //
 // For the license information refer to format.h.
@@ -46,13 +46,14 @@ using format_string_char_t = typename format_string_char<S>::type;
 inline auto write_loc(basic_appender<wchar_t> out, loc_value value,
                       const format_specs& specs, locale_ref loc) -> bool {
 #if FMT_USE_LOCALE
-  auto& numpunct =
-      std::use_facet<std::numpunct<wchar_t>>(loc.get<std::locale>());
+  auto locale = loc.get<std::locale>();  // Workaround a gcc 14 bug (#4876).
+  auto& numpunct = std::use_facet<std::numpunct<wchar_t>>(locale);
   auto separator = std::wstring();
   auto grouping = numpunct.grouping();
   if (!grouping.empty()) separator = std::wstring(1, numpunct.thousands_sep());
   return value.visit(loc_writer<wchar_t>{out, specs, separator, grouping, {}});
 #endif
+  ignore_unused(out, value, specs, loc);
   return false;
 }
 
@@ -297,9 +298,27 @@ inline auto format_to_n(OutputIt out, size_t n, const S& fmt, T&&... args)
                       fmt::make_format_args<buffered_context<Char>>(args...));
 }
 
+template <typename... T>
+FMT_NODISCARD FMT_INLINE auto formatted_size(wformat_string<T...> fmt,
+                                             T&&... args) -> size_t {
+  auto buf = detail::counting_buffer<wchar_t>();
+  detail::vformat_to(buf, fmt.get(), fmt::make_wformat_args(args...));
+  return buf.count();
+}
+
+template <typename... T>
+FMT_NODISCARD FMT_INLINE auto formatted_size(locale_ref loc,
+                                             wformat_string<T...> fmt,
+                                             T&&... args) -> size_t {
+  auto buf = detail::counting_buffer<wchar_t>();
+  detail::vformat_to(buf, fmt.get(), fmt::make_wformat_args(args...), loc);
+  return buf.count();
+}
+
 template <typename S, typename... T,
           typename Char = detail::format_string_char_t<S>,
-          FMT_ENABLE_IF(detail::is_exotic_char<Char>::value)>
+          FMT_ENABLE_IF(detail::is_exotic_char<Char>::value &&
+                        !std::is_same<Char, wchar_t>::value)>
 inline auto formatted_size(const S& fmt, T&&... args) -> size_t {
   auto buf = detail::counting_buffer<Char>();
   detail::vformat_to(buf, detail::to_string_view(fmt),

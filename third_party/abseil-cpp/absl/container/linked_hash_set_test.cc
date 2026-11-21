@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
 #include <utility>
@@ -28,6 +30,7 @@
 #include "absl/container/internal/hash_generator_testing.h"
 #include "absl/container/internal/hash_policy_testing.h"
 #include "absl/container/internal/heterogeneous_lookup_testing.h"
+#include "absl/container/internal/test_allocator.h"
 #include "absl/container/internal/test_instance_tracker.h"
 #include "absl/container/internal/unordered_set_constructor_test.h"
 #include "absl/container/internal/unordered_set_lookup_test.h"
@@ -42,6 +45,7 @@ namespace {
 
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
+using ::testing::IsEmpty;
 using ::testing::Pointee;
 
 template <class T>
@@ -177,6 +181,10 @@ TEST(LinkedHashSetTest, CanInsertTransparent) {
   s.insert(absl::string_view("bar"));
   s.insert(absl::string_view("foo"));
   EXPECT_THAT(s, ElementsAre("foo", "bar"));
+
+  std::vector<absl::string_view> svs = {"baz", "qux", "baz"};
+  linked_hash_set<std::string> ranged(svs.begin(), svs.end());
+  EXPECT_THAT(ranged, ElementsAre("baz", "qux"));
 }
 
 // Tests that iteration from begin() to end() works
@@ -823,6 +831,177 @@ TEST(LinkedHashSet, ExtractInsert) {
   EXPECT_EQ(node.value(), 9);
   EXPECT_THAT(s, ElementsAre(7, 2, 17));
   EXPECT_FALSE(s.contains(9));
+
+  node.value() = 19;
+  auto it = s.insert(s.begin(), std::move(node));
+  EXPECT_EQ(it, s.find(19));
+  EXPECT_THAT(s, ElementsAre(7, 2, 17, 19));
+}
+
+TEST(LinkedHashSet, NonTransparentRangeConstructorConvertsElementsOnce) {
+  struct PolyHash {
+    size_t operator()(int x) const { return static_cast<size_t>(x) ^ 0x1234; }
+    size_t operator()(double x) const { return static_cast<size_t>(x); }
+  };
+  struct PolyEq {
+    bool operator()(int a, int b) const { return a == b; }
+    bool operator()(double a, double b) const { return a == b; }
+  };
+  std::vector<int> input = {1, 2, 1};
+  linked_hash_set<double, PolyHash, PolyEq> s(input.begin(), input.end());
+  EXPECT_THAT(s, ElementsAre(1.0, 2.0));
+  EXPECT_TRUE(s.contains(2.0));
+}
+
+// Verify that emplacing and extracting nodes results in the same stateful
+// allocator being used for splicing purposes, rather than another instance
+// (say, a default-constructed one), which could otherwise silently corrupt
+// memory.
+TEST(LinkedHashSet, ExtractAndEmplaceUseSameStatefulAllocator) {
+  using Alloc = absl::container_internal::CountingAllocator<int>;
+  int64_t bytes_used = 0;
+  Alloc alloc(&bytes_used);
+  linked_hash_set<int, linked_hash_set<int>::hasher, std::equal_to<>, Alloc>
+      set(alloc);
+
+  set.emplace(1);
+  EXPECT_GT(bytes_used, 0) << "emplace() failed to use the same allocator";
+
+  auto node = set.extract(set.begin());
+  EXPECT_EQ(node.get_allocator(), alloc)
+      << "extract(iter) failed to use the same allocator";
+
+  set.insert(std::move(node));
+  EXPECT_EQ(set.extract(1).get_allocator(), alloc)
+      << "extract(key) failed to use the same allocator";
+}
+
+// Move-assigning with an unequal, non-propagating allocator must move each
+// element into a node allocated with the destination's allocator and rebuild
+// the index over those nodes. Previously the index kept pointing at the
+// source's nodes, which the source then freed, so the first lookup read freed
+// memory (heap-use-after-free).
+TEST(LinkedHashSet, MoveAssignWithUnequalNonPropagatingAllocator) {
+  using Alloc = absl::container_internal::CountingAllocator<int>;
+  int64_t bytes_used_a = 0;
+  int64_t bytes_used_b = 0;
+  Alloc alloc_a(&bytes_used_a);
+  Alloc alloc_b(&bytes_used_b);
+  ASSERT_NE(alloc_a, alloc_b);
+  using Set = linked_hash_set<int, linked_hash_set<int>::hasher,
+                              std::equal_to<>, Alloc>;
+
+  {
+    Set a(alloc_a);
+    a.insert(11);
+    a.insert(22);
+    a.insert(33);
+    const int64_t bytes_used_a_before = bytes_used_a;
+    EXPECT_GT(bytes_used_a_before, 0);
+    EXPECT_EQ(bytes_used_b, 0);
+
+    // Move-assign into an empty set.
+    Set b(alloc_b);
+    b = std::move(a);
+    EXPECT_EQ(b.get_allocator(), alloc_b);
+    EXPECT_LT(bytes_used_a, bytes_used_a_before);
+    EXPECT_GT(bytes_used_b, 0);
+    EXPECT_THAT(b, ElementsAre(11, 22, 33));
+    auto found = b.find(22);
+    ASSERT_NE(found, b.end());
+    EXPECT_EQ(*found, 22);
+    EXPECT_EQ(b.erase(22), 1);
+    EXPECT_THAT(b, ElementsAre(11, 33));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(a, IsEmpty());
+
+    // Move-assign into a non-empty set: the old elements must be gone.
+    Set c(alloc_b);
+    c.insert(1);
+    c.insert(2);
+    a.clear();
+    a.insert(44);
+    a.insert(55);
+    c = std::move(a);
+    EXPECT_EQ(c.get_allocator(), alloc_b);
+    EXPECT_THAT(c, ElementsAre(44, 55));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(a, IsEmpty());
+  }
+  EXPECT_EQ(bytes_used_a, 0);
+  EXPECT_EQ(bytes_used_b, 0);
+}
+
+// Move-assigning with equal allocators must keep taking over the source's
+// nodes (and its index) without allocating.
+TEST(LinkedHashSet, MoveAssignWithEqualAllocatorTakesOverNodes) {
+  using Alloc = absl::container_internal::CountingAllocator<int>;
+  int64_t bytes_used = 0;
+  Alloc alloc(&bytes_used);
+  using Set = linked_hash_set<int, linked_hash_set<int>::hasher,
+                              std::equal_to<>, Alloc>;
+
+  {
+    // Note: some STL implementations (e.g. MSVC) allocate a sentinel node
+    // (and debug proxy) in std::list's default constructor.
+    Set a(alloc);
+    const int64_t empty_set_bytes = bytes_used;
+    a.insert(11);
+    a.insert(22);
+    Set b(alloc);
+    const int64_t bytes_used_before = bytes_used;
+    b = std::move(a);
+    EXPECT_EQ(bytes_used, bytes_used_before);
+    EXPECT_THAT(b, ElementsAre(11, 22));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(a, IsEmpty());
+
+    // Move-assign into a non-empty set: the old elements must be freed and the
+    // source's nodes taken over without new allocations.
+    Set c(alloc);
+    c.insert(1);
+    c.insert(2);
+    c.insert(3);
+    EXPECT_GT(bytes_used, bytes_used_before + empty_set_bytes);
+    c = std::move(b);
+    EXPECT_EQ(bytes_used, bytes_used_before + empty_set_bytes);
+    EXPECT_THAT(c, ElementsAre(11, 22));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(b, IsEmpty());
+  }
+  EXPECT_EQ(bytes_used, 0);
+}
+
+// Move-assigning with an allocator that propagates on move assignment must
+// propagate the allocator, even when the allocators are unequal.
+TEST(LinkedHashSet, MoveAssignWithPropagatingAllocatorPropagates) {
+  using Alloc =
+      absl::container_internal::MoveAssignPropagatingCountingAlloc<int>;
+  int64_t bytes_used_a = 0;
+  int64_t bytes_used_b = 0;
+  Alloc alloc_a(&bytes_used_a);
+  Alloc alloc_b(&bytes_used_b);
+  ASSERT_NE(alloc_a, alloc_b);
+  using Set = linked_hash_set<int, linked_hash_set<int>::hasher,
+                              std::equal_to<>, Alloc>;
+
+  {
+    Set a(alloc_a);
+    a.insert(11);
+    a.insert(22);
+    const int64_t bytes_used_a_before = bytes_used_a;
+    Set b(alloc_b);
+    const int64_t empty_set_bytes = bytes_used_b;
+    b = std::move(a);
+    EXPECT_EQ(b.get_allocator(), alloc_a);
+    EXPECT_EQ(bytes_used_a, bytes_used_a_before + empty_set_bytes);
+    EXPECT_EQ(bytes_used_b, 0);
+    EXPECT_THAT(b, ElementsAre(11, 22));
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_THAT(a, IsEmpty());
+  }
+  EXPECT_EQ(bytes_used_a, 0);
+  EXPECT_EQ(bytes_used_b, 0);
 }
 
 TEST(LinkedHashSet, Merge) {

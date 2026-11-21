@@ -71,7 +71,12 @@ int main()
 
 This library is available to anybody free of charge, under the terms of MIT License (see LICENSE.md).
 
-This work is based on the pugxml parser, which carried the following Public Domain dedication:
+To honor the license agreement, please include attribution into the user-facing product documentation and/or credits, for example using this or similar text:
+
+> Uses pugixml. Copyright (c) 2006-2026, Arseny Kapoulkine
+
+<details>
+<summary>This work is based on the pugxml parser, which carried the following Public Domain dedication</summary>
 
     // Pug XML Parser - Version 1.0002
     // --------------------------------------------------------
@@ -79,3 +84,8 @@ This work is based on the pugxml parser, which carried the following Public Doma
     // Released into the Public Domain. Use at your own risk.
     // See pugxml.xml for further information, history, etc.
     // Contributions by Neville Franks (readonly@getsoft.com).
+</details>
+
+## AI policy
+
+AI-generated issues or pull requests (including pull request descriptions), will be closed. Repeat submissions may result in a ban.

@@ -7,6 +7,19 @@
 #include "yaml-cpp/exceptions.h"  // IWYU pragma: keep
 
 namespace YAML {
+namespace {
+// IsWhitespaceToBeEaten
+// . We can eat whitespace if it's a space or tab
+// . Note: originally tabs in block context couldn't be eaten
+//         "where a simple key could be allowed
+//         (i.e., not at the beginning of a line, or following '-', '?', or
+// ':')"
+//   I think this is wrong, since tabs can be non-content whitespace; it's just
+//   that they can't contribute to indentation, so once you've seen a tab in a
+//   line, you can't start a simple key
+bool IsWhitespaceToBeEaten(char ch) { return (ch == ' ') || (ch == '\t'); }
+}  // namespace
+
 Scanner::Scanner(std::istream& in)
     : INPUT(in),
       m_tokens{},
@@ -168,6 +181,25 @@ void Scanner::ScanNextToken() {
   // special scalars
   if (InBlockContext() && (INPUT.peek() == Keys::LiteralScalar ||
                            INPUT.peek() == Keys::FoldedScalar)) {
+    // if we begin parsing a literal scalar with an unverified potential
+    // simple key pushed, that may be a tag to the literal scalar, and
+    // should be removed to avoid wrong indentation limit
+    // eg:
+    // - !!str |
+    //  literal
+    //  scalar
+    if (!m_simpleKeys.empty() &&
+      m_simpleKeys.top().pKey->status == Token::UNVERIFIED) {
+      // if the top of the indents does not match the unverified simple key,
+      // just invalidate the simple key and do not pop indent to avoid crash.
+      // eg: an unverified key crossing lines, like issue #1475.
+      if (m_simpleKeys.top().pIndent && !m_indents.empty() &&
+          m_indents.top() == m_simpleKeys.top().pIndent) {
+        PopIndent();
+      } else {
+        InvalidateSimpleKey();
+      }
+    }
     return ScanBlockScalar();
   }
 
@@ -235,27 +267,6 @@ void Scanner::ScanToNextToken() {
 ///////////////////////////////////////////////////////////////////////
 // Misc. helpers
 
-// IsWhitespaceToBeEaten
-// . We can eat whitespace if it's a space or tab
-// . Note: originally tabs in block context couldn't be eaten
-//         "where a simple key could be allowed
-//         (i.e., not at the beginning of a line, or following '-', '?', or
-// ':')"
-//   I think this is wrong, since tabs can be non-content whitespace; it's just
-//   that they can't contribute to indentation, so once you've seen a tab in a
-//   line, you can't start a simple key
-bool Scanner::IsWhitespaceToBeEaten(char ch) {
-  if (ch == ' ') {
-    return true;
-  }
-
-  if (ch == '\t') {
-    return true;
-  }
-
-  return false;
-}
-
 const RegEx& Scanner::GetValueRegex() const {
   if (InBlockContext()) {
     return Exp::Value();
@@ -293,7 +304,7 @@ Token* Scanner::PushToken(Token::TYPE type) {
   return &m_tokens.back();
 }
 
-Token::TYPE Scanner::GetStartTokenFor(IndentMarker::INDENT_TYPE type) const {
+Token::TYPE Scanner::GetStartTokenFor(IndentMarker::INDENT_TYPE type) {
   switch (type) {
     case IndentMarker::SEQ:
       return Token::BLOCK_SEQ_START;
@@ -382,6 +393,9 @@ void Scanner::PopAllIndents() {
 }
 
 void Scanner::PopIndent() {
+  if (m_indents.empty()) {
+    ThrowParserException(ErrorMsg::INDENT_STACK_UNDERFLOW);
+  }
   const IndentMarker& indent = *m_indents.top();
   m_indents.pop();
 

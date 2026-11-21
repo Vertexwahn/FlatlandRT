@@ -15,8 +15,10 @@
 #ifndef ABSL_CRC_INTERNAL_CRC_H_
 #define ABSL_CRC_INTERNAL_CRC_H_
 
+#include <cstddef>
 #include <cstdint>
 
+#include "absl/base/attributes.h"
 #include "absl/base/config.h"
 
 // This class implements CRCs (aka Rabin Fingerprints).
@@ -45,6 +47,12 @@ class CRC {
   // bytes at "bytes" into "*crc".
   virtual void Extend(uint32_t* crc, const void* bytes,
                       size_t length) const = 0;
+
+  // Copy 'length' bytes from 'src' to 'dst' and extend the CRC with the copied
+  // bytes.
+  virtual void ExtendAndCopy(uint32_t* crc, void* __restrict dst,
+                             const void* __restrict src, size_t length,
+                             bool non_temporal) const;
 
   // Equivalent to Extend(crc, bytes, length) where "bytes"
   // points to an array of "length" zero bytes.
@@ -75,6 +83,23 @@ class CRC {
   CRC(const CRC&) = delete;
   CRC& operator=(const CRC&) = delete;
 };
+// Bookkeeping hooks called by non-temporal store functions and
+// NonTemporalStoreFence(), for use in tests.
+//
+// In debug builds (!defined(NDEBUG)), these are declared out-of-line and
+// defined as weak symbols in crc.cc so crc_memcpy_test.cc can override them to
+// verify non-temporal store fencing. In optimized builds (NDEBUG), they must be
+// defined inline here so the compiler eliminates the call within the same
+// translation unit without needing LTO; otherwise, an external call following a
+// non-temporal store causes the compiler's x86-fence-nontemporal-stores pass to
+// insert an sfence after every store.
+#ifndef NDEBUG
+void DebugReportNonTemporalStore();
+void DebugReportStoreFence();
+#else
+inline void DebugReportNonTemporalStore() {}
+inline void DebugReportStoreFence() {}
+#endif
 
 }  // namespace crc_internal
 ABSL_NAMESPACE_END

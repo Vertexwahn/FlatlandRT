@@ -22,6 +22,7 @@
 #include <tuple>
 #include <type_traits>
 
+#include "absl/base/config.h"
 #include "absl/meta/type_traits.h"
 #include "absl/types/optional.h"
 
@@ -31,20 +32,15 @@
 #define ABSL_INTERNAL_IF_true(if_satisfied, ...) if_satisfied
 #define ABSL_INTERNAL_IF_false(if_satisfied, ...) __VA_ARGS__
 
-#define ABSL_INTERNAL_IF_true_AND_true ABSL_INTERNAL_IF_true
-#define ABSL_INTERNAL_IF_false_AND_false ABSL_INTERNAL_IF_false
-#define ABSL_INTERNAL_IF_true_AND_false ABSL_INTERNAL_IF_false_AND_false
-#define ABSL_INTERNAL_IF_false_AND_true ABSL_INTERNAL_IF_false_AND_false
-
 #define ABSL_INTERNAL_IF_true_OR_true ABSL_INTERNAL_IF_true
 #define ABSL_INTERNAL_IF_false_OR_false ABSL_INTERNAL_IF_false
-#define ABSL_INTERNAL_IF_true_OR_false ABSL_INTERNAL_IF_true_OR_true
-#define ABSL_INTERNAL_IF_false_OR_true ABSL_INTERNAL_IF_true_OR_true
+#define ABSL_INTERNAL_IF_true_OR_false ABSL_INTERNAL_IF_true
+#define ABSL_INTERNAL_IF_false_OR_true ABSL_INTERNAL_IF_true
 
-#define ABSL_INTERNAL_IF_true_NOR_true ABSL_INTERNAL_IF_false_AND_false
-#define ABSL_INTERNAL_IF_false_NOR_false ABSL_INTERNAL_IF_true_AND_true
-#define ABSL_INTERNAL_IF_true_NOR_false ABSL_INTERNAL_IF_false_AND_true
-#define ABSL_INTERNAL_IF_false_NOR_true ABSL_INTERNAL_IF_true_AND_false
+#define ABSL_INTERNAL_IF_true_NOR_true ABSL_INTERNAL_IF_false
+#define ABSL_INTERNAL_IF_false_NOR_false ABSL_INTERNAL_IF_true
+#define ABSL_INTERNAL_IF_true_NOR_false ABSL_INTERNAL_IF_false
+#define ABSL_INTERNAL_IF_false_NOR_true ABSL_INTERNAL_IF_false
 
 #define ABSL_INTERNAL_COMMA ,
 
@@ -79,17 +75,31 @@ struct IsTransparent<T, std::void_t<typename T::is_transparent>>
     : std::true_type {};
 
 template <bool is_transparent>
-struct KeyArg {
-  // Transparent. Forward `K`.
-  template <typename K, typename key_type>
-  using type = K;
+struct KeyArg;
+
+template <>
+struct KeyArg<true> {
+  // Transparent case: forward the user's argument type as-is (without
+  // converting to the key type).
+  template <typename Arg, typename Key>
+  using Select = Arg;
+
+  // In the transparent case, the argument type is deduced, and we can't make
+  // pass-by-value vs. pass-by-reference be conditional on the type.
+  template <typename Arg, typename Key>
+  using SelectReadOnly = const Arg&;
 };
 
 template <>
 struct KeyArg<false> {
-  // Not transparent. Always use `key_type`.
-  template <typename K, typename key_type>
-  using type = key_type;
+  // Non-transparent case: convert the user's argument to the key type first.
+  template <typename Arg, typename Key>
+  using Select = Key;
+
+  template <typename Arg, typename Key>
+  using SelectReadOnly = type_traits_internal::AddConstRefIfExpensiveToCopy<
+      // Allows incomplete Key by making it a dependent type.
+      std::conditional_t<false, Arg, Key>>;
 };
 
 // The node_handle concept from C++17.
@@ -194,8 +204,6 @@ class node_handle<Policy, PolicyTraits, Alloc,
 
   constexpr node_handle() {}
 
-  // When C++17 is available, we can use std::launder to provide mutable
-  // access to the key. Otherwise, we provide const access.
   auto key() const
       -> decltype(PolicyTraits::mutable_key(std::declval<slot_type*>())) {
     return PolicyTraits::mutable_key(this->slot());

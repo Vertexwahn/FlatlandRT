@@ -16,8 +16,10 @@
 
 #include <cfloat>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <random>
 #include <sstream>
 #include <string>
@@ -64,9 +66,9 @@ class UniformRealDistributionTest : public ::testing::Test {};
 // https://bugs.llvm.org/show_bug.cgi?id=49132. Don't bother running these tests
 // with double doubles until compiler support is better.
 using RealTypes =
-    std::conditional<absl::numeric_internal::IsDoubleDouble(),
-                     ::testing::Types<float, double>,
-                     ::testing::Types<float, double, long double>>::type;
+    std::conditional_t<absl::numeric_internal::IsDoubleDouble(),
+                       ::testing::Types<float, double>,
+                       ::testing::Types<float, double, long double>>;
 
 TYPED_TEST_SUITE(UniformRealDistributionTest, RealTypes);
 
@@ -180,7 +182,7 @@ TYPED_TEST(UniformRealDistributionTest, ParamSerializeTest) {
       }
     }
 
-    if (!std::is_same<real_type, long double>::value) {
+    if (!std::is_same_v<real_type, long double>) {
       // static_cast<double>(long double) can overflow.
       LOG(INFO) << "Range: " << static_cast<double>(sample_min) << ", "
                 << static_cast<double>(sample_max);
@@ -389,6 +391,81 @@ TEST(UniformRealDistributionTest, AlgorithmBounds) {
     double a = dist(urbg);
     EXPECT_EQ(a, 0.999999999999999888978);
   }
+}
+
+MATCHER(FailsLeavingUnchanged,
+        "fails stream extraction and leaves target and stream flags "
+        "unchanged") {
+  return arg.failed && arg.flags_preserved && arg.value == arg.initial;
+}
+
+MATCHER_P(ParsesEqualTo, expected,
+          "succeeds, updates target, and preserves stream flags") {
+  return !arg.failed && arg.flags_preserved && arg.value == expected;
+}
+
+TEST(UniformRealDistributionTest, StreamRejectsInvalidParameters) {
+  using absl::random_internal::ParseFromStream;
+  const absl::uniform_real_distribution<double> kInitial(1.0, 2.0);
+  const absl::uniform_real_distribution<float> kFloatInitial(1.0f, 2.0f);
+
+  // Valid streams including degenerate [a, a] and subnormal bounds.
+  EXPECT_THAT(ParseFromStream(kInitial, "0.0 1.0"),
+              ParsesEqualTo(absl::uniform_real_distribution<double>(0.0, 1.0)));
+  EXPECT_THAT(ParseFromStream(kInitial, "1.5 1.5"),
+              ParsesEqualTo(absl::uniform_real_distribution<double>(1.5, 1.5)));
+  EXPECT_THAT(
+      ParseFromStream(kInitial, "-1.0 1e-320"),
+      ParsesEqualTo(absl::uniform_real_distribution<double>(-1.0, 1e-320)));
+
+  // Truncated, inverted, overflowing-span, and non-finite inputs.
+  EXPECT_THAT(ParseFromStream(kInitial, ""), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "1.0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "10.0 1.0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "nan 1.0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0.0 nan"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "0.0 inf"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-inf 0.0"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "inf inf"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-inf -inf"), FailsLeavingUnchanged());
+  EXPECT_THAT(ParseFromStream(kInitial, "-1e308 1e308"),
+              FailsLeavingUnchanged());
+
+  // Non-finite values delivered with goodbit by a custom num_get facet.
+  EXPECT_THAT(
+      ParseFromStream(kInitial, "nan 1.0", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
+  EXPECT_THAT(
+      ParseFromStream(kInitial, "0.0 nan", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
+  EXPECT_THAT(
+      ParseFromStream(kInitial, "0.0 inf", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
+  EXPECT_THAT(
+      ParseFromStream(kInitial, "-inf 0.0", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
+  EXPECT_THAT(
+      ParseFromStream(kInitial, "inf inf", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
+  EXPECT_THAT(
+      ParseFromStream(kInitial, "-inf -inf", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
+  EXPECT_THAT(
+      ParseFromStream(kFloatInitial, "nan 1.0", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
+  EXPECT_THAT(
+      ParseFromStream(kFloatInitial, "0.0 inf", /*use_non_finite_facet=*/true),
+      FailsLeavingUnchanged());
+
+  // A boundary interval whose IEEE-754 double difference rounds to DBL_MAX
+  // (b - a == DBL_MAX in double, though larger under x87 80-bit excess
+  // precision) round-trips cleanly without false rejection.
+  const double a = -std::ldexp(1.0, 969);
+  const double b = (std::numeric_limits<double>::max)();
+  const absl::uniform_real_distribution<double> kMaxSpan(a, b);
+  std::ostringstream oss;
+  oss << kMaxSpan;
+  EXPECT_THAT(ParseFromStream(kInitial, oss.str()), ParsesEqualTo(kMaxSpan));
 }
 
 }  // namespace

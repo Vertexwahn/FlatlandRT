@@ -56,8 +56,7 @@ project(FMT CXX)
 # Compilers GCC>=14, Clang>=16 or MSVC >= 17.4
 # Source: https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html
 set(FMT_USE_CMAKE_MODULES FALSE)
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.28 AND CMAKE_CXX_STANDARD
-                                                 GREATER_EQUAL 20)
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
   if (CMAKE_GENERATOR STREQUAL "Ninja")
     execute_process(COMMAND "${CMAKE_MAKE_PROGRAM}" "--version"
                     OUTPUT_VARIABLE NINJA_VERSION)
@@ -65,7 +64,8 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.28 AND CMAKE_CXX_STANDARD
       if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION
                                                     GREATER_EQUAL 15)
           OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
-              AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 16)
+              AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 16
+              AND CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS)
           OR (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION
                                                         GREATER_EQUAL 1934))
         set(FMT_USE_CMAKE_MODULES TRUE)
@@ -77,13 +77,23 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.28 AND CMAKE_CXX_STANDARD
   endif ()
 endif ()
 
+# fmt-module requires C++20 itself, so the standard only affects the default.
+set(FMT_USE_MODULES OFF)
+if (FMT_USE_CMAKE_MODULES AND CMAKE_CXX_STANDARD GREATER_EQUAL 20)
+  set(FMT_USE_MODULES ON)
+endif ()
+if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION
+                                                    VERSION_GREATER_EQUAL 21)
+  set(FMT_USE_MODULES ON)
+endif ()
+
 option(FMT_DOC "Generate the doc target." ${FMT_MASTER_PROJECT})
 option(FMT_INSTALL "Generate the install target." ${FMT_MASTER_PROJECT})
 option(FMT_TEST "Generate the test target." ${FMT_MASTER_PROJECT})
 option(FMT_FUZZ "Generate the fuzz target." OFF)
 option(FMT_CUDA_TEST "Generate the cuda-test target." OFF)
 option(FMT_OS "Include OS-specific APIs." ON)
-option(FMT_MODULE "Build a module library." ${FMT_USE_CMAKE_MODULES})
+option(FMT_MODULE "Build a module library." ${FMT_USE_MODULES})
 option(FMT_SYSTEM_HEADERS "Expose headers with marking them as system." OFF)
 option(FMT_UNICODE "Enable Unicode support." ON)
 option(FMT_PEDANTIC "Enable extra warnings and expensive tests." OFF)
@@ -106,10 +116,10 @@ set(FMT_DEBUG_POSTFIX
     d
     CACHE STRING "Debug library postfix.")
 
-# Get version from base.h.
-file(READ include/fmt/base.h base_h)
-if (NOT base_h MATCHES "FMT_VERSION ([0-9]+)([0-9][0-9])([0-9][0-9])")
-  message(FATAL_ERROR "Cannot get FMT_VERSION from base.h.")
+# Get version from core.h.
+file(READ include/fmt/core.h core_h)
+if (NOT core_h MATCHES "FMT_VERSION ([0-9]+)([0-9][0-9])([0-9][0-9])")
+  message(FATAL_ERROR "Cannot get FMT_VERSION from core.h.")
 endif ()
 # Use math to skip leading zeros if any.
 math(EXPR CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_MATCH_1})
@@ -231,7 +241,7 @@ if (FMT_MASTER_PROJECT AND CMAKE_GENERATOR MATCHES "Visual Studio")
   join(netfxpath
        "C:\\Program Files\\Reference Assemblies\\Microsoft\\Framework\\"
        ".NETFramework\\v4.0")
-  file(WRITE run-msbuild.bat "${MSBUILD_SETUP}
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/run-msbuild.bat "${MSBUILD_SETUP}
     ${CMAKE_MAKE_PROGRAM} -p:FrameworkPathOverride=\"${netfxpath}\" %*")
 endif ()
 
@@ -256,11 +266,13 @@ function (setup_target target kind)
     target_compile_definitions(${target} ${kind} FMT_UNICODE=0)
   endif ()
 
-  set_target_properties(
-    ${target}
-    PROPERTIES VERSION ${FMT_VERSION}
-               SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}
-               DEBUG_POSTFIX "${FMT_DEBUG_POSTFIX}")
+  if (NOT "${kind}" STREQUAL "INTERFACE")
+    set_target_properties(
+      ${target}
+      PROPERTIES VERSION ${FMT_VERSION}
+                 SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}
+                 DEBUG_POSTFIX "${FMT_DEBUG_POSTFIX}")
+  endif ()
 endfunction ()
 
 set(FMT_HEADERS)
@@ -272,6 +284,7 @@ foreach (
   color.h
   compile.h
   core.h
+  enum.h
   format.h
   format-inl.h
   os.h
@@ -358,21 +371,52 @@ function (add_module_library name)
   endif ()
 
   if (CMAKE_COMPILER_IS_GNUCXX)
-    target_compile_options(${name} PUBLIC -fmodules-ts)
+    message(
+      FATAL_ERROR
+        "FMT_MODULE with GCC requires CMake 3.28 or newer, the Ninja generator "
+        "(Ninja 1.11 or newer) and GCC 15 or newer.")
   endif ()
 
-  # `std` is affected by CMake options and may be higher than C++20.
+  set(module_compile_options)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    # AppleClang requires explicit module and SDK flags when precompiling.
+    execute_process(
+      COMMAND xcrun --sdk "${CMAKE_OSX_SYSROOT}" --show-sdk-path
+      RESULT_VARIABLE module_sdk_result
+      OUTPUT_VARIABLE module_sysroot
+      ERROR_VARIABLE module_sdk_error
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (NOT module_sdk_result EQUAL 0 OR NOT module_sysroot)
+      message(FATAL_ERROR "Failed to find Apple SDK: ${module_sdk_error}")
+    endif ()
+    set(module_compile_options -fcxx-modules -isysroot "${module_sysroot}")
+    target_compile_options(${name} PUBLIC ${module_compile_options})
+  endif ()
+
+  # The standard and extension mode are affected by CMake options.
   get_target_property(std ${name} CXX_STANDARD)
+  if (NOT std OR std LESS 20)
+    set(std 20)
+  endif ()
+  get_target_property(extensions ${name} CXX_EXTENSIONS)
+  if (extensions STREQUAL "extensions-NOTFOUND")
+    set(extensions ON)
+  endif ()
+  set(std_prefix c++)
+  if (extensions)
+    set(std_prefix gnu++)
+  endif ()
 
   if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(pcms)
     foreach (src ${sources})
-      get_filename_component(pcm ${src} NAME_WE)
-      set(pcm ${pcm}.pcm)
+      get_filename_component(module_name ${src} NAME_WE)
+      set(pcm ${module_name}.pcm)
 
-      # Propagate -fmodule-file=*.pcm to targets that link with this library.
+      # Propagate the module BMI to targets that link with this library.
       target_compile_options(
-        ${name} PUBLIC -fmodule-file=${CMAKE_CURRENT_BINARY_DIR}/${pcm})
+        ${name}
+        PUBLIC -fmodule-file=${module_name}=${CMAKE_CURRENT_BINARY_DIR}/${pcm})
 
       # Use an absolute path to prevent target_link_libraries prepending -l
       # to it.
@@ -380,8 +424,9 @@ function (add_module_library name)
       add_custom_command(
         OUTPUT ${pcm}
         COMMAND
-          ${CMAKE_CXX_COMPILER} -std=c++${std} -x c++-module --precompile -c -o
-          ${pcm} ${CMAKE_CURRENT_SOURCE_DIR}/${src}
+          ${CMAKE_CXX_COMPILER} ${module_compile_options}
+          -std=${std_prefix}${std} -x c++-module --precompile -o ${pcm}
+          ${CMAKE_CURRENT_SOURCE_DIR}/${src}
           "-I$<JOIN:$<TARGET_PROPERTY:${name},INCLUDE_DIRECTORIES>,;-I>"
         # Required by the -I generator expression above.
         COMMAND_EXPAND_LISTS
@@ -399,6 +444,7 @@ function (add_module_library name)
         OUTPUT ${obj}
         COMMAND ${CMAKE_CXX_COMPILER} $<TARGET_PROPERTY:${name},COMPILE_OPTIONS>
                 -c -o ${obj} ${pcm}
+        COMMAND_EXPAND_LISTS
         DEPENDS ${pcm})
     endforeach ()
   endif ()
@@ -417,8 +463,27 @@ target_compile_definitions(fmt-header-only INTERFACE FMT_HEADER_ONLY=1)
 target_compile_features(fmt-header-only INTERFACE cxx_std_11)
 setup_target(fmt-header-only INTERFACE)
 
-add_library(fmt-c STATIC src/fmt-c.cc)
+add_library(fmt-c src/fmt-c.cc)
 target_compile_features(fmt-c INTERFACE c_std_11)
+
+# Set FMT_C_LIB_NAME for pkg-config fmt-c.pc. We cannot use the OUTPUT_NAME
+# target property because it's not set by default.
+set(FMT_C_LIB_NAME fmt-c)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(FMT_C_LIB_NAME ${FMT_C_LIB_NAME}${FMT_DEBUG_POSTFIX})
+endif ()
+
+if (BUILD_SHARED_LIBS)
+  target_compile_definitions(
+    fmt-c
+    PRIVATE FMT_LIB_EXPORT
+    INTERFACE FMT_SHARED)
+endif ()
+set_target_properties(
+  fmt-c
+  PROPERTIES VERSION ${FMT_VERSION}
+             SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}
+             DEBUG_POSTFIX "${FMT_DEBUG_POSTFIX}")
 if (MSVC)
   target_compile_options(fmt-c PUBLIC /Zc:preprocessor)
 endif ()
@@ -428,6 +493,13 @@ add_library(fmt::fmt-c ALIAS fmt-c)
 set_target_properties(fmt-c PROPERTIES PUBLIC_HEADER include/fmt/fmt-c.h)
 
 # Install targets.
+set(targets_export_name fmt-targets)
+set(FMT_TARGETS fmt fmt-header-only fmt-c)
+
+if (FMT_MODULE)
+  list(APPEND FMT_TARGETS fmt-module)
+endif ()
+
 if (FMT_INSTALL)
   include(CMakePackageConfigHelpers)
   set_verbose(
@@ -441,7 +513,7 @@ if (FMT_INSTALL)
   set(version_config ${PROJECT_BINARY_DIR}/fmt-config-version.cmake)
   set(project_config ${PROJECT_BINARY_DIR}/fmt-config.cmake)
   set(pkgconfig ${PROJECT_BINARY_DIR}/fmt.pc)
-  set(targets_export_name fmt-targets)
+  set(pkgconfig_c ${PROJECT_BINARY_DIR}/fmt-c.pc)
 
   set_verbose(
     FMT_LIB_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING
@@ -468,35 +540,32 @@ if (FMT_INSTALL)
 
   configure_file("${PROJECT_SOURCE_DIR}/support/cmake/fmt.pc.in" "${pkgconfig}"
                  @ONLY)
+  configure_file("${PROJECT_SOURCE_DIR}/support/cmake/fmt-c.pc.in"
+                 "${pkgconfig_c}" @ONLY)
   configure_package_config_file(
     ${PROJECT_SOURCE_DIR}/support/cmake/fmt-config.cmake.in ${project_config}
     INSTALL_DESTINATION ${FMT_CMAKE_DIR})
 
-  set(INSTALL_TARGETS fmt fmt-header-only fmt-c)
-
-  if (FMT_MODULE)
-    list(APPEND INSTALL_TARGETS fmt-module)
-    if (FMT_USE_CMAKE_MODULES)
-      set(INSTALL_FILE_SET FILE_SET fmt DESTINATION ${FMT_INC_DIR}/fmt)
-    endif ()
-  endif ()
-
   # Install the library and headers.
+  set(install_targets ${FMT_TARGETS})
+  if (FMT_MODULE
+      AND FMT_USE_CMAKE_MODULES
+      AND CMAKE_GENERATOR STREQUAL "Ninja")
+    set(INSTALL_FILE_SET FILE_SET fmt DESTINATION ${FMT_INC_DIR}/fmt)
+  elseif (FMT_MODULE)
+    # CMake can't install module information with Visual Studio generators and
+    # the fallback BMI is only usable from the build tree.
+    list(REMOVE_ITEM install_targets fmt-module)
+    message(STATUS "fmt-module is only installed with Ninja and CMake modules")
+  endif ()
   install(
-    TARGETS ${INSTALL_TARGETS}
+    TARGETS ${install_targets}
     COMPONENT fmt_core
     EXPORT ${targets_export_name}
     LIBRARY DESTINATION ${FMT_LIB_DIR}
     ARCHIVE DESTINATION ${FMT_LIB_DIR}
     PUBLIC_HEADER DESTINATION ${FMT_INC_DIR}/fmt
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} ${INSTALL_FILE_SET})
-
-  # Use a namespace because CMake provides better diagnostics for namespaced
-  # imported targets.
-  export(
-    TARGETS ${INSTALL_TARGETS}
-    NAMESPACE fmt::
-    FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
 
   # Install version, config and target files.
   install(
@@ -510,10 +579,19 @@ if (FMT_INSTALL)
     COMPONENT fmt_core)
 
   install(
-    FILES "${pkgconfig}"
+    FILES "${pkgconfig}" "${pkgconfig_c}"
     DESTINATION "${FMT_PKGCONFIG_DIR}"
     COMPONENT fmt_core)
 endif ()
+
+# Generate a build-tree export so that targets depending on fmt can also be
+# exported without installing fmt, including when fmt is provided through
+# add_subdirectory() or FetchContent. Use a namespace because CMake provides
+# better diagnostics for namespaced imported targets.
+export(
+  TARGETS ${FMT_TARGETS}
+  NAMESPACE fmt::
+  FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
 
 function (add_doc_target)
   find_program(DOXYGEN doxygen PATHS "$ENV{ProgramFiles}/doxygen/bin"
@@ -582,7 +660,9 @@ if (FMT_MASTER_PROJECT AND EXISTS ${gitignore})
     string(REPLACE "*" ".*" line "${line}")
     set(ignored_files ${ignored_files} "${line}$" "${line}/")
   endforeach ()
-  set(ignored_files ${ignored_files} /.git /build/doxyxml .vagrant)
+  # Exclude the whole build tree: the .gitignore-derived `build/` pattern does
+  # not actually prune the directory or its contents from the source package.
+  set(ignored_files ${ignored_files} /.git "/build($|/)" .vagrant)
 
   set(CPACK_SOURCE_GENERATOR ZIP)
   set(CPACK_SOURCE_IGNORE_FILES ${ignored_files})

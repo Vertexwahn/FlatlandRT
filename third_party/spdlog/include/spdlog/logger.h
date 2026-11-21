@@ -45,7 +45,7 @@
 #define SPDLOG_LOGGER_CATCH(location)
 #endif
 
-namespace spdlog {
+SPDLOG_NAMESPACE_BEGIN
 
 class SPDLOG_API logger {
 public:
@@ -73,7 +73,7 @@ public:
     logger(const logger &other);
     logger(logger &&other) SPDLOG_NOEXCEPT;
     logger &operator=(logger other) SPDLOG_NOEXCEPT;
-    void swap(spdlog::logger &other) SPDLOG_NOEXCEPT;
+    void swap(logger &other) SPDLOG_NOEXCEPT;
 
     template <typename... Args>
     void log(source_loc loc, level::level_enum lvl, format_string_t<Args...> fmt, Args &&...args) {
@@ -315,8 +315,8 @@ public:
 protected:
     std::string name_;
     std::vector<sink_ptr> sinks_;
-    spdlog::level_t level_{level::info};
-    spdlog::level_t flush_level_{level::off};
+    level_t level_{level::info};
+    level_t flush_level_{level::off};
     err_handler custom_err_handler_{nullptr};
     details::backtracer tracer_;
 
@@ -380,7 +380,7 @@ protected:
 
 void swap(logger &a, logger &b) noexcept;
 
-}  // namespace spdlog
+SPDLOG_NAMESPACE_END
 
 #ifdef SPDLOG_HEADER_ONLY
 #include "logger-inl.h"

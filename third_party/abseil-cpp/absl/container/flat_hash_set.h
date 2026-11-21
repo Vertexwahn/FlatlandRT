@@ -39,6 +39,7 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
+#include "absl/base/config.h"
 #include "absl/base/macros.h"
 #include "absl/container/hash_container_defaults.h"
 #include "absl/container/internal/container_memory.h"
@@ -71,6 +72,12 @@ struct FlatHashSetPolicy;
 // * Contains a `capacity()` member function indicating the number of element
 //   slots (open, deleted, and empty) within the hash set.
 // * Returns `void` from the `erase(iterator)` overload.
+// * Constructors accept reservation size as an optional argument instead of
+//   bucket count. Reservation size is the number of elements that fits in the
+//   set before rehash.
+// * insert/emplace and other modification functions return special iterator
+//   that doesn't support iteration. std::next(it) for such iterators would
+//   always point to the end().
 //
 // By default, `flat_hash_set` uses the `absl::Hash` hashing framework. All
 // fundamental and Abseil types that support the `absl::Hash` framework have a
@@ -167,11 +174,18 @@ class ABSL_ATTRIBUTE_OWNER flat_hash_set
   //   // Move is guaranteed efficient
   //   absl::flat_hash_set<std::string> set5(std::move(set4));
   //
+  //   // After the move, set4 is in a valid but unspecified state. The only
+  //   // operations guaranteed to be safe on a moved-from set are destruction,
+  //   // assignment, and clear(). Any other operation (e.g. size(), empty(),
+  //   // iteration) results in undefined behavior.
+  //
   // * Move assignment operator
   //
   //   // May be efficient if allocators are compatible
   //   absl::flat_hash_set<std::string> set6;
   //   set6 = std::move(set5);
+  //
+  //   // Same moved-from guarantees apply to set5 after this operation.
   //
   // * Range constructor
   //
@@ -510,35 +524,6 @@ void swap(flat_hash_set<T, H, E, A>& x,
 
 namespace container_internal {
 
-// c_for_each_fast(flat_hash_set<>, Function)
-//
-// Container-based version of the <algorithm> `std::for_each()` function to
-// apply a function to a container's elements.
-// There is no guarantees on the order of the function calls.
-// Erasure and/or insertion of elements in the function is not allowed.
-template <typename T, typename H, typename E, typename A, typename Function>
-std::decay_t<Function> c_for_each_fast(const flat_hash_set<T, H, E, A>& c,
-                                       Function&& f) {
-  container_internal::ForEach(f, &c);
-  return f;
-}
-template <typename T, typename H, typename E, typename A, typename Function>
-std::decay_t<Function> c_for_each_fast(flat_hash_set<T, H, E, A>& c,
-                                       Function&& f) {
-  container_internal::ForEach(f, &c);
-  return f;
-}
-template <typename T, typename H, typename E, typename A, typename Function>
-std::decay_t<Function> c_for_each_fast(flat_hash_set<T, H, E, A>&& c,
-                                       Function&& f) {
-  container_internal::ForEach(f, &c);
-  return f;
-}
-
-}  // namespace container_internal
-
-namespace container_internal {
-
 template <class T>
 struct FlatHashSetPolicy {
   using slot_type = T;
@@ -549,6 +534,7 @@ struct FlatHashSetPolicy {
   using DefaultHash = DefaultHashContainerHash<T>;
   using DefaultEq = DefaultHashContainerEq<T>;
   using DefaultAlloc = std::allocator<T>;
+  using SlotEq = SlotEqFn<T, /*kDerefSlot=*/false>;
 
   template <class Allocator, class... Args>
   static void construct(Allocator* alloc, slot_type* slot, Args&&... args) {
@@ -575,9 +561,9 @@ struct FlatHashSetPolicy {
 
   static size_t space_used(const T*) { return 0; }
 
-  template <class Hash, bool kIsDefault>
+  template <class Hash, bool kIsAbsl, size_t kSeedShift>
   static constexpr HashSlotFn get_hash_slot_fn() {
-    return &TypeErasedApplyToSlotFn<Hash, T, kIsDefault>;
+    return GetTypeErasedApplyToSlotFn<Hash, T, kIsAbsl, kSeedShift>();
   }
 };
 }  // namespace container_internal

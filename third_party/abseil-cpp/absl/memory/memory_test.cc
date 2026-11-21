@@ -19,6 +19,7 @@
 #include <sys/types.h>
 
 #include <cstddef>
+#include <cstring>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -148,7 +149,7 @@ TEST(MakeUniqueForOverwriteTest, Array) {
   ArrayWatch::allocs().clear();
 
   auto p = absl::make_unique_for_overwrite<ArrayWatch[]>(5);
-  static_assert(std::is_same<decltype(p), std::unique_ptr<ArrayWatch[]>>::value,
+  static_assert(std::is_same_v<decltype(p), std::unique_ptr<ArrayWatch[]>>,
                 "unexpected return type");
   EXPECT_THAT(ArrayWatch::allocs(), ElementsAre(5 * sizeof(ArrayWatch)));
 }
@@ -194,19 +195,19 @@ TEST(RawPtrTest, NullValuedSmartPointer) {
 
 TEST(RawPtrTest, Nullptr) {
   auto p = absl::RawPtr(nullptr);
-  EXPECT_TRUE((std::is_same<std::nullptr_t, decltype(p)>::value));
+  EXPECT_TRUE((std::is_same_v<std::nullptr_t, decltype(p)>));
   EXPECT_EQ(nullptr, p);
 }
 
 TEST(RawPtrTest, Null) {
   auto p = absl::RawPtr(nullptr);
-  EXPECT_TRUE((std::is_same<std::nullptr_t, decltype(p)>::value));
+  EXPECT_TRUE((std::is_same_v<std::nullptr_t, decltype(p)>));
   EXPECT_EQ(nullptr, p);
 }
 
 TEST(RawPtrTest, Zero) {
   auto p = absl::RawPtr(nullptr);
-  EXPECT_TRUE((std::is_same<std::nullptr_t, decltype(p)>::value));
+  EXPECT_TRUE((std::is_same_v<std::nullptr_t, decltype(p)>));
   EXPECT_EQ(nullptr, p);
 }
 

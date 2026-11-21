@@ -17,13 +17,18 @@
 
 #include <algorithm>
 #include <cinttypes>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
+#include <ios>
 #include <istream>
 #include <iterator>
 #include <limits>
 #include <ostream>
 #include <type_traits>
+#include <utility>
 
+#include "absl/base/config.h"
 #include "absl/base/internal/endian.h"
 #include "absl/meta/type_traits.h"
 #include "absl/random/internal/iostream_state_saver.h"
@@ -47,7 +52,7 @@ class alignas(8) randen_engine {
  public:
   // C++11 URBG interface:
   using result_type = T;
-  static_assert(std::is_unsigned<result_type>::value,
+  static_assert(std::is_unsigned_v<result_type>,
                 "randen_engine template argument must be a built-in unsigned "
                 "integer type");
 
@@ -59,12 +64,12 @@ class alignas(8) randen_engine {
     return (std::numeric_limits<result_type>::max)();
   }
 
-  randen_engine() : randen_engine(0) {}
+  randen_engine() : randen_engine(result_type{0}) {}
   explicit randen_engine(result_type seed_value) { seed(seed_value); }
 
   template <class SeedSequence,
             typename = typename std::enable_if_t<
-                !std::is_same<SeedSequence, randen_engine>::value>>
+                !std::is_same_v<SeedSequence, randen_engine>>>
   explicit randen_engine(SeedSequence&& seq) {
     seed(seq);
   }
@@ -75,6 +80,9 @@ class alignas(8) randen_engine {
     std::memcpy(state(), other.state(), kStateSizeT * sizeof(result_type));
   }
   randen_engine& operator=(const randen_engine& other) {
+    if (this == &other) {
+      return *this;
+    }
     next_ = other.next_;
     impl_ = other.impl_;
     std::memcpy(state(), other.state(), kStateSizeT * sizeof(result_type));
@@ -93,21 +101,21 @@ class alignas(8) randen_engine {
   }
 
   template <class SeedSequence>
-  typename std::enable_if_t<
-      !std::is_convertible<SeedSequence, result_type>::value>
+  typename std::enable_if_t<!std::is_convertible_v<SeedSequence, result_type>>
   seed(SeedSequence&& seq) {
     // Zeroes the state.
     seed();
     reseed(seq);
   }
 
-  void seed(result_type seed_value = 0) {
+  void seed(result_type seed_value = result_type{0}) {
     next_ = kStateSizeT;
     // Zeroes the inner state and fills the outer state with seed_value to
     // mimic the behaviour of reseed
     auto* begin = state();
-    std::fill(begin, begin + kCapacityT, 0);
-    std::fill(begin + kCapacityT, begin + kStateSizeT, seed_value);
+    std::fill(begin, begin + kCapacityT, result_type{0});
+    std::fill(begin + kCapacityT, begin + kStateSizeT,
+              little_endian::FromHost(seed_value));
   }
 
   // Inserts entropy into (part of) the state. Calling this periodically with
@@ -133,13 +141,6 @@ class alignas(8) randen_engine {
       const size_t requested_entropy = (entropy_size == 0) ? 8u : entropy_size;
       std::fill(buffer + requested_entropy, buffer + kBufferSize, 0);
       seq.generate(buffer, buffer + requested_entropy);
-#ifdef ABSL_IS_BIG_ENDIAN
-      // Randen expects the seed buffer to be in Little Endian; reverse it on
-      // Big Endian platforms.
-      for (sequence_result_type& e : buffer) {
-        e = absl::little_endian::FromHost(e);
-      }
-#endif
       // The Randen paper suggests preferentially initializing even-numbered
       // 128-bit vectors of the randen state (there are 16 such vectors).
       // The seed data is merged into the state offset by 128-bits, which
@@ -160,6 +161,13 @@ class alignas(8) randen_engine {
     } else {
       seq.generate(buffer, buffer + kBufferSize);
     }
+#ifdef ABSL_IS_BIG_ENDIAN
+    // Randen expects the seed buffer to be in Little Endian; reverse it on
+    // Big Endian platforms.
+    for (sequence_result_type& e : buffer) {
+      e = absl::little_endian::FromHost(e);
+    }
+#endif
     impl_.Absorb(buffer, state());
 
     // Generate will be called when operator() is called
@@ -167,15 +175,16 @@ class alignas(8) randen_engine {
   }
 
   void discard(uint64_t count) {
-    uint64_t step = std::min<uint64_t>(kStateSizeT - next_, count);
+    uint64_t step =
+        (std::min)(static_cast<uint64_t>(kStateSizeT - next_), count);
     count -= step;
 
     constexpr uint64_t kRateT = kStateSizeT - kCapacityT;
     auto* begin = state();
     while (count > 0) {
       next_ = kCapacityT;
-      impl_.Generate(*reinterpret_cast<result_type(*)[kStateSizeT]>(begin));
-      step = std::min<uint64_t>(kRateT, count);
+      impl_.Generate(begin);
+      step = (std::min)(kRateT, count);
       count -= step;
     }
     next_ += step;
@@ -214,19 +223,21 @@ class alignas(8) randen_engine {
   friend std::basic_istream<CharT, Traits>& operator>>(
       std::basic_istream<CharT, Traits>& is,  // NOLINT(runtime/references)
       randen_engine<T>& engine) {             // NOLINT(runtime/references)
-    using numeric_type =
-        typename random_internal::stream_format_type<result_type>::type;
+    auto saver = random_internal::make_istream_state_saver(is);
     result_type state[kStateSizeT];
-    size_t next;
     for (auto& elem : state) {
-      // It is not possible to read uint8_t from wide streams, so it is
-      // necessary to read a wider type and then cast it to uint8_t.
-      numeric_type value;
-      is >> value;
-      elem = little_endian::ToHost(static_cast<result_type>(value));
+      result_type value = 0;
+      if (!random_internal::read_integral(is, value)) {
+        return is;
+      }
+      elem = little_endian::ToHost(value);
     }
-    is >> next;
-    if (is.fail()) {
+    size_t next = 0;
+    if (!random_internal::read_integral(is, next)) {
+      return is;
+    }
+    if (next < kCapacityT || next > kStateSizeT) {
+      is.setstate(std::ios_base::failbit);
       return is;
     }
     std::memcpy(engine.state(), state, sizeof(state));
@@ -253,7 +264,7 @@ class alignas(8) randen_engine {
 
   // raw state array, manually aligned in state(). This overallocates
   // by 8 bytes since C++ does not guarantee extended heap alignment.
-  alignas(8) char raw_state_[Randen::kStateBytes + 8];
+  alignas(8) unsigned char raw_state_[Randen::kStateBytes + 8];
   size_t next_;  // index within state()
   Randen impl_;
 };

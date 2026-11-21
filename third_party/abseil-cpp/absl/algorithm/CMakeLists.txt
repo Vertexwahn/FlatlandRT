@@ -50,8 +50,9 @@ absl_cc_library(
   DEPS
     absl::algorithm
     absl::config
-    absl::iterator_traits_internal
     absl::core_headers
+    absl::hardening
+    absl::iterator_traits_internal
     absl::meta
   PUBLIC
 )

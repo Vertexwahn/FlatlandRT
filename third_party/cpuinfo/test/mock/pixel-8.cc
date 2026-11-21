@@ -582,6 +582,34 @@ TEST(ISA, crc32) {
 	ASSERT_TRUE(cpuinfo_has_arm_crc32());
 }
 
+TEST(ISA, sve2p1) {
+	ASSERT_FALSE(cpuinfo_has_arm_sve2p1());
+}
+
+TEST(ISA, sme_mop4) {
+	ASSERT_FALSE(cpuinfo_has_arm_sme_mop4());
+}
+
+TEST(ISA, fp8) {
+	ASSERT_FALSE(cpuinfo_has_arm_fp8());
+}
+
+TEST(ISA, f8dot) {
+	ASSERT_FALSE(cpuinfo_has_arm_f8dot());
+}
+
+TEST(ISA, neon_f8dot4) {
+	ASSERT_FALSE(cpuinfo_has_arm_neon_f8dot4());
+}
+
+TEST(ISA, f8mm) {
+	ASSERT_FALSE(cpuinfo_has_arm_f8mm());
+}
+
+TEST(ISA, neon_f8mm) {
+	ASSERT_FALSE(cpuinfo_has_arm_neon_f8mm());
+}
+
 TEST(L1I, count) {
 	ASSERT_EQ(9, cpuinfo_get_l1i_caches_count());
 }

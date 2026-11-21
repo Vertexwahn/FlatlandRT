@@ -14,11 +14,13 @@
 
 #include "absl/strings/str_split.h"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <initializer_list>
+#include <iterator>
 #include <list>
 #include <map>
 #include <memory>
@@ -31,6 +33,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/algorithm/container.h"
 #include "absl/base/macros.h"
 #include "absl/container/btree_map.h"
 #include "absl/container/btree_set.h"
@@ -47,31 +50,23 @@ using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
 
 TEST(Split, TraitsTest) {
-  static_assert(!absl::strings_internal::SplitterIsConvertibleTo<int>::value,
-                "");
+  static_assert(!absl::strings_internal::SplitterIsConvertibleTo<int>::value);
   static_assert(
-      !absl::strings_internal::SplitterIsConvertibleTo<std::string>::value, "");
+      !absl::strings_internal::SplitterIsConvertibleTo<std::string>::value);
   static_assert(absl::strings_internal::SplitterIsConvertibleTo<
-                    std::vector<std::string>>::value,
-                "");
-  static_assert(
-      !absl::strings_internal::SplitterIsConvertibleTo<std::vector<int>>::value,
-      "");
-  static_assert(absl::strings_internal::SplitterIsConvertibleTo<
-                    std::vector<absl::string_view>>::value,
-                "");
-  static_assert(absl::strings_internal::SplitterIsConvertibleTo<
-                    std::map<std::string, std::string>>::value,
-                "");
-  static_assert(absl::strings_internal::SplitterIsConvertibleTo<
-                    std::map<absl::string_view, absl::string_view>>::value,
-                "");
+                std::vector<std::string>>::value);
   static_assert(!absl::strings_internal::SplitterIsConvertibleTo<
-                    std::map<int, std::string>>::value,
-                "");
+                std::vector<int>>::value);
+  static_assert(absl::strings_internal::SplitterIsConvertibleTo<
+                std::vector<absl::string_view>>::value);
+  static_assert(absl::strings_internal::SplitterIsConvertibleTo<
+                std::map<std::string, std::string>>::value);
+  static_assert(absl::strings_internal::SplitterIsConvertibleTo<
+                std::map<absl::string_view, absl::string_view>>::value);
   static_assert(!absl::strings_internal::SplitterIsConvertibleTo<
-                    std::map<std::string, int>>::value,
-                "");
+                std::map<int, std::string>>::value);
+  static_assert(!absl::strings_internal::SplitterIsConvertibleTo<
+                std::map<std::string, int>>::value);
 }
 
 // This tests the overall split API, which is made up of the absl::StrSplit()
@@ -666,7 +661,7 @@ TEST(Split, Temporary) {
   // destroyed, if the splitter keeps a reference to the string's contents,
   // it'll reference freed memory instead of just dead on-stack memory.
   const char input[] = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u";
-  EXPECT_LT(sizeof(std::string), ABSL_ARRAYSIZE(input))
+  EXPECT_LT(sizeof(std::string), std::size(input))
       << "Input should be larger than fits on the stack.";
 
   // This happens more often in C++11 as part of a range-based for loop.
@@ -1041,6 +1036,36 @@ TEST(Delimiter, ByLength) {
   EXPECT_FALSE(IsFoundAt("ab", four_char_delim, 0));
   EXPECT_FALSE(IsFoundAt("abc", four_char_delim, 0));
   EXPECT_FALSE(IsFoundAt("abcd", four_char_delim, 0));
+}
+
+TEST(Split, ByAnyCharWorksWithRepeatedFind) {
+  auto splitter = absl::StrSplit("a,b;a", absl::ByAnyChar(",;"));
+  auto it = absl::c_find(splitter, "a");
+  ASSERT_NE(it, splitter.end());
+  // Search on from the next piece, which assigns the iterator.
+  it = std::find(std::next(it), splitter.end(), "a");
+  ASSERT_NE(it, splitter.end());
+  EXPECT_EQ(std::next(it), splitter.end());
+}
+
+TEST(Split, ByLengthWorksWithRepeatedFind) {
+  auto splitter = absl::StrSplit("aba", absl::ByLength(1));
+  auto it = absl::c_find(splitter, "a");
+  ASSERT_NE(it, splitter.end());
+  // Search on from the next piece, which assigns the iterator.
+  it = std::find(std::next(it), splitter.end(), "a");
+  ASSERT_NE(it, splitter.end());
+  EXPECT_EQ(std::next(it), splitter.end());
+}
+
+TEST(Split, MaxSplitsWorksWithRepeatedFind) {
+  auto splitter = absl::StrSplit("a,a,b,c", absl::MaxSplits(',', 2));
+  auto it = absl::c_find(splitter, "a");
+  ASSERT_NE(it, splitter.end());
+  // Search on from the next piece, which assigns the iterator.
+  it = std::find(std::next(it), splitter.end(), "a");
+  ASSERT_NE(it, splitter.end());
+  EXPECT_EQ(*std::next(it), "b,c");
 }
 
 TEST(Split, WorksWithLargeStrings) {

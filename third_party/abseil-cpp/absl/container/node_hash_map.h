@@ -45,6 +45,7 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
+#include "absl/base/config.h"
 #include "absl/container/hash_container_defaults.h"
 #include "absl/container/internal/container_memory.h"
 #include "absl/container/internal/node_slot_policy.h"
@@ -167,11 +168,18 @@ class ABSL_ATTRIBUTE_OWNER node_hash_map
   //   // Move is guaranteed efficient
   //   absl::node_hash_map<int, std::string> map5(std::move(map4));
   //
+  //   // After the move, map4 is in a valid but unspecified state. The only
+  //   // operations guaranteed to be safe on a moved-from map are destruction,
+  //   // assignment, and clear(). Any other operation (e.g. size(), empty(),
+  //   // iteration) results in undefined behavior.
+  //
   // * Move assignment operator
   //
   //   // May be efficient if allocators are compatible
   //   absl::node_hash_map<int, std::string> map6;
   //   map6 = std::move(map5);
+  //
+  //   // Same moved-from guarantees apply to map5 after this operation.
   //
   // * Range constructor
   //
@@ -421,10 +429,6 @@ class ABSL_ATTRIBUTE_OWNER node_hash_map
   //   `node_hash_map` does not contain an element with a matching key, this
   //   function returns an empty node handle.
   //
-  // NOTE: when compiled in an earlier version of C++ than C++17,
-  // `node_type::key()` returns a const reference to the key instead of a
-  // mutable reference. We cannot safely return a mutable reference without
-  // std::launder (which is not available before C++17).
   using Base::extract;
 
   // node_hash_map::merge()
@@ -596,38 +600,6 @@ void swap(node_hash_map<K, V, H, E, A>& x,
 
 namespace container_internal {
 
-// c_for_each_fast(node_hash_map<>, Function)
-//
-// Container-based version of the <algorithm> `std::for_each()` function to
-// apply a function to a container's elements.
-// There is no guarantees on the order of the function calls.
-// Erasure and/or insertion of elements in the function is not allowed.
-template <typename K, typename V, typename H, typename E, typename A,
-          typename Function>
-std::decay_t<Function> c_for_each_fast(const node_hash_map<K, V, H, E, A>& c,
-                                       Function&& f) {
-  container_internal::ForEach(f, &c);
-  return f;
-}
-template <typename K, typename V, typename H, typename E, typename A,
-          typename Function>
-std::decay_t<Function> c_for_each_fast(node_hash_map<K, V, H, E, A>& c,
-                                       Function&& f) {
-  container_internal::ForEach(f, &c);
-  return f;
-}
-template <typename K, typename V, typename H, typename E, typename A,
-          typename Function>
-std::decay_t<Function> c_for_each_fast(node_hash_map<K, V, H, E, A>&& c,
-                                       Function&& f) {
-  container_internal::ForEach(f, &c);
-  return f;
-}
-
-}  // namespace container_internal
-
-namespace container_internal {
-
 template <class Key, class Value>
 class NodeHashMapPolicy
     : public absl::container_internal::node_slot_policy<
@@ -642,26 +614,7 @@ class NodeHashMapPolicy
   using DefaultHash = DefaultHashContainerHash<Key>;
   using DefaultEq = DefaultHashContainerEq<Key>;
   using DefaultAlloc = std::allocator<std::pair<const Key, Value>>;
-
-  template <class Allocator, class... Args>
-  static value_type* new_element(Allocator* alloc, Args&&... args) {
-    using PairAlloc = typename std::allocator_traits<
-        Allocator>::template rebind_alloc<value_type>;
-    PairAlloc pair_alloc(*alloc);
-    value_type* res = std::allocator_traits<PairAlloc>::allocate(pair_alloc, 1);
-    std::allocator_traits<PairAlloc>::construct(pair_alloc, res,
-                                                std::forward<Args>(args)...);
-    return res;
-  }
-
-  template <class Allocator>
-  static void delete_element(Allocator* alloc, value_type* pair) {
-    using PairAlloc = typename std::allocator_traits<
-        Allocator>::template rebind_alloc<value_type>;
-    PairAlloc pair_alloc(*alloc);
-    std::allocator_traits<PairAlloc>::destroy(pair_alloc, pair);
-    std::allocator_traits<PairAlloc>::deallocate(pair_alloc, pair, 1);
-  }
+  using SlotEq = SlotEqFn<Key, /*kDerefSlot=*/true>;
 
   template <class F, class... Args>
   static decltype(absl::container_internal::DecomposePair(
@@ -671,18 +624,14 @@ class NodeHashMapPolicy
                                                    std::forward<Args>(args)...);
   }
 
-  static size_t element_space_used(const value_type*) {
-    return sizeof(value_type);
-  }
-
   static Value& value(value_type* elem) { return elem->second; }
   static const Value& value(const value_type* elem) { return elem->second; }
 
-  template <class Hash, bool kIsDefault>
+  template <class Hash, bool kIsAbsl, size_t kSeedShift>
   static constexpr HashSlotFn get_hash_slot_fn() {
-    return memory_internal::IsLayoutCompatible<Key, Value>::value
-               ? &TypeErasedDerefAndApplyToSlotFn<Hash, Key, kIsDefault>
-               : nullptr;
+    static_assert(memory_internal::OffsetOf<value_type>::kFirst == 0);
+    return GetTypeErasedApplyToSlotFn<Hash, Key, kIsAbsl, kSeedShift,
+                                      /*kDerefSlot=*/true>();
   }
 };
 }  // namespace container_internal

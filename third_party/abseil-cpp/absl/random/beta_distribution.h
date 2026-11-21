@@ -18,12 +18,12 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <ios>
 #include <istream>
 #include <limits>
 #include <ostream>
 #include <type_traits>
 
-#include "absl/base/attributes.h"
 #include "absl/base/config.h"
 #include "absl/meta/type_traits.h"
 #include "absl/random/internal/fast_uniform_bits.h"
@@ -196,7 +196,7 @@ class beta_distribution {
     // Whether alpha_ != a_, i.e. true iff alpha_ > beta_.
     bool inverted_{};
 
-    static_assert(std::is_floating_point<RealType>::value,
+    static_assert(std::is_floating_point_v<RealType>,
                   "Class-template absl::beta_distribution<> must be "
                   "parameterized using a floating-point type.");
   };
@@ -282,7 +282,7 @@ beta_distribution<RealType>::AlgorithmJoehnk(
   using random_internal::GeneratePositiveTag;
   using random_internal::GenerateRealFromBits;
   using real_type =
-      std::conditional_t<std::is_same<RealType, float>::value, float, double>;
+      std::conditional_t<std::is_same_v<RealType, float>, float, double>;
 
   // Based on Joehnk, M. D. Erzeugung von betaverteilten und gammaverteilten
   // Zufallszahlen. Metrika 8.1 (1964): 5-15.
@@ -297,7 +297,7 @@ beta_distribution<RealType>::AlgorithmJoehnk(
 
     // Direct method. std::pow is slow for float, so rely on the optimizer to
     // remove the std::pow() path for that case.
-    if (!std::is_same<float, result_type>::value) {
+    if (!std::is_same_v<float, result_type>) {
       x = std::pow(u, p.a_);
       y = std::pow(v, p.b_);
       z = x + y;
@@ -340,7 +340,7 @@ beta_distribution<RealType>::AlgorithmCheng(
   using random_internal::GeneratePositiveTag;
   using random_internal::GenerateRealFromBits;
   using real_type =
-      std::conditional_t<std::is_same<RealType, float>::value, float, double>;
+      std::conditional_t<std::is_same_v<RealType, float>, float, double>;
 
   // Based on Cheng, Russell CH. Generating beta variates with nonintegral
   // shape parameters. Communications of the ACM 21.4 (1978): 317-322.
@@ -387,7 +387,6 @@ beta_distribution<RealType>::operator()(URBG& g,  // NOLINT(runtime/references)
     case param_type::JOEHNK:
       return AlgorithmJoehnk(g, p);
     case param_type::CHENG_BA:
-      ABSL_FALLTHROUGH_INTENDED;
     case param_type::CHENG_BB:
       return AlgorithmCheng(g, p);
     default:
@@ -411,14 +410,21 @@ std::basic_istream<CharT, Traits>& operator>>(
     beta_distribution<RealType>& x) {       // NOLINT(runtime/references)
   using result_type = typename beta_distribution<RealType>::result_type;
   using param_type = typename beta_distribution<RealType>::param_type;
-  result_type alpha, beta;
 
   auto saver = random_internal::make_istream_state_saver(is);
-  alpha = random_internal::read_floating_point<result_type>(is);
+  const result_type alpha =
+      random_internal::read_floating_point<result_type>(is);
   if (is.fail()) return is;
-  beta = random_internal::read_floating_point<result_type>(is);
+  const result_type beta =
+      random_internal::read_floating_point<result_type>(is);
   if (!is.fail()) {
-    x.param(param_type(alpha, beta));
+    constexpr result_type kMax = (std::numeric_limits<result_type>::max)();
+    if (alpha >= result_type(0) && beta >= result_type(0) && alpha <= kMax &&
+        beta <= kMax) {
+      x.param(param_type(alpha, beta));
+    } else {
+      is.setstate(std::ios_base::failbit);
+    }
   }
   return is;
 }

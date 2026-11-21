@@ -29,6 +29,7 @@
 #include <atomic>
 #include <cstdint>
 #include <functional>
+#include <iterator>
 #include <type_traits>
 #include <utility>
 
@@ -38,7 +39,6 @@
 #include "absl/base/internal/raw_logging.h"
 #include "absl/base/internal/scheduling_mode.h"
 #include "absl/base/internal/spinlock_wait.h"
-#include "absl/base/macros.h"
 #include "absl/base/nullability.h"
 #include "absl/base/optimization.h"
 #include "absl/base/port.h"
@@ -148,6 +148,11 @@ enum {
   kOnceDone = 221,    // Random Number
 };
 
+inline constexpr SpinLockWaitTransition kCallOnceTransitions[] = {
+    {kOnceInit, kOnceRunning, true},
+    {kOnceRunning, kOnceWaiter, false},
+    {kOnceDone, kOnceDone, true}};
+
 template <typename Callable, typename... Args>
     void
     CallOnceImpl(std::atomic<uint32_t>* absl_nonnull control,
@@ -166,10 +171,6 @@ template <typename Callable, typename... Args>
     }
   }
 #endif  // NDEBUG
-  static const base_internal::SpinLockWaitTransition trans[] = {
-      {kOnceInit, kOnceRunning, true},
-      {kOnceRunning, kOnceWaiter, false},
-      {kOnceDone, kOnceDone, true}};
 
   // Must do this before potentially modifying control word's state.
   base_internal::SchedulingHelper maybe_disable_scheduling(scheduling_mode);
@@ -180,8 +181,9 @@ template <typename Callable, typename... Args>
   uint32_t old_control = kOnceInit;
   if (control->compare_exchange_strong(old_control, kOnceRunning,
                                        std::memory_order_relaxed) ||
-      base_internal::SpinLockWait(control, ABSL_ARRAYSIZE(trans), trans,
-                                  scheduling_mode) == kOnceInit) {
+      base_internal::SpinLockWait(
+          control, static_cast<int>(std::size(kCallOnceTransitions)),
+          kCallOnceTransitions, scheduling_mode) == kOnceInit) {
     std::invoke(std::forward<Callable>(fn), std::forward<Args>(args)...);
     old_control =
         control->exchange(base_internal::kOnceDone, std::memory_order_release);

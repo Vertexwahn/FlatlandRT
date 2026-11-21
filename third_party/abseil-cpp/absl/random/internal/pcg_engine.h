@@ -15,6 +15,12 @@
 #ifndef ABSL_RANDOM_INTERNAL_PCG_ENGINE_H_
 #define ABSL_RANDOM_INTERNAL_PCG_ENGINE_H_
 
+#include <cstddef>
+#include <cstdint>
+#include <ios>
+#include <istream>
+#include <limits>
+#include <ostream>
 #include <type_traits>
 
 #include "absl/base/config.h"
@@ -39,12 +45,12 @@ namespace random_internal {
 //
 template <typename Params, typename Mix>
 class pcg_engine {
-  static_assert(std::is_same<typename Params::state_type,
-                             typename Mix::state_type>::value,
-                "Class-template absl::pcg_engine must be parameterized by "
-                "Params and Mix with identical state_type");
+  static_assert(
+      std::is_same_v<typename Params::state_type, typename Mix::state_type>,
+      "Class-template absl::pcg_engine must be parameterized by "
+      "Params and Mix with identical state_type");
 
-  static_assert(std::is_unsigned<typename Mix::result_type>::value,
+  static_assert(std::is_unsigned_v<typename Mix::result_type>,
                 "Class-template absl::pcg_engine must be parameterized by "
                 "an unsigned Mix::result_type");
 
@@ -66,9 +72,8 @@ class pcg_engine {
 
   explicit pcg_engine(uint64_t seed_value = 0) { seed(seed_value); }
 
-  template <class SeedSequence,
-            typename = typename std::enable_if_t<
-                !std::is_same<SeedSequence, pcg_engine>::value>>
+  template <class SeedSequence, typename = typename std::enable_if_t<
+                                    !std::is_same_v<SeedSequence, pcg_engine>>>
   explicit pcg_engine(SeedSequence&& seq) {
     seed(seq);
   }
@@ -90,8 +95,8 @@ class pcg_engine {
   }
 
   template <class SeedSequence>
-  typename std::enable_if_t<
-      !std::is_convertible<SeedSequence, uint64_t>::value, void>
+  typename std::enable_if_t<!std::is_convertible_v<SeedSequence, uint64_t>,
+                            void>
   seed(SeedSequence&& seq) {
     reseed(seq);
   }
@@ -139,18 +144,21 @@ class pcg_engine {
   operator>>(
       std::basic_istream<CharT, Traits>& is,  // NOLINT(runtime/references)
       pcg_engine& engine) {                   // NOLINT(runtime/references)
+    auto saver = random_internal::make_istream_state_saver(is);
     random_internal::stream_u128_helper<state_type> helper;
     auto mult = helper.read(is);
     auto inc = helper.read(is);
     auto tmp = helper.read(is);
+    if (is.fail()) {
+      return is;
+    }
     if (mult != pcg_engine::params_type::multiplier() ||
         inc != pcg_engine::params_type::increment()) {
       // signal failure by setting the failbit.
-      is.setstate(is.rdstate() | std::ios_base::failbit);
+      is.setstate(std::ios_base::failbit);
+      return is;
     }
-    if (!is.fail()) {
-      engine.state_ = tmp;
-    }
+    engine.state_ = tmp;
     return is;
   }
 
@@ -160,16 +168,20 @@ class pcg_engine {
   operator>>(
       std::basic_istream<CharT, Traits>& is,  // NOLINT(runtime/references)
       pcg_engine& engine) {                   // NOLINT(runtime/references)
+    auto saver = random_internal::make_istream_state_saver(is);
     state_type mult{}, inc{}, tmp{};
-    is >> mult >> inc >> tmp;
+    if (!random_internal::read_integral(is, mult) ||
+        !random_internal::read_integral(is, inc) ||
+        !random_internal::read_integral(is, tmp)) {
+      return is;
+    }
     if (mult != pcg_engine::params_type::multiplier() ||
         inc != pcg_engine::params_type::increment()) {
       // signal failure by setting the failbit.
-      is.setstate(is.rdstate() | std::ios_base::failbit);
+      is.setstate(std::ios_base::failbit);
+      return is;
     }
-    if (!is.fail()) {
-      engine.state_ = tmp;
-    }
+    engine.state_ = tmp;
     return is;
   }
 
@@ -177,12 +189,12 @@ class pcg_engine {
   state_type state_;
 
   // Returns the linear-congruential generator next state.
-  static inline constexpr state_type lcg(state_type s) {
+  static constexpr state_type lcg(state_type s) {
     return s * Params::multiplier() + Params::increment();
   }
 
   // Returns the linear-congruential arbitrary seek state.
-  inline state_type advance(state_type s, uint64_t n) const {
+  state_type advance(state_type s, uint64_t n) const {
     state_type mult = Params::multiplier();
     state_type inc = Params::increment();
     state_type m = 1;
@@ -222,10 +234,10 @@ template <uint64_t kMultA, uint64_t kMultB, uint64_t kIncA, uint64_t kIncB>
 class pcg128_params {
  public:
   using state_type = absl::uint128;
-  static inline constexpr state_type multiplier() {
+  static constexpr state_type multiplier() {
     return absl::MakeUint128(kMultA, kMultB);
   }
-  static inline constexpr state_type increment() {
+  static constexpr state_type increment() {
     return absl::MakeUint128(kIncA, kIncB);
   }
 };
@@ -236,7 +248,7 @@ struct pcg_xsl_rr_128_64 {
   using state_type = absl::uint128;
   using result_type = uint64_t;
 
-  inline uint64_t operator()(state_type state) {
+  uint64_t operator()(state_type state) {
     // This is equivalent to the xsl_rr_128_64 mixing function.
     uint64_t rotate = static_cast<uint64_t>(state >> 122u);
     state ^= state >> 64;
@@ -251,8 +263,8 @@ template <uint64_t kMult, uint64_t kInc>
 class pcg64_params {
  public:
   using state_type = uint64_t;
-  static inline constexpr state_type multiplier() { return kMult; }
-  static inline constexpr state_type increment() { return kInc; }
+  static constexpr state_type multiplier() { return kMult; }
+  static constexpr state_type increment() { return kInc; }
 };
 
 // Implementation of the PCG xsh_rr_64_32 64-bit mixing function, which accepts
@@ -260,7 +272,7 @@ class pcg64_params {
 struct pcg_xsh_rr_64_32 {
   using state_type = uint64_t;
   using result_type = uint32_t;
-  inline uint32_t operator()(uint64_t state) {
+  uint32_t operator()(uint64_t state) {
     return rotr(static_cast<uint32_t>(((state >> 18) ^ state) >> 27),
                 state >> 59);
   }

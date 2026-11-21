@@ -1,13 +1,91 @@
 #include "yaml-cpp/yaml.h"  // IWYU pragma: keep
 
+#include <sstream>
+#include <string>
+
 #include "gtest/gtest.h"
 
 namespace YAML {
 namespace {
+class FailingStreamBuf : public std::stringbuf {
+ public:
+  explicit FailingStreamBuf(const std::string& input)
+      : std::stringbuf(input), first_read_(true) {}
+
+ protected:
+  std::streamsize xsgetn(char* output, std::streamsize count) override {
+    if (first_read_) {
+      first_read_ = false;
+      return std::stringbuf::xsgetn(output, count > 32 ? 32 : count);
+    }
+    throw std::ios_base::failure("simulated read failure");
+  }
+
+ private:
+  bool first_read_;
+};
+
+// Fails on the very first read, which the buffer above cannot do: it serves 32
+// bytes before throwing, so Stream's constructor completes and the failure is
+// raised later, during scanning.  Stream's constructor ends in ReadAheadTo(0),
+// so a buffer that throws immediately makes the failure escape the constructor
+// itself - a different path, and the one that used to leak the prefetch buffer
+// because ~Stream cannot run for an object that was never constructed.
+class ImmediatelyFailingStreamBuf : public std::stringbuf {
+ public:
+  ImmediatelyFailingStreamBuf() : std::stringbuf(std::string()) {}
+
+ protected:
+  std::streamsize xsgetn(char*, std::streamsize) override {
+    throw std::ios_base::failure("simulated read failure");
+  }
+};
+
 TEST(LoadNodeTest, Reassign) {
   Node node = Load("foo");
   node = Node();
   EXPECT_TRUE(node.IsNull());
+}
+
+TEST(LoadNodeTest, RejectsFailedInputStream) {
+  std::istringstream stream("key: value");
+  stream.setstate(std::ios_base::failbit);
+  EXPECT_THROW(Load(stream), BadStream);
+}
+
+TEST(LoadNodeTest, RejectsBadInputStream) {
+  std::istringstream stream("key: value");
+  stream.setstate(std::ios_base::badbit);
+  EXPECT_THROW(Load(stream), BadStream);
+}
+
+TEST(LoadNodeTest, LoadAllRejectsFailedInputStream) {
+  std::istringstream stream("---\nfirst\n---\nsecond\n");
+  stream.setstate(std::ios_base::failbit);
+  EXPECT_THROW(LoadAll(stream), BadStream);
+}
+
+TEST(LoadNodeTest, RejectsInputStreamFailureWhileReading) {
+  FailingStreamBuf buffer("value: " + std::string(128, 'a'));
+  std::istream stream(&buffer);
+  EXPECT_THROW(Load(stream), BadStream);
+}
+
+TEST(LoadNodeTest, RejectsInputStreamFailureOnFirstRead) {
+  ImmediatelyFailingStreamBuf buffer;
+  std::istream stream(&buffer);
+  EXPECT_THROW(Load(stream), BadStream);
+}
+
+TEST(LoadNodeTest, EmptyInputStreamRemainsNull) {
+  std::istringstream stream;
+  EXPECT_TRUE(Load(stream).IsNull());
+}
+
+TEST(LoadNodeTest, EofInputStreamRemainsNull) {
+  std::istringstream stream;
+  stream.setstate(std::ios_base::eofbit);
+  EXPECT_TRUE(Load(stream).IsNull());
 }
 
 TEST(LoadNodeTest, FallbackValues) {
@@ -222,13 +300,6 @@ TEST(LoadNodeTest, DereferenceIteratorError) {
   EXPECT_EQ(true, node.begin()->IsMap());
   EXPECT_THROW((*node.begin()->begin()).Type(), InvalidNode);
   EXPECT_THROW(node.begin()->begin()->Type(), InvalidNode);
-}
-
-TEST(NodeTest, EmitEmptyNode) {
-  Node node;
-  Emitter emitter;
-  emitter << node;
-  EXPECT_EQ("", std::string(emitter.c_str()));
 }
 
 TEST(NodeTest, ParseNodeStyle) {

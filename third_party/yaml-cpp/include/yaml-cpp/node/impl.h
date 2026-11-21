@@ -1,11 +1,20 @@
 #ifndef NODE_IMPL_H_62B23520_7C8E_11DE_8A39_0800200C9A66
 #define NODE_IMPL_H_62B23520_7C8E_11DE_8A39_0800200C9A66
 
+
+
+
 #if defined(_MSC_VER) ||                                            \
     (defined(__GNUC__) && (__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || \
      (__GNUC__ >= 4))  // GCC supports "pragma once" correctly since 3.4
 #pragma once
+
+
 #endif
+
+// IWYU pragma: private, include "yaml-cpp/yaml.h"
+// IWYU pragma: friend "yaml-cpp/.*"
+
 
 #include "yaml-cpp/exceptions.h"
 #include "yaml-cpp/node/detail/memory.h"
@@ -303,6 +312,14 @@ inline iterator Node::begin() {
   return m_pNode ? iterator(m_pNode->begin(), m_pMemory) : iterator();
 }
 
+inline const_reverse_iterator Node::rbegin() const {
+  return const_reverse_iterator(end());
+}
+
+inline reverse_iterator Node::rbegin() {
+  return reverse_iterator(end());
+}
+
 inline const_iterator Node::end() const {
   if (!m_isValid)
     return const_iterator();
@@ -313,6 +330,14 @@ inline iterator Node::end() {
   if (!m_isValid)
     return iterator();
   return m_pNode ? iterator(m_pNode->end(), m_pMemory) : iterator();
+}
+
+inline const_reverse_iterator Node::rend() const {
+  return const_reverse_iterator(begin());
+}
+
+inline reverse_iterator Node::rend() {
+  return reverse_iterator(begin());
 }
 
 // sequence
@@ -392,6 +417,14 @@ template <typename Key, typename Value>
 inline void Node::force_insert(const Key& key, const Value& value) {
   EnsureNodeExists();
   m_pNode->force_insert(key, value, m_pMemory);
+}
+
+template <typename Key>
+inline bool Node::contains(const Key& key) const {
+  if (!m_isValid)
+    throw InvalidNode(m_invalidKey);
+  if (!m_pNode) return false;
+  return (static_cast<const detail::node*>(m_pNode))->get(key, m_pMemory) != nullptr;
 }
 
 // free functions
