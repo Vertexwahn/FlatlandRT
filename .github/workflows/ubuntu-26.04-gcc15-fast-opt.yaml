@@ -16,7 +16,7 @@ permissions:
 jobs:
   build_and_test_ubuntu26:
     name: "gcc15 fastbuild opt on Ubuntu 26.04"
-    runs-on: ubuntu-26.04 # https://github.com/actions/runner-images#available-images
+    runs-on: ubuntu-26.04  # https://github.com/actions/runner-images#available-images
     steps:
       - name: "Show disk space"
         run: |

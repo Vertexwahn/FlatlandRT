@@ -1,11 +1,14 @@
 #
-#   SPDX-FileCopyrightText: Copyright 2026 Julian Amann <dev@vertexwahn.de>
+#   SPDX-FileCopyrightText: Copyright 2025-2026 Julian Amann <dev@vertexwahn.de>
 #   SPDX-License-Identifier: Apache-2.0
 #
 
-# Apple Clang 17 on macOS 26 (Tahoe)
-# Make sure we can build with Apple Clang17 in all different compilation modes
-name: Apple Clang17 on macOS 26 (Tahoe)
+# Apple Clang 21 on macOS 26
+# Make sure that the following commands work:
+# - `bazel query //...`
+# - `bazel cquery //...`
+# - `bazel mod graph`
+name: Bazel query on Apple Clang21 on macOS 26
 
 on:
   workflow_call:
@@ -13,10 +16,18 @@ on:
 permissions:
   contents: read
 
+#on:
+#  schedule:
+#    - cron: "0 0 * * *"
+#  #push: {}
+#  # Allows you to run this workflow manually from the Actions tab
+#  workflow_dispatch:
+
 jobs:
-  build_and_test_macos26:
-    name: "Apple Clang17 on macOS 26 (Tahoe)"
+  bazel_query_macos26:
+    name: "Bazel query on Apple Clang21 on macOS 26 (Tahoe)"
     runs-on: macos-26
+    #runs-on: macos-26  # GitHub hosted runner
     steps:
       - name: "Show disk space"
         run: |
@@ -37,7 +48,7 @@ jobs:
       - name: "Show disk space"
         run: |
           df -h
-
+  
       - name: "Show OS version"
         run: |
           sw_vers
@@ -66,35 +77,25 @@ jobs:
           cd devertexwahn
           bazel run --config=macos -- //bazel/module/python:requirements.update
 
-      # fastbuild
-      - name: "Bazel build macos-fastbuild"
+      - name: "Bazel query"
         run: |
           cd devertexwahn
-          bazel build --config=macos -- //...
+          bazel query //...
 
-      - name: "Bazel test macos-fastbuild"
+      - name: "Show disk space"
         run: |
-          cd devertexwahn
-          bazel build --config=macos -- //...
+          df -h
 
-      # dbg
-      - name: "Bazel build macos-dbg"
+      - name: "Bazel cquery"
         run: |
           cd devertexwahn
-          bazel build --config=macos --compilation_mode=dbg -- //...
+          bazel cquery --config=macos //...
 
-      - name: "Bazel test macos-dbg"
+      - name: "Bazel mod graph"
         run: |
           cd devertexwahn
-          bazel build --config=macos --compilation_mode=dbg -- //...
+          bazel mod graph
 
-      # opt
-      - name: "Bazel build macos-opt"
+      - name: "Show disk space"
         run: |
-          cd devertexwahn
-          bazel build --config=macos --compilation_mode=opt -- //...
-
-      - name: "Bazel test macos-opt"
-        run: |
-          cd devertexwahn
-          bazel build --config=macos --compilation_mode=opt -- //...
+          df -h

@@ -1,0 +1,58 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2025-2026 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# VS2026 on Windows Server 2025
+# Make sure we can build with VS2026 in fastbuild compilation mode
+
+name: VS2026 fastbuild on Windows Server 2025
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  VisualStudio2026_Windows11_Fastbuild:
+    name: "VS2026 fastbuild on Windows Server 2025"
+    runs-on: windows-2025  # https://github.com/actions/runner-images#available-images
+    steps:
+      - name: "Show system information"
+        run: |
+          systeminfo
+
+      - name: "Checkout"
+        uses: actions/checkout@v7
+
+      - name: "Show Bazel version"
+        run: |
+          cd devertexwahn
+          bazel version
+
+      - name: "Add Windows specific Bazel ignore file"
+        run: |
+          cd devertexwahn
+          Copy-Item -Path "bazel/ignore/.bazelignore.windows" -Destination ".bazelignore"
+
+      - name: "Compiler feature dump"
+        run: |
+          cd devertexwahn
+          bazel --output_base=C:/bazel_output_base run --config=vs2026 -- //tools/compiler_feature_dump
+
+      - name: "Show CPU information"
+        run: |
+          cd devertexwahn
+          bazel --output_base=C:/bazel_output_base run --config=vs2026 -- //tools/cpu_info:cpu_info
+
+      # fastbuild
+      - name: "Bazel build vs2026-fastbuild"
+        run: |
+          cd devertexwahn
+          bazel --output_base=C:/bazel_output_base build --config=vs2026 -- //...
+
+      - name: "Bazel test vs2026-fastbuild"
+        run: |
+          cd devertexwahn
+          bazel --output_base=C:/bazel_output_base test --config=vs2026 -- //...
+

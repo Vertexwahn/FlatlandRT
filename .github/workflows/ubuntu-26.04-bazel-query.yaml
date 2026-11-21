@@ -1,0 +1,80 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2025-2026 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# gcc15 on Ubuntu 26.04
+# Make sure that the following commands work:
+# - `bazel query //...`
+# - `bazel cquery //...`
+# - `bazel mod graph`
+
+name: Bazel query on Ubuntu 26.04
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  
+jobs:
+  BazelQuery_Ubuntu26gcc15:
+    name: "Bazel query on Ubuntu 26.04"
+    runs-on: ubuntu-26.04  # https://github.com/actions/runner-images#available-images
+    steps:
+      - name: "Show disk space"
+        run: |
+          df -h
+
+      - name: "Checkout"
+        uses: actions/checkout@v7
+
+      - name: "Show disk space"
+        run: |
+          df -h
+  
+      - name: "Show OS version"
+        run: |
+          lsb_release -a
+
+      - name: "Show Bazel version"
+        run: |
+          cd devertexwahn
+          bazel version
+
+      #- name: "Add Linux specific Bazel ignore file"
+      #  run: |
+      #    cd devertexwahn
+      #    mv "bazel/ignore/.bazelignore.linux" ".bazelignore"
+
+      - name: "Compiler feature dump"
+        run: |
+          cd devertexwahn
+          bazel run --config=gcc15 -- //tools/compiler_feature_dump
+      
+      - name: "Show disk space"
+        run: |
+          df -h
+
+      - name: "Bazel query"
+        run: |
+          cd devertexwahn
+          bazel query //...
+
+      - name: "Show disk space"
+        run: |
+          df -h
+
+      - name: "Bazel cquery"
+        run: |
+          cd devertexwahn
+          bazel cquery --config=gcc15 //...
+
+      - name: "Bazel mod graph"
+        run: |
+          cd devertexwahn
+          bazel mod graph
+
+      - name: "Show disk space"
+        run: |
+          df -h

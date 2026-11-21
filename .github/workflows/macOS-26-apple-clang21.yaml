@@ -1,0 +1,100 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2026 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# Apple Clang 17 on macOS 26 (Tahoe)
+# Make sure we can build with Apple Clang17 in all different compilation modes
+name: Apple Clang21 on macOS 26 (Tahoe)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test_macos26:
+    name: "Apple Clang21 on macOS 26 (Tahoe)"
+    runs-on: macos-26
+    steps:
+      - name: "Show disk space"
+        run: |
+          df -h
+
+      - name: "Checkout"
+        uses: actions/checkout@v7
+
+      - uses: bazel-contrib/setup-bazel@0.19.2
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+
+      - name: "Show disk space"
+        run: |
+          df -h
+
+      - name: "Show OS version"
+        run: |
+          sw_vers
+          uname
+
+      - name: "Show CPU info"
+        run: |
+          sysctl -a | grep machdep.cpu
+
+      - name: "Show Bazel version"
+        run: |
+          cd devertexwahn
+          bazel version
+
+      - name: "Show Clang version"
+        run: |
+          clang --version
+
+      #- name: "Add macOS specific Bazel ignore file"
+      #  run: |
+      #    cd devertexwahn
+      #    mv "bazel/ignore/.bazelignore.macos" ".bazelignore"
+
+      - name: "Regenerate lock files for Python"
+        run: |
+          cd devertexwahn
+          bazel run --config=macos -- //bazel/module/python:requirements.update
+
+      # fastbuild
+      - name: "Bazel build macos-fastbuild"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos -- //...
+
+      - name: "Bazel test macos-fastbuild"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos -- //...
+
+      # dbg
+      - name: "Bazel build macos-dbg"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos --compilation_mode=dbg -- //...
+
+      - name: "Bazel test macos-dbg"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos --compilation_mode=dbg -- //...
+
+      # opt
+      - name: "Bazel build macos-opt"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos --compilation_mode=opt -- //...
+
+      - name: "Bazel test macos-opt"
+        run: |
+          cd devertexwahn
+          bazel build --config=macos --compilation_mode=opt -- //...

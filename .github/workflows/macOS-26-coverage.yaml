@@ -1,0 +1,85 @@
+#
+#   SPDX-FileCopyrightText: Copyright 2026 Julian Amann <dev@vertexwahn.de>
+#   SPDX-License-Identifier: Apache-2.0
+#
+
+# Apple Clang 21 on macOS 26 (Golden Gate)
+# Analyse test coverage and make sure test coverage does not drop
+
+name: Coverage with LCOV/Apple Clang21 on macOS 26 (Golden Gate)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+#on:
+#  schedule:
+#    - cron: "0 0 * * *"
+#  #push: {}
+#  # Allows you to run this workflow manually from the Actions tab
+#  workflow_dispatch:
+
+jobs:
+  bazel_query_macos26:
+    name: "Bazel query on Apple Clang21 on macOS 26 (Tahoe)"
+    runs-on: macos-26
+    #runs-on: macos-26  # GitHub hosted runner
+    steps:
+      - name: "Show disk space"
+        run: |
+          df -h
+
+      - name: "Checkout"
+        uses: actions/checkout@v7
+
+      - uses: bazel-contrib/setup-bazel@0.19.2
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+
+      - name: "Show disk space"
+        run: |
+          df -h
+  
+      - name: "Show OS version"
+        run: |
+          sw_vers
+          uname
+
+      - name: "Show CPU info"
+        run: |
+          sysctl -a | grep machdep.cpu
+
+      - name: "Show Bazel version"
+        run: |
+          cd devertexwahn
+          bazel version
+
+      - name: "Show Clang version"
+        run: |
+          clang --version
+
+      #- name: "Add macOS specific Bazel ignore file"
+      #  run: |
+      #    cd devertexwahn
+      #    mv "bazel/ignore/.bazelignore.macos" ".bazelignore"
+
+      - name: "Regenerate lock files for Python"
+        run: |
+          cd devertexwahn
+          bazel run --config=macos -- //bazel/module/python:requirements.update
+
+      - name: "Bazel coverage"
+        run: |
+          cd devertexwahn
+          ./coverage.sh
+
+      - name: "Show disk space"
+        run: |
+          df -h
