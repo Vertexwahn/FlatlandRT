@@ -48,10 +48,10 @@ jobs:
         run: |
           gcc --version
 
-      - name: "Add Linux specific Bazel ignore file"
-        run: |
-          cd devertexwahn
-          mv "bazel/ignore/.bazelignore.linux" ".bazelignore"
+      #- name: "Add Linux specific Bazel ignore file"
+      #  run: |
+      #    cd devertexwahn
+      #    mv "bazel/ignore/.bazelignore.linux" ".bazelignore"
 
       - name: "Compiler feature dump"
         run: |
