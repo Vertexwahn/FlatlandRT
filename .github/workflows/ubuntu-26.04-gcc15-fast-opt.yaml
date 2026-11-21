@@ -25,11 +25,14 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v7
 
-      - name: Mount bazel cache
-        uses: actions/cache@v6
+      - uses: bazel-contrib/setup-bazel@0.19.2
         with:
-          path: "/home/runner/.cache/bazel-ubuntu-26.04"
-          key: bazel
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
 
       - name: "Show disk space"
         run: |
@@ -56,7 +59,7 @@ jobs:
       - name: "Compiler feature dump"
         run: |
           cd devertexwahn
-          bazel run --config=gcc15 -- //tools/compiler_feature_dump
+          bazel run --config=gcc15 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY}-- //tools/compiler_feature_dump
 
       - name: "Regenerate lock files for Python"
         run: |
@@ -67,9 +70,9 @@ jobs:
       - name: "Bazel build gcc13-fastbuild"
         run: |
           cd devertexwahn
-          bazel build --config=gcc15 -- //...
+          bazel build --config=gcc15 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY}-- //...
 
       - name: "Bazel test gcc13-fastbuild"
         run: |
           cd devertexwahn
-          bazel test --config=gcc15 -- //...
+          bazel test --config=gcc15 --config=buildbuddy_remote_cache --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_API_KEY} -- //...
