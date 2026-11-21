@@ -13,15 +13,8 @@ on:
 permissions:
   contents: read
 
-#on:
-#  schedule:
-#    - cron: "0 0 * * *"
-#  #push: {}
-#  # Allows you to run this workflow manually from the Actions tab
-#  workflow_dispatch:
-
 jobs:
-  build_and_test_macos15:
+  build_and_test_macos26:
     name: "Apple Clang17 on macOS 26 (Tahoe)"
     runs-on: macos-26
     steps:

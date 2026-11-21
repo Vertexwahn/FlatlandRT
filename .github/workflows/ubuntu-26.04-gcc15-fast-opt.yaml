@@ -5,7 +5,6 @@
 
 # gcc15 on Ubuntu 26.04
 # Make sure we can build with gcc15 in all different compilation modes
-
 name: gcc15 fastbuild opt on Ubuntu 26.04
 
 on:
@@ -15,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  Ubuntu26GCC13_SelfHosted:
+  build_and_test_ubuntu26:
     name: "gcc15 fastbuild opt on Ubuntu 26.04"
     runs-on: ubuntu-26.04 # https://github.com/actions/runner-images#available-images
     steps:
