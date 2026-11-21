@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -518,11 +518,11 @@ TEST(QuadtreeIntersector, intersect) {
 
     // Assert
     ASSERT_TRUE(hit);
-    EXPECT_THAT(me.p.x(), 100.0f);
-    EXPECT_THAT(me.p.y(), 50.0f);
-    EXPECT_THAT(me.t, 100.f);
-    EXPECT_THAT(me.geo_frame.n.x(), -1.f);
-    EXPECT_THAT(me.geo_frame.n.y(), 0.f);
+    EXPECT_FLOAT_EQ(me.p.x(), 100.0f);
+    EXPECT_FLOAT_EQ(me.p.y(), 50.0f);
+    EXPECT_FLOAT_EQ(me.t, 100.f);
+    EXPECT_FLOAT_EQ(me.geo_frame.n.x(), -1.f);
+    EXPECT_FLOAT_EQ(me.geo_frame.n.y(), 0.f);
 }
 
 TEST(QuadtreeIntersector, support_translated_meshes) {

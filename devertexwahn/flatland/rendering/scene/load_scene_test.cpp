@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -327,6 +327,6 @@ TEST(Scene, GivenSceneWithMultipleShapes_WhenRayHitsAllShapes_ThenClosesHit) {
 
     // Assert
     EXPECT_TRUE(hit);
-    EXPECT_THAT(me.p.x(), 100.f);
-    EXPECT_THAT(me.p.y(), 300.f);
+    EXPECT_FLOAT_EQ(me.p.x(), 100.f);
+    EXPECT_FLOAT_EQ(me.p.y(), 300.f);
 }

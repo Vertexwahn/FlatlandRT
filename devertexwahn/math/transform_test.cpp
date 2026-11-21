@@ -1,5 +1,5 @@
 /*
- *  SPDX-FileCopyrightText: Copyright 2022-2023 Julian Amann <dev@vertexwahn.de>
+ *  SPDX-FileCopyrightText: Copyright 2022-2026 Julian Amann <dev@vertexwahn.de>
  *  SPDX-License-Identifier: Apache-2.0
  */
 
@@ -21,8 +21,8 @@ TEST(Transform44f, WhenDefaultInitalizingATransform_ExpectIdentityTransform) {
                       0.f, 0.f, 1.f, 0.f,
                       0.f, 0.f, 0.f, 1.f;
 
-    EXPECT_THAT(transform.matrix(), identity_matrix);
-    EXPECT_THAT(transform.inverse(), identity_matrix);
+    EXPECT_TRUE(transform.matrix().isApprox(identity_matrix));
+    EXPECT_TRUE(transform.inverse().matrix().isApprox(identity_matrix));
 }
 
 TEST(Transform44f, GivenAMatrix_WhenInitalizingATransformWithThisMatrix_ExpectExactlyThisMatrix) {
@@ -43,8 +43,8 @@ TEST(Transform44f, GivenAMatrix_WhenInitalizingATransformWithThisMatrix_ExpectEx
                0.f,  0.f, 1.f, -12.f,
                0.f,  0.f, 0.f,   1.f;
 
-    EXPECT_THAT(transform.matrix(), matrix);
-    EXPECT_THAT(transform.inverse().matrix(), inverse);
+    EXPECT_TRUE(transform.matrix().isApprox(matrix));
+    EXPECT_TRUE(transform.inverse().matrix().isApprox(inverse));
 }
 
 TEST(Transform44f, GivenMatrixAndInverse_WhenInitalizingTranform_ThenExpectCorrectValues) {
@@ -65,8 +65,8 @@ TEST(Transform44f, GivenMatrixAndInverse_WhenInitalizingTranform_ThenExpectCorre
     Transform44f transform(matrix, inverse);
 
     // Assert
-    EXPECT_THAT(transform.matrix(), matrix);
-    EXPECT_THAT(transform.inverse().matrix(), inverse);
+    EXPECT_TRUE(transform.matrix().isApprox(matrix));
+    EXPECT_TRUE(transform.inverse().matrix().isApprox(inverse));
 }
 
 TEST(Transform44f, GivenATranslateTransform_WhenConvertingToMatrix_ThenExpectTranslationMatrix) {
@@ -80,7 +80,7 @@ TEST(Transform44f, GivenATranslateTransform_WhenConvertingToMatrix_ThenExpectTra
                       0.f, 0.f, 1.f, 0.f,
                       0.f, 0.f, 0.f, 1.f;
 
-    EXPECT_THAT(m, expected_matrix);
+    EXPECT_TRUE(m.isApprox(expected_matrix));
 }
 
 TEST(Transform44f, GivenATranslateTransform_WhenConvertingToInverseMatrix_ThenExpectInverseTranslationMatrix) {
@@ -94,7 +94,7 @@ TEST(Transform44f, GivenATranslateTransform_WhenConvertingToInverseMatrix_ThenEx
                       0.f, 0.f, 1.f, 0.f,
                       0.f, 0.f, 0.f, 1.f;
 
-    EXPECT_THAT(m, expected_matrix);
+    EXPECT_TRUE(m.isApprox(expected_matrix));
 }
 
 TEST(Transform44f, Transform44f_multiplication) {
@@ -109,7 +109,7 @@ TEST(Transform44f, Transform44f_multiplication) {
                       0.f, 0.f, 3.f, 0.f,
                       0.f, 0.f, 0.f, 1.f;
 
-    EXPECT_THAT(result.matrix(), expected_result);
+    EXPECT_TRUE(result.matrix().isApprox(expected_result));
 }
 
 TEST(Transform44f, Transform44f_assignment) {
@@ -122,7 +122,7 @@ TEST(Transform44f, Transform44f_assignment) {
                       0.f, 0.f, 1.f, 0.f,
                       0.f, 0.f, 0.f, 1.f;
 
-    EXPECT_THAT(transform.matrix(), expected_result);
+    EXPECT_TRUE(transform.matrix().isApprox(expected_result));
 }
 
 TEST(Transform44f, ComapreOperators) {
@@ -131,7 +131,7 @@ TEST(Transform44f, ComapreOperators) {
     auto transform3 = translate(10.f, 10.f, 10.f);
 
     EXPECT_NE(transform1, transform2);
-    EXPECT_EQ(transform2, transform3);
+    EXPECT_TRUE(transform2.matrix().isApprox(transform3.matrix()));
 }
 
 TEST(Transform44f, GivenRayInWorldSpace_ExpetRayInObjectSpace_WhenTransformedWithInverseOfWorldSpaceTransform) {
@@ -148,8 +148,8 @@ TEST(Transform44f, GivenRayInWorldSpace_ExpetRayInObjectSpace_WhenTransformedWit
 
     EXPECT_THAT(ray.origin, (Point2f{-translation.x(), -translation.y()}));
     EXPECT_THAT(ray.direction, direction);
-    EXPECT_THAT(ray.min_t, min_distance);
-    EXPECT_THAT(ray.max_t, max_distance);
+    EXPECT_FLOAT_EQ(ray.min_t, min_distance);
+    EXPECT_FLOAT_EQ(ray.max_t, max_distance);
 }
 
 TEST(Transform44f, dir) {
@@ -166,8 +166,8 @@ TEST(Transform44f, dir) {
 
     EXPECT_THAT(ray.origin, (Point2f{-translation.x()*1.f/3.f, -translation.y()*1.f/3.f}));
     //EXPECT_THAT(ray.direction, direction);
-    EXPECT_THAT(ray.min_t, min_distance);
-    EXPECT_THAT(ray.max_t, max_distance);
+    EXPECT_FLOAT_EQ(ray.min_t, min_distance);
+    EXPECT_FLOAT_EQ(ray.max_t, max_distance);
 }
 
 TEST(Transform44f, WhenTransformIsTranslation_ExpetedTranslatedPoint) {
@@ -205,7 +205,7 @@ TEST(Transform44f, GivenOriginAndTargetAlignedWithWorldSpace_ThenExpectIdentityM
             0.f, 0.f, 1.f, 0.f,
             0.f, 0.f, 0.f, 1.f;
 
-    EXPECT_THAT(m, expected_matrix);
+    EXPECT_TRUE(m.isApprox(expected_matrix));
 }
 
 TEST(Transform44f, GivenOriginAndTargetAlignedWithWorldSpace_ThenExpectIdentityMatrix_3D) {
@@ -226,7 +226,7 @@ TEST(Transform44f, GivenOriginAndTargetAlignedWithWorldSpace_ThenExpectIdentityM
             0.f, 0.f, 1.f, 0.f,
             0.f, 0.f, 0.f, 1.f;
 
-    EXPECT_THAT(m, expected_matrix);
+    EXPECT_TRUE(m.isApprox(expected_matrix));
 }
 
 TEST(Transform44f, look_at_invalid_up_vector) {

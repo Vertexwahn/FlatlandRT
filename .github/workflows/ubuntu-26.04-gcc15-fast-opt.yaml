@@ -67,12 +67,12 @@ jobs:
           bazel run --config=gcc15 -- //bazel/module/python:requirements.update
       
       # fastbuild
-      - name: "Bazel build gcc13-fastbuild"
+      - name: "Bazel build gcc15-fastbuild"
         run: |
           cd devertexwahn
           bazel build --config=gcc15 //...
 
-      - name: "Bazel test gcc13-fastbuild"
+      - name: "Bazel test gcc15-fastbuild"
         run: |
           cd devertexwahn
           bazel test --config=gcc15 --test_output=errors -- //...
